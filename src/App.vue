@@ -1,0 +1,503 @@
+<script setup lang="ts">
+// Vue
+import { ref } from "vue";
+import { activateColors } from "./modules/utils/elements";
+
+// User data
+import UserDataManager from "./modules/classes/user_data_manager";
+import ThemeData, {
+  type ThemeValue,
+  DEFAULT_THEME_VALUE,
+} from "./modules/user_data/theme";
+import TransitionsData, {
+  type TransitionsValue,
+  DEFAULT_TRANSITIONS_VALUE,
+} from "./modules/user_data/transitions";
+import HueData, {
+  DEFAULT_PLAYER_HUE_VALUE,
+  DEFAULT_OPPONENT_HUE_VALUE,
+} from "./modules/user_data/hue";
+import PieceSetData, {
+  type PieceSetValue,
+  DEFAULT_PIECE_SET_VALUE,
+} from "./modules/user_data/piece_set";
+import BoardStateData, {
+  type BoardStateValue,
+  DEFAULT_BOARD_STATE_VALUE,
+} from "./modules/user_data/board_state";
+import PiecePaddingData, {
+  DEFAULT_PIECE_PADDING_VALUE,
+} from "./modules/user_data/piece_padding";
+import PieceBorderData, {
+  DEFAULT_PIECE_BORDER_VALUE,
+} from "./modules/user_data/piece_border";
+import TransitionDurationData, {
+  DEFAULT_TRANSITION_DURATION_VALUE,
+} from "./modules/user_data/transition_duration";
+import CellIndexOpacityData, {
+  DEFAULT_CELL_INDEX_OPACITY_VALUE,
+} from "./modules/user_data/cell_index_opacity";
+import BooleanData from "./modules/user_data/status_bar";
+
+// Classes
+import ToastManager, {
+  type ToastElement,
+} from "./modules/classes/toast_manager";
+import SplashscreenManager from "./modules/classes/splashscreen_manager";
+import ThemeManager from "./modules/classes/theme_manager";
+import TransitionsManager from "./modules/classes/transitions_manager";
+import DialogManager, { type Dialog } from "./modules/classes/dialog_manager";
+import DefaultBoardManager from "./modules/classes/default_board_manager";
+
+// Custom components
+import Board from "./components/Board.vue";
+import Icon from "./components/Icon.vue";
+import Drawer from "./components/Drawer.vue";
+import Category from "./components/Category.vue";
+import SimpleOption from "./components/SimpleOption.vue";
+import Toast from "./components/Toast.vue";
+import Checkbox from "./components/Checkbox.vue";
+import Backdrop from "./components/Backdrop.vue";
+
+// Define refs
+const themeValueRef = ref<ThemeValue>(DEFAULT_THEME_VALUE);
+const transitionsValueRef = ref<TransitionsValue>(DEFAULT_TRANSITIONS_VALUE);
+const playerHueRef = ref<number>(DEFAULT_PLAYER_HUE_VALUE);
+const opponentHueRef = ref<number>(DEFAULT_OPPONENT_HUE_VALUE);
+const pieceSetRef = ref<PieceSetValue>(DEFAULT_PIECE_SET_VALUE);
+const primaryBoardStateRef = ref<BoardStateValue>(DEFAULT_BOARD_STATE_VALUE);
+const piecePaddingRef = ref<number>(DEFAULT_PIECE_PADDING_VALUE);
+const pieceBorderRef = ref<number>(DEFAULT_PIECE_BORDER_VALUE);
+const transitionDurationRef = ref<number>(DEFAULT_TRANSITION_DURATION_VALUE);
+const cellIndexOpacityRef = ref<number>(DEFAULT_CELL_INDEX_OPACITY_VALUE);
+const statusBarRef = ref<boolean>(true);
+
+const toastsRef = ref<ToastElement[]>([]);
+const drawerOpenRef = ref<boolean>(false);
+const dialogRef = ref<Dialog>({ message: "", confirmText: "", cancelText: "" });
+const showDialogRef = ref<boolean>(false);
+
+const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
+const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
+const dialogManager = new DialogManager(dialogRef, showDialogRef);
+const toastManager = new ToastManager(toastsRef);
+const userDataManager = new UserDataManager(dialogManager, toastManager);
+const splashscreenManager = new SplashscreenManager(transitionsManager);
+const defaultBoardManager = new DefaultBoardManager(primaryBoardStateRef);
+
+const userDataSaveCallBack = userDataManager.saveData;
+
+userDataManager.entries = [
+  new ThemeData(
+    userDataSaveCallBack,
+    themeValueRef.value,
+    themeValueRef,
+    themeManger
+  ),
+  new TransitionsData(
+    userDataSaveCallBack,
+    transitionsValueRef.value,
+    transitionsValueRef,
+    transitionsManager
+  ),
+  new HueData(userDataSaveCallBack, playerHueRef.value, playerHueRef, false),
+  new HueData(userDataSaveCallBack, opponentHueRef.value, opponentHueRef, true),
+  new PieceSetData(userDataSaveCallBack, pieceSetRef.value, pieceSetRef),
+  new BoardStateData(
+    userDataSaveCallBack,
+    primaryBoardStateRef.value,
+    primaryBoardStateRef
+  ),
+  new PiecePaddingData(
+    userDataSaveCallBack,
+    piecePaddingRef.value,
+    piecePaddingRef
+  ),
+  new PieceBorderData(
+    userDataSaveCallBack,
+    pieceBorderRef.value,
+    pieceBorderRef
+  ),
+  new TransitionDurationData(
+    userDataSaveCallBack,
+    transitionDurationRef.value,
+    transitionDurationRef
+  ),
+  new CellIndexOpacityData(
+    userDataSaveCallBack,
+    cellIndexOpacityRef.value,
+    cellIndexOpacityRef
+  ),
+  new BooleanData(
+    userDataSaveCallBack,
+    statusBarRef.value,
+    statusBarRef,
+    "status_bar"
+  ),
+];
+
+addEventListener("load", () => {
+  splashscreenManager.hideSplashscreen();
+  if (navigator.cookieEnabled) {
+    userDataManager.loadData();
+  } else {
+    toastManager.showToast(
+      "Cookies are disabled. -> No changes will be restored in next session.",
+      "error",
+      "cookie-alert"
+    );
+  }
+  userDataManager.applyData();
+  userDataManager.updateRefs();
+  activateColors();
+});
+</script>
+
+<template>
+  <span
+    v-show="statusBarRef"
+    id="game-status-bar"
+    role="status"
+    aria-live="polite"
+    >Loading...</span
+  >
+  <div id="boards-area">
+    <Board
+      :manager="defaultBoardManager"
+      :state="primaryBoardStateRef"
+      :piece-set="pieceSetRef"
+      :piece-padding="piecePaddingRef"
+      id="primary-board"
+    />
+  </div>
+  <div class="nav placeholder"></div>
+
+  <!-- Fixed -->
+  <Drawer :open="drawerOpenRef">
+    <header>
+      <h1>Tessera board</h1>
+      <small class="version">v0.0.0 (0)</small>
+    </header>
+    <div class="action-buttons">
+      <button @click="userDataManager.requestClearData()">
+        <Icon icon-id="delete-forever-outline" side />
+        Clear all data
+      </button>
+    </div>
+    <!-- Player -->
+    <Category name="Player" icon-id="account">
+      <SimpleOption
+        name="computer"
+        icon-id="memory"
+        option-id="check-computer-player"
+      >
+        <Checkbox id="check-computer-player" />
+        <template #description>
+          If this option is enabled an algorythm will play instead of a human
+          player.
+        </template>
+      </SimpleOption>
+    </Category>
+    <!-- Opponent -->
+    <Category name="Opponent" icon-id="target-account">
+      <SimpleOption
+        name="remote"
+        icon-id="lan-connect"
+        option-id="check-remote-opponent"
+      >
+        <Checkbox id="check-remote-opponent" />
+        <template #description>
+          If this option is enabled the opponent won't play on the same device,
+          but instead play on another device connected to the same network after
+          peer connection is established.</template
+        >
+      </SimpleOption>
+      <SimpleOption
+        name="computer"
+        icon-id="memory"
+        option-id="check-computer-opponent"
+      >
+        <Checkbox id="check-computer-opponent" />
+        <template #description>
+          If this option is enabled an algorythm will play instead of a human
+          player.
+        </template>
+      </SimpleOption>
+    </Category>
+    <!-- Game rules -->
+    <Category name="Game rules" icon-id="rule"> </Category>
+    <!-- Look and feel -->
+    <Category name="look and feel" icon-id="palette-advanced">
+      <!-- Colors -->
+      <span class="category-section">Colors</span>
+      <SimpleOption
+        name="UI mode"
+        icon-id="brightness-6"
+        option-id="select-ui-mode"
+      >
+        <select id="select-ui-mode" v-model="themeValueRef">
+          <option value="auto">Auto</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <template #description
+          >Makes the whole webpage colors appear more light or dark, which can
+          strain your eyes less when you are in dark environment. When set to
+          "Automatic" the app will try to follow theme preferred by your
+          browser.
+        </template>
+      </SimpleOption>
+      <SimpleOption
+        name="Player hue"
+        icon-id="format-color-fill"
+        option-id="input-hue-player"
+      >
+        <input
+          type="number"
+          min="0"
+          max="360"
+          id="input-hue-player"
+          v-model="playerHueRef"
+        />
+        <template #description
+          >The UI transitions the overall hue of the app to this hue when you
+          are currently playing. The value is a hue degree from 0 to 360.
+        </template>
+      </SimpleOption>
+      <SimpleOption
+        name="Opponent hue"
+        icon-id="format-color-fill"
+        option-id="input-hue-opponent"
+      >
+        <input
+          type="number"
+          min="0"
+          max="360"
+          id="input-hue-opponent"
+          v-model="opponentHueRef"
+        />
+        <template #description
+          >The UI transitions the overall hue of the app to this hue when you
+          are currently playing. The value is a hue degree from 0 to 360.
+        </template>
+      </SimpleOption>
+      <!-- Checkboard -->
+      <span class="category-section">Checkboard</span>
+      <SimpleOption
+        name="piece set"
+        icon-id="chess-pawn"
+        option-id="select-piece-set"
+      >
+        <select id="select-piece-set" v-model="pieceSetRef">
+          <option value="material_design">Material Design</option>
+          <option value="font_awesome">Font Awesome</option>
+        </select>
+        <template #description
+          >Chooses what vector icons are used for pieces. Different icon sets
+          have different shapes.
+        </template>
+      </SimpleOption>
+      <SimpleOption
+        name="piece padding (px)"
+        icon-id="padding-piece"
+        option-id="input-piece-padding"
+      >
+        <input
+          type="number"
+          min="0"
+          max="20"
+          id="input-piece-padding"
+          v-model="piecePaddingRef"
+        />
+        <template #description
+          >Increases padding of the pieces relative to its cell, but that also
+          decreases their overall size.
+        </template>
+      </SimpleOption>
+      <SimpleOption
+        name="piece border (px)"
+        icon-id="border-piece"
+        option-id="input-piece-border"
+      >
+        <input
+          type="number"
+          min="0"
+          max="3"
+          id="input-piece-border"
+          v-model="pieceBorderRef"
+        />
+        <template #description
+          >Increases border/stroke width of the pieces vector, which can improve
+          their visibility.
+        </template>
+      </SimpleOption>
+      <SimpleOption
+        name="cell index opacity (%)"
+        icon-id="code-array"
+        option-id="select-cell-index-opacity"
+      >
+        <input
+          type="number"
+          min="0"
+          max="100"
+          id="input-cell-index-opacity"
+          v-model="cellIndexOpacityRef"
+        />
+        <template #description
+          >Opacity of the cell indexes (numbers and letters) written on borders
+          of checkboard.
+        </template>
+      </SimpleOption>
+      <!-- Elements -->
+      <span class="category-section">Elements</span>
+      <SimpleOption
+        name="status bar"
+        icon-id="dock-top"
+        option-id="check-status-bar"
+      >
+        <Checkbox id="check-status-bar" v-model="statusBarRef" />
+        <template #description
+          >Status bar on the main checkboard screen permanently displays
+          information about current game status.
+        </template>
+      </SimpleOption>
+      <!-- Transitions -->
+      <span class="category-section">Transitions</span>
+      <SimpleOption
+        name="transitions"
+        icon-id="transition"
+        option-id="select-transitions"
+      >
+        <select id="select-transitions" v-model="transitionsValueRef">
+          <option value="auto">Auto</option>
+          <option value="enabled">Enabled</option>
+          <option value="disabled">Disabled</option>
+        </select>
+        <template #description
+          >Disables or enables all transitions (excluding the splashcreen
+          starting animation). This can help people who have problems with focus
+          because of transitions being distracting to them or just don't like
+          them. When set to "Automatic" the app will keep tansition effects
+          disabled only if your browser requests it.
+        </template>
+      </SimpleOption>
+      <SimpleOption
+        name="transition duration (%)"
+        icon-id="play-speed"
+        option-id="select-transition-duration"
+      >
+        <input
+          type="number"
+          min="0"
+          max="300"
+          id="input-transition-duration"
+          v-model="transitionDurationRef"
+        />
+        <template #description
+          >Changes duration of all the transitions and animations (except for
+          the splashscreen animation) in the same ratio.
+        </template>
+      </SimpleOption>
+    </Category>
+    <div class="nav placeholder"></div
+  ></Drawer>
+  <nav>
+    <div class="action-buttons">
+      <button
+        id="open-quick-actions"
+        class="fast"
+        aria-label="Quick Actions"
+        title="Quick Actions"
+      >
+        <Icon icon-id="flash-outline" />
+      </button>
+      <button
+        @click="drawerOpenRef = !drawerOpenRef"
+        id="open-menu"
+        class="fast"
+        aria-label="Menu"
+        title="Menu"
+      >
+        <Icon
+          id="open-menu-chevron"
+          :class="drawerOpenRef ? 'open' : ''"
+          icon-id="chevron-up"
+        />
+      </button>
+    </div>
+  </nav>
+  <Backdrop v-show="showDialogRef" />
+  <Transition name="throw">
+    <dialog v-show="showDialogRef" id="confirm-dialog">
+      <p class="message">{{ dialogRef.message }}</p>
+      <div class="action-buttons">
+        <button @click="dialogManager.onCancel()">
+          <Icon side icon-id="close-circle-outline" />{{ dialogRef.cancelText }}
+        </button>
+        <button @click="dialogManager.onConfirm()">
+          <Icon side icon-id="check-circle-outline" />{{
+            dialogRef.confirmText
+          }}
+        </button>
+      </div>
+    </dialog>
+  </Transition>
+  <div id="toast-stack" aria-label="Toast notifications">
+    <TransitionGroup name="toast">
+      <Toast
+        v-for="toast in toastsRef"
+        :message="toast.message"
+        :case="toast.case"
+        :icon-id="toast.iconId"
+        :key="toast.id"
+        @click="toastManager.hideToastId(toast.id)"
+      ></Toast>
+    </TransitionGroup>
+  </div>
+</template>
+
+<style lang="scss">
+@import "./partials/mixins";
+@import "./partials/nav";
+@import "./partials/confirm_dialog";
+
+#toast-stack {
+  align-items: center;
+  position: fixed;
+  display: flex;
+  flex-direction: column-reverse;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  padding: var(--spacing-small);
+}
+
+.category-section {
+  @include round-border;
+  @include inverted-accent;
+  margin: var(--spacing-big) 0;
+  font-size: var(--font-size-small);
+  padding: var(--spacing-small);
+}
+
+.placeholder.nav {
+  height: 95px;
+}
+
+#boards-area {
+  @include flex-center;
+  padding: var(--spacing-small) 0;
+  flex-grow: 1;
+  width: 100%;
+}
+
+#game-status-bar {
+  @include shadow;
+  @include no-select;
+  @include flex-center;
+  border-bottom: var(--border-width) solid var(--color-primary-text);
+  width: 100%;
+  padding: var(--spacing-small) 0;
+}
+</style>

@@ -1,0 +1,107 @@
+#splashscreen {
+  @include flex-center;
+  @include screen;
+  flex-direction: column;
+  background-color: var(--color-cell-black);
+  transition: opacity var(--transition-duration-long)
+      var(--transition-timing-function-display),
+    background-color var(--transition-duration-long)
+      var(--transition-timing-function-display);
+
+  &.faded {
+    opacity: 0;
+  }
+}
+
+.logo {
+  margin: var(--spacing-enormous);
+  display: flex;
+
+  .cell {
+    position: relative;
+    width: 65px;
+    height: 65px;
+    transition: transform var(--transition-duration-long)
+        var(--transition-timing-function-motion),
+      background-color var(--transition-duration-long)
+        var(--transition-timing-function-display);
+  }
+
+  #cell1,
+  #cell2 {
+    background-color: var(--color-cell-white);
+  }
+
+  #cell1 {
+    border-radius: 0 0 0 var(--border-radius);
+
+    &.away {
+      transform: translateX(-200%);
+    }
+
+    @media (not (prefers-reduced-motion)) {
+      &.animated {
+        animation: cell1 var(--transition-duration-splashscreen)
+          var(--transition-timing-function-motion) infinite;
+      }
+    }
+  }
+
+  #cell2 {
+    border-radius: 0 var(--border-radius) 0 0;
+
+    &.away {
+      transform: translateX(200%);
+    }
+
+    @media (not (prefers-reduced-motion)) {
+      &.animated {
+        animation: cell2 var(--transition-duration-splashscreen)
+          var(--transition-timing-function-motion) infinite;
+      }
+    }
+  }
+}
+
+@keyframes cell1 {
+  50% {
+    transform: translate(100%, 0);
+    border-radius: 0 0 var(--border-radius) 0;
+  }
+
+  100% {
+    transform: translate(100%, -100%);
+    border-radius: 0 var(--border-radius) 0 0;
+  }
+}
+
+@keyframes cell2 {
+  50% {
+    transform: translate(-100%, 0);
+    border-radius: var(--border-radius) 0 0 0;
+  }
+
+  100% {
+    transform: translate(-100%, 100%);
+    border-radius: 0 0 0 var(--border-radius);
+  }
+}
+
+noscript {
+  @include flex-center;
+  @include shadow;
+  max-width: 500px;
+  padding: var(--spacing-medium);
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
+  background-color: var(--color-error-surface-top);
+  color: var(--color-error-text);
+  border-color: var(--color-error-text);
+  border-style: solid;
+  border-width: 0 var(--border-width) var(--border-width) var(--border-width);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  font-size: var(--font-size-small);
+}

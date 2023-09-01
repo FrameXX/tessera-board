@@ -1,0 +1,89 @@
+<!-- Toast message/alert -->
+
+<script lang="ts" setup>
+import Icon from "./Icon.vue";
+import { PropType } from "vue/dist/vue.js";
+import { ToastCase } from "../types/toast";
+
+const props = defineProps({
+  message: { type: String, required: true },
+  case: { type: String as PropType<ToastCase>, default: "info" },
+  iconId: { type: String, required: false },
+});
+</script>
+
+<template>
+  <div
+    :class="'toast ' + props.case"
+    role="alert"
+    aria-live="assertive"
+    tabindex="0"
+  >
+    <Icon v-if="props.iconId" :icon-id="props.iconId" side />
+    {{ props.message }}
+    <div class="close-overlay">
+      <Icon icon-id="close" side />
+      DISMISS
+    </div>
+  </div>
+</template>
+
+<style lang="scss">
+@import "../partials/mixins";
+
+.toast {
+  @include flex-center;
+  @include shadow;
+  @include round-border;
+  @include clickable;
+  @include no-overrender;
+  @include no-overflow;
+  margin: var(--spacing-small);
+  position: relative;
+  padding: var(--spacing-medium);
+  border-width: var(--border-width);
+  border-style: solid;
+
+  &.info {
+    backdrop-filter: blur(5px) brightness(0.3);
+    border-color: var(--color-primary-text);
+  }
+
+  &.error {
+    background-color: var(--color-error-surface-top);
+    color: var(--color-error-text);
+    border-color: var(--color-error-text);
+  }
+
+  > .close-overlay {
+    @include flex-center;
+    @include stretch;
+    position: fixed;
+    background-color: var(--color-primary-surface-top);
+    opacity: 0;
+    transition: opacity var(--transition-duration-medium)
+      var(--transition-timing-function-display);
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+.toast-move,
+.toast-enter-active,
+.toast-leave-active {
+  transition: all var(--transition-duration-medium)
+    var(--transition-timing-function-motion);
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.toast-leave-active {
+  position: absolute;
+}
+</style>

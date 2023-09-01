@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta lang="en" />
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
+    <meta
+      name="viewport"
+      content="width=device-width, height=device-height, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover"
+    />
+    <title>Tessera board</title>
+
+    <!-- Icon & Theming -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="256x256"
+      href="assets/img/favicon.png"
+    />
+    <meta name="theme-color" content="#1a1a1a" />
+
+    <!-- JetBrains Mono Font (Google) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Style -->
+    <link rel="stylesheet" lang="scss" href="./main.scss" />
+
+    <!-- Open Graph properties -->
+    <meta property="og:title" content="Chess" />
+    <meta property="og:description" content="Chess web game" />
+  </head>
+  <body>
+    <!-- App -->
+    <div id="app"></div>
+
+    <!-- Splashscreen -->
+    <div id="splashscreen">
+      <div class="logo">
+        <div>
+          <div class="cell"></div>
+          <div class="cell animated" id="cell1"></div>
+        </div>
+        <div>
+          <div class="cell animated" id="cell2"></div>
+          <div class="cell"></div>
+        </div>
+      </div>
+      <small class="version">v0.0.0 (0)</small>
+      <noscript>
+        <svg class="icon side">
+          <use href="assets/img/icons.svg#warning"></use>
+        </svg>
+        <span
+          >This app requires JavaScript for basic functioning. Please allow this
+          app to use JavaScript. This app (excluding third parties I do not have
+          in control) does not collect or use any personal information data
+          outside of your device.</span
+        >
+      </noscript>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+@mixin inverted-accent {
+  background-color: var(--color-primary-accent);
+  color: var(--color-primary-surface);
+}
+
+@mixin centered {
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+@mixin fix-centered {
+  @include centered;
+  position: fixed;
+}
+
+@mixin absolute-centered {
+  @include centered;
+  position: absolute;
+}
+
+@mixin square-size($size) {
+  width: $size;
+  height: $size;
+}
+
+@mixin stretch {
+  @include square-size(100%);
+}
+
+@mixin screen {
+  @include fix-centered;
+  @include stretch;
+}
+
+@mixin flex-center($display: flex) {
+  display: $display;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin no-shrink {
+  flex-shrink: 0;
+}
+
+@mixin no-overflow {
+  overflow: hidden;
+}
+
+@mixin no-overrender {
+  contain: paint;
+}
+
+@mixin no-select {
+  user-select: none;
+}
+
+@mixin scrollable {
+  overflow-y: auto;
+}
+
+@mixin shadow {
+  box-shadow: var(--box-shadow);
+}
+
+@mixin round-border {
+  border-radius: var(--border-radius);
+}
+
+@mixin clickable {
+  cursor: pointer;
+}

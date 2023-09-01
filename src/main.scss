@@ -1,0 +1,116 @@
+@import "./partials/mixins";
+@import "./partials/splashscreen";
+@import "./partials/variables";
+
+::selection {
+  background-color: var(--color-primary-accent);
+  color: var(--color-primary-surface);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @include round-border;
+  background: var(--color-primary-surface-top);
+}
+
+::-webkit-scrollbar-thumb {
+  @include round-border;
+  background: var(--color-primary-accent);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  @include shadow;
+  @include round-border;
+  padding: var(--spacing-tiny);
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+input,
+select {
+  background-color: var(--color-primary-surface-top);
+  color: inherit;
+  border: var(--border-width) solid var(--color-primary-accent);
+  margin: var(--spacing-small);
+}
+
+select,
+button {
+  @include clickable;
+}
+
+button {
+  @include no-overrender;
+  @include round-border;
+  @include flex-center(inline-flex);
+  margin: var(--spacing-small);
+  font-weight: 500;
+  text-transform: uppercase;
+  background-color: var(--color-primary-surface-top);
+  color: var(--color-primary-accent);
+  padding: var(--spacing-tiny) var(--spacing-medium);
+}
+
+dialog {
+  color: inherit;
+  border: none;
+}
+
+button.fast {
+  width: var(--button-height);
+  height: var(--button-height);
+  padding: 0;
+}
+
+h1 {
+  margin: var(--spacing-big) 0 var(--spacing-medium) 0;
+}
+
+#app {
+  @include screen;
+  @include no-overflow;
+  @include no-overrender;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.placeholder {
+  flex-shrink: 0;
+}
+
+.version {
+  @include shadow;
+  @include inverted-accent;
+  @include round-border;
+  padding: var(--spacing-tiny);
+  font-size: var(--font-size-tiny);
+}
+
+.icon {
+  @include no-select;
+  @include no-shrink;
+  margin: var(--spacing-tiny);
+  width: var(--font-size-huge);
+  height: var(--font-size-huge);
+  display: inline;
+
+  &.side {
+    margin: var(--spacing-tiny) var(--spacing-medium) var(--spacing-tiny) 0;
+  }
+}
