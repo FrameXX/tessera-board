@@ -85,6 +85,7 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 
 .piece {
   @include clickable;
+  filter: var(--svg-shadow-filter);
   outline: none;
   pointer-events: all;
   margin: 0;
