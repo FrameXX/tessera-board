@@ -11,11 +11,20 @@ html {
   --border-radius: 9px;
   --border-width: 3px;
   --separator-width: 1.5px;
-  --box-shadow: 2px 2px 7px 0px rgba(0, 0, 0, 0.75);
   --button-height: 60px;
   --cell-index-opacity: 0.8;
   --piece-padding: 5px;
   --piece-stroke-width: 1.1px;
+
+  /* ===== Box shadow ===== */
+  --box-shadow-offset-x: 2px;
+  --box-shadow-offset-y: 2px;
+  --box-shadow-offset-blur: 5px;
+  --box-shadow-offset-spread: 0px;
+  --box-shadow-color: rgba(0, 0, 0, 0.75);
+  --box-shadow: var(--box-shadow-offset-x) var(--box-shadow-offset-y)
+    var(--box-shadow-offset-blur) var(--box-shadow-offset-spread)
+    var(--box-shadow-color);
 
   /* ===== Transition ===== */
   --transition-duration-multiplier-config: 1;
