@@ -94,7 +94,9 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   left: 0;
   padding: var(--piece-padding);
   transition: transform var(--transition-duration-medium)
-    var(--transition-timing-function-display);
+      var(--transition-timing-function-display),
+    opacity var(--transition-duration-short)
+      var(--transition-timing-function-display);
 
   &:hover {
     opacity: 0.3;
