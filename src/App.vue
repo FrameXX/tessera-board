@@ -5,12 +5,8 @@ import { activateColors } from "./modules/utils/elements";
 
 // User data
 import UserDataManager from "./modules/classes/user_data_manager";
-import ThemeData, {
-  type ThemeValue,
-  DEFAULT_THEME_VALUE,
-} from "./modules/user_data/theme";
+import ThemeData, { DEFAULT_THEME_VALUE } from "./modules/user_data/theme";
 import TransitionsData, {
-  type TransitionsValue,
   DEFAULT_TRANSITIONS_VALUE,
 } from "./modules/user_data/transitions";
 import HueData, {
@@ -18,7 +14,6 @@ import HueData, {
   DEFAULT_OPPONENT_HUE_VALUE,
 } from "./modules/user_data/hue";
 import PieceSetData, {
-  type PieceSetValue,
   DEFAULT_PIECE_SET_VALUE,
 } from "./modules/user_data/piece_set";
 import BoardStateData, {
@@ -60,24 +55,24 @@ import Checkbox from "./components/Checkbox.vue";
 import Backdrop from "./components/Backdrop.vue";
 
 // Define refs
-const themeValueRef = ref<ThemeValue>(DEFAULT_THEME_VALUE);
-const transitionsValueRef = ref<TransitionsValue>(DEFAULT_TRANSITIONS_VALUE);
-const playerHueRef = ref<number>(DEFAULT_PLAYER_HUE_VALUE);
-const opponentHueRef = ref<number>(DEFAULT_OPPONENT_HUE_VALUE);
-const pieceSetRef = ref<PieceSetValue>(DEFAULT_PIECE_SET_VALUE);
+const themeValueRef = ref(DEFAULT_THEME_VALUE);
+const transitionsValueRef = ref(DEFAULT_TRANSITIONS_VALUE);
+const playerHueRef = ref(DEFAULT_PLAYER_HUE_VALUE);
+const opponentHueRef = ref(DEFAULT_OPPONENT_HUE_VALUE);
+const pieceSetRef = ref(DEFAULT_PIECE_SET_VALUE);
 const primaryBoardStateReactive: BoardStateValue = reactive(
   DEFAULT_BOARD_STATE_VALUE
 );
-const piecePaddingRef = ref<number>(DEFAULT_PIECE_PADDING_VALUE);
-const pieceBorderRef = ref<number>(DEFAULT_PIECE_BORDER_VALUE);
-const transitionDurationRef = ref<number>(DEFAULT_TRANSITION_DURATION_VALUE);
-const cellIndexOpacityRef = ref<number>(DEFAULT_CELL_INDEX_OPACITY_VALUE);
-const statusBarRef = ref<boolean>(true);
+const piecePaddingRef = ref(DEFAULT_PIECE_PADDING_VALUE);
+const pieceBorderRef = ref(DEFAULT_PIECE_BORDER_VALUE);
+const transitionDurationRef = ref(DEFAULT_TRANSITION_DURATION_VALUE);
+const cellIndexOpacityRef = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
+const statusBarRef = ref(true);
 
 const toastsRef = ref<ToastElement[]>([]);
-const drawerOpenRef = ref<boolean>(false);
+const drawerOpenRef = ref(false);
 const dialogRef = ref<Dialog>({ message: "", confirmText: "", cancelText: "" });
-const showDialogRef = ref<boolean>(false);
+const showDialogRef = ref(false);
 
 const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
