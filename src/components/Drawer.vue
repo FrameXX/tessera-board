@@ -17,12 +17,6 @@ const props = defineProps({ open: { type: Boolean, default: false } });
 
 header {
   margin-bottom: var(--spacing-big);
-
-  & + .action-buttons {
-    > button {
-      margin-left: 0;
-    }
-  }
 }
 
 .drawer {
@@ -39,8 +33,11 @@ header {
     margin: auto;
     max-width: 450px;
   }
+}
 
+.action-buttons-main {
   button {
+    margin-left: 0;
   }
 }
 

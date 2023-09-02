@@ -163,12 +163,6 @@ addEventListener("load", () => {
       <h1>Tessera board</h1>
       <small class="version">v0.0.0 (0)</small>
     </header>
-    <div class="action-buttons">
-      <button @click="userDataManager.requestClearData()">
-        <Icon icon-id="delete-forever-outline" side />
-        Clear all data
-      </button>
-    </div>
     <!-- Player -->
     <Category name="Player" icon-id="account">
       <Option
@@ -395,6 +389,12 @@ addEventListener("load", () => {
         </template>
       </Option>
     </Category>
+    <div class="action-buttons-main">
+      <button @click="userDataManager.requestClearData()">
+        <Icon icon-id="delete-forever-outline" side />
+        Clear all data
+      </button>
+    </div>
     <div class="nav placeholder"></div
   ></Drawer>
   <nav>
@@ -428,6 +428,7 @@ addEventListener("load", () => {
   />
   <Transition name="throw">
     <dialog id="config-piece-dialog" v-show="showConfigPieceDialogRef">
+      <h2>Configure new piece</h2>
       <div class="piece-preview">
         <Icon
           :icon-id="`${configPieceIdRef}-${configPieceColorRef}`"
@@ -474,6 +475,7 @@ addEventListener("load", () => {
   <Backdrop v-show="showConfirmDialogRef" />
   <Transition name="throw">
     <dialog v-show="showConfirmDialogRef" id="confirm-dialog">
+      <h2>Confirm</h2>
       <p class="message">{{ confirmDialogRef.message }}</p>
       <div class="action-buttons">
         <button @click="confirmDialog.onCancel()">
