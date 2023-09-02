@@ -452,6 +452,7 @@ addEventListener("load", () => {
 }
 
 .category-section {
+  @include shadow;
   @include round-border;
   @include inverted-accent;
   margin: var(--spacing-big) 0;
