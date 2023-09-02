@@ -4,7 +4,7 @@ import Icon from "./Icon.vue";
 
 const props = defineProps({
   optionId: { type: String, required: true },
-  iconId: { type: String, required: true },
+  iconId: { type: String },
   name: { type: String, required: true },
   description: { type: String, default: "" },
   simple: { type: Boolean, default: true },
@@ -14,7 +14,7 @@ const props = defineProps({
 <template>
   <div class="simple-option">
     <label :for="props.optionId">
-      <Icon :icon-id="props.iconId" side />
+      <Icon v-if="props.iconId" :icon-id="props.iconId" side />
       <span class="title">{{ capitalizeFirst(props.name) }}</span>
       <span class="input simple" v-if="props.simple">
         <slot v-if="props.simple"></slot>

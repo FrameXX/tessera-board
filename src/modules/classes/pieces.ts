@@ -4,7 +4,7 @@ import { getRandomId } from "../utils/misc";
 export type PlayerColor = "white" | "black";
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 
-abstract class Piece {
+export abstract class Piece {
   public color: PlayerColor;
   public pieceId: PieceId;
   public id: string;

@@ -7,6 +7,8 @@ export interface Dialog {
 }
 
 class ConfirmDialog {
+  private resolve?: (confirmed: boolean) => void;
+
   constructor(
     private readonly dialogRef: Ref<Dialog>,
     private readonly showDialogRef: Ref<boolean>
@@ -43,8 +45,6 @@ class ConfirmDialog {
       this.resolve = resolve;
     });
   }
-
-  private resolve?: (confirmed: boolean) => void;
 }
 
 export default ConfirmDialog;

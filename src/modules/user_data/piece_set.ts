@@ -6,6 +6,7 @@ function isPieceSetValue(string: string): string is PieceSetValue {
   return string === "material_design" || string === "font_awesome";
 }
 
+export const PIECE_SETS_DIR = "assets/img/";
 export const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "material_design";
 
 class PieceSetData extends UserData<PieceSetValue> {

@@ -12,8 +12,7 @@ import {
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { capitalizeFirst } from "../modules/utils/misc";
 import { waitForTransitionEnd } from "../modules/utils/elements";
-
-const PIECE_SETS_DIR = "assets/img/";
+import { PIECE_SETS_DIR } from "../modules/user_data/piece_set";
 
 const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },

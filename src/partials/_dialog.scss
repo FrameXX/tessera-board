@@ -1,4 +1,5 @@
-#confirm-dialog {
+#confirm-dialog,
+#config-piece-dialog {
   @include fix-centered;
   @include flex-center(inline-block);
   @include shadow;
@@ -9,12 +10,31 @@
   max-width: calc(100% - var(--spacing-huge) * 3);
   width: 450px;
 
+  .action-buttons {
+    text-align: end;
+  }
+}
+
+#confirm-dialog > .message {
   .message {
     margin-top: 0;
   }
+}
 
-  .action-buttons {
-    text-align: end;
+#config-piece-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: normal;
+
+  .piece-preview {
+    @include flex-center;
+
+    .icon {
+      filter: var(--svg-shadow-filter);
+      padding: var(--spacing-medium);
+      width: 65px;
+      height: 65px;
+    }
   }
 }
 

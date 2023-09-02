@@ -15,6 +15,7 @@ import HueData, {
 } from "./modules/user_data/hue";
 import PieceSetData, {
   DEFAULT_PIECE_SET_VALUE,
+  PIECE_SETS_DIR,
 } from "./modules/user_data/piece_set";
 import BoardStateData, {
   type BoardStateValue,
@@ -43,6 +44,7 @@ import ThemeManager from "./modules/classes/theme_manager";
 import TransitionsManager from "./modules/classes/transitions_manager";
 import ConfirmDialog, { type Dialog } from "./modules/classes/confirm_dialog";
 import DefaultBoardManager from "./modules/classes/default_board_manager";
+import ConfigPieceDialog from "./modules/classes/config_piece_dialog";
 
 // Custom components
 import Board from "./components/Board.vue";
@@ -53,6 +55,7 @@ import Option from "./components/Option.vue";
 import Toast from "./components/Toast.vue";
 import Checkbox from "./components/Checkbox.vue";
 import Backdrop from "./components/Backdrop.vue";
+import { PieceId, PlayerColor } from "./modules/classes/pieces";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -71,16 +74,31 @@ const statusBarRef = ref(true);
 
 const toastsRef = ref<ToastElement[]>([]);
 const drawerOpenRef = ref(false);
-const dialogRef = ref<Dialog>({ message: "", confirmText: "", cancelText: "" });
-const showDialogRef = ref(false);
+const confirmDialogRef = ref<Dialog>({
+  message: "",
+  confirmText: "",
+  cancelText: "",
+});
+const showConfirmDialogRef = ref(false);
+const configPieceIdRef = ref<PieceId>("pawn");
+const configPieceColorRef = ref<PlayerColor>("white");
+const showConfigPieceDialogRef = ref(false);
 
 const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
-const dialogManager = new ConfirmDialog(dialogRef, showDialogRef);
+const confirmDialog = new ConfirmDialog(confirmDialogRef, showConfirmDialogRef);
+const configPieceDialog = new ConfigPieceDialog(
+  configPieceIdRef,
+  configPieceColorRef,
+  showConfigPieceDialogRef
+);
 const toastManager = new ToastManager(toastsRef);
-const userDataManager = new UserDataManager(dialogManager, toastManager);
+const userDataManager = new UserDataManager(confirmDialog, toastManager);
 const splashscreenManager = new SplashscreenManager(transitionsManager);
-const defaultBoardManager = new DefaultBoardManager(primaryBoardStateReactive);
+const defaultBoardManager = new DefaultBoardManager(
+  primaryBoardStateReactive,
+  configPieceDialog
+);
 
 userDataManager.entries = [
   new ThemeData(themeValueRef.value, themeValueRef, themeManger),
@@ -404,17 +422,68 @@ addEventListener("load", () => {
       </button>
     </div>
   </nav>
-  <Backdrop v-show="showDialogRef" />
+  <Backdrop
+    v-show="showConfigPieceDialogRef"
+    @click="configPieceDialog.onCancel()"
+  />
   <Transition name="throw">
-    <dialog v-show="showDialogRef" id="confirm-dialog">
-      <p class="message">{{ dialogRef.message }}</p>
+    <dialog id="config-piece-dialog" v-show="showConfigPieceDialogRef">
+      <div class="piece-preview">
+        <Icon
+          :icon-id="`${configPieceIdRef}-${configPieceColorRef}`"
+          :source-file="`${PIECE_SETS_DIR}pieces_${pieceSetRef}.svg`"
+        />
+      </div>
+      <div class="config">
+        <Option name="piece" option-id="select-piece-id">
+          <select id="select-piece-id" v-model="configPieceIdRef">
+            <option value="rook">Rook</option>
+            <option value="knight">Knight</option>
+            <option value="bishop">Bishop</option>
+            <option value="queen">Queen</option>
+            <option value="king">King</option>
+            <option value="pawn">Pawn</option>
+          </select>
+          <template #description>
+            Different pieces have different look, but mainly their abilities and
+            strategic differ.
+          </template>
+        </Option>
+        <Option name="color" option-id="select-piece-color">
+          <select id="select-piece-color" v-model="configPieceColorRef">
+            <option value="white">White</option>
+            <option value="black">Black</option>
+          </select>
+          <template #description
+            >Piece color determines its player. Although pieces here are not
+            usually entirely black or white they are darker or
+            brighter.</template
+          >
+        </Option>
+      </div>
       <div class="action-buttons">
-        <button @click="dialogManager.onCancel()">
-          <Icon side icon-id="close-circle-outline" />{{ dialogRef.cancelText }}
+        <button @click="configPieceDialog.onCancel()">
+          <Icon side icon-id="close-circle-outline" />Cancel
         </button>
-        <button @click="dialogManager.onConfirm()">
+        <button @click="configPieceDialog.onConfirm()">
+          <Icon side icon-id="check-circle-outline" />Add piece
+        </button>
+      </div>
+    </dialog>
+  </Transition>
+  <Backdrop v-show="showConfirmDialogRef" />
+  <Transition name="throw">
+    <dialog v-show="showConfirmDialogRef" id="confirm-dialog">
+      <p class="message">{{ confirmDialogRef.message }}</p>
+      <div class="action-buttons">
+        <button @click="confirmDialog.onCancel()">
+          <Icon side icon-id="close-circle-outline" />{{
+            confirmDialogRef.cancelText
+          }}
+        </button>
+        <button @click="confirmDialog.onConfirm()">
           <Icon side icon-id="check-circle-outline" />{{
-            dialogRef.confirmText
+            confirmDialogRef.confirmText
           }}
         </button>
       </div>
@@ -437,7 +506,7 @@ addEventListener("load", () => {
 <style lang="scss">
 @import "./partials/mixins";
 @import "./partials/nav";
-@import "./partials/confirm_dialog";
+@import "./partials/dialog";
 
 #toast-stack {
   align-items: center;
