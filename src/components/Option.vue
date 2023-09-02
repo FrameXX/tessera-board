@@ -7,6 +7,7 @@ const props = defineProps({
   iconId: { type: String, required: true },
   name: { type: String, required: true },
   description: { type: String, default: "" },
+  simple: { type: Boolean, default: true },
 });
 </script>
 
@@ -15,12 +16,15 @@ const props = defineProps({
     <label :for="props.optionId">
       <Icon :icon-id="props.iconId" side />
       <span class="title">{{ capitalizeFirst(props.name) }}</span>
-      <span class="input">
-        <slot></slot>
+      <span class="input" v-if="props.simple">
+        <slot v-if="props.simple"></slot>
       </span>
     </label>
     <span class="description" :id="`${props.optionId}-description`">
       <slot name="description"></slot>
+    </span>
+    <span class="input" v-if="!props.simple">
+      <slot v-if="!props.simple"></slot>
     </span>
   </div>
 </template>
