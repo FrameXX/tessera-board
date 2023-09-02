@@ -1,13 +1,13 @@
 import type UserData from "../user_data/user_data";
-import type DialogManager from "./dialog_manager";
+import type ConfirmDialog from "./confirm_dialog";
 import type ToastManager from "./toast_manager";
 
 class UserDataManager {
-  private readonly dialogManager: DialogManager;
+  private readonly dialogManager: ConfirmDialog;
   private readonly toastManager: ToastManager;
   public entries: UserData<any>[] = [];
 
-  constructor(dialogManager: DialogManager, toastManager: ToastManager) {
+  constructor(dialogManager: ConfirmDialog, toastManager: ToastManager) {
     this.dialogManager = dialogManager;
     this.toastManager = toastManager;
   }
@@ -55,7 +55,7 @@ class UserDataManager {
       );
       return;
     }
-    const confirmed = await this.dialogManager.confirmRequest(
+    const confirmed = await this.dialogManager.show(
       "This action deletes all data, preferences, configuration and games played (including the current one) stored on this device and reloads the page. Are you sure?"
     );
     if (confirmed) {

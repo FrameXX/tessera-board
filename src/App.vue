@@ -41,7 +41,7 @@ import ToastManager, {
 import SplashscreenManager from "./modules/classes/splashscreen_manager";
 import ThemeManager from "./modules/classes/theme_manager";
 import TransitionsManager from "./modules/classes/transitions_manager";
-import DialogManager, { type Dialog } from "./modules/classes/dialog_manager";
+import ConfirmDialog, { type Dialog } from "./modules/classes/confirm_dialog";
 import DefaultBoardManager from "./modules/classes/default_board_manager";
 
 // Custom components
@@ -76,7 +76,7 @@ const showDialogRef = ref(false);
 
 const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
-const dialogManager = new DialogManager(dialogRef, showDialogRef);
+const dialogManager = new ConfirmDialog(dialogRef, showDialogRef);
 const toastManager = new ToastManager(toastsRef);
 const userDataManager = new UserDataManager(dialogManager, toastManager);
 const splashscreenManager = new SplashscreenManager(transitionsManager);
@@ -483,3 +483,4 @@ addEventListener("load", () => {
   padding: var(--spacing-small) 0;
 }
 </style>
+./modules/classes/confirm_dialog

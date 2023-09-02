@@ -6,7 +6,7 @@ export interface Dialog {
   cancelText: string;
 }
 
-class DialogManager {
+class ConfirmDialog {
   constructor(
     private readonly dialogRef: Ref<Dialog>,
     private readonly showDialogRef: Ref<boolean>
@@ -28,7 +28,7 @@ class DialogManager {
     }
   };
 
-  public confirmRequest(
+  public show(
     message: string,
     confirmText: string = "Confirm",
     cancelText: string = "Cancel"
@@ -47,4 +47,4 @@ class DialogManager {
   private resolve?: (confirmed: boolean) => void;
 }
 
-export default DialogManager;
+export default ConfirmDialog;
