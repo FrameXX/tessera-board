@@ -1,3 +1,7 @@
 # Tessera Board (alpha)
 
-This is a Single Page Application for playing Chess. The goal is to make a functional, customizable chess game that's pleasing to the eye and usable on both mobile and desktop.
+This is a Single Page Application for playing chess with the aim of creating a functional and customisable game that is visually appealing and usable on both mobile and desktop devices.
+
+### Note on "dev" command
+
+The "dev" command in package.json is configured to start a server on the local network. This is useful for debugging on a mobile phone, but the IP address in the command is hardcoded. Therefore, you must modify the command to utilise the IP address of your device on your network, which varies on each network.
