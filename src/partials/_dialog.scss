@@ -38,7 +38,13 @@
   }
 }
 
-.throw-enter-active,
+.throw-enter-active {
+  transition: transform var(--transition-duration-short)
+      var(--transition-timing-function-display),
+    opacity var(--transition-duration-short)
+      var(--transition-timing-function-display);
+}
+
 .throw-leave-active {
   transition: transform var(--transition-duration-medium)
       var(--transition-timing-function-motion),
