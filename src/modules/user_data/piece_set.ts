@@ -1,6 +1,5 @@
 import type { Ref } from "vue";
 import UserData from "./user_data";
-import type { SaveCallBack } from "./user_data";
 
 export type PieceSetValue = "material_design" | "font_awesome";
 function isPieceSetValue(string: string): string is PieceSetValue {
@@ -10,12 +9,8 @@ function isPieceSetValue(string: string): string is PieceSetValue {
 export const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "material_design";
 
 class PieceSetData extends UserData<PieceSetValue> {
-  constructor(
-    saveCallBack: SaveCallBack,
-    value: PieceSetValue,
-    valueRef: Ref<PieceSetValue>
-  ) {
-    super(saveCallBack, "piece_set", value, valueRef);
+  constructor(value: PieceSetValue, valueRef: Ref<PieceSetValue>) {
+    super("piece_set", value, valueRef);
   }
 
   public load(dumped: string): void {

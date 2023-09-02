@@ -1,5 +1,4 @@
 import UserData from "./user_data";
-import type { SaveCallBack } from "./user_data";
 import type ThemeManager from "../classes/theme_manager";
 import type { Ref } from "vue";
 
@@ -14,12 +13,11 @@ class ThemeData extends UserData<ThemeValue> {
   private themeManager: ThemeManager;
 
   constructor(
-    saveCallBack: SaveCallBack,
     value: ThemeValue,
     valueRef: Ref<ThemeValue>,
     themeManager: ThemeManager
   ) {
-    super(saveCallBack, "theme", value, valueRef);
+    super("theme", value, valueRef);
     this.themeManager = themeManager;
   }
 

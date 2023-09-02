@@ -8,7 +8,7 @@ import {
   getPieceById,
 } from "../classes/pieces";
 import { ComplexUserData } from "./user_data";
-import type { SaveCallBack } from "./user_data";
+
 import type Piece from "../classes/pieces";
 
 export type BoardStateValue = (Piece | null)[][];
@@ -61,12 +61,8 @@ export const DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
 ];
 
 class BoardStateData extends ComplexUserData<BoardStateValue> {
-  constructor(
-    saveCallBack: SaveCallBack,
-    value: BoardStateValue,
-    valueReactive: BoardStateValue
-  ) {
-    super(saveCallBack, "board_state", value, valueReactive);
+  constructor(value: BoardStateValue, valueReactive: BoardStateValue) {
+    super("board_state", value, valueReactive);
   }
 
   public dump(): string {

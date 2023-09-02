@@ -1,17 +1,12 @@
 import UserData from "./user_data";
-import type { SaveCallBack } from "./user_data";
 import { setCSSVariable } from "../utils/elements";
 import type { Ref } from "vue";
 
 export const DEFAULT_TRANSITION_DURATION_VALUE = 100;
 
 class TransitionDurationData extends UserData<number> {
-  constructor(
-    saveCallBack: SaveCallBack,
-    value: number,
-    valueRef: Ref<number>
-  ) {
-    super(saveCallBack, "transition_duration", value, valueRef);
+  constructor(value: number, valueRef: Ref<number>) {
+    super("transition_duration", value, valueRef);
   }
 
   public dump(): string {

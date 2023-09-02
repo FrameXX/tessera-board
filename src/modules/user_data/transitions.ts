@@ -1,5 +1,4 @@
 import UserData from "./user_data";
-import type { SaveCallBack } from "./user_data";
 import type TransitionsManager from "../classes/transitions_manager";
 import type { Ref } from "vue";
 
@@ -14,12 +13,11 @@ class TransitionsData extends UserData<TransitionsValue> {
   private transitionManager: TransitionsManager;
 
   constructor(
-    saveCallBack: SaveCallBack,
     value: TransitionsValue,
     valueRef: Ref<TransitionsValue>,
     transitionsManager: TransitionsManager
   ) {
-    super(saveCallBack, "transitions", value, valueRef);
+    super("transitions", value, valueRef);
     this.transitionManager = transitionsManager;
   }
 

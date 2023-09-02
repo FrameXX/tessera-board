@@ -1,17 +1,12 @@
 import UserData from "./user_data";
-import type { SaveCallBack } from "./user_data";
 import { setCSSVariable } from "../utils/elements";
 import type { Ref } from "vue";
 
 export const DEFAULT_CELL_INDEX_OPACITY_VALUE = 80;
 
 class CellIndexOpacityData extends UserData<number> {
-  constructor(
-    saveCallBack: SaveCallBack,
-    value: number,
-    valueRef: Ref<number>
-  ) {
-    super(saveCallBack, "cell_index_opacity", value, valueRef);
+  constructor(value: number, valueRef: Ref<number>) {
+    super("cell_index_opacity", value, valueRef);
   }
 
   public dump(): string {

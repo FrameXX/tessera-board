@@ -13,18 +13,12 @@ export class UserDataError extends Error {
 
 // UserData class manages recovering, applying and saving data types from and to localStorage.
 abstract class UserData<ValueType> {
+  private readonly STORAGE_KEY = "tessera_board";
   private valueRef?: Ref<ValueType>;
-  protected saveCallback: () => void;
   protected value: ValueType;
   public id: string;
 
-  constructor(
-    saveCallBack: () => void,
-    id: string,
-    value: ValueType,
-    valueRef?: Ref<ValueType>
-  ) {
-    this.saveCallback = saveCallBack;
+  constructor(id: string, value: ValueType, valueRef?: Ref<ValueType>) {
     this.id = id;
     this.value = value;
 
@@ -37,10 +31,16 @@ abstract class UserData<ValueType> {
     }
   }
 
+  protected save() {
+    if (navigator.cookieEnabled) {
+      localStorage.setItem(`${this.STORAGE_KEY}-${this.id}`, this.dump());
+    }
+  }
+
   protected onValueChange(newValue: ValueType) {
     this.value = newValue;
     this.apply();
-    this.saveCallback();
+    this.save();
   }
 
   protected handleInvalidLoadValue(value: string) {
@@ -51,6 +51,13 @@ abstract class UserData<ValueType> {
   public updateReference() {
     if (this.valueRef) {
       this.valueRef.value = this.value;
+    }
+  }
+
+  public recover() {
+    const dumped = localStorage.getItem(`${this.STORAGE_KEY}-${this.id}`);
+    if (dumped) {
+      this.load(dumped);
     }
   }
 
@@ -68,13 +75,8 @@ export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   // @ts-ignore
   private reactiveValue: ValueType;
 
-  constructor(
-    saveCallBack: () => void,
-    id: string,
-    value: ValueType,
-    reactiveValue: ValueType
-  ) {
-    super(saveCallBack, id, value);
+  constructor(id: string, value: ValueType, reactiveValue: ValueType) {
+    super(id, value);
 
     this.reactiveValue = reactiveValue;
     watch(reactiveValue!, (newValue) => {
@@ -85,9 +87,8 @@ export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   // Value of reactive is a proxy. To get the original value toRaw built-in Vue function is used to extract the real value.
   protected onValueChange(newValue: ValueType) {
     this.value = toRaw(newValue);
-    console.log(this.value);
     this.apply();
-    this.saveCallback();
+    this.save();
   }
 
   // Reactive loses reactivity if the whole value is overwritten. The values needs to be chnaged key by key.

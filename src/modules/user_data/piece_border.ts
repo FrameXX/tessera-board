@@ -5,12 +5,8 @@ import { setCSSVariable } from "../utils/elements";
 export const DEFAULT_PIECE_BORDER_VALUE = 1.1;
 
 class PieceBorderData extends UserData<Number> {
-  constructor(
-    saveCallBack: SaveCallBack,
-    value: number,
-    valueRef: Ref<number>
-  ) {
-    super(saveCallBack, "piece_border", value, valueRef);
+  constructor(value: number, valueRef: Ref<number>) {
+    super("piece_border", value, valueRef);
   }
 
   public load(dumped: string): void {

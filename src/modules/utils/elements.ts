@@ -37,7 +37,7 @@ export function repaintElement(...elements: Element[]): void {
 export async function waitForTransitionEnd(
   element: HTMLElement | SVGElement,
   propertyName?: string,
-  abortionTimoutMs: number = 800
+  abortionTimoutMs: number = 1000
 ): Promise<void> {
   return new Promise((resolve) => {
     const abortionTimeout = setTimeout(() => {

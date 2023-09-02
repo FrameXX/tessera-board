@@ -5,12 +5,8 @@ import { setCSSVariable } from "../utils/elements";
 export const DEFAULT_PIECE_PADDING_VALUE = 5;
 
 class PiecePaddingData extends UserData<Number> {
-  constructor(
-    saveCallBack: SaveCallBack,
-    value: number,
-    valueRef: Ref<number>
-  ) {
-    super(saveCallBack, "piece_padding", value, valueRef);
+  constructor(value: number, valueRef: Ref<number>) {
+    super("piece_padding", value, valueRef);
   }
 
   public load(dumped: string): void {

@@ -87,61 +87,31 @@ const userDataManager = new UserDataManager(dialogManager, toastManager);
 const splashscreenManager = new SplashscreenManager(transitionsManager);
 const defaultBoardManager = new DefaultBoardManager(primaryBoardStateReactive);
 
-const userDataSaveCallBack = userDataManager.saveData;
-
 userDataManager.entries = [
-  new ThemeData(
-    userDataSaveCallBack,
-    themeValueRef.value,
-    themeValueRef,
-    themeManger
-  ),
+  new ThemeData(themeValueRef.value, themeValueRef, themeManger),
   new TransitionsData(
-    userDataSaveCallBack,
     transitionsValueRef.value,
     transitionsValueRef,
     transitionsManager
   ),
-  new HueData(userDataSaveCallBack, playerHueRef.value, playerHueRef, false),
-  new HueData(userDataSaveCallBack, opponentHueRef.value, opponentHueRef, true),
-  new PieceSetData(userDataSaveCallBack, pieceSetRef.value, pieceSetRef),
-  new BoardStateData(
-    userDataSaveCallBack,
-    primaryBoardStateReactive,
-    primaryBoardStateReactive
-  ),
-  new PiecePaddingData(
-    userDataSaveCallBack,
-    piecePaddingRef.value,
-    piecePaddingRef
-  ),
-  new PieceBorderData(
-    userDataSaveCallBack,
-    pieceBorderRef.value,
-    pieceBorderRef
-  ),
+  new HueData(playerHueRef.value, playerHueRef, false),
+  new HueData(opponentHueRef.value, opponentHueRef, true),
+  new PieceSetData(pieceSetRef.value, pieceSetRef),
+  new BoardStateData(primaryBoardStateReactive, primaryBoardStateReactive),
+  new PiecePaddingData(piecePaddingRef.value, piecePaddingRef),
+  new PieceBorderData(pieceBorderRef.value, pieceBorderRef),
   new TransitionDurationData(
-    userDataSaveCallBack,
     transitionDurationRef.value,
     transitionDurationRef
   ),
-  new CellIndexOpacityData(
-    userDataSaveCallBack,
-    cellIndexOpacityRef.value,
-    cellIndexOpacityRef
-  ),
-  new BooleanData(
-    userDataSaveCallBack,
-    statusBarRef.value,
-    statusBarRef,
-    "status_bar"
-  ),
+  new CellIndexOpacityData(cellIndexOpacityRef.value, cellIndexOpacityRef),
+  new BooleanData(statusBarRef.value, statusBarRef, "status_bar"),
 ];
 
 addEventListener("load", () => {
   splashscreenManager.hideSplashscreen();
   if (navigator.cookieEnabled) {
-    userDataManager.loadData();
+    userDataManager.recoverData();
   } else {
     toastManager.showToast(
       "Cookies are disabled. -> No changes will be restored in next session.",
