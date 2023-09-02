@@ -54,7 +54,7 @@ import Board from "./components/Board.vue";
 import Icon from "./components/Icon.vue";
 import Drawer from "./components/Drawer.vue";
 import Category from "./components/Category.vue";
-import SimpleOption from "./components/SimpleOption.vue";
+import Option from "./components/Option.vue";
 import Toast from "./components/Toast.vue";
 import Checkbox from "./components/Checkbox.vue";
 import Backdrop from "./components/Backdrop.vue";
@@ -158,7 +158,7 @@ addEventListener("load", () => {
     </div>
     <!-- Player -->
     <Category name="Player" icon-id="account">
-      <SimpleOption
+      <Option
         name="computer"
         icon-id="memory"
         option-id="check-computer-player"
@@ -168,11 +168,11 @@ addEventListener("load", () => {
           If this option is enabled an algorythm will play instead of a human
           player.
         </template>
-      </SimpleOption>
+      </Option>
     </Category>
     <!-- Opponent -->
     <Category name="Opponent" icon-id="target-account">
-      <SimpleOption
+      <Option
         name="remote"
         icon-id="lan-connect"
         option-id="check-remote-opponent"
@@ -183,8 +183,8 @@ addEventListener("load", () => {
           but instead play on another device connected to the same network after
           peer connection is established.</template
         >
-      </SimpleOption>
-      <SimpleOption
+      </Option>
+      <Option
         name="computer"
         icon-id="memory"
         option-id="check-computer-opponent"
@@ -194,7 +194,7 @@ addEventListener("load", () => {
           If this option is enabled an algorythm will play instead of a human
           player.
         </template>
-      </SimpleOption>
+      </Option>
     </Category>
     <!-- Game rules -->
     <Category name="Game rules" icon-id="rule"> </Category>
@@ -202,11 +202,7 @@ addEventListener("load", () => {
     <Category name="look and feel" icon-id="palette-advanced">
       <!-- Colors -->
       <span class="category-section">Colors</span>
-      <SimpleOption
-        name="UI mode"
-        icon-id="brightness-6"
-        option-id="select-ui-mode"
-      >
+      <Option name="UI mode" icon-id="brightness-6" option-id="select-ui-mode">
         <select id="select-ui-mode" v-model="themeValueRef">
           <option value="auto">Auto</option>
           <option value="light">Light</option>
@@ -218,8 +214,8 @@ addEventListener("load", () => {
           "Automatic" the app will try to follow theme preferred by your
           browser.
         </template>
-      </SimpleOption>
-      <SimpleOption
+      </Option>
+      <Option
         name="Player hue"
         icon-id="format-color-fill"
         option-id="input-hue-player"
@@ -235,8 +231,8 @@ addEventListener("load", () => {
           >The UI transitions the overall hue of the app to this hue when you
           are currently playing. The value is a hue degree from 0 to 360.
         </template>
-      </SimpleOption>
-      <SimpleOption
+      </Option>
+      <Option
         name="Opponent hue"
         icon-id="format-color-fill"
         option-id="input-hue-opponent"
@@ -252,10 +248,10 @@ addEventListener("load", () => {
           >The UI transitions the overall hue of the app to this hue when you
           are currently playing. The value is a hue degree from 0 to 360.
         </template>
-      </SimpleOption>
+      </Option>
       <!-- Checkboard -->
       <span class="category-section">Checkboard</span>
-      <SimpleOption
+      <Option
         name="piece set"
         icon-id="chess-pawn"
         option-id="select-piece-set"
@@ -268,8 +264,8 @@ addEventListener("load", () => {
           >Chooses what vector icons are used for pieces. Different icon sets
           have different shapes.
         </template>
-      </SimpleOption>
-      <SimpleOption
+      </Option>
+      <Option
         name="piece padding (px)"
         icon-id="padding-piece"
         option-id="input-piece-padding"
@@ -285,8 +281,8 @@ addEventListener("load", () => {
           >Increases padding of the pieces relative to its cell, but that also
           decreases their overall size.
         </template>
-      </SimpleOption>
-      <SimpleOption
+      </Option>
+      <Option
         name="piece border (px)"
         icon-id="border-piece"
         option-id="input-piece-border"
@@ -302,8 +298,8 @@ addEventListener("load", () => {
           >Increases border/stroke width of the pieces vector, which can improve
           their visibility.
         </template>
-      </SimpleOption>
-      <SimpleOption
+      </Option>
+      <Option
         name="cell index opacity (%)"
         icon-id="code-array"
         option-id="select-cell-index-opacity"
@@ -319,23 +315,19 @@ addEventListener("load", () => {
           >Opacity of the cell indexes (numbers and letters) written on borders
           of checkboard.
         </template>
-      </SimpleOption>
+      </Option>
       <!-- Elements -->
       <span class="category-section">Elements</span>
-      <SimpleOption
-        name="status bar"
-        icon-id="dock-top"
-        option-id="check-status-bar"
-      >
+      <Option name="status bar" icon-id="dock-top" option-id="check-status-bar">
         <Checkbox id="check-status-bar" v-model="statusBarRef" />
         <template #description
           >Status bar on the main checkboard screen permanently displays
           information about current game status.
         </template>
-      </SimpleOption>
+      </Option>
       <!-- Transitions -->
       <span class="category-section">Transitions</span>
-      <SimpleOption
+      <Option
         name="transitions"
         icon-id="transition"
         option-id="select-transitions"
@@ -352,8 +344,8 @@ addEventListener("load", () => {
           them. When set to "Automatic" the app will keep tansition effects
           disabled only if your browser requests it.
         </template>
-      </SimpleOption>
-      <SimpleOption
+      </Option>
+      <Option
         name="transition duration (%)"
         icon-id="play-speed"
         option-id="select-transition-duration"
@@ -369,7 +361,7 @@ addEventListener("load", () => {
           >Changes duration of all the transitions and animations (except for
           the splashscreen animation) in the same ratio.
         </template>
-      </SimpleOption>
+      </Option>
     </Category>
     <div class="nav placeholder"></div
   ></Drawer>
