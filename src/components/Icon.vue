@@ -8,7 +8,11 @@ const props = defineProps({
 </script>
 
 <template>
-  <svg :class="`icon ${props.side ? 'side' : ''}`" aria-hidden="true">
+  <svg
+    ref="element"
+    :class="`icon ${props.side ? 'side' : ''}`"
+    aria-hidden="true"
+  >
     <use :href="`${props.sourceFile}#${props.iconId}`"></use>
   </svg>
 </template>

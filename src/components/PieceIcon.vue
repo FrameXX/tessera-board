@@ -1,9 +1,17 @@
 <script lang="ts" setup>
 import Icon from "./Icon.vue";
 import type { BoardPiece } from "./Board.vue";
-import { type PropType, computed, ref } from "vue";
+import {
+  type PropType,
+  computed,
+  ref,
+  watch,
+  reactive,
+  type ComponentPublicInstance,
+} from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { capitalizeFirst } from "../modules/utils/misc";
+import { waitForTransitionEnd } from "../modules/utils/elements";
 
 const PIECE_SETS_DIR = "assets/img/";
 
@@ -13,8 +21,10 @@ const props = defineProps({
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
 });
-const zIndex = ref("");
+const zIndex = ref<"" | "1">("");
+const element = ref<null | ComponentPublicInstance>(null);
 
+// Values for translating pieces to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
   return props.boardPiece.col * props.cellSize;
 });
@@ -30,10 +40,36 @@ const label = computed(() => {
     props.boardPiece.piece.pieceId
   }`;
 });
+
+// Convert prop to reactive so it can be watched without problems
+const reactiveBoardPiece = computed(() => {
+  return reactive(props.boardPiece);
+});
+
+// Watch piece for changes in rows, columns or both and set z-index to 1 while moving so it appears on top of other pieces
+watch(reactiveBoardPiece, (newValue, oldValue) => {
+  if (newValue.row !== oldValue.row || newValue.col !== oldValue.col) {
+    const boardPieceElement = element.value?.$el;
+    if (!boardPieceElement) {
+      console.error(
+        "Cannot obtain SVGElement instance of boardPiece, thus cannot alter zIndex."
+      );
+      return;
+    }
+    temporarilyMoveToTop(boardPieceElement);
+  }
+});
+
+async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
+  zIndex.value = "1";
+  await waitForTransitionEnd(boardPieceElement);
+  zIndex.value = "";
+}
 </script>
 
 <template>
   <Icon
+    ref="element"
     :aria-label="label"
     :title="label"
     tabindex="0"
@@ -57,7 +93,13 @@ const label = computed(() => {
   left: 0;
   padding: var(--piece-padding);
   transition: transform var(--transition-duration-medium)
-    var(--transition-timing-function-display);
+      var(--transition-timing-function-display),
+    opacity var(--transition-duration-short)
+      var(--transition-timing-function-display);
+
+  &:hover {
+    opacity: 0.3;
+  }
 }
 
 .piece-move,
