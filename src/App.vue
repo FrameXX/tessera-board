@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Vue
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import { activateColors } from "./modules/utils/elements";
 
 // User data
@@ -65,7 +65,9 @@ const transitionsValueRef = ref<TransitionsValue>(DEFAULT_TRANSITIONS_VALUE);
 const playerHueRef = ref<number>(DEFAULT_PLAYER_HUE_VALUE);
 const opponentHueRef = ref<number>(DEFAULT_OPPONENT_HUE_VALUE);
 const pieceSetRef = ref<PieceSetValue>(DEFAULT_PIECE_SET_VALUE);
-const primaryBoardStateRef = ref<BoardStateValue>(DEFAULT_BOARD_STATE_VALUE);
+const primaryBoardStateReactive: BoardStateValue = reactive(
+  DEFAULT_BOARD_STATE_VALUE
+);
 const piecePaddingRef = ref<number>(DEFAULT_PIECE_PADDING_VALUE);
 const pieceBorderRef = ref<number>(DEFAULT_PIECE_BORDER_VALUE);
 const transitionDurationRef = ref<number>(DEFAULT_TRANSITION_DURATION_VALUE);
@@ -83,7 +85,7 @@ const dialogManager = new DialogManager(dialogRef, showDialogRef);
 const toastManager = new ToastManager(toastsRef);
 const userDataManager = new UserDataManager(dialogManager, toastManager);
 const splashscreenManager = new SplashscreenManager(transitionsManager);
-const defaultBoardManager = new DefaultBoardManager(primaryBoardStateRef);
+const defaultBoardManager = new DefaultBoardManager(primaryBoardStateReactive);
 
 const userDataSaveCallBack = userDataManager.saveData;
 
@@ -105,8 +107,8 @@ userDataManager.entries = [
   new PieceSetData(userDataSaveCallBack, pieceSetRef.value, pieceSetRef),
   new BoardStateData(
     userDataSaveCallBack,
-    primaryBoardStateRef.value,
-    primaryBoardStateRef
+    primaryBoardStateReactive,
+    primaryBoardStateReactive
   ),
   new PiecePaddingData(
     userDataSaveCallBack,
@@ -148,7 +150,7 @@ addEventListener("load", () => {
     );
   }
   userDataManager.applyData();
-  userDataManager.updateRefs();
+  userDataManager.updateReferences();
   activateColors();
 });
 </script>
@@ -164,7 +166,7 @@ addEventListener("load", () => {
   <div id="boards-area">
     <Board
       :manager="defaultBoardManager"
-      :state="primaryBoardStateRef"
+      :state="primaryBoardStateReactive"
       :piece-set="pieceSetRef"
       :piece-padding="piecePaddingRef"
       id="primary-board"

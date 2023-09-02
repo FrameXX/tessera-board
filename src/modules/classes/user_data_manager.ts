@@ -84,9 +84,9 @@ class UserDataManager {
     }
   }
 
-  public updateRefs() {
+  public updateReferences() {
     for (const entry of this.entries) {
-      entry.updateRefIfDefined();
+      entry.updateReference();
     }
   }
 

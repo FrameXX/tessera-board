@@ -7,10 +7,9 @@ import {
   Rook,
   getPieceById,
 } from "../classes/pieces";
-import UserData from "./user_data";
+import { ComplexUserData } from "./user_data";
 import type { SaveCallBack } from "./user_data";
 import type Piece from "../classes/pieces";
-import type { Ref } from "vue";
 
 export type BoardStateValue = (Piece | null)[][];
 
@@ -61,13 +60,13 @@ export const DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   ],
 ];
 
-class BoardStateData extends UserData<BoardStateValue> {
+class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     saveCallBack: SaveCallBack,
     value: BoardStateValue,
-    valueRef: Ref<BoardStateValue>
+    valueReactive: BoardStateValue
   ) {
-    super(saveCallBack, "board_state", value, valueRef);
+    super(saveCallBack, "board_state", value, valueReactive);
   }
 
   public dump(): string {
@@ -88,6 +87,7 @@ class BoardStateData extends UserData<BoardStateValue> {
           }
         }
       }
+      this.value = value;
     } catch (error) {
       console.error("Loading board state data resulted in an error", error);
       this.handleInvalidLoadValue(dumped);

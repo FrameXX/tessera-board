@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-import { watch } from "vue";
+import { watch, toRaw } from "vue";
 
 export type SaveCallBack = () => void;
 
@@ -11,11 +11,12 @@ export class UserDataError extends Error {
   }
 }
 
+// UserData class manages recovering, applying and saving data types from and to localStorage.
 abstract class UserData<ValueType> {
-  private saveCallback: () => void;
+  private valueRef?: Ref<ValueType>;
+  protected saveCallback: () => void;
   protected value: ValueType;
   public id: string;
-  public valueRef?: Ref<ValueType>;
 
   constructor(
     saveCallBack: () => void,
@@ -27,14 +28,19 @@ abstract class UserData<ValueType> {
     this.id = id;
     this.value = value;
 
+    // Watch ref for changes, update the original value and save changes.
     if (valueRef) {
       this.valueRef = valueRef;
-      watch<ValueType>(valueRef, async (newValue) => {
-        this.value = newValue;
-        this.apply();
-        this.saveCallback();
+      watch(valueRef, async (newValue) => {
+        this.onValueChange(newValue);
       });
     }
+  }
+
+  protected onValueChange(newValue: ValueType) {
+    this.value = newValue;
+    this.apply();
+    this.saveCallback();
   }
 
   protected handleInvalidLoadValue(value: string) {
@@ -42,7 +48,7 @@ abstract class UserData<ValueType> {
     throw new UserDataError(`"Loaded ${this.id} value was invalid"`);
   }
 
-  public updateRefIfDefined() {
+  public updateReference() {
     if (this.valueRef) {
       this.valueRef.value = this.value;
     }
@@ -55,6 +61,41 @@ abstract class UserData<ValueType> {
 
   // Load value from a string
   public abstract load(dumped: string): void;
+}
+
+// The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values.
+export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
+  // @ts-ignore
+  private reactiveValue: ValueType;
+
+  constructor(
+    saveCallBack: () => void,
+    id: string,
+    value: ValueType,
+    reactiveValue: ValueType
+  ) {
+    super(saveCallBack, id, value);
+
+    this.reactiveValue = reactiveValue;
+    watch(reactiveValue!, (newValue) => {
+      this.onValueChange(newValue);
+    });
+  }
+
+  // Value of reactive is a proxy. To get the original value toRaw built-in Vue function is used to extract the real value.
+  protected onValueChange(newValue: ValueType) {
+    this.value = toRaw(newValue);
+    console.log(this.value);
+    this.apply();
+    this.saveCallback();
+  }
+
+  // Reactive loses reactivity if the whole value is overwritten. The values needs to be chnaged key by key.
+  public updateReference() {
+    for (const key in this.reactiveValue) {
+      this.reactiveValue[key] = this.value[key];
+    }
+  }
 }
 
 export default UserData;
