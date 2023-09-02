@@ -48,10 +48,10 @@
 
 .throw-leave-to {
   opacity: 0;
-  transform: translateX(120%) rotate(0.5turn);
+  transform: translateX(100%) rotate(0.5turn);
 }
 
 .throw-enter-from {
   opacity: 0;
-  transform: translateX(-120%) rotate(-0.5turn);
+  transform: translateY(-5px);
 }
