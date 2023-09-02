@@ -140,7 +140,6 @@ function getPieceY(row: number) {
   @include stretch;
   @include flex-center;
   flex-grow: 1;
-  padding: 0 var(--spacing-small);
 
   .board-wrapper {
     position: absolute;

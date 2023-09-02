@@ -71,7 +71,7 @@ const open = ref<Boolean>(false);
 
   > .content {
     @include no-overrender;
-    padding-top: var(--spacing-huge);
+    padding-top: var(--spacing-big);
   }
 }
 

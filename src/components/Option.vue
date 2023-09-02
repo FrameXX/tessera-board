@@ -16,7 +16,7 @@ const props = defineProps({
     <label :for="props.optionId">
       <Icon :icon-id="props.iconId" side />
       <span class="title">{{ capitalizeFirst(props.name) }}</span>
-      <span class="input" v-if="props.simple">
+      <span class="input simple" v-if="props.simple">
         <slot v-if="props.simple"></slot>
       </span>
     </label>
@@ -59,7 +59,16 @@ const props = defineProps({
 
   .input {
     @include flex-center;
-    height: 40px;
+
+    &.simple {
+      height: 40px;
+    }
+
+    &:not(.simple) {
+      aspect-ratio: 1;
+      height: auto;
+      padding-top: var(--spacing-medium);
+    }
   }
 }
 </style>

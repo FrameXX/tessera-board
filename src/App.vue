@@ -197,7 +197,26 @@ addEventListener("load", () => {
       </Option>
     </Category>
     <!-- Game rules -->
-    <Category name="Game rules" icon-id="rule"> </Category>
+    <Category name="Game rules" icon-id="rule">
+      <Option
+        :simple="false"
+        name="default piece positions"
+        icon-id="checkerboard"
+        option-id="default-board"
+      >
+        <Board
+          :manager="defaultBoardManager"
+          :state="primaryBoardStateReactive"
+          :piece-set="pieceSetRef"
+          :piece-padding="piecePaddingRef"
+          id="default-board"
+        />
+        <template #description>
+          Defines position of each piece at the start of the game. Click on
+          piece to remove it. Click on empty cell to add a piece.
+        </template>
+      </Option>
+    </Category>
     <!-- Look and feel -->
     <Category name="look and feel" icon-id="palette-advanced">
       <!-- Colors -->
@@ -454,6 +473,10 @@ addEventListener("load", () => {
   padding: var(--spacing-small) 0;
   flex-grow: 1;
   width: 100%;
+
+  .board-container {
+    padding: 0 var(--spacing-small);
+  }
 }
 
 #game-status-bar {
