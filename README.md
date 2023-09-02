@@ -1,4 +1,4 @@
-# Tessera Board (alpha)
+# Tessera Board (unreleased)
 
 This is a Single Page Application for playing chess with the aim of creating a functional and customisable game that is visually appealing and usable on both mobile and desktop devices.
 
