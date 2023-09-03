@@ -69,7 +69,6 @@ class ConfigManager {
     const configIdsStr = localStorage.getItem(
       `${UserData.STORAGE_KEY}-configs-${this.id}`
     );
-
     if (!configIdsStr) {
       return;
     }
