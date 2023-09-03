@@ -6,7 +6,7 @@ export const DEFAULT_PLAYER_HUE_VALUE = 37;
 export const DEFAULT_OPPONENT_HUE_VALUE = 212;
 
 class HueData extends UserData<number> {
-  forOpponent: boolean;
+  private forOpponent: boolean;
 
   constructor(value: number, valueRef: Ref<number>, forOpponent: boolean) {
     super(forOpponent ? "player_hue" : "opponent_hue", value, valueRef);
