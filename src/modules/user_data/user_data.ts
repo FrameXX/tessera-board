@@ -13,10 +13,10 @@ export class UserDataError extends Error {
 
 // UserData class manages recovering, applying and saving data types from and to localStorage.
 abstract class UserData<ValueType> {
-  private readonly STORAGE_KEY = "tessera_board";
+  public static readonly STORAGE_KEY = "tessera_board";
   private valueRef?: Ref<ValueType>;
   protected value: ValueType;
-  public id: string;
+  public readonly id: string;
 
   constructor(id: string, value: ValueType, valueRef?: Ref<ValueType>) {
     this.id = id;
@@ -33,7 +33,7 @@ abstract class UserData<ValueType> {
 
   protected save() {
     if (navigator.cookieEnabled) {
-      localStorage.setItem(`${this.STORAGE_KEY}-${this.id}`, this.dump());
+      localStorage.setItem(`${UserData.STORAGE_KEY}-${this.id}`, this.dump());
     }
   }
 
@@ -55,7 +55,7 @@ abstract class UserData<ValueType> {
   }
 
   public recover() {
-    const dumped = localStorage.getItem(`${this.STORAGE_KEY}-${this.id}`);
+    const dumped = localStorage.getItem(`${UserData.STORAGE_KEY}-${this.id}`);
     if (dumped) {
       this.load(dumped);
     }
@@ -72,7 +72,6 @@ abstract class UserData<ValueType> {
 
 // The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values.
 export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
-  // @ts-ignore
   private reactiveValue: ValueType;
 
   constructor(id: string, value: ValueType, reactiveValue: ValueType) {
@@ -84,14 +83,14 @@ export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
     });
   }
 
-  // Value of reactive is a proxy. To get the original value toRaw built-in Vue function is used to extract the real value.
+  // HACK: Value of reactive is a proxy. To get the original value toRaw built-in Vue function is used to extract the real value.
   protected onValueChange(newValue: ValueType) {
     this.value = toRaw(newValue);
     this.apply();
     this.save();
   }
 
-  // Reactive loses reactivity if the whole value is overwritten. The values needs to be chnaged key by key.
+  // NOTE: Reactive loses reactivity if the whole value is overwritten. The values needs to be chnaged key by key instead of updating it as a whole.
   public updateReference() {
     for (const key in this.reactiveValue) {
       this.reactiveValue[key] = this.value[key];

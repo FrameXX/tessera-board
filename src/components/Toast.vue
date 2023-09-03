@@ -3,7 +3,7 @@
 <script lang="ts" setup>
 import Icon from "./Icon.vue";
 import { PropType } from "vue/dist/vue.js";
-import { ToastCase } from "../types/toast";
+import { ToastCase } from "../modules/classes/toast_manager";
 
 const props = defineProps({
   message: { type: String, required: true },
@@ -61,7 +61,7 @@ const props = defineProps({
     position: fixed;
     background-color: var(--color-primary-surface-top);
     opacity: 0;
-    transition: opacity var(--transition-duration-medium) ease-in;
+    transition: opacity var(--transition-duration-medium) linear;
 
     &:hover {
       opacity: 0.9;
@@ -73,7 +73,7 @@ const props = defineProps({
 .toast-enter-active,
 .toast-leave-active {
   transition: all var(--transition-duration-medium)
-    var(--transition-timing-bounce);
+    var(--transition-timing-jump);
 }
 
 .toast-enter-from,

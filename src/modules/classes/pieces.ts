@@ -7,7 +7,7 @@ export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 export abstract class Piece {
   public color: PlayerColor;
   public pieceId: PieceId;
-  public id: string;
+  public readonly id: string;
 
   constructor(color: PlayerColor, iconId: PieceId) {
     this.color = color;

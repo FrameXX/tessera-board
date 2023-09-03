@@ -33,7 +33,7 @@ import TransitionDurationData, {
 import CellIndexOpacityData, {
   DEFAULT_CELL_INDEX_OPACITY_VALUE,
 } from "./modules/user_data/cell_index_opacity";
-import BooleanData from "./modules/user_data/status_bar";
+import BooleanData from "./modules/user_data/boolean";
 
 // Classes
 import ToastManager, {
@@ -555,4 +555,4 @@ addEventListener("load", () => {
   padding: var(--spacing-small) 0;
 }
 </style>
-./modules/classes/confirm_dialog
+./modules/classes/confirm_dialog ./modules/user_data/boolean

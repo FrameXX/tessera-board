@@ -19,7 +19,7 @@ class UserDataManager {
         entry.recover();
       } catch (error) {
         console.error(
-          `An eerror occured when restoring ${entry.id}. No data was restored. Data may be corrupted. Alerting user.`,
+          `An eerror occured when restoring ${entry.id}. No data was restored. Data may be corrupted or invalid. Alerting user.`,
           error
         );
         recoverError = true;
@@ -27,7 +27,7 @@ class UserDataManager {
     }
     if (recoverError) {
       this.toastManager.showToast(
-        "Some values could not be restored. Data may be invalid. If the problem persists clear all data.",
+        "Some values could not be restored from local storage. Data may be corrupted or invalid. If the problem persists clear all data.",
         "error",
         "database-alert"
       );
