@@ -40,16 +40,14 @@
 
 .throw-enter-active {
   transition: transform var(--transition-duration-short)
-      var(--transition-timing-function-display),
-    opacity var(--transition-duration-short)
-      var(--transition-timing-function-display);
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-short) linear;
 }
 
 .throw-leave-active {
   transition: transform var(--transition-duration-medium)
-      var(--transition-timing-function-motion),
-    opacity var(--transition-duration-medium)
-      var(--transition-timing-function-display);
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-medium) linear;
 }
 
 .throw-leave-to {

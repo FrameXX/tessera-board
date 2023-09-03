@@ -53,8 +53,7 @@ function toggle() {
 
 .card-enter-active,
 .card-leave-active {
-  transition: transform var(--transition-duration-short)
-    var(--transition-timing-function-display);
+  transition: transform var(--transition-duration-short) ease-in;
 }
 
 .card-enter-from,

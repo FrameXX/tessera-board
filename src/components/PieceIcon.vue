@@ -92,36 +92,34 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   top: 0;
   left: 0;
   padding: var(--piece-padding);
-  transition: transform var(--transition-duration-medium)
-      var(--transition-timing-function-display),
-    opacity var(--transition-duration-short)
-      var(--transition-timing-function-display);
+  transition: transform var(--transition-duration-medium) ease-in-out,
+    opacity var(--transition-duration-short) linear;
 
   &:hover {
     opacity: 0.3;
   }
 }
 
-.piece-move,
-.piece-enter-active,
-.piece-leave-active {
-  transition: transform var(--transition-duration-medium)
-      var(--transition-timing-function-display),
-    opacity var(--transition-duration-medium)
-      var(--transition-timing-function-display);
+// .piece-enter-active {
+//   transition: transform var(--transition-duration-medium)
+//       var(--transition-timing-jump),
+//     opacity var(--transition-duration-medium) linear;
+// }
+
+.piece-leave-active,
+.piece-enter-active {
+  transition: transform var(--transition-duration-long)
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-long) linear;
 }
 
 .piece-enter-from {
   opacity: 0;
-  transform: translateY(-10px) scale(1.1);
+  transform: translateY(-15px) scale(1.1);
 }
 
 .piece-leave-to {
   opacity: 0;
-  transform: translateY(-100px) rotate(215deg) scale(2);
-}
-
-.piece-leave-active {
-  position: absolute;
+  transform: translateY(-100px) rotate(135deg) scale(2);
 }
 </style>

@@ -180,7 +180,7 @@ function getPieceY(row: number) {
   position: absolute;
   mix-blend-mode: exclusion;
   transition: transform var(--transition-duration-short)
-    var(--transition-timing-function-motion);
+    var(--transition-timing-bounce);
   width: 0.7rem;
   height: 0.7rem;
   font-size: var(--font-size-tiny);

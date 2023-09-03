@@ -26,7 +26,7 @@ nav {
 
 #open-menu-chevron {
   transition: transform var(--transition-duration-medium)
-    var(--transition-timing-function-motion);
+    var(--transition-timing-bounce);
 
   &.open {
     transform: rotateX(0.5turn);

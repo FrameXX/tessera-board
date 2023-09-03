@@ -62,7 +62,7 @@ const open = ref<Boolean>(false);
 
   .caret {
     transition: transform var(--transition-duration-medium)
-      var(--transition-timing-function-motion);
+      var(--transition-timing-jump);
 
     &.open {
       transform: rotateX(0.5turn);
@@ -77,9 +77,8 @@ const open = ref<Boolean>(false);
 
 .fade-down-enter-active {
   transition: transform var(--transition-duration-medium)
-      var(--transition-timing-function-motion),
-    opacity var(--transition-duration-medium)
-      var(--transition-timing-function-display);
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-medium) linear;
 }
 
 .fade-down-enter-from {

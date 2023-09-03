@@ -61,8 +61,7 @@ const props = defineProps({
     position: fixed;
     background-color: var(--color-primary-surface-top);
     opacity: 0;
-    transition: opacity var(--transition-duration-medium)
-      var(--transition-timing-function-display);
+    transition: opacity var(--transition-duration-medium) ease-in;
 
     &:hover {
       opacity: 0.9;
@@ -74,7 +73,7 @@ const props = defineProps({
 .toast-enter-active,
 .toast-leave-active {
   transition: all var(--transition-duration-medium)
-    var(--transition-timing-function-motion);
+    var(--transition-timing-bounce);
 }
 
 .toast-enter-from,

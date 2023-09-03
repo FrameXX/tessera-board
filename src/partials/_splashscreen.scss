@@ -3,10 +3,8 @@
   @include screen;
   flex-direction: column;
   background-color: var(--color-cell-black);
-  transition: opacity var(--transition-duration-long)
-      var(--transition-timing-function-display),
-    background-color var(--transition-duration-long)
-      var(--transition-timing-function-display);
+  transition: opacity var(--transition-duration-long) ease-in,
+    background-color var(--transition-duration-long) ease-in;
 
   &.faded {
     opacity: 0;
@@ -22,9 +20,8 @@
     width: 65px;
     height: 65px;
     transition: transform var(--transition-duration-long)
-        var(--transition-timing-function-motion),
-      background-color var(--transition-duration-long)
-        var(--transition-timing-function-display);
+        var(--transition-timing-bounce),
+      background-color var(--transition-duration-long) ease-in;
   }
 
   #cell1,
@@ -42,7 +39,7 @@
     @media (not (prefers-reduced-motion)) {
       &.animated {
         animation: cell1 var(--transition-duration-splashscreen)
-          var(--transition-timing-function-motion) infinite;
+          var(--transition-timing-bounce) infinite;
       }
     }
   }
@@ -57,7 +54,7 @@
     @media (not (prefers-reduced-motion)) {
       &.animated {
         animation: cell2 var(--transition-duration-splashscreen)
-          var(--transition-timing-function-motion) infinite;
+          var(--transition-timing-bounce) infinite;
       }
     }
   }
