@@ -51,9 +51,9 @@ import Icon from "./components/Icon.vue";
 import Drawer from "./components/Drawer.vue";
 import Category from "./components/Category.vue";
 import Option from "./components/Option.vue";
-import Toast from "./components/Toast.vue";
 import Checkbox from "./components/Checkbox.vue";
 import DialogWindow from "./components/DialogWindow.vue";
+import ToastStack from "./components/ToastStack.vue";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -481,35 +481,15 @@ addEventListener("load", () => {
       </button>
     </template>
   </DialogWindow>
-  <div id="toast-stack" aria-label="Toast notifications">
-    <TransitionGroup name="toast">
-      <Toast
-        v-for="toast in toastsRef"
-        :message="toast.message"
-        :case="toast.case"
-        :icon-id="toast.iconId"
-        :key="toast.id"
-        @click="toastManager.hideToastId(toast.id)"
-      ></Toast>
-    </TransitionGroup>
-  </div>
+  <ToastStack
+    :toasts="toastsRef"
+    @toast-dismiss="toastManager.hideToastId($event.id)"
+  />
 </template>
 
 <style lang="scss">
 @import "./partials/mixins";
 @import "./partials/nav";
-
-#toast-stack {
-  align-items: center;
-  position: fixed;
-  display: flex;
-  flex-direction: column-reverse;
-  top: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-  padding: var(--spacing-small);
-}
 
 .category-section {
   @include shadow;
