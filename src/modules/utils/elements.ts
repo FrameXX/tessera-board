@@ -84,21 +84,19 @@ export function getElementInstanceById<T extends Element = Element>(
 }
 
 export function activateColors(): void {
-  DOMRoot.style.setProperty("--S-primary-text", "var(--S-primary-text-active)");
-  DOMRoot.style.setProperty(
-    "--S-primary-surface",
-    "var(--S-primary-surface-active)"
-  );
-  DOMRoot.style.setProperty(
-    "--S-primary-surface-top",
+  setCSSVariable("S-primary-text", "var(--S-primary-text-active)");
+  setCSSVariable("S-primary-surface", "var(--S-primary-surface-active)");
+  setCSSVariable(
+    "S-primary-surface-top",
     "var(--S-primary-surface-top-active)"
   );
-  DOMRoot.style.setProperty(
-    "--S-primary-accent",
-    "var(--S-primary-accent-active)"
+  setCSSVariable(
+    "S-primary-surface-accent",
+    "var(--S-primary-surface-accent-active)"
   );
-  DOMRoot.style.setProperty("--S-cell", "var(--S-cell-active)");
-  DOMRoot.style.setProperty("--S-piece-fill", "var(--S-piece-fill-active)");
-  DOMRoot.style.setProperty("--S-piece-stroke", "var(--S-piece-stroke-active)");
-  DOMRoot.style.setProperty("--S-dim", "var(--S-dim-active)");
+  setCSSVariable("S-primary-accent", "var(--S-primary-accent-active)");
+  setCSSVariable("S-cell", "var(--S-cell-active)");
+  setCSSVariable("S-piece-fill", "var(--S-piece-fill-active)");
+  setCSSVariable("S-piece-stroke", "var(--S-piece-stroke-active)");
+  setCSSVariable("S-dim", "var(--S-dim-active)");
 }
