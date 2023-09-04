@@ -1,5 +1,35 @@
-#confirm-dialog,
-#config-piece-dialog {
+<script lang="ts" setup>
+import { capitalizeFirst } from "../modules/utils/misc";
+import Backdrop from "./Backdrop.vue";
+
+const props = defineProps({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  open: { type: Boolean, default: false },
+});
+</script>
+
+<template>
+  <Backdrop v-show="props.open" />
+  <Transition name="throw">
+    <dialog
+      v-show="props.open"
+      :id="`${props.id}-dialog`"
+      class="window-dialog"
+    >
+      <h2>{{ capitalizeFirst(props.name) }}</h2>
+      <slot></slot>
+      <div class="action-buttons">
+        <slot name="action-buttons"> </slot>
+      </div>
+    </dialog>
+  </Transition>
+</template>
+
+<style lang="scss">
+@import "../partials/mixins";
+
+.window-dialog {
   @include fix-centered;
   @include flex-center(inline-block);
   @include shadow;
@@ -59,3 +89,4 @@
   opacity: 0;
   transform: translateY(-5px);
 }
+</style>

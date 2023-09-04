@@ -1,6 +1,5 @@
 import UserData from "./user_data/user_data";
 import type ConfigInventory from "./config_inventory";
-import type { Ref } from "vue";
 import type ToastManager from "./toast_manager";
 import { getRandomId } from "./utils/misc";
 
@@ -8,7 +7,6 @@ class ConfigManager {
   constructor(
     private readonly inventory: ConfigInventory,
     private readonly entries: UserData<any>[],
-    private readonly configsRef: Ref,
     private readonly toastManager: ToastManager
   ) {}
 

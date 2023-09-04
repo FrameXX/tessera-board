@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // Vue
 import { ref, reactive } from "vue";
-import { activateColors } from "./modules/utils/elements";
 
 // User data
 import UserDataManager from "./modules/user_data_manager";
@@ -43,6 +42,8 @@ import TransitionsManager from "./modules/transitions_manager";
 import ConfirmDialog, { type Dialog } from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
+import type { PieceId, PlayerColor } from "./modules/pieces";
+import { activateColors } from "./modules/utils/elements";
 
 // Custom components
 import Board from "./components/Board.vue";
@@ -52,8 +53,7 @@ import Category from "./components/Category.vue";
 import Option from "./components/Option.vue";
 import Toast from "./components/Toast.vue";
 import Checkbox from "./components/Checkbox.vue";
-import Backdrop from "./components/Backdrop.vue";
-import { PieceId, PlayerColor } from "./modules/pieces";
+import DialogWindow from "./components/DialogWindow.vue";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -420,75 +420,67 @@ addEventListener("load", () => {
       </button>
     </div>
   </nav>
-  <Backdrop
-    v-show="showConfigPieceDialogRef"
-    @click="configPieceDialog.onCancel()"
-  />
-  <Transition name="throw">
-    <dialog id="config-piece-dialog" v-show="showConfigPieceDialogRef">
-      <h2>Configure new piece</h2>
-      <div class="piece-preview">
-        <Icon
-          :icon-id="`${configPieceIdRef}-${configPieceColorRef}`"
-          :source-file="`${PIECE_SETS_DIR}pieces_${pieceSetRef}.svg`"
-        />
-      </div>
-      <div class="config">
-        <Option name="piece" option-id="select-piece-id">
-          <select id="select-piece-id" v-model="configPieceIdRef">
-            <option value="rook">Rook</option>
-            <option value="knight">Knight</option>
-            <option value="bishop">Bishop</option>
-            <option value="queen">Queen</option>
-            <option value="king">King</option>
-            <option value="pawn">Pawn</option>
-          </select>
-          <template #description>
-            Different pieces have different look, but mainly their abilities and
-            strategic differ.
-          </template>
-        </Option>
-        <Option name="color" option-id="select-piece-color">
-          <select id="select-piece-color" v-model="configPieceColorRef">
-            <option value="white">White</option>
-            <option value="black">Black</option>
-          </select>
-          <template #description
-            >Piece color determines its player. Although pieces here are not
-            usually entirely black or white they are darker or
-            brighter.</template
-          >
-        </Option>
-      </div>
-      <div class="action-buttons">
-        <button @click="configPieceDialog.onCancel()">
-          <Icon side icon-id="close-circle-outline" />Cancel
-        </button>
-        <button @click="configPieceDialog.onConfirm()">
-          <Icon side icon-id="check-circle-outline" />Add piece
-        </button>
-      </div>
-    </dialog>
-  </Transition>
-  <Backdrop v-show="showConfirmDialogRef" />
-  <Transition name="throw">
-    <dialog v-show="showConfirmDialogRef" id="confirm-dialog">
-      <h2>Confirm</h2>
-      <p class="message">{{ confirmDialogRef.message }}</p>
-      <div class="action-buttons">
-        <button @click="confirmDialog.onCancel()">
-          <Icon side icon-id="close-circle-outline" />{{
-            confirmDialogRef.cancelText
-          }}
-        </button>
-        <button @click="confirmDialog.onConfirm()">
-          <Icon side icon-id="check-circle-outline" />{{
-            confirmDialogRef.confirmText
-          }}
-        </button>
-      </div>
-    </dialog>
-  </Transition>
+  <DialogWindow
+    id="config-piece"
+    name="Configure new piece"
+    :open="showConfigPieceDialogRef"
+  >
+    <div class="piece-preview">
+      <Icon
+        :icon-id="`${configPieceIdRef}-${configPieceColorRef}`"
+        :source-file="`${PIECE_SETS_DIR}pieces_${pieceSetRef}.svg`"
+      />
+    </div>
+    <div class="config">
+      <Option name="piece" option-id="select-piece-id">
+        <select id="select-piece-id" v-model="configPieceIdRef">
+          <option value="rook">Rook</option>
+          <option value="knight">Knight</option>
+          <option value="bishop">Bishop</option>
+          <option value="queen">Queen</option>
+          <option value="king">King</option>
+          <option value="pawn">Pawn</option>
+        </select>
+        <template #description>
+          Different pieces have different look, but mainly their abilities and
+          strategic differ.
+        </template>
+      </Option>
+      <Option name="color" option-id="select-piece-color">
+        <select id="select-piece-color" v-model="configPieceColorRef">
+          <option value="white">White</option>
+          <option value="black">Black</option>
+        </select>
+        <template #description
+          >Piece color determines its player. Although pieces here are not
+          usually entirely black or white they are darker or brighter.</template
+        >
+      </Option>
+    </div>
+    <template #action-buttons>
+      <button @click="configPieceDialog.onCancel()">
+        <Icon side icon-id="close-circle-outline" />Cancel
+      </button>
+      <button @click="configPieceDialog.onConfirm()">
+        <Icon side icon-id="check-circle-outline" />Add piece
+      </button>
+    </template>
+  </DialogWindow>
+  <DialogWindow id="confirm" name="Confirm" :open="showConfirmDialogRef">
+    <p class="message">{{ confirmDialogRef.message }}</p>
+    <template #action-buttons>
+      <button @click="confirmDialog.onCancel()">
+        <Icon side icon-id="close-circle-outline" />{{
+          confirmDialogRef.cancelText
+        }}
+      </button>
+      <button @click="confirmDialog.onConfirm()">
+        <Icon side icon-id="check-circle-outline" />{{
+          confirmDialogRef.confirmText
+        }}
+      </button>
+    </template>
+  </DialogWindow>
   <div id="toast-stack" aria-label="Toast notifications">
     <TransitionGroup name="toast">
       <Toast
@@ -506,7 +498,6 @@ addEventListener("load", () => {
 <style lang="scss">
 @import "./partials/mixins";
 @import "./partials/nav";
-@import "./partials/dialog";
 
 #toast-stack {
   align-items: center;

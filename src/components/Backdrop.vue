@@ -20,7 +20,7 @@
 
 .opacity-enter-active,
 .opacity-leave-active {
-  transition: opacity var(--transition-duration-medium) ease-in;
+  transition: opacity var(--transition-duration-medium) linear;
 }
 
 .opacity-enter-from,

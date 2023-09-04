@@ -1,5 +1,6 @@
 import UserData from "./user_data/user_data";
 import type ToastManager from "./toast_manager";
+import type { Ref } from "vue";
 
 interface ConfigPrint {
   id: string;
