@@ -1,5 +1,5 @@
-import { setCSSVariable } from "../utils/elements";
-import type { ThemeValue } from "../user_data/theme";
+import { setCSSVariable } from "./utils/elements";
+import type { ThemeValue } from "./user_data/theme";
 
 export type Theme = "light" | "dark";
 
@@ -37,6 +37,7 @@ class ThemeManager {
     setCSSVariable("L-text", `var(--L-${theme}-text)`);
     setCSSVariable("L-surface", `var(--L-${theme}-surface)`);
     setCSSVariable("L-surface-top", `var(--L-${theme}-surface-top)`);
+    setCSSVariable("L-surface-accent", `var(--L-${theme}-surface-accent)`);
     setCSSVariable("L-accent", `var(--L-${theme}-accent)`);
     setCSSVariable("L-cell-white", `var(--L-${theme}-cell-white)`);
     setCSSVariable("L-cell-black", `var(--L-${theme}-cell-black)`);

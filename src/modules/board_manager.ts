@@ -1,6 +1,5 @@
-import { Ref } from "vue";
-import type { BoardStateValue } from "../user_data/board_state";
-import type { BoardPiece } from "../../components/Board.vue";
+import type { BoardStateValue } from "./user_data/board_state";
+import { BoardPiece } from "../components/Board.vue";
 
 abstract class BoardManager {
   protected readonly boardStateReactive: BoardStateValue;

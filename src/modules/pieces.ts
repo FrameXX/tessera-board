@@ -1,5 +1,5 @@
-import { UserDataError } from "../user_data/user_data";
-import { getRandomId } from "../utils/misc";
+import { UserDataError } from "./user_data/user_data";
+import { getRandomId } from "./utils/misc";
 
 export type PlayerColor = "white" | "black";
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";

@@ -2,7 +2,7 @@ import {
   repaintElement,
   waitForTransitionEnd,
   getElementInstanceById,
-} from "../utils/elements";
+} from "./utils/elements";
 import TransitionsManager from "./transitions_manager";
 
 class SplashscreenManager {

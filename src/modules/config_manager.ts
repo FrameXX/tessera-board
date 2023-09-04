@@ -1,5 +1,5 @@
-import UserData from "../user_data/user_data";
-import { getRandomId } from "../utils/misc";
+import UserData from "./user_data/user_data";
+import { getRandomId } from "./utils/misc";
 import type ToastManager from "./toast_manager";
 
 interface Config {

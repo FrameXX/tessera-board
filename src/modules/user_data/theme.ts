@@ -1,5 +1,5 @@
 import UserData from "./user_data";
-import type ThemeManager from "../classes/theme_manager";
+import type ThemeManager from "../theme_manager";
 import type { Ref } from "vue";
 
 export type ThemeValue = "light" | "dark" | "auto";

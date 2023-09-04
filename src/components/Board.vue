@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { computed, type PropType, ref, onMounted } from "vue";
 import type { BoardStateValue } from "../modules/user_data/board_state";
-import Piece from "../modules/classes/pieces";
+import Piece from "../modules/pieces";
 import Cell from "./Cell.vue";
 import PieceIcon from "./PieceIcon.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
-import type BoardManager from "../modules/classes/board_manager";
+import type BoardManager from "../modules/board_manager";
 
 export interface BoardPiece {
   row: number;

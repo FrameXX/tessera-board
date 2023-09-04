@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-import { getRandomId } from "../utils/misc";
+import { getRandomId } from "./utils/misc";
 
 export type ToastCase = "info" | "error";
 

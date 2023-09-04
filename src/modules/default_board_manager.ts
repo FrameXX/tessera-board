@@ -1,6 +1,6 @@
 import BoardManager from "./board_manager";
-import type { BoardStateValue } from "../user_data/board_state";
-import { BoardPiece } from "../../components/Board.vue";
+import type { BoardStateValue } from "./user_data/board_state";
+import { BoardPiece } from "../components/Board.vue";
 import type ConfigPieceDialog from "./config_piece_dialog";
 
 class DefaultBoardManager extends BoardManager {

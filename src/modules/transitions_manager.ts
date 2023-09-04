@@ -1,5 +1,5 @@
-import { setCSSVariable } from "../utils/elements";
-import type { TransitionsValue } from "../user_data/transitions";
+import { setCSSVariable } from "./utils/elements";
+import type { TransitionsValue } from "./user_data/transitions";
 
 class TransitionsManager {
   public usedTransitions: TransitionsValue;

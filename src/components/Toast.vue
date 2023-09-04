@@ -3,7 +3,7 @@
 <script lang="ts" setup>
 import Icon from "./Icon.vue";
 import { PropType } from "vue/dist/vue.js";
-import { ToastCase } from "../modules/classes/toast_manager";
+import { ToastCase } from "../modules/toast_manager";
 
 const props = defineProps({
   message: { type: String, required: true },

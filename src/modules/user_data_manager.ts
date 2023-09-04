@@ -1,4 +1,4 @@
-import type UserData from "../user_data/user_data";
+import type UserData from "./user_data/user_data";
 import type ConfirmDialog from "./confirm_dialog";
 import type ToastManager from "./toast_manager";
 

@@ -1,5 +1,5 @@
 import UserData from "./user_data";
-import type TransitionsManager from "../classes/transitions_manager";
+import type TransitionsManager from "../transitions_manager";
 import type { Ref } from "vue";
 
 export type TransitionsValue = "enabled" | "disabled" | "auto";

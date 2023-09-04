@@ -4,7 +4,7 @@ import { ref, reactive } from "vue";
 import { activateColors } from "./modules/utils/elements";
 
 // User data
-import UserDataManager from "./modules/classes/user_data_manager";
+import UserDataManager from "./modules/user_data_manager";
 import ThemeData, { DEFAULT_THEME_VALUE } from "./modules/user_data/theme";
 import TransitionsData, {
   DEFAULT_TRANSITIONS_VALUE,
@@ -36,15 +36,13 @@ import CellIndexOpacityData, {
 import BooleanData from "./modules/user_data/boolean";
 
 // Classes
-import ToastManager, {
-  type ToastElement,
-} from "./modules/classes/toast_manager";
-import SplashscreenManager from "./modules/classes/splashscreen_manager";
-import ThemeManager from "./modules/classes/theme_manager";
-import TransitionsManager from "./modules/classes/transitions_manager";
-import ConfirmDialog, { type Dialog } from "./modules/classes/confirm_dialog";
-import DefaultBoardManager from "./modules/classes/default_board_manager";
-import ConfigPieceDialog from "./modules/classes/config_piece_dialog";
+import ToastManager, { type ToastElement } from "./modules/toast_manager";
+import SplashscreenManager from "./modules/splashscreen_manager";
+import ThemeManager from "./modules/theme_manager";
+import TransitionsManager from "./modules/transitions_manager";
+import ConfirmDialog, { type Dialog } from "./modules/confirm_dialog";
+import DefaultBoardManager from "./modules/default_board_manager";
+import ConfigPieceDialog from "./modules/config_piece_dialog";
 
 // Custom components
 import Board from "./components/Board.vue";
@@ -55,7 +53,7 @@ import Option from "./components/Option.vue";
 import Toast from "./components/Toast.vue";
 import Checkbox from "./components/Checkbox.vue";
 import Backdrop from "./components/Backdrop.vue";
-import { PieceId, PlayerColor } from "./modules/classes/pieces";
+import { PieceId, PlayerColor } from "./modules/pieces";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -550,9 +548,10 @@ addEventListener("load", () => {
   @include shadow;
   @include no-select;
   @include flex-center;
+  background-color: var(--color-primary-surface-accent);
   border-bottom: var(--border-width) solid var(--color-primary-text);
   width: 100%;
   padding: var(--spacing-small) 0;
 }
 </style>
-./modules/classes/confirm_dialog ./modules/user_data/boolean
+./modules/confirm_dialog ./modules/user_data/boolean

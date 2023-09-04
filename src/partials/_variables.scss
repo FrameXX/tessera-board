@@ -80,9 +80,10 @@ html {
   --H-error: 0;
 
   /* ===== Saturation ===== */
-  --S-primary-text-active: 6%;
-  --S-primary-surface-active: 6%;
-  --S-primary-surface-top-active: 6%;
+  --S-primary-text-active: 5%;
+  --S-primary-surface-active: 5%;
+  --S-primary-surface-top-active: 5%;
+  --S-primary-surface-accent-active: 30%;
   --S-primary-accent-active: 55%;
   --S-cell-active: 0%;
   --S-piece-fill-active: 60%;
@@ -92,6 +93,7 @@ html {
   --S-primary-text: 0%;
   --S-primary-surface: 0%;
   --S-primary-surface-top: 0%;
+  --S-primary-surface-accent: 0%;
   --S-primary-accent: 0%;
 
   --S-cell: 0%;
@@ -109,6 +111,7 @@ html {
   --L-light-text: 5%;
   --L-light-surface: 85%;
   --L-light-surface-top: 95%;
+  --L-light-surface-accent: 85%;
   --L-light-accent: 43%;
   --L-light-cell-white: 76%;
   --L-light-cell-black: 23%;
@@ -121,7 +124,8 @@ html {
   /* Dark mode */
   --L-dark-text: 95%;
   --L-dark-surface: 10%;
-  --L-dark-surface-top: 20%;
+  --L-dark-surface-top: 16%;
+  --L-dark-surface-accent: 25%;
   --L-dark-accent: 66%;
   --L-dark-cell-white: 76%;
   --L-dark-cell-black: 23%;
@@ -135,6 +139,7 @@ html {
   --L-text: var(--L-dark-text);
   --L-surface: var(--L-dark-surface);
   --L-surface-top: var(--L-dark-surface-top);
+  --L-surface-accent: var(--L-dark-surface-accent);
   --L-accent: var(--L-dark-accent);
   --L-cell-white: var(--L-dark-cell-white);
   --L-cell-black: var(--L-dark-cell-black);
@@ -167,6 +172,13 @@ html {
     var(--H-primary),
     var(--S-primary-surface-top),
     var(--L-surface-top)
+  );
+
+  /* Surface accent */
+  --color-primary-surface-accent: hsl(
+    var(--H-primary),
+    var(--S-primary-surface-accent),
+    var(--L-surface-accent)
   );
 
   /* Accent */
@@ -234,7 +246,7 @@ html {
     var(--L-piece-stroke-white)
   );
 
-  /* backdrop */
+  /* Backdrop */
   --color-backdrop: hsla(
     var(--H-primary),
     var(--S-backdrop),

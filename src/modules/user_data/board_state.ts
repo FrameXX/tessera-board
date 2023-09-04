@@ -6,10 +6,10 @@ import {
   Queen,
   Rook,
   getPieceById,
-} from "../classes/pieces";
+} from "../pieces";
 import { ComplexUserData } from "./user_data";
 
-import type Piece from "../classes/pieces";
+import type Piece from "../pieces";
 
 export type BoardStateValue = (Piece | null)[][];
 
