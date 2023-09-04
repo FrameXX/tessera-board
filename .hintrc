@@ -10,6 +10,15 @@
           "-webkit-tap-highlight-color"
         ]
       }
+    ],
+    "typescript-config/is-valid": "off",
+    "compat-api/html": [
+      "default",
+      {
+        "ignore": [
+          "meta[name=theme-color]"
+        ]
+      }
     ]
   }
 }
