@@ -14,7 +14,6 @@ import HueData, {
 } from "./modules/user_data/hue";
 import PieceSetData, {
   DEFAULT_PIECE_SET_VALUE,
-  PIECE_SETS_DIR,
 } from "./modules/user_data/piece_set";
 import BoardStateData, {
   type BoardStateValue,
@@ -54,6 +53,7 @@ import Option from "./components/Option.vue";
 import Checkbox from "./components/Checkbox.vue";
 import DialogWindow from "./components/DialogWindow.vue";
 import ToastStack from "./components/ToastStack.vue";
+import PieceIcon from "./components/PieceIcon.vue";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -426,9 +426,10 @@ addEventListener("load", () => {
     :open="showConfigPieceDialogRef"
   >
     <div class="piece-preview">
-      <Icon
-        :icon-id="`${configPieceIdRef}-${configPieceColorRef}`"
-        :source-file="`${PIECE_SETS_DIR}pieces_${pieceSetRef}.svg`"
+      <PieceIcon
+        :piece-set="pieceSetRef"
+        :piece-id="configPieceIdRef"
+        :color="configPieceColorRef"
       />
     </div>
     <div class="config">

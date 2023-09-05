@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Icon from "./Icon.vue";
+import PieceIcon from "./PieceIcon.vue";
 import type { PositionedPiece } from "./Board.vue";
 import {
   type PropType,
@@ -10,9 +10,7 @@ import {
   type ComponentPublicInstance,
 } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
-import { capitalizeFirst } from "../modules/utils/misc";
 import { waitForTransitionEnd } from "../modules/utils/elements";
-import { PIECE_SETS_DIR } from "../modules/user_data/piece_set";
 
 const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
@@ -32,12 +30,6 @@ const translateY = computed(() => {
 });
 const pieceSize = computed(() => {
   return props.cellSize - props.piecePadding * 2;
-});
-
-const label = computed(() => {
-  return `${capitalizeFirst(props.boardPiece.piece.color)} ${
-    props.boardPiece.piece.pieceId
-  }`;
 });
 
 // Convert prop to reactive so it can be watched without problems
@@ -67,15 +59,13 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 </script>
 
 <template>
-  <Icon
+  <PieceIcon
     ref="element"
-    :aria-label="label"
-    :title="label"
-    tabindex="0"
     class="piece"
     :style="`transform: translate(${translateX}px,${translateY}px); width: ${pieceSize}px; height: ${pieceSize}px; z-index: ${zIndex};`"
-    :icon-id="`${props.boardPiece.piece.pieceId}-${props.boardPiece.piece.color}`"
-    :source-file="`${PIECE_SETS_DIR}pieces_${props.pieceSet}.svg`"
+    :piece-set="props.pieceSet"
+    :piece-id="props.boardPiece.piece.pieceId"
+    :color="props.boardPiece.piece.color"
   />
 </template>
 
