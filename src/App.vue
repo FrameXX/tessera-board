@@ -133,6 +133,11 @@ addEventListener("load", () => {
   userDataManager.applyData();
   userDataManager.updateReferences();
   activateColors();
+  addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      drawerOpenRef.value = !drawerOpenRef.value;
+    }
+  });
 });
 </script>
 
