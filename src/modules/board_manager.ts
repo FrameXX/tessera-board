@@ -1,5 +1,5 @@
 import type { BoardStateValue } from "./user_data/board_state";
-import { BoardPiece } from "../components/Board.vue";
+import { PositionedPiece } from "../components/Board.vue";
 
 abstract class BoardManager {
   protected readonly boardStateReactive: BoardStateValue;
@@ -8,7 +8,7 @@ abstract class BoardManager {
     this.boardStateReactive = boardStateReactive;
   }
 
-  public abstract onPieceClick(boardPiece: BoardPiece): void;
+  public abstract onPieceClick(boardPiece: PositionedPiece): void;
 
   public abstract onCellClick(row: number, col: number): void;
 }

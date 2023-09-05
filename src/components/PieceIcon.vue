@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Icon from "./Icon.vue";
-import type { BoardPiece } from "./Board.vue";
+import type { PositionedPiece } from "./Board.vue";
 import {
   type PropType,
   computed,
@@ -16,7 +16,7 @@ import { PIECE_SETS_DIR } from "../modules/user_data/piece_set";
 
 const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
-  boardPiece: { type: Object as PropType<BoardPiece>, required: true },
+  boardPiece: { type: Object as PropType<PositionedPiece>, required: true },
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
 });

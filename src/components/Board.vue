@@ -7,7 +7,7 @@ import PieceIcon from "./PieceIcon.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 
-export interface BoardPiece {
+export interface PositionedPiece {
   row: number;
   col: number;
   piece: Piece;
@@ -20,7 +20,7 @@ const props = defineProps({
   manager: { type: Object as PropType<BoardManager>, required: true },
 });
 const boardPieces = computed(() => {
-  const boardPieces: BoardPiece[] = [];
+  const boardPieces: PositionedPiece[] = [];
   for (const [rowIndex, row] of props.state.entries()) {
     for (const [colIndex, piece] of row.entries()) {
       if (piece) {
