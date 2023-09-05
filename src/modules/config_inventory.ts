@@ -1,20 +1,28 @@
 import UserData from "./user_data/user_data";
 import type ToastManager from "./toast_manager";
-import type { Ref } from "vue";
+import { Ref } from "vue";
 
-interface ConfigPrint {
+export interface UserConfigPrint {
   id: string;
   name: string;
 }
 
-function isConfigPrint(object: any): object is ConfigPrint {
+export interface PredefinedConfig extends UserConfigPrint {
+  values: string[];
+}
+
+export interface CommonConfigPrint extends UserConfigPrint {
+  predefined: boolean;
+}
+
+function isConfigPrint(object: any): object is UserConfigPrint {
   if (!("id" in object && "name" in object)) {
     return false;
   }
   return typeof object.id === "string" && typeof object.name === "string";
 }
 
-function isArrayofConfigPrints(object: any): object is ConfigPrint[] {
+function isArrayofConfigPrints(object: any): object is UserConfigPrint[] {
   if (!Array.isArray(object)) {
     return false;
   }
@@ -29,12 +37,20 @@ function isArrayofStrings(object: any): object is string[] {
 }
 
 class ConfigInventory {
-  private configPrints: ConfigPrint[] = [];
+  public configPrints: CommonConfigPrint[] = [];
 
   constructor(
     public readonly id: string,
+    public readonly predefinedConfigs: PredefinedConfig[],
+    private readonly configsRef: Ref<CommonConfigPrint[]>,
     private readonly toastManager: ToastManager
-  ) {}
+  ) {
+    this.configPrints = this.predefinedConfigs.map((config) => {
+      return { id: config.id, name: config.name, predefined: true };
+    });
+    this.loadUserConfigPrints();
+    this.configsRef.value = this.configPrints;
+  }
 
   private handleErrorOnLoad() {
     this.toastManager.showToast(
@@ -44,41 +60,64 @@ class ConfigInventory {
     );
   }
 
-  public loadConfigValues(id: string) {
-    const configValuesStr = localStorage.getItem(
-      `${UserData.STORAGE_KEY}-configs-${this.id}-values-${id}`
-    );
-    if (!configValuesStr) {
-      console.error(
-        `Config values of config of id ${id} of inventory ${this.id} do not exist.`
+  public loadConfigValues(configPrint: CommonConfigPrint) {
+    if (configPrint.predefined) {
+      const predefinedConfig = this.predefinedConfigs.filter(
+        (config) => config.id === configPrint.id
       );
-      return;
-    }
-
-    let configValues: any;
-    try {
-      configValues = JSON.parse(configValuesStr);
-    } catch (error) {
-      console.error(
-        `An error occured while trying to parse list of config values under id ${id} of inventory ${this.id}. Data are probably corrupted or invalid. Alerting user.`,
-        error
+      if (predefinedConfig.length != 1) {
+        console.warn(
+          `Number of predefined configs of id ${configPrint.id} in inventory ${this.id} is not 1. Id should be unique.`
+        );
+      }
+      if (!predefinedConfig) {
+        console.error(
+          `Provided id ${configPrint.id} of predefined config of inventory ${this.id} is not valid, or the value got lost.`
+        );
+        this.toastManager.showToast(
+          "An unknown error occured while trying to apply preloaded config.",
+          "error",
+          "database-alert"
+        );
+        return;
+      }
+      return predefinedConfig[0].values;
+    } else {
+      const configValuesStr = localStorage.getItem(
+        `${UserData.STORAGE_KEY}-configs-${this.id}-values-${configPrint.id}`
       );
-      this.handleErrorOnLoad();
-      return;
-    }
+      if (!configValuesStr) {
+        console.error(
+          `Config values of config of id ${configPrint.id} of inventory ${this.id} do not exist.`
+        );
+        return;
+      }
 
-    if (!isArrayofStrings(configValues)) {
-      console.error(
-        `Config saved under id ${id} of inventory ${this.id} could not be validated. It does not contain desired properties. Data are probably corrupted or invalid. Alerting user.`
-      );
-      this.handleErrorOnLoad();
-      return;
-    }
+      let configValues: any;
+      try {
+        configValues = JSON.parse(configValuesStr);
+      } catch (error) {
+        console.error(
+          `An error occured while trying to parse list of config values under id ${configPrint.id} of inventory ${this.id}. Data are probably corrupted or invalid. Alerting user.`,
+          error
+        );
+        this.handleErrorOnLoad();
+        return;
+      }
 
-    return configValues;
+      if (!isArrayofStrings(configValues)) {
+        console.error(
+          `Config saved under id ${configPrint.id} of inventory ${this.id} could not be validated. It does not contain desired properties. Data are probably corrupted or invalid. Alerting user.`
+        );
+        this.handleErrorOnLoad();
+        return;
+      }
+
+      return configValues;
+    }
   }
 
-  public loadConfigPrints() {
+  private loadUserConfigPrints() {
     const configPrintsStr = localStorage.getItem(
       `${UserData.STORAGE_KEY}-configs-${this.id}`
     );
@@ -106,13 +145,27 @@ class ConfigInventory {
       return;
     }
 
-    this.configPrints = configPrints;
+    // Since all of these are loaded from storage none of them is predefined.
+    const commonConfigPrints: CommonConfigPrint[] = configPrints.map(
+      (print) => {
+        return { ...print, predefined: false };
+      }
+    );
+    this.configPrints = commonConfigPrints;
+  }
+
+  private get userConfigPrints(): UserConfigPrint[] {
+    return this.configPrints
+      .filter((print) => !print.predefined)
+      .map((print) => {
+        return { id: print.id, name: print.name };
+      });
   }
 
   private saveConfigPrints() {
     localStorage.setItem(
       `${UserData.STORAGE_KEY}-configs-${this.id}`,
-      JSON.stringify(this.configPrints)
+      JSON.stringify(this.userConfigPrints)
     );
   }
 
@@ -121,7 +174,7 @@ class ConfigInventory {
     if (currentIds.includes(id)) {
       return;
     }
-    this.configPrints.push({ id, name });
+    this.configPrints.push({ id, name, predefined: false });
     this.saveConfigPrints();
   }
 
@@ -133,11 +186,11 @@ class ConfigInventory {
     );
   }
 
-  public saveConfig(id: string, name: string, values: string[]) {
-    this.addConfigPrint(id, name);
+  public saveConfig(config: PredefinedConfig) {
+    this.addConfigPrint(config.id, config.name);
     localStorage.setItem(
-      `${UserData.STORAGE_KEY}-configs-${this.id}-values-${id}`,
-      JSON.stringify(values)
+      `${UserData.STORAGE_KEY}-configs-${this.id}-values-${config.id}`,
+      JSON.stringify(config.values)
     );
   }
 }

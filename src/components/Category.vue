@@ -41,6 +41,10 @@ const open = ref<Boolean>(false);
   flex-direction: column;
   margin: var(--spacing-big) 0;
 
+  > button {
+    height: auto;
+  }
+
   .head {
     @include clickable;
     @include flex-center;

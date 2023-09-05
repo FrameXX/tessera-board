@@ -58,12 +58,17 @@ button {
   @include no-overrender;
   @include round-border;
   @include flex-center(inline-flex);
+  height: var(--button-height);
   margin: var(--spacing-small);
   font-weight: 500;
   text-transform: uppercase;
   background-color: var(--color-primary-surface-top);
   color: var(--color-primary-accent);
   padding: var(--spacing-tiny) var(--spacing-medium);
+
+  &.button-configs {
+    margin: var(--spacing-big) 0;
+  }
 }
 
 dialog {
@@ -72,9 +77,8 @@ dialog {
 }
 
 button.fast {
-  width: var(--button-height);
-  height: var(--button-height);
-  padding: 0;
+  padding: var(--spacing-small);
+  aspect-ratio: 1;
 }
 
 h1 {

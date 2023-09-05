@@ -130,6 +130,11 @@ function getPieceY(row: number) {
 <style lang="scss">
 @import "../partials/mixins";
 
+.board-box {
+  aspect-ratio: 1;
+  height: auto;
+}
+
 .piece-wrapper {
   position: absolute;
   pointer-events: none;

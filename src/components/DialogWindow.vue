@@ -50,7 +50,7 @@ const props = defineProps({
     overflow: auto;
   }
 
-  .action-buttons {
+  > .action-buttons {
     @include no-shrink;
     margin-top: var(--spacing-medium);
     width: 100%;

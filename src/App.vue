@@ -43,6 +43,8 @@ import DefaultBoardManager from "./modules/default_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
 import type { PieceId, PlayerColor } from "./modules/pieces";
 import { activateColors } from "./modules/utils/elements";
+import type { CommonConfigPrint } from "./modules/config_inventory";
+import ConfigInventory from "./modules/config_inventory";
 
 // Custom components
 import Board from "./components/Board.vue";
@@ -54,6 +56,10 @@ import Checkbox from "./components/Checkbox.vue";
 import DialogWindow from "./components/DialogWindow.vue";
 import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
+import ConfigItem from "./components/ConfigItem.vue";
+import ConfigManager, {
+  DEFAULT_BOARD_PREDEFINED_CONFIG_DEFAULT,
+} from "./modules/config_manager";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -61,7 +67,7 @@ const transitionsValueRef = ref(DEFAULT_TRANSITIONS_VALUE);
 const playerHueRef = ref(DEFAULT_PLAYER_HUE_VALUE);
 const opponentHueRef = ref(DEFAULT_OPPONENT_HUE_VALUE);
 const pieceSetRef = ref(DEFAULT_PIECE_SET_VALUE);
-const primaryBoardStateReactive: BoardStateValue = reactive(
+const defaultBoardStateReactive: BoardStateValue = reactive(
   DEFAULT_BOARD_STATE_VALUE
 );
 const piecePaddingRef = ref(DEFAULT_PIECE_PADDING_VALUE);
@@ -81,7 +87,16 @@ const showConfirmDialogRef = ref(false);
 const configPieceIdRef = ref<PieceId>("pawn");
 const configPieceColorRef = ref<PlayerColor>("white");
 const showConfigPieceDialogRef = ref(false);
+const defaultBoardConfigsRef = ref<CommonConfigPrint[]>([]);
+const showDefaultBoardConfigsRef = ref(false);
 
+// Define user data
+const defaultBoardStateData = new BoardStateData(
+  defaultBoardStateReactive,
+  defaultBoardStateReactive
+);
+
+// Define classes
 const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 const confirmDialog = new ConfirmDialog(confirmDialogRef, showConfirmDialogRef);
@@ -94,8 +109,25 @@ const toastManager = new ToastManager(toastsRef);
 const userDataManager = new UserDataManager(confirmDialog, toastManager);
 const splashscreenManager = new SplashscreenManager(transitionsManager);
 const defaultBoardManager = new DefaultBoardManager(
-  primaryBoardStateReactive,
+  defaultBoardStateReactive,
   configPieceDialog
+);
+const defaultBoardConfigInventory = new ConfigInventory(
+  "default-board",
+  [
+    {
+      id: "default",
+      name: "Default",
+      values: [DEFAULT_BOARD_PREDEFINED_CONFIG_DEFAULT],
+    },
+  ],
+  defaultBoardConfigsRef,
+  toastManager
+);
+const defaultBoardConfigManager = new ConfigManager(
+  defaultBoardConfigInventory,
+  [defaultBoardStateData],
+  toastManager
 );
 
 userDataManager.entries = [
@@ -108,7 +140,7 @@ userDataManager.entries = [
   new HueData(playerHueRef.value, playerHueRef, false),
   new HueData(opponentHueRef.value, opponentHueRef, true),
   new PieceSetData(pieceSetRef.value, pieceSetRef),
-  new BoardStateData(primaryBoardStateReactive, primaryBoardStateReactive),
+  defaultBoardStateData,
   new PiecePaddingData(piecePaddingRef.value, piecePaddingRef),
   new PieceBorderData(pieceBorderRef.value, pieceBorderRef),
   new TransitionDurationData(
@@ -152,7 +184,7 @@ addEventListener("load", () => {
   <div id="boards-area">
     <Board
       :manager="defaultBoardManager"
-      :state="primaryBoardStateReactive"
+      :state="defaultBoardStateReactive"
       :piece-set="pieceSetRef"
       :piece-padding="piecePaddingRef"
       id="primary-board"
@@ -214,13 +246,21 @@ addEventListener("load", () => {
         icon-id="checkerboard"
         option-id="default-board"
       >
-        <Board
-          :manager="defaultBoardManager"
-          :state="primaryBoardStateReactive"
-          :piece-set="pieceSetRef"
-          :piece-padding="piecePaddingRef"
-          id="default-board"
-        />
+        <button
+          class="button-configs"
+          @click="showDefaultBoardConfigsRef = true"
+        >
+          <Icon icon-id="tune" side />Configurations
+        </button>
+        <div class="board-box">
+          <Board
+            :manager="defaultBoardManager"
+            :state="defaultBoardStateReactive"
+            :piece-set="pieceSetRef"
+            :piece-padding="piecePaddingRef"
+            id="default-board"
+          />
+        </div>
         <template #description>
           Defines position of each piece at the start of the game. Click on
           piece to remove it. Click on empty cell to add a piece.
@@ -464,25 +504,60 @@ addEventListener("load", () => {
       </Option>
     </div>
     <template #action-buttons>
-      <button @click="configPieceDialog.onCancel()">
+      <button @click="configPieceDialog.onCancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />Cancel
       </button>
-      <button @click="configPieceDialog.onConfirm()">
+      <button @click="configPieceDialog.onConfirm()" title="Add piece">
         <Icon side icon-id="check-circle-outline" />Add piece
       </button>
     </template>
   </DialogWindow>
-  <DialogWindow id="manage-configs" title="Manage configurations">
+  <DialogWindow
+    id="manage-configs"
+    title="Manage configurations"
+    :open="showDefaultBoardConfigsRef"
+  >
+    <ConfigItem
+      v-for="config in defaultBoardConfigsRef"
+      :key="config.id"
+      :id="config.id"
+      :name="config.name"
+      :predefined="config.predefined"
+    />
+    <template #action-buttons>
+      <button title="Save current configuration">
+        <Icon side icon-id="content-save-outline" />New config
+      </button>
+      <button title="Cancel" @click="showDefaultBoardConfigsRef = false">
+        <Icon side icon-id="close-circle-outline" />Cancel
+      </button>
+    </template>
+  </DialogWindow>
+  <DialogWindow id="save-config" title="Set configuration name">
+    <input type="text" id="input-config-name" />
+    <label for="input-config-name"
+      >Although the configuration name can be any string, even an already used
+      one, I won't be the one who struggles with recognising one configuration
+      from another.</label
+    >
+    <template #action-buttons>
+      <button title="Save current configuration">
+        <Icon side icon-id="content-save-outline" />Save
+      </button>
+      <button title="Cancel">
+        <Icon side icon-id="close-circle-outline" />Cancel
+      </button>
+    </template>
   </DialogWindow>
   <DialogWindow id="confirm" title="Confirm" :open="showConfirmDialogRef">
     <p class="message">{{ confirmDialogRef.message }}</p>
     <template #action-buttons>
-      <button @click="confirmDialog.onCancel()">
+      <button @click="confirmDialog.onCancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />{{
           confirmDialogRef.cancelText
         }}
       </button>
-      <button @click="confirmDialog.onConfirm()">
+      <button @click="confirmDialog.onConfirm()" title="Confirm">
         <Icon side icon-id="check-circle-outline" />{{
           confirmDialogRef.confirmText
         }}
@@ -509,7 +584,7 @@ addEventListener("load", () => {
 }
 
 .placeholder.nav {
-  height: 95px;
+  height: 90px;
 }
 
 #boards-area {
