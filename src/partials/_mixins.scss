@@ -50,11 +50,13 @@
 }
 
 @mixin no-overrender {
+  @include no-overflow;
   contain: paint;
 }
 
 @mixin no-select {
   user-select: none;
+  -webkit-user-select: none;
 }
 
 @mixin scrollable {

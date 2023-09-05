@@ -427,7 +427,7 @@ addEventListener("load", () => {
   </nav>
   <DialogWindow
     id="config-piece"
-    name="Configure new piece"
+    title="Configure new piece"
     :open="showConfigPieceDialogRef"
   >
     <div class="piece-preview">
@@ -472,7 +472,9 @@ addEventListener("load", () => {
       </button>
     </template>
   </DialogWindow>
-  <DialogWindow id="confirm" name="Confirm" :open="showConfirmDialogRef">
+  <DialogWindow id="manage-configs" title="Manage configurations">
+  </DialogWindow>
+  <DialogWindow id="confirm" title="Confirm" :open="showConfirmDialogRef">
     <p class="message">{{ confirmDialogRef.message }}</p>
     <template #action-buttons>
       <button @click="confirmDialog.onCancel()">

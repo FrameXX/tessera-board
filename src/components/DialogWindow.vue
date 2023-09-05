@@ -4,7 +4,7 @@ import Backdrop from "./Backdrop.vue";
 
 const props = defineProps({
   id: { type: String, required: true },
-  name: { type: String, required: true },
+  title: { type: String, required: true },
   open: { type: Boolean, default: false },
 });
 </script>
@@ -14,11 +14,15 @@ const props = defineProps({
   <Transition name="throw">
     <dialog
       v-show="props.open"
-      :id="`${props.id}-dialog`"
       class="window-dialog"
+      :id="`${props.id}-dialog`"
+      :aria-label="props.title"
+      :title="props.title"
     >
-      <h2>{{ capitalizeFirst(props.name) }}</h2>
-      <slot></slot>
+      <div class="content">
+        <h2>{{ capitalizeFirst(props.title) }}</h2>
+        <slot></slot>
+      </div>
       <div class="action-buttons">
         <slot name="action-buttons"> </slot>
       </div>
@@ -34,13 +38,22 @@ const props = defineProps({
   @include flex-center(inline-block);
   @include shadow;
   @include round-border;
-  padding: var(--spacing-medium);
+  padding: var(--spacing-big);
+  display: flex;
+  flex-direction: column;
   background-color: var(--color-primary-surface);
   max-height: calc(100% - var(--spacing-huge) * 3);
   max-width: calc(100% - var(--spacing-huge) * 3);
   width: 450px;
 
+  .content {
+    overflow: auto;
+  }
+
   .action-buttons {
+    @include no-shrink;
+    margin-top: var(--spacing-medium);
+    width: 100%;
     text-align: end;
   }
 }
@@ -53,7 +66,6 @@ const props = defineProps({
 
 #config-piece-dialog {
   display: flex;
-  flex-direction: column;
   align-items: normal;
 
   .piece-preview {
