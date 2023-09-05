@@ -3,7 +3,7 @@ import { computed, type PropType, ref, onMounted } from "vue";
 import type { BoardStateValue } from "../modules/user_data/board_state";
 import Piece from "../modules/pieces";
 import Cell from "./Cell.vue";
-import PieceIcon from "./PieceIcon.vue";
+import BoardPiece from "./BoardPiece.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 
@@ -114,7 +114,7 @@ function getPieceY(row: number) {
             getPieceX(boardPiece.col) + halfCell
           }px ${getPieceY(boardPiece.row) + halfCell}px`"
         >
-          <PieceIcon
+          <BoardPiece
             @click="props.manager.onPieceClick(boardPiece)"
             :board-piece="boardPiece"
             :piece-set="props.pieceSet"
