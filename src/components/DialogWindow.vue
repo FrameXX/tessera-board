@@ -17,7 +17,6 @@ const props = defineProps({
       class="window-dialog"
       :id="`${props.id}-dialog`"
       :aria-label="props.title"
-      :title="props.title"
     >
       <div class="content">
         <h2>{{ capitalizeFirst(props.title) }}</h2>

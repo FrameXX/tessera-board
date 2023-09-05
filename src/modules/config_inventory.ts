@@ -1,6 +1,5 @@
 import UserData from "./user_data/user_data";
 import type ToastManager from "./toast_manager";
-import { Ref } from "vue";
 
 export interface UserConfigPrint {
   id: string;
@@ -8,7 +7,7 @@ export interface UserConfigPrint {
 }
 
 export interface PredefinedConfig extends UserConfigPrint {
-  values: string[];
+  values: any[];
 }
 
 export interface CommonConfigPrint extends UserConfigPrint {
@@ -42,14 +41,12 @@ class ConfigInventory {
   constructor(
     public readonly id: string,
     public readonly predefinedConfigs: PredefinedConfig[],
-    private readonly configsRef: Ref<CommonConfigPrint[]>,
     private readonly toastManager: ToastManager
   ) {
     this.configPrints = this.predefinedConfigs.map((config) => {
       return { id: config.id, name: config.name, predefined: true };
     });
     this.loadUserConfigPrints();
-    this.configsRef.value = this.configPrints;
   }
 
   private handleErrorOnLoad() {
@@ -60,61 +57,61 @@ class ConfigInventory {
     );
   }
 
-  public loadConfigValues(configPrint: CommonConfigPrint) {
-    if (configPrint.predefined) {
-      const predefinedConfig = this.predefinedConfigs.filter(
-        (config) => config.id === configPrint.id
+  public getPredefinedConfigValues(id: string) {
+    const predefinedConfig = this.predefinedConfigs.filter(
+      (config) => config.id === id
+    );
+    if (predefinedConfig.length != 1) {
+      console.warn(
+        `Number of predefined configs of id ${id} in inventory ${this.id} is not 1. Id should be unique.`
       );
-      if (predefinedConfig.length != 1) {
-        console.warn(
-          `Number of predefined configs of id ${configPrint.id} in inventory ${this.id} is not 1. Id should be unique.`
-        );
-      }
-      if (!predefinedConfig) {
-        console.error(
-          `Provided id ${configPrint.id} of predefined config of inventory ${this.id} is not valid, or the value got lost.`
-        );
-        this.toastManager.showToast(
-          "An unknown error occured while trying to apply preloaded config.",
-          "error",
-          "database-alert"
-        );
-        return;
-      }
-      return predefinedConfig[0].values;
-    } else {
-      const configValuesStr = localStorage.getItem(
-        `${UserData.STORAGE_KEY}-configs-${this.id}-values-${configPrint.id}`
-      );
-      if (!configValuesStr) {
-        console.error(
-          `Config values of config of id ${configPrint.id} of inventory ${this.id} do not exist.`
-        );
-        return;
-      }
-
-      let configValues: any;
-      try {
-        configValues = JSON.parse(configValuesStr);
-      } catch (error) {
-        console.error(
-          `An error occured while trying to parse list of config values under id ${configPrint.id} of inventory ${this.id}. Data are probably corrupted or invalid. Alerting user.`,
-          error
-        );
-        this.handleErrorOnLoad();
-        return;
-      }
-
-      if (!isArrayofStrings(configValues)) {
-        console.error(
-          `Config saved under id ${configPrint.id} of inventory ${this.id} could not be validated. It does not contain desired properties. Data are probably corrupted or invalid. Alerting user.`
-        );
-        this.handleErrorOnLoad();
-        return;
-      }
-
-      return configValues;
     }
+    if (!predefinedConfig) {
+      console.error(
+        `Provided id ${id} of predefined config of inventory ${this.id} is not valid, or the value got lost.`
+      );
+      this.toastManager.showToast(
+        "An unknown error occured while trying to apply preloaded config.",
+        "error",
+        "database-alert"
+      );
+      return;
+    }
+    return predefinedConfig[0].values;
+  }
+
+  public loadConfigValues(id: string) {
+    const configValuesStr = localStorage.getItem(
+      `${UserData.STORAGE_KEY}-configs-${this.id}-values-${id}`
+    );
+    if (!configValuesStr) {
+      console.error(
+        `Config values of config of id ${id} of inventory ${this.id} do not exist.`
+      );
+      return;
+    }
+
+    let configValues: any;
+    try {
+      configValues = JSON.parse(configValuesStr);
+    } catch (error) {
+      console.error(
+        `An error occured while trying to parse list of config values under id ${id} of inventory ${this.id}. Data are probably corrupted or invalid. Alerting user.`,
+        error
+      );
+      this.handleErrorOnLoad();
+      return;
+    }
+
+    if (!isArrayofStrings(configValues)) {
+      console.error(
+        `Config saved under id ${id} of inventory ${this.id} could not be validated. It does not contain desired properties. Data are probably corrupted or invalid. Alerting user.`
+      );
+      this.handleErrorOnLoad();
+      return;
+    }
+
+    return configValues;
   }
 
   private loadUserConfigPrints() {

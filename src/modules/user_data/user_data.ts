@@ -15,7 +15,7 @@ export class UserDataError extends Error {
 abstract class UserData<ValueType> {
   public static readonly STORAGE_KEY = "tessera_board";
   private valueRef?: Ref<ValueType>;
-  protected value: ValueType;
+  public value: ValueType;
   public readonly id: string;
 
   constructor(id: string, value: ValueType, valueRef?: Ref<ValueType>) {

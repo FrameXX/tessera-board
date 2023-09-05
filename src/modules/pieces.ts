@@ -5,13 +5,12 @@ export type PlayerColor = "white" | "black";
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 
 export abstract class Piece {
-  public color: PlayerColor;
-  public pieceId: PieceId;
   public readonly id: string;
 
-  constructor(color: PlayerColor, iconId: PieceId) {
-    this.color = color;
-    this.pieceId = iconId;
+  constructor(
+    public readonly color: PlayerColor,
+    public readonly pieceId: PieceId
+  ) {
     this.id = getRandomId();
   }
 

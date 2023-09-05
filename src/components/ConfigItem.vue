@@ -10,7 +10,7 @@ const props = defineProps({
 
 <template>
   <div class="config-item">
-    <div>{{ props.name }}</div>
+    <div class="title">{{ props.name }}</div>
     <div class="action-buttons">
       <button
         v-if="!props.predefined"
@@ -45,8 +45,21 @@ const props = defineProps({
 .config-item {
   @include shadow;
   @include round-border;
+  border: var(--border-width) solid var(--color-primary-accent);
   padding: var(--spacing-medium);
   display: flex;
   flex-direction: column;
+
+  .title {
+    padding-bottom: var(--spacing-big);
+    font-weight: 600;
+  }
+
+  .action-buttons {
+    button {
+      margin: 0;
+      margin-right: var(--spacing-small);
+    }
+  }
 }
 </style>

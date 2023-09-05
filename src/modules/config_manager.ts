@@ -3,11 +3,16 @@ import type ConfigInventory from "./config_inventory";
 import type ToastManager from "./toast_manager";
 import { getRandomId } from "./utils/misc";
 import { CommonConfigPrint } from "./config_inventory";
+import { Ref } from "vue";
 
 class ConfigManager {
   constructor(
     private readonly inventory: ConfigInventory,
     private readonly entries: UserData<any>[],
+    private readonly configsListRef: Ref<CommonConfigPrint[]>,
+    private readonly showConfigsRef: Ref<boolean>,
+    private readonly showSaveConfigRef: Ref<boolean>,
+    private readonly configNameRef: Ref<string>,
     private readonly toastManager: ToastManager
   ) {}
 
@@ -20,30 +25,59 @@ class ConfigManager {
   }
 
   public restoreConfig(configPrint: CommonConfigPrint) {
-    const configValues = this.inventory.loadConfigValues(configPrint);
-    if (!configValues) {
-      console.error(
-        `Config of id ${configPrint.id} of inventory ${this.inventory.id} failed to load. Alerting user.`
+    if (configPrint.predefined) {
+      const configValues = this.inventory.getPredefinedConfigValues(
+        configPrint.id
       );
-      this.handleErrorOnRestore();
-      return;
-    }
-    if (configValues.length !== this.entries.length) {
-      console.error(
-        "Length of config values array does not match length of entries array. The data does not seem to be compatible. Alerting user."
-      );
-      this.handleErrorOnRestore();
-      return;
-    }
-    try {
-      for (const index in configValues) {
-        this.entries[index].load(configValues[index]);
+      if (!configValues) {
+        return;
       }
-    } catch (error) {
-      console.error(
-        `An error occured while trying to apply a config of id ${configPrint.id} from inventory ${this.inventory.id}. The data is corrupt, invalid or the config is incompaible with the entries. Alerting user.`,
-        error
-      );
+      try {
+        for (const index in configValues) {
+          const entry = this.entries[index];
+          entry.value = configValues[index];
+        }
+      } catch (error) {
+        console.error(
+          `An error occured while trying to apply a config of id ${configPrint.id} from inventory ${this.inventory.id}. The config is incompaible with the entries. Alerting user.`,
+          error
+        );
+        this.handleErrorOnRestore();
+        return;
+      }
+    } else {
+      const configValues = this.inventory.loadConfigValues(configPrint.id);
+      if (!configValues) {
+        console.error(
+          `Config of id ${configPrint.id} of inventory ${this.inventory.id} failed to load. Alerting user.`
+        );
+        this.handleErrorOnRestore();
+        return;
+      }
+      if (configValues.length !== this.entries.length) {
+        console.error(
+          "Length of config values array does not match length of entries array. The data does not seem to be compatible. Alerting user."
+        );
+        this.handleErrorOnRestore();
+        return;
+      }
+      try {
+        for (const index in configValues) {
+          const entry = this.entries[index];
+          entry.load(configValues[index]);
+        }
+      } catch (error) {
+        console.error(
+          `An error occured while trying to apply a config of id ${configPrint.id} from inventory ${this.inventory.id}. The data is corrupt, invalid or the config is incompaible with the entries. Alerting user.`,
+          error
+        );
+        this.handleErrorOnRestore();
+        return;
+      }
+    }
+    for (const entry of this.entries) {
+      entry.apply();
+      entry.updateReference();
     }
   }
 
@@ -65,6 +99,3 @@ class ConfigManager {
 }
 
 export default ConfigManager;
-
-export const DEFAULT_BOARD_PREDEFINED_CONFIG_DEFAULT =
-  '[[{"color":"white","pieceId":"rook","id":"xihytuwe"},{"color":"white","pieceId":"knight","id":"cezyqotu"},{"color":"white","pieceId":"bishop","id":"ofexurub"},{"color":"white","pieceId":"queen","id":"rogabafo"},{"color":"white","pieceId":"king","id":"ufesymak"},{"color":"white","pieceId":"bishop","id":"wygibosy"},{"color":"white","pieceId":"knight","id":"maqakeri"},{"color":"white","pieceId":"rook","id":"olylysed"}],[{"color":"white","pieceId":"pawn","id":"ugifysaq"},{"color":"white","pieceId":"pawn","id":"cofapesy"},{"color":"white","pieceId":"pawn","id":"haqynasu"},{"color":"white","pieceId":"pawn","id":"tihumuga"},{"color":"white","pieceId":"pawn","id":"lyzemeje"},{"color":"white","pieceId":"pawn","id":"febarigo"},{"color":"white","pieceId":"pawn","id":"ejurebej"},{"color":"white","pieceId":"pawn","id":"kumogamy"}],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[{"color":"black","pieceId":"pawn","id":"ajiguvoh"},{"color":"black","pieceId":"pawn","id":"ehucorol"},{"color":"black","pieceId":"pawn","id":"sitifubu"},{"color":"black","pieceId":"pawn","id":"dybaquma"},{"color":"black","pieceId":"pawn","id":"eriwurot"},{"color":"black","pieceId":"pawn","id":"zewadifo"},{"color":"black","pieceId":"pawn","id":"zejoxofe"},{"color":"black","pieceId":"pawn","id":"luhaloti"}],[{"color":"black","pieceId":"rook","id":"abosutur"},{"color":"black","pieceId":"knight","id":"mosefebo"},{"color":"black","pieceId":"bishop","id":"okuruwox"},{"color":"black","pieceId":"queen","id":"bocafyfa"},{"color":"black","pieceId":"king","id":"iqinuryv"},{"color":"black","pieceId":"bishop","id":"cafejuju"},{"color":"black","pieceId":"knight","id":"emicuzud"},{"color":"black","pieceId":"rook","id":"otihukud"}]]';

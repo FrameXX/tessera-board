@@ -57,9 +57,7 @@ import DialogWindow from "./components/DialogWindow.vue";
 import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
-import ConfigManager, {
-  DEFAULT_BOARD_PREDEFINED_CONFIG_DEFAULT,
-} from "./modules/config_manager";
+import ConfigManager from "./modules/config_manager";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -87,8 +85,10 @@ const showConfirmDialogRef = ref(false);
 const configPieceIdRef = ref<PieceId>("pawn");
 const configPieceColorRef = ref<PlayerColor>("white");
 const showConfigPieceDialogRef = ref(false);
-const defaultBoardConfigsRef = ref<CommonConfigPrint[]>([]);
-const showDefaultBoardConfigsRef = ref(false);
+const configsListRef = ref<CommonConfigPrint[]>([]);
+const showConfigsRef = ref(false);
+const showSaveConfigRef = ref(false);
+const configNameRef = ref("");
 
 // Define user data
 const defaultBoardStateData = new BoardStateData(
@@ -118,15 +118,18 @@ const defaultBoardConfigInventory = new ConfigInventory(
     {
       id: "default",
       name: "Default",
-      values: [DEFAULT_BOARD_PREDEFINED_CONFIG_DEFAULT],
+      values: [DEFAULT_BOARD_STATE_VALUE],
     },
   ],
-  defaultBoardConfigsRef,
   toastManager
 );
 const defaultBoardConfigManager = new ConfigManager(
   defaultBoardConfigInventory,
   [defaultBoardStateData],
+  configsListRef,
+  showConfigsRef,
+  showSaveConfigRef,
+  configNameRef,
   toastManager
 );
 
@@ -246,10 +249,7 @@ addEventListener("load", () => {
         icon-id="checkerboard"
         option-id="default-board"
       >
-        <button
-          class="button-configs"
-          @click="showDefaultBoardConfigsRef = true"
-        >
+        <button class="button-configs" @click="showConfigsRef = true">
           <Icon icon-id="tune" side />Configurations
         </button>
         <div class="board-box">
@@ -515,10 +515,10 @@ addEventListener("load", () => {
   <DialogWindow
     id="manage-configs"
     title="Manage configurations"
-    :open="showDefaultBoardConfigsRef"
+    :open="showConfigsRef"
   >
     <ConfigItem
-      v-for="config in defaultBoardConfigsRef"
+      v-for="config in configsListRef"
       :key="config.id"
       :id="config.id"
       :name="config.name"
@@ -528,13 +528,17 @@ addEventListener("load", () => {
       <button title="Save current configuration">
         <Icon side icon-id="content-save-outline" />New config
       </button>
-      <button title="Cancel" @click="showDefaultBoardConfigsRef = false">
+      <button title="Cancel" @click="showConfigsRef = false">
         <Icon side icon-id="close-circle-outline" />Cancel
       </button>
     </template>
   </DialogWindow>
-  <DialogWindow id="save-config" title="Set configuration name">
-    <input type="text" id="input-config-name" />
+  <DialogWindow
+    id="save-config"
+    title="Set configuration name"
+    :open="showSaveConfigRef"
+  >
+    <input type="text" id="input-config-name" v-model="configNameRef" />
     <label for="input-config-name"
       >Although the configuration name can be any string, even an already used
       one, I won't be the one who struggles with recognising one configuration
