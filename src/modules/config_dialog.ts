@@ -97,6 +97,14 @@ class ConfigDialog {
 
   public onConfirmName = () => {
     if (this.resolveName) {
+      if (this.configNameRef.value === "") {
+        this.toastManager.showToast(
+          "Configuration name cannot be an empty string.",
+          "error",
+          "alert-circle-outline"
+        );
+        return;
+      }
       this.resolveName(this.configNameRef.value);
       this.resolveName = undefined;
     }
