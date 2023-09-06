@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { ref, watch, onMounted } from "vue";
 import { capitalizeFirst } from "../modules/utils/misc";
 import Backdrop from "./Backdrop.vue";
 
@@ -7,6 +8,29 @@ const props = defineProps({
   title: { type: String, required: true },
   open: { type: Boolean, default: false },
 });
+const emit = defineEmits(["open", "close"]);
+
+const buttons = ref<HTMLDivElement | null>(null);
+let lastButton: undefined | HTMLButtonElement;
+onMounted(() => {
+  const lastChild = buttons.value?.lastElementChild;
+  if (lastChild instanceof HTMLButtonElement) {
+    lastButton = lastChild;
+  }
+});
+watch(
+  () => props.open,
+  () => {
+    if (props.open) {
+      emit("open");
+      setTimeout(() => {
+        lastButton?.focus();
+      }, 10);
+    } else {
+      emit("close");
+    }
+  }
+);
 </script>
 
 <template>
@@ -22,7 +46,7 @@ const props = defineProps({
         <h2>{{ capitalizeFirst(props.title) }}</h2>
         <slot></slot>
       </div>
-      <div class="action-buttons">
+      <div class="action-buttons" ref="buttons">
         <slot name="action-buttons"> </slot>
       </div>
     </dialog>

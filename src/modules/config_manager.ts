@@ -24,7 +24,7 @@ class ConfigManager {
     );
   }
 
-  public restoreConfig(configPrint: CommonConfigPrint) {
+  public restoreConfig = (configPrint: CommonConfigPrint) => {
     if (configPrint.predefined) {
       const configValues = this.inventory.getPredefinedConfigValues(
         configPrint.id
@@ -79,10 +79,10 @@ class ConfigManager {
       entry.apply();
       entry.updateReference();
     }
-  }
+  };
 
   // If id equal to some of the already defiend config ids is passed, the method can also be used to overwrite values of already saved configs
-  saveConfig(writeId?: string) {
+  public saveConfig = (writeId?: string) => {
     if (!writeId) {
       writeId = getRandomId();
     }
@@ -95,7 +95,7 @@ class ConfigManager {
     }
 
     this.inventory.saveConfig({ id: writeId, name, values });
-  }
+  };
 }
 
 export default ConfigManager;

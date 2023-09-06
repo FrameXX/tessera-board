@@ -15,7 +15,7 @@ class ConfigPieceDialog {
     private showConfigPieceDialogRef: Ref<boolean>
   ) {}
 
-  public onConfirm() {
+  public onConfirm = () => {
     if (this.resolve) {
       this.resolve(
         getPieceById(
@@ -26,12 +26,12 @@ class ConfigPieceDialog {
       this.resolve = undefined;
       this.showConfigPieceDialogRef.value = false;
     }
-  }
+  };
 
-  public onCancel() {
+  public onCancel = () => {
     this.resolve = undefined;
     this.showConfigPieceDialogRef.value = false;
-  }
+  };
 
   public show(): Promise<Piece> {
     this.showConfigPieceDialogRef.value = true;

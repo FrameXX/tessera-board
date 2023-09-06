@@ -89,6 +89,7 @@ const configsListRef = ref<CommonConfigPrint[]>([]);
 const showConfigsRef = ref(false);
 const showSaveConfigRef = ref(false);
 const configNameRef = ref("");
+const escCallback = ref(toggleDrawer);
 
 // Define user data
 const defaultBoardStateData = new BoardStateData(
@@ -170,10 +171,14 @@ addEventListener("load", () => {
   activateColors();
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") {
-      drawerOpenRef.value = !drawerOpenRef.value;
+      escCallback.value();
     }
   });
 });
+
+function toggleDrawer() {
+  drawerOpenRef.value = !drawerOpenRef.value;
+}
 </script>
 
 <template>
@@ -451,7 +456,7 @@ addEventListener("load", () => {
         <Icon icon-id="flash-outline" />
       </button>
       <button
-        @click="drawerOpenRef = !drawerOpenRef"
+        @click="toggleDrawer"
         id="open-menu"
         class="fast"
         aria-label="Menu"
@@ -469,6 +474,8 @@ addEventListener("load", () => {
     id="config-piece"
     title="Configure new piece"
     :open="showConfigPieceDialogRef"
+    @open="escCallback = configPieceDialog.onCancel"
+    @close="escCallback = toggleDrawer"
   >
     <div class="piece-preview">
       <PieceIcon
@@ -553,7 +560,13 @@ addEventListener("load", () => {
       </button>
     </template>
   </DialogWindow>
-  <DialogWindow id="confirm" title="Confirm" :open="showConfirmDialogRef">
+  <DialogWindow
+    id="confirm"
+    title="Confirm"
+    :open="showConfirmDialogRef"
+    @open="escCallback = confirmDialog.onCancel"
+    @close="escCallback = toggleDrawer"
+  >
     <p class="message">{{ confirmDialogRef.message }}</p>
     <template #action-buttons>
       <button @click="confirmDialog.onCancel()" title="Cancel">
@@ -588,7 +601,7 @@ addEventListener("load", () => {
 }
 
 .placeholder.nav {
-  height: 90px;
+  height: 95px;
 }
 
 #boards-area {
