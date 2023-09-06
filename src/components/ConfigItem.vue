@@ -87,20 +87,4 @@ defineEmits({
     }
   }
 }
-
-.config-list-move,
-.config-list-enter-active,
-.config-list-leave-active {
-  transition: all var(--transition-duration-medium) ease;
-}
-
-.config-list-enter-from,
-.config-list-leave-to {
-  opacity: 0;
-  transform: translateY(-5px);
-}
-
-.config-list-leave-active {
-  position: absolute;
-}
 </style>

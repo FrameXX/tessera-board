@@ -545,7 +545,7 @@ function toggleDrawer() {
     @close="escCallback = toggleDrawer"
     @backdrop-click="configDialog.onCancel()"
   >
-    <TransitionGroup name="config-list">
+    <TransitionGroup name="list">
       <ConfigItem
         @delete="configDialog.onDeleteConfig($event.id)"
         @rename="configDialog.onRenameConfig($event.id, $event.currentName)"
@@ -667,5 +667,19 @@ function toggleDrawer() {
   width: 100%;
   padding: var(--spacing-small) 0;
 }
+
+.list-move,
+.list-enter-active,
+.list-leave-active {
+  transition: all var(--transition-duration-medium) ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+}
+
+.list-leave-active {
+  position: absolute;
+}
 </style>
-./modules/confirm_dialog ./modules/user_data/boolean
