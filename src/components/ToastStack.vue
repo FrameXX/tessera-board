@@ -7,8 +7,8 @@ const props = defineProps({
   toasts: { type: Object as PropType<ToastElement[]>, required: true },
 });
 defineEmits({
-  toastDismiss: ({ id }: { id: string }) => {
-    return typeof id === "string";
+  toastDismiss: (event: { id: string }) => {
+    return typeof event.id === "string";
   },
 });
 </script>

@@ -6,6 +6,22 @@ const props = defineProps({
   name: { type: String, required: true },
   predefined: { type: Boolean, required: true },
 });
+
+defineEmits({
+  delete: (event: { id: string }) => {
+    return typeof event.id === "string";
+  },
+  rename: (event: { id: string; currentName: string }) => {
+    return (
+      typeof event.id === "string" && typeof event.currentName === "string"
+    );
+  },
+  restore: (event: { id: string; predefined: boolean }) => {
+    return (
+      typeof event.id === "string" && typeof event.predefined === "boolean"
+    );
+  },
+});
 </script>
 
 <template>
@@ -14,6 +30,7 @@ const props = defineProps({
     <div class="action-buttons">
       <button
         v-if="!props.predefined"
+        @click="$emit('delete', { id: props.id })"
         class="fast"
         :title="`Delete configuration ${props.name}`"
         :aria-label="`Delete configuration ${props.name}`"
@@ -22,13 +39,17 @@ const props = defineProps({
       </button>
       <button
         v-if="!props.predefined"
+        @click="$emit('rename', { id: props.id, currentName: props.name })"
         class="fast"
-        :title="`Overwrite configuration ${props.name}`"
-        :aria-label="`Overwrite configuration ${props.name}`"
+        :title="`Rename configuration ${props.name}`"
+        :aria-label="`Rename configuration ${props.name}`"
       >
-        <Icon icon-id="content-save-all-outline" />
+        <Icon icon-id="rename-outline" />
       </button>
       <button
+        @click="
+          $emit('restore', { id: props.id, predefined: props.predefined })
+        "
         class="fast"
         :title="`Load configuration ${props.name}`"
         :aria-label="`Load configuration ${props.name}`"
@@ -49,17 +70,37 @@ const props = defineProps({
   padding: var(--spacing-medium);
   display: flex;
   flex-direction: column;
+  margin-bottom: var(--spacing-big);
 
   .title {
     padding-bottom: var(--spacing-big);
     font-weight: 600;
+    font-size: var(--font-size-big);
   }
 
   .action-buttons {
+    text-align: right;
+
     button {
       margin: 0;
-      margin-right: var(--spacing-small);
+      margin-left: var(--spacing-small);
     }
   }
+}
+
+.config-list-move,
+.config-list-enter-active,
+.config-list-leave-active {
+  transition: all var(--transition-duration-medium) ease;
+}
+
+.config-list-enter-from,
+.config-list-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+.config-list-leave-active {
+  position: absolute;
 }
 </style>

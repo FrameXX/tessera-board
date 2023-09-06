@@ -7,7 +7,7 @@ export interface UserConfigPrint {
 }
 
 export interface PredefinedConfig extends UserConfigPrint {
-  values: any[];
+  values: string[];
 }
 
 export interface CommonConfigPrint extends UserConfigPrint {
@@ -148,7 +148,7 @@ class ConfigInventory {
         return { ...print, predefined: false };
       }
     );
-    this.configPrints = commonConfigPrints;
+    this.configPrints = [...this.configPrints, ...commonConfigPrints];
   }
 
   private get userConfigPrints(): UserConfigPrint[] {
@@ -172,6 +172,17 @@ class ConfigInventory {
       return;
     }
     this.configPrints.push({ id, name, predefined: false });
+    this.saveConfigPrints();
+  }
+
+  public renameConfig(id: string, newName: string) {
+    this.configPrints = this.configPrints.map((print) => {
+      if (print.id === id) {
+        return { id: print.id, name: newName, predefined: print.predefined };
+      } else {
+        return print;
+      }
+    });
     this.saveConfigPrints();
   }
 

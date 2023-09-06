@@ -2,17 +2,11 @@ import UserData from "./user_data/user_data";
 import type ConfigInventory from "./config_inventory";
 import type ToastManager from "./toast_manager";
 import { getRandomId } from "./utils/misc";
-import { CommonConfigPrint } from "./config_inventory";
-import { Ref } from "vue";
 
 class ConfigManager {
   constructor(
-    private readonly inventory: ConfigInventory,
+    public readonly inventory: ConfigInventory,
     private readonly entries: UserData<any>[],
-    private readonly configsListRef: Ref<CommonConfigPrint[]>,
-    private readonly showConfigsRef: Ref<boolean>,
-    private readonly showSaveConfigRef: Ref<boolean>,
-    private readonly configNameRef: Ref<string>,
     private readonly toastManager: ToastManager
   ) {}
 
@@ -24,78 +18,91 @@ class ConfigManager {
     );
   }
 
-  public restoreConfig = (configPrint: CommonConfigPrint) => {
-    if (configPrint.predefined) {
-      const configValues = this.inventory.getPredefinedConfigValues(
-        configPrint.id
-      );
-      if (!configValues) {
-        return;
-      }
-      try {
-        for (const index in configValues) {
-          const entry = this.entries[index];
-          entry.value = configValues[index];
-        }
-      } catch (error) {
-        console.error(
-          `An error occured while trying to apply a config of id ${configPrint.id} from inventory ${this.inventory.id}. The config is incompaible with the entries. Alerting user.`,
-          error
-        );
-        this.handleErrorOnRestore();
-        return;
-      }
-    } else {
-      const configValues = this.inventory.loadConfigValues(configPrint.id);
-      if (!configValues) {
-        console.error(
-          `Config of id ${configPrint.id} of inventory ${this.inventory.id} failed to load. Alerting user.`
-        );
-        this.handleErrorOnRestore();
-        return;
-      }
-      if (configValues.length !== this.entries.length) {
-        console.error(
-          "Length of config values array does not match length of entries array. The data does not seem to be compatible. Alerting user."
-        );
-        this.handleErrorOnRestore();
-        return;
-      }
-      try {
-        for (const index in configValues) {
-          const entry = this.entries[index];
-          entry.load(configValues[index]);
-        }
-      } catch (error) {
-        console.error(
-          `An error occured while trying to apply a config of id ${configPrint.id} from inventory ${this.inventory.id}. The data is corrupt, invalid or the config is incompaible with the entries. Alerting user.`,
-          error
-        );
-        this.handleErrorOnRestore();
-        return;
-      }
+  public restorePredefinedConfig(id: string) {
+    const configValues = this.inventory.getPredefinedConfigValues(id);
+    if (!configValues) {
+      return;
     }
+    try {
+      for (const index in configValues) {
+        const entry = this.entries[index];
+        entry.load(configValues[index]);
+      }
+    } catch (error) {
+      console.error(
+        `An error occured while trying to apply a predefined config of id ${id} from inventory ${this.inventory.id}. The data is corrupt, invalid or the config is incompaible with the entries. Alerting user.`,
+        error
+      );
+      this.handleErrorOnRestore();
+      return;
+    }
+  }
+
+  public restoreUserConfig(id: string) {
+    const configValues = this.inventory.loadConfigValues(id);
+    if (!configValues) {
+      console.error(
+        `Config of id ${id} of inventory ${this.inventory.id} failed to load. Alerting user.`
+      );
+      this.handleErrorOnRestore();
+      return;
+    }
+    if (configValues.length !== this.entries.length) {
+      console.error(
+        "Length of config values array does not match length of entries array. The data does not seem to be compatible. Alerting user."
+      );
+      this.handleErrorOnRestore();
+      return;
+    }
+    try {
+      for (const index in configValues) {
+        const entry = this.entries[index];
+        entry.load(configValues[index]);
+      }
+    } catch (error) {
+      console.error(
+        `An error occured while trying to apply a user config of id ${id} from inventory ${this.inventory.id}. The data is corrupt, invalid or the config is incompaible with the entries. Alerting user.`,
+        error
+      );
+      this.handleErrorOnRestore();
+      return;
+    }
+  }
+
+  public applyEntries() {
     for (const entry of this.entries) {
       entry.apply();
       entry.updateReference();
     }
-  };
+  }
+
+  public renameConfig(id: string, newName: string) {
+    this.inventory.renameConfig(id, newName);
+  }
 
   // If id equal to some of the already defiend config ids is passed, the method can also be used to overwrite values of already saved configs
-  public saveConfig = (writeId?: string) => {
-    if (!writeId) {
-      writeId = getRandomId();
-    }
-
-    const name = "test";
+  public async saveConfig(name: string) {
+    const id = getRandomId();
 
     let values: string[] = [];
     for (const entry of this.entries) {
       values.push(entry.dump());
     }
 
-    this.inventory.saveConfig({ id: writeId, name, values });
+    this.inventory.saveConfig({ id, name, values });
+  }
+
+  public deleteConfig = (id: string) => {
+    this.inventory.deleteConfig(id);
   };
 }
 
 export default ConfigManager;
+
+export const DEFAULT_BOARD_CONFIG_DEFAULT = [
+  '[[{"pieceId":"rook","color":"white"},{"pieceId":"knight","color":"white"},{"pieceId":"bishop","color":"white"},{"pieceId":"queen","color":"white"},{"pieceId":"king","color":"white"},{"pieceId":"bishop","color":"white"},{"pieceId":"knight","color":"white"},{"pieceId":"rook","color":"white"}],[{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"}],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"}],[{"pieceId":"rook","color":"black"},{"pieceId":"knight","color":"black"},{"pieceId":"bishop","color":"black"},{"pieceId":"queen","color":"black"},{"pieceId":"king","color":"black"},{"pieceId":"bishop","color":"black"},{"pieceId":"knight","color":"black"},{"pieceId":"rook","color":"black"}]]',
+];
+
+export const DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE = [
+  '[[{"pieceId":"rook","color":"white"},{"pieceId":"knight","color":"white"},{"pieceId":"bishop","color":"white"},{"pieceId":"queen","color":"white"},{"pieceId":"king","color":"white"},{"pieceId":"bishop","color":"white"},null,{"pieceId":"rook","color":"white"}],[{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},null,{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"},{"pieceId":"pawn","color":"white"}],[null,null,null,null,null,{"pieceId":"knight","color":"white"},null,null],[null,null,null,null,{"pieceId":"pawn","color":"white"},null,null,null],[null,null,null,null,{"pieceId":"pawn","color":"black"},null,null,null],[null,null,null,{"pieceId":"pawn","color":"black"},null,null,null,null],[{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},null,null,{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"},{"pieceId":"pawn","color":"black"}],[{"pieceId":"rook","color":"black"},{"pieceId":"knight","color":"black"},{"pieceId":"bishop","color":"black"},{"pieceId":"queen","color":"black"},{"pieceId":"king","color":"black"},{"pieceId":"bishop","color":"black"},{"pieceId":"knight","color":"black"},{"pieceId":"rook","color":"black"}]]',
+];

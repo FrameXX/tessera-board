@@ -7,8 +7,9 @@ const props = defineProps({
   id: { type: String, required: true },
   title: { type: String, required: true },
   open: { type: Boolean, default: false },
+  focusButton: { type: Boolean, default: true },
 });
-const emit = defineEmits(["open", "close"]);
+const emit = defineEmits(["open", "close", "backdropClick"]);
 
 const buttons = ref<HTMLDivElement | null>(null);
 let lastButton: undefined | HTMLButtonElement;
@@ -22,9 +23,19 @@ watch(
   () => props.open,
   () => {
     if (props.open) {
-      emit("open");
+      // HACK: The timeout is here only becuase for the button to be focuseable the dialog element can't have display style set to none
       setTimeout(() => {
-        lastButton?.focus();
+        emit("open");
+        if (!props.focusButton) {
+          return;
+        }
+        if (lastButton) {
+          lastButton?.focus();
+        } else {
+          console.error(
+            "Reference of last button of WindowDialog is null, thus impossible to focus."
+          );
+        }
       }, 10);
     } else {
       emit("close");
@@ -34,11 +45,11 @@ watch(
 </script>
 
 <template>
-  <Backdrop v-show="props.open" />
+  <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
   <Transition name="throw">
     <dialog
       v-show="props.open"
-      class="window-dialog"
+      class="dialog-window"
       :id="`${props.id}-dialog`"
       :aria-label="props.title"
     >
@@ -56,7 +67,7 @@ watch(
 <style lang="scss">
 @import "../partials/mixins";
 
-.window-dialog {
+.dialog-window {
   @include fix-centered;
   @include flex-center(inline-block);
   @include shadow;
@@ -70,7 +81,9 @@ watch(
   width: 450px;
 
   .content {
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   > .action-buttons {
@@ -78,6 +91,11 @@ watch(
     margin-top: var(--spacing-medium);
     width: 100%;
     text-align: end;
+  }
+
+  #input-config-name {
+    @include fill-availible;
+    margin: var(--spacing-medium) 0;
   }
 }
 

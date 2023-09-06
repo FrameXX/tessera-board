@@ -24,8 +24,8 @@ class ConfigPieceDialog {
         )
       );
       this.resolve = undefined;
-      this.showConfigPieceDialogRef.value = false;
     }
+    this.showConfigPieceDialogRef.value = false;
   };
 
   public onCancel = () => {

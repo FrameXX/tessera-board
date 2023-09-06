@@ -57,7 +57,11 @@ import DialogWindow from "./components/DialogWindow.vue";
 import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
-import ConfigManager from "./modules/config_manager";
+import ConfigManager, {
+  DEFAULT_BOARD_CONFIG_DEFAULT,
+  DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
+} from "./modules/config_manager";
+import ConfigDialog from "./modules/config_dialog";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -87,9 +91,10 @@ const configPieceColorRef = ref<PlayerColor>("white");
 const showConfigPieceDialogRef = ref(false);
 const configsListRef = ref<CommonConfigPrint[]>([]);
 const showConfigsRef = ref(false);
-const showSaveConfigRef = ref(false);
+const showNameConfigRef = ref(false);
 const configNameRef = ref("");
 const escCallback = ref(toggleDrawer);
+const configNameInput = ref<null | HTMLInputElement>(null);
 
 // Define user data
 const defaultBoardStateData = new BoardStateData(
@@ -99,6 +104,7 @@ const defaultBoardStateData = new BoardStateData(
 
 // Define classes
 const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
+const toastManager = new ToastManager(toastsRef);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 const confirmDialog = new ConfirmDialog(confirmDialogRef, showConfirmDialogRef);
 const configPieceDialog = new ConfigPieceDialog(
@@ -106,7 +112,14 @@ const configPieceDialog = new ConfigPieceDialog(
   configPieceColorRef,
   showConfigPieceDialogRef
 );
-const toastManager = new ToastManager(toastsRef);
+const configDialog = new ConfigDialog(
+  showConfigsRef,
+  configsListRef,
+  showNameConfigRef,
+  configNameRef,
+  confirmDialog,
+  toastManager
+);
 const userDataManager = new UserDataManager(confirmDialog, toastManager);
 const splashscreenManager = new SplashscreenManager(transitionsManager);
 const defaultBoardManager = new DefaultBoardManager(
@@ -119,7 +132,12 @@ const defaultBoardConfigInventory = new ConfigInventory(
     {
       id: "default",
       name: "Default",
-      values: [DEFAULT_BOARD_STATE_VALUE],
+      values: DEFAULT_BOARD_CONFIG_DEFAULT,
+    },
+    {
+      id: "philidor_defence",
+      name: "Philidor Defence",
+      values: DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
     },
   ],
   toastManager
@@ -127,10 +145,6 @@ const defaultBoardConfigInventory = new ConfigInventory(
 const defaultBoardConfigManager = new ConfigManager(
   defaultBoardConfigInventory,
   [defaultBoardStateData],
-  configsListRef,
-  showConfigsRef,
-  showSaveConfigRef,
-  configNameRef,
   toastManager
 );
 
@@ -254,7 +268,10 @@ function toggleDrawer() {
         icon-id="checkerboard"
         option-id="default-board"
       >
-        <button class="button-configs" @click="showConfigsRef = true">
+        <button
+          class="button-configs"
+          @click="configDialog.show(defaultBoardConfigManager)"
+        >
           <Icon icon-id="tune" side />Configurations
         </button>
         <div class="board-box">
@@ -476,6 +493,7 @@ function toggleDrawer() {
     :open="showConfigPieceDialogRef"
     @open="escCallback = configPieceDialog.onCancel"
     @close="escCallback = toggleDrawer"
+    @backdrop-click="configPieceDialog.onCancel()"
   >
     <div class="piece-preview">
       <PieceIcon
@@ -520,43 +538,68 @@ function toggleDrawer() {
     </template>
   </DialogWindow>
   <DialogWindow
-    id="manage-configs"
+    id="configs"
     title="Manage configurations"
     :open="showConfigsRef"
+    @open="escCallback = configDialog.onCancel"
+    @close="escCallback = toggleDrawer"
+    @backdrop-click="configDialog.onCancel()"
   >
-    <ConfigItem
-      v-for="config in configsListRef"
-      :key="config.id"
-      :id="config.id"
-      :name="config.name"
-      :predefined="config.predefined"
-    />
+    <TransitionGroup name="config-list">
+      <ConfigItem
+        @delete="configDialog.onDeleteConfig($event.id)"
+        @rename="configDialog.onRenameConfig($event.id, $event.currentName)"
+        @restore="configDialog.onRestoreConfig($event.id, $event.predefined)"
+        v-for="config in configsListRef"
+        :key="config.id"
+        :id="config.id"
+        :name="config.name"
+        :predefined="config.predefined"
+      />
+    </TransitionGroup>
     <template #action-buttons>
-      <button title="Save current configuration">
-        <Icon side icon-id="content-save-outline" />New config
+      <button title="Close" @click="configDialog.onCancel()">
+        <Icon side icon-id="close-circle-outline" />Close
       </button>
-      <button title="Cancel" @click="showConfigsRef = false">
-        <Icon side icon-id="close-circle-outline" />Cancel
+      <button
+        title="Save current configuration"
+        @click="configDialog.onSaveConfig()"
+      >
+        <Icon side icon-id="content-save-outline" />New config
       </button>
     </template>
   </DialogWindow>
   <DialogWindow
-    id="save-config"
+    id="name-config"
     title="Set configuration name"
-    :open="showSaveConfigRef"
+    :open="showNameConfigRef"
+    :focus-button="false"
+    @open="
+      escCallback = configDialog.onCancelName;
+      configNameInput?.focus();
+    "
+    @close="escCallback = configDialog.onCancel"
   >
-    <input type="text" id="input-config-name" v-model="configNameRef" />
+    <input
+      type="text"
+      id="input-config-name"
+      ref="configNameInput"
+      v-model="configNameRef"
+    />
     <label for="input-config-name"
       >Although the configuration name can be any string, even an already used
       one, I won't be the one who struggles with recognising one configuration
       from another.</label
     >
     <template #action-buttons>
-      <button title="Save current configuration">
-        <Icon side icon-id="content-save-outline" />Save
-      </button>
-      <button title="Cancel">
+      <button title="Cancel" @click="configDialog.onCancelName()">
         <Icon side icon-id="close-circle-outline" />Cancel
+      </button>
+      <button
+        title="Save current configuration"
+        @click="configDialog.onConfirmName()"
+      >
+        <Icon side icon-id="content-save-outline" />Save
       </button>
     </template>
   </DialogWindow>

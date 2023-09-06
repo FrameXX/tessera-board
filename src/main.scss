@@ -81,6 +81,13 @@ button.fast {
   aspect-ratio: 1;
 }
 
+input + label {
+  padding-top: var(--spacing-small);
+  display: block;
+  font-size: var(--font-size-tiny);
+  font-style: italic;
+}
+
 h1 {
   margin: var(--spacing-big) 0 var(--spacing-medium) 0;
 }
