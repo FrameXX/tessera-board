@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, PropType } from "vue";
 import { capitalizeFirst } from "../modules/utils/misc";
 import Backdrop from "./Backdrop.vue";
 
@@ -7,7 +7,7 @@ const props = defineProps({
   id: { type: String, required: true },
   title: { type: String, required: true },
   open: { type: Boolean, default: false },
-  focusButton: { type: Boolean, default: true },
+  focusOnOpen: { type: Object as PropType<HTMLElement | null>, default: null },
 });
 const emit = defineEmits(["open", "close", "backdropClick"]);
 
@@ -26,7 +26,8 @@ watch(
       // HACK: The timeout is here only becuase for the button to be focuseable the dialog element can't have display style set to none
       setTimeout(() => {
         emit("open");
-        if (!props.focusButton) {
+        if (props.focusOnOpen) {
+          props.focusOnOpen.focus();
           return;
         }
         if (lastButton) {

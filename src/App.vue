@@ -573,11 +573,8 @@ function toggleDrawer() {
     id="name-config"
     title="Set configuration name"
     :open="showNameConfigRef"
-    :focus-button="false"
-    @open="
-      escCallback = configDialog.onCancelName;
-      configNameInput?.focus();
-    "
+    :focus-on-open="configNameInput"
+    @open="escCallback = configDialog.onCancelName"
     @close="escCallback = configDialog.onCancel"
   >
     <input
