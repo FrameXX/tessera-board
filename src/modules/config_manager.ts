@@ -76,12 +76,12 @@ class ConfigManager {
     }
   }
 
-  public renameConfig(id: string, newName: string) {
-    this.inventory.renameConfig(id, newName);
+  public renameConfig(id: string, newName: string, newDescription: string) {
+    this.inventory.renameConfig(id, newName, newDescription);
   }
 
   // If id equal to some of the already defiend config ids is passed, the method can also be used to overwrite values of already saved configs
-  public async saveConfig(name: string) {
+  public async saveConfig(name: string, description: string) {
     const id = getRandomId();
 
     let values: string[] = [];
@@ -89,7 +89,7 @@ class ConfigManager {
       values.push(entry.dump());
     }
 
-    this.inventory.saveConfig({ id, name, values });
+    this.inventory.saveConfig({ id, name, description, values });
   }
 
   public deleteConfig = (id: string) => {

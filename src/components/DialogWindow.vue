@@ -93,10 +93,20 @@ watch(
     width: 100%;
     text-align: end;
   }
+}
 
-  #input-config-name {
+#name-config-dialog {
+  input,
+  textarea {
     @include fill-availible;
-    margin: var(--spacing-medium) 0;
+    margin: var(--spacing-small) 0;
+  }
+
+  textarea {
+    resize: vertical;
+    height: 150px;
+    max-height: 350px;
+    min-height: 50px;
   }
 }
 

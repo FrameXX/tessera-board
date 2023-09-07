@@ -6,13 +6,14 @@ import ToastManager from "./toast_manager";
 
 class ConfigDialog {
   private manager?: ConfigManager;
-  private resolveName?: (name?: string) => void;
+  private resolveName?: (value?: { name: string; description: string }) => void;
 
   constructor(
     private readonly showConfigsRef: Ref<boolean>,
     private readonly configsListRef: Ref<CommonConfigPrint[]>,
     private readonly showNameConfigRef: Ref<boolean>,
     private readonly configNameRef: Ref<string>,
+    private readonly configDescriptionRef: Ref<string>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {}
@@ -38,11 +39,12 @@ class ConfigDialog {
 
   public onSaveConfig = async () => {
     this.configNameRef.value = "";
-    const name = await this.showNameDialog();
-    if (!name) {
+    this.configDescriptionRef.value = "";
+    const userPrint = await this.showNameDialog();
+    if (!userPrint) {
       return;
     }
-    this.manager?.saveConfig(name);
+    this.manager?.saveConfig(userPrint.name, userPrint.description);
     this.updateConfigList();
     this.toastManager.showToast(
       "Config saved.",
@@ -61,13 +63,18 @@ class ConfigDialog {
     }
   }
 
-  public async onRenameConfig(id: string, currentName: string) {
+  public async onRenameConfig(
+    id: string,
+    currentName: string,
+    currentDescription: string
+  ) {
     this.configNameRef.value = currentName;
-    const name = await this.showNameDialog();
-    if (!name) {
+    this.configDescriptionRef.value = currentDescription;
+    const userPrint = await this.showNameDialog();
+    if (!userPrint) {
       return;
     }
-    this.manager?.renameConfig(id, name);
+    this.manager?.renameConfig(id, userPrint.name, userPrint.description);
     this.updateConfigList();
     this.toastManager.showToast(
       "Config renamed.",
@@ -90,9 +97,11 @@ class ConfigDialog {
 
   private showNameDialog() {
     this.showNameConfigRef.value = true;
-    return new Promise((resolve: (name?: string) => void) => {
-      this.resolveName = resolve;
-    });
+    return new Promise(
+      (resolve: (value?: { name: string; description: string }) => void) => {
+        this.resolveName = resolve;
+      }
+    );
   }
 
   public onConfirmName = () => {
@@ -105,7 +114,10 @@ class ConfigDialog {
         );
         return;
       }
-      this.resolveName(this.configNameRef.value);
+      this.resolveName({
+        name: this.configNameRef.value,
+        description: this.configDescriptionRef.value,
+      });
       this.resolveName = undefined;
     }
     this.showNameConfigRef.value = false;

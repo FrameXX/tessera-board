@@ -31,6 +31,7 @@ body {
 
 button,
 input,
+textarea,
 select {
   @include shadow;
   @include round-border;
@@ -42,6 +43,7 @@ select {
 }
 
 input,
+textarea,
 select {
   background-color: var(--color-primary-surface-top);
   color: inherit;
@@ -81,8 +83,9 @@ button.fast {
   aspect-ratio: 1;
 }
 
-input + label {
-  padding-top: var(--spacing-small);
+input + label,
+textarea + label {
+  padding: var(--spacing-tiny) 0;
   display: block;
   font-size: var(--font-size-tiny);
   font-style: italic;

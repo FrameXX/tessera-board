@@ -4,6 +4,7 @@ import Icon from "./Icon.vue";
 const props = defineProps({
   id: { type: String, required: true },
   name: { type: String, required: true },
+  description: { type: String, required: true },
   predefined: { type: Boolean, required: true },
 });
 
@@ -11,9 +12,15 @@ defineEmits({
   delete: (event: { id: string }) => {
     return typeof event.id === "string";
   },
-  rename: (event: { id: string; currentName: string }) => {
+  rename: (event: {
+    id: string;
+    currentName: string;
+    currentDescription: string;
+  }) => {
     return (
-      typeof event.id === "string" && typeof event.currentName === "string"
+      typeof event.id === "string" &&
+      typeof event.currentName === "string" &&
+      typeof event.currentDescription === "string"
     );
   },
   restore: (event: { id: string; predefined: boolean }) => {
@@ -27,6 +34,9 @@ defineEmits({
 <template>
   <div class="config-item">
     <div class="title">{{ props.name }}</div>
+    <div v-show="props.description !== ''" class="description">
+      {{ props.description }}
+    </div>
     <div class="action-buttons">
       <button
         v-if="!props.predefined"
@@ -39,7 +49,13 @@ defineEmits({
       </button>
       <button
         v-if="!props.predefined"
-        @click="$emit('rename', { id: props.id, currentName: props.name })"
+        @click="
+          $emit('rename', {
+            id: props.id,
+            currentName: props.name,
+            currentDescription: props.description,
+          })
+        "
         class="fast"
         :title="`Rename configuration ${props.name}`"
         :aria-label="`Rename configuration ${props.name}`"
@@ -73,9 +89,15 @@ defineEmits({
   margin-bottom: var(--spacing-big);
 
   .title {
-    padding-bottom: var(--spacing-big);
+    padding-bottom: var(--spacing-small);
     font-weight: 600;
     font-size: var(--font-size-big);
+  }
+
+  .description {
+    font-size: var(--font-size-tiny);
+    font-style: italic;
+    padding-bottom: var(--spacing-big);
   }
 
   .action-buttons {

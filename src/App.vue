@@ -93,6 +93,7 @@ const configsListRef = ref<CommonConfigPrint[]>([]);
 const showConfigsRef = ref(false);
 const showNameConfigRef = ref(false);
 const configNameRef = ref("");
+const configDescriptionRef = ref("");
 const escCallback = ref(toggleDrawer);
 const configNameInput = ref<null | HTMLInputElement>(null);
 
@@ -117,6 +118,7 @@ const configDialog = new ConfigDialog(
   configsListRef,
   showNameConfigRef,
   configNameRef,
+  configDescriptionRef,
   confirmDialog,
   toastManager
 );
@@ -132,11 +134,13 @@ const defaultBoardConfigInventory = new ConfigInventory(
     {
       id: "default",
       name: "Default",
+      description: "Classic checkboard setup as you know it.",
       values: DEFAULT_BOARD_CONFIG_DEFAULT,
     },
     {
       id: "philidor_defence",
       name: "Philidor Defence",
+      description: `The Philidor Defence (or Philidor's Defence) is a chess opening characterised by the moves: \n1. e4 e5\n2. Nf3 d6.\nThe opening is named after the famous 18th-century player François-André Danican Philidor, who advocated it as an alternative to the common 2...Nc6. His original idea was to challenge White's centre by the pawn thrust ...f7–f5. Source: Wikipedia.`,
       values: DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
     },
   ],
@@ -548,12 +552,19 @@ function toggleDrawer() {
     <TransitionGroup name="list">
       <ConfigItem
         @delete="configDialog.onDeleteConfig($event.id)"
-        @rename="configDialog.onRenameConfig($event.id, $event.currentName)"
+        @rename="
+          configDialog.onRenameConfig(
+            $event.id,
+            $event.currentName,
+            $event.currentDescription
+          )
+        "
         @restore="configDialog.onRestoreConfig($event.id, $event.predefined)"
         v-for="config in configsListRef"
         :key="config.id"
         :id="config.id"
         :name="config.name"
+        :description="config.description"
         :predefined="config.predefined"
       />
     </TransitionGroup>
@@ -571,7 +582,7 @@ function toggleDrawer() {
   </DialogWindow>
   <DialogWindow
     id="name-config"
-    title="Set configuration name"
+    title="Set configuration name and description"
     :open="showNameConfigRef"
     :focus-on-open="configNameInput"
     @open="escCallback = configDialog.onCancelName"
@@ -582,12 +593,19 @@ function toggleDrawer() {
       id="input-config-name"
       ref="configNameInput"
       v-model="configNameRef"
+      placeholder="name"
     />
     <label for="input-config-name"
       >Although the configuration name can be any string, even an already used
       one, I won't be the one who struggles with recognising one configuration
       from another.</label
     >
+    <textarea
+      placeholder="description"
+      id="input-config-description"
+      v-model="configDescriptionRef"
+    />
+    <label for="input-config-description">Description is not required.</label>
     <template #action-buttons>
       <button title="Cancel" @click="configDialog.onCancelName()">
         <Icon side icon-id="close-circle-outline" />Cancel

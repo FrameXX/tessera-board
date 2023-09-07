@@ -4,6 +4,7 @@ import type ToastManager from "./toast_manager";
 export interface UserConfigPrint {
   id: string;
   name: string;
+  description: string;
 }
 
 export interface PredefinedConfig extends UserConfigPrint {
@@ -14,18 +15,22 @@ export interface CommonConfigPrint extends UserConfigPrint {
   predefined: boolean;
 }
 
-function isConfigPrint(object: any): object is UserConfigPrint {
-  if (!("id" in object && "name" in object)) {
+function isUserConfigPrint(object: any): object is UserConfigPrint {
+  if (!("id" in object && "name" in object && "description" in object)) {
     return false;
   }
-  return typeof object.id === "string" && typeof object.name === "string";
+  return (
+    typeof object.id === "string" &&
+    typeof object.name === "string" &&
+    typeof object.description === "string"
+  );
 }
 
-function isArrayofConfigPrints(object: any): object is UserConfigPrint[] {
+function isArrayOfUserConfigPrints(object: any): object is UserConfigPrint[] {
   if (!Array.isArray(object)) {
     return false;
   }
-  return object.every((element) => isConfigPrint(element));
+  return object.every((element) => isUserConfigPrint(element));
 }
 
 function isArrayofStrings(object: any): object is string[] {
@@ -44,7 +49,12 @@ class ConfigInventory {
     private readonly toastManager: ToastManager
   ) {
     this.configPrints = this.predefinedConfigs.map((config) => {
-      return { id: config.id, name: config.name, predefined: true };
+      return {
+        id: config.id,
+        name: config.name,
+        description: config.description,
+        predefined: true,
+      };
     });
     this.loadUserConfigPrints();
   }
@@ -134,7 +144,7 @@ class ConfigInventory {
       return;
     }
 
-    if (!isArrayofConfigPrints(configPrints)) {
+    if (!isArrayOfUserConfigPrints(configPrints)) {
       console.error(
         `Parsed config prints of inventory ${this.id} could not be validated. They properties do not match type ConfigPrint[]. Alerting user.`
       );
@@ -155,7 +165,11 @@ class ConfigInventory {
     return this.configPrints
       .filter((print) => !print.predefined)
       .map((print) => {
-        return { id: print.id, name: print.name };
+        return {
+          id: print.id,
+          name: print.name,
+          description: print.description,
+        };
       });
   }
 
@@ -166,19 +180,24 @@ class ConfigInventory {
     );
   }
 
-  private addConfigPrint(id: string, name: string) {
+  private addConfigPrint(id: string, name: string, description: string) {
     const currentIds = this.configPrints.map((print) => print.id);
     if (currentIds.includes(id)) {
       return;
     }
-    this.configPrints.push({ id, name, predefined: false });
+    this.configPrints.push({ id, name, description, predefined: false });
     this.saveConfigPrints();
   }
 
-  public renameConfig(id: string, newName: string) {
+  public renameConfig(id: string, newName: string, newDescription: string) {
     this.configPrints = this.configPrints.map((print) => {
       if (print.id === id) {
-        return { id: print.id, name: newName, predefined: print.predefined };
+        return {
+          id: print.id,
+          name: newName,
+          description: newDescription,
+          predefined: print.predefined,
+        };
       } else {
         return print;
       }
@@ -195,7 +214,7 @@ class ConfigInventory {
   }
 
   public saveConfig(config: PredefinedConfig) {
-    this.addConfigPrint(config.id, config.name);
+    this.addConfigPrint(config.id, config.name, config.description);
     localStorage.setItem(
       `${UserData.STORAGE_KEY}-configs-${this.id}-values-${config.id}`,
       JSON.stringify(config.values)
