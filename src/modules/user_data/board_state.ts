@@ -68,9 +68,7 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
   public dump(): string {
     return JSON.stringify(
       this.value.map((row) =>
-        row.map((piece) =>
-          piece ? { pieceId: piece.pieceId, color: piece.color } : null
-        )
+        row.map((piece) => (piece ? piece.genericObject : null))
       )
     );
   }

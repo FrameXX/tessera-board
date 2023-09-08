@@ -1,8 +1,11 @@
 <script lang="ts" setup>
+import Backdrop from "./Backdrop.vue";
+
 const props = defineProps({ open: { type: Boolean, default: false } });
 </script>
 
 <template>
+  <Backdrop v-show="props.open" />
   <Transition name="slide-up">
     <div class="drawer" v-show="props.open">
       <div class="content">

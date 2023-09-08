@@ -14,6 +14,10 @@ export abstract class Piece {
     this.id = getRandomId();
   }
 
+  public get genericObject() {
+    return { pieceId: this.pieceId, color: this.color };
+  }
+
   public abstract getPossibleMoves(): unknown;
 }
 
