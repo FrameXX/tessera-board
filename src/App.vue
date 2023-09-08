@@ -76,7 +76,6 @@ const piecePaddingRef = ref(DEFAULT_PIECE_PADDING_VALUE);
 const pieceBorderRef = ref(DEFAULT_PIECE_BORDER_VALUE);
 const transitionDurationRef = ref(DEFAULT_TRANSITION_DURATION_VALUE);
 const cellIndexOpacityRef = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
-const statusBarRef = ref(true);
 
 const toastsRef = ref<ToastElement[]>([]);
 const drawerOpenRef = ref(false);
@@ -170,7 +169,6 @@ userDataManager.entries = [
     transitionDurationRef
   ),
   new CellIndexOpacityData(cellIndexOpacityRef.value, cellIndexOpacityRef),
-  new BooleanData(statusBarRef.value, statusBarRef, "status_bar"),
 ];
 
 addEventListener("load", () => {
@@ -200,13 +198,6 @@ function toggleDrawer() {
 </script>
 
 <template>
-  <span
-    v-show="statusBarRef"
-    id="game-status-bar"
-    role="status"
-    aria-live="polite"
-    >Loading...</span
-  >
   <div id="boards-area">
     <Board
       :manager="defaultBoardManager"
@@ -413,13 +404,6 @@ function toggleDrawer() {
       </Option>
       <!-- Elements -->
       <span class="category-section">Elements</span>
-      <Option name="status bar" icon-id="dock-top" option-id="check-status-bar">
-        <Checkbox id="check-status-bar" v-model="statusBarRef" />
-        <template #description
-          >Status bar on the main checkboard screen permanently displays
-          information about current game status.
-        </template>
-      </Option>
       <!-- Transitions -->
       <span class="category-section">Transitions</span>
       <Option
