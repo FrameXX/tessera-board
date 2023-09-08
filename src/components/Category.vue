@@ -36,6 +36,15 @@ const open = ref<Boolean>(false);
 <style lang="scss">
 @import "../partials/mixins";
 
+.category-section {
+  @include shadow;
+  @include round-border;
+  @include inverted-accent;
+  margin: var(--spacing-big) 0;
+  font-size: var(--font-size-small);
+  padding: var(--spacing-small);
+}
+
 .category {
   display: flex;
   flex-direction: column;

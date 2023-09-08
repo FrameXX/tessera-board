@@ -19,7 +19,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
 @import "../partials/mixins";
 
 header {
-  margin-bottom: var(--spacing-big);
+  margin-bottom: var(--spacing-huge);
 }
 
 .drawer {
@@ -35,12 +35,6 @@ header {
     right: 0;
     margin: auto;
     max-width: 450px;
-  }
-}
-
-.action-buttons-main {
-  button {
-    margin-left: 0;
   }
 }
 

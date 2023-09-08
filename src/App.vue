@@ -31,7 +31,6 @@ import TransitionDurationData, {
 import CellIndexOpacityData, {
   DEFAULT_CELL_INDEX_OPACITY_VALUE,
 } from "./modules/user_data/cell_index_opacity";
-import BooleanData from "./modules/user_data/boolean";
 
 // Classes
 import ToastManager, { type ToastElement } from "./modules/toast_manager";
@@ -198,16 +197,21 @@ function toggleDrawer() {
 </script>
 
 <template>
-  <div id="boards-area">
-    <Board
-      :manager="defaultBoardManager"
-      :state="defaultBoardStateReactive"
-      :piece-set="pieceSetRef"
-      :piece-padding="piecePaddingRef"
-      id="primary-board"
-    />
+  <!-- Relative -->
+  <div id="game-area">
+    <div class="dead-pieces-placeholder"></div>
+    <div id="boards-area">
+      <Board
+        :manager="defaultBoardManager"
+        :state="defaultBoardStateReactive"
+        :piece-set="pieceSetRef"
+        :piece-padding="piecePaddingRef"
+        id="primary-board"
+      />
+    </div>
+    <div class="dead-pieces-placeholder"></div>
   </div>
-  <div class="nav placeholder"></div>
+  <div class="menu-button-placeholder"></div>
 
   <!-- Fixed -->
   <Drawer :open="drawerOpenRef">
@@ -215,8 +219,33 @@ function toggleDrawer() {
       <h1>Tessera board</h1>
       <small class="version">v0.0.0 (0)</small>
     </header>
+    <div role="status" id="game-status">Loading...</div>
+    <div class="action-buttons-drawer">
+      <button>
+        <Icon icon-id="play-outline" side />
+        Start new game
+      </button>
+      <button>
+        <Icon icon-id="flag-outline" side />
+        Draw
+      </button>
+    </div>
     <!-- Player -->
     <Category name="Player" icon-id="account">
+      <Option
+        name="color"
+        icon-id="invert-colors"
+        option-id="select-player-color"
+      >
+        <select id="select-player-color">
+          <option value="random">Random</option>
+          <option value="white">White</option>
+          <option value="black">Black</option>
+        </select>
+        <template #description>
+          Defines color of your pieces be it black or white.
+        </template>
+      </Option>
       <Option
         name="computer"
         icon-id="memory"
@@ -232,7 +261,7 @@ function toggleDrawer() {
     <!-- Opponent -->
     <Category name="Opponent" icon-id="target-account">
       <Option
-        name="remote"
+        name="over local network"
         icon-id="lan-connect"
         option-id="check-remote-opponent"
       >
@@ -442,39 +471,28 @@ function toggleDrawer() {
         </template>
       </Option>
     </Category>
-    <div class="action-buttons-main">
+    <div class="action-buttons-drawer">
       <button @click="userDataManager.requestClearData()">
         <Icon icon-id="delete-forever-outline" side />
         Clear all data
       </button>
     </div>
-    <div class="nav placeholder"></div
+    <div class="menu-button-placeholder"></div
   ></Drawer>
-  <nav>
-    <div class="action-buttons">
-      <button
-        id="open-quick-actions"
-        class="fast"
-        aria-label="Quick Actions"
-        title="Quick Actions"
-      >
-        <Icon icon-id="flash-outline" />
-      </button>
-      <button
-        @click="toggleDrawer"
-        id="open-menu"
-        class="fast"
-        aria-label="Menu"
-        title="Menu"
-      >
-        <Icon
-          id="open-menu-chevron"
-          :class="drawerOpenRef ? 'open' : ''"
-          icon-id="chevron-up"
-        />
-      </button>
-    </div>
-  </nav>
+  <div class="primary-buttons">
+    <button
+      @click="toggleDrawer"
+      id="menu-button"
+      aria-label="Menu"
+      title="Menu"
+    >
+      <Icon
+        id="open-menu-chevron"
+        :class="drawerOpenRef ? 'open' : ''"
+        icon-id="chevron-up"
+      />
+    </button>
+  </div>
   <DialogWindow
     id="config-piece"
     title="Configure new piece"
@@ -631,40 +649,72 @@ function toggleDrawer() {
 
 <style lang="scss">
 @import "./partials/mixins";
-@import "./partials/nav";
 
-.category-section {
-  @include shadow;
-  @include round-border;
-  @include inverted-accent;
-  margin: var(--spacing-big) 0;
-  font-size: var(--font-size-small);
-  padding: var(--spacing-small);
+#game-area {
+  @include flex-center;
+  @include stretch;
+  flex-direction: column;
+  padding: var(--spacing-small) 0;
 }
 
-.placeholder.nav {
-  height: 95px;
+.dead-pieces-placeholder {
+  height: 40px;
 }
 
 #boards-area {
   @include flex-center;
-  padding: var(--spacing-small) 0;
-  flex-grow: 1;
   width: 100%;
+  flex-grow: 1;
 
   .board-container {
     padding: 0 var(--spacing-small);
   }
 }
 
-#game-status-bar {
-  @include shadow;
-  @include no-select;
+.menu-button-placeholder {
+  height: 84px;
+}
+
+.primary-buttons {
+  @include no-shrink;
   @include flex-center;
-  background-color: var(--color-primary-surface-accent);
-  border-bottom: var(--border-width) solid var(--color-primary-text);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
-  padding: var(--spacing-small) 0;
+
+  #menu-button {
+    margin: var(--spacing-medium);
+    width: 100px;
+
+    .icon {
+      width: 40px;
+      height: 40px;
+    }
+  }
+}
+
+#open-menu-chevron {
+  transition: transform var(--transition-duration-medium)
+    var(--transition-timing-bounce);
+
+  &.open {
+    transform: rotateX(0.5turn);
+  }
+}
+
+#game-status {
+  @include round-border;
+  margin: var(--spacing-medium) 0;
+  padding: var(--spacing-medium);
+  background-color: var(--color-primary-surface-accent);
+}
+
+.action-buttons-drawer {
+  button {
+    margin: var(--spacing-medium) var(--spacing-medium) var(--spacing-medium) 0;
+  }
 }
 
 .list-move,

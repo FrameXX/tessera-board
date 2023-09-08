@@ -60,7 +60,6 @@ button {
   @include no-overrender;
   @include round-border;
   @include flex-center(inline-flex);
-  height: var(--button-height);
   margin: var(--spacing-small);
   font-weight: 500;
   text-transform: uppercase;
@@ -70,6 +69,10 @@ button {
 
   &.button-configs {
     margin: var(--spacing-big) 0;
+  }
+
+  &:hover:not(.checkbox) {
+    outline: var(--border-width) solid var(--color-primary-accent);
   }
 }
 
