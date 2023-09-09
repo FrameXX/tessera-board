@@ -48,6 +48,7 @@ import ConfigManager, {
   DEFAULT_BOARD_CONFIG_DEFAULT,
   DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
 } from "./modules/config_manager";
+import type { PositionedMark } from "./components/Board.vue";
 
 // Custom components
 import Board from "./components/Board.vue";
@@ -97,6 +98,8 @@ const escCallback = ref(toggleDrawer);
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCapturedPieces = ref<Piece[]>([]);
 const opponentCapturedPieces = ref<Piece[]>([]);
+const playerBoardMarks = ref<PositionedMark[]>([]);
+const OpponentBoardMarks = ref<PositionedMark[]>([]);
 
 // Define user data
 const defaultBoardStateData = new BoardStateData(
@@ -244,9 +247,15 @@ function toggleDrawer() {
         :piece-padding="piecePaddingRef"
         id="primary-board"
       />
+      <Board
+        :manager="defaultBoardManager"
+        :state="defaultBoardStateReactive"
+        :piece-set="pieceSetRef"
+        :piece-padding="piecePaddingRef"
+        id="primary-board"
+      />
     </div>
   </div>
-  <div class="menu-button-placeholder"></div>
 
   <!-- Fixed -->
   <Drawer :open="drawerOpenRef">
@@ -747,17 +756,9 @@ function toggleDrawer() {
   }
 }
 
-.menu-button-placeholder {
-  height: 84px;
-}
-
 .primary-buttons {
   @include no-shrink;
   @include flex-center;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   width: 100%;
 
   #menu-button {

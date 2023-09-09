@@ -28,7 +28,7 @@ const translateX = computed(() => {
 const translateY = computed(() => {
   return (7 - props.boardPiece.row) * props.cellSize;
 });
-const pieceSize = computed(() => {
+const size = computed(() => {
   return props.cellSize - props.piecePadding * 2;
 });
 
@@ -62,7 +62,7 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   <PieceIcon
     ref="element"
     class="piece"
-    :style="`transform: translate(${translateX}px,${translateY}px); width: ${pieceSize}px; height: ${pieceSize}px; z-index: ${zIndex};`"
+    :style="`transform: translate(${translateX}px,${translateY}px); width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
     :piece-set="props.pieceSet"
     :piece-id="props.boardPiece.piece.pieceId"
     :color="props.boardPiece.piece.color"

@@ -6,6 +6,7 @@ import Cell from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
+import BoardMark from "./BoardMark.vue";
 
 export interface PositionedPiece {
   row: number;
@@ -13,11 +14,18 @@ export interface PositionedPiece {
   piece: Piece;
 }
 
+export interface PositionedMark {
+  row: number;
+  col: number;
+  mark: "availible" | "capture";
+}
+
 const props = defineProps({
   state: { type: Object as PropType<BoardStateValue>, required: true },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
+  marks: { type: Array as PropType<PositionedMark[]>, default: [] },
 });
 const boardPieces = computed(() => {
   const boardPieces: PositionedPiece[] = [];
@@ -123,6 +131,11 @@ function getPieceY(row: number) {
           />
         </div>
       </TransitionGroup>
+      <BoardMark
+        v-for="mark in props.marks"
+        :board-mark="mark"
+        :cell-size="cellSize"
+      />
     </table>
   </div>
 </template>
