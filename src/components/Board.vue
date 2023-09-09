@@ -130,17 +130,6 @@ function getPieceY(row: number) {
 <style lang="scss">
 @import "../partials/mixins";
 
-.board-box {
-  aspect-ratio: 1;
-  height: auto;
-}
-
-.piece-wrapper {
-  position: absolute;
-  pointer-events: none;
-  @include stretch;
-}
-
 .board-container {
   @include stretch;
   @include flex-center;
@@ -160,19 +149,17 @@ function getPieceY(row: number) {
   display: flex;
   flex-direction: column;
 
-  caption {
-    @include no-select;
-    text-transform: uppercase;
-    padding: var(--spacing-medium);
-    color: var(--color-cell-white);
-    border-bottom: var(--border-width) solid var(--color-cell-white);
-  }
-
   .row {
     height: 100%;
     padding: 0;
     display: flex;
   }
+}
+
+.piece-wrapper {
+  position: absolute;
+  pointer-events: none;
+  @include stretch;
 }
 
 .index-row-left,

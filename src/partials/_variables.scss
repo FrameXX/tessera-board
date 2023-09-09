@@ -1,5 +1,5 @@
 html {
-  /* ===== Global properties ===== */
+  // ===== Global properties =====
   background-color: var(--color-primary-surface);
   color: var(--color-primary-text);
   font-family: "JetBrains Mono", system-ui, Arial;
@@ -7,16 +7,14 @@ html {
   font-size: var(--font-size-medium);
   -webkit-tap-highlight-color: var(--color-primary-accent-transparent);
 
-  /* ===== General ===== */
+  // ===== General =====
   --border-radius: 9px;
   --border-width: 3px;
-  --separator-width: 1.5px;
-  --button-height: 52px;
   --cell-index-opacity: 0.8;
   --piece-padding: 5px;
   --piece-stroke-width: 1.1px;
 
-  /* ===== Box shadow ===== */
+  // ===== Box shadow =====
   --box-shadow-offset-x: 0;
   --box-shadow-offset-y: 0;
   --box-shadow-offset-blur: 6px;
@@ -30,7 +28,7 @@ html {
       var(--box-shadow-color)
   );
 
-  /* ===== Transition ===== */
+  // ===== Transition =====
   --transition-duration-multiplier-config: 1;
   --transition-duration-multiplier: var(
     --transition-duration-multiplier-config
@@ -51,7 +49,7 @@ html {
   --transition-timing-bounce: cubic-bezier(0.5, 1.25, 0.55, 1.05);
   --transition-timing-jump: cubic-bezier(0.35, 1, 0.5, 1);
 
-  /* ===== Font size ===== */
+  // ===== Font size =====
   --font-size-multiplier: 1;
   --font-size-tiny: calc(0.6rem * var(--font-size-multiplier));
   --font-size-small: calc(0.8rem * var(--font-size-multiplier));
@@ -61,7 +59,7 @@ html {
   --font-size-huge: calc(1.8rem * var(--font-size-multiplier));
   --font-size-enormous: calc(2.1rem * var(--font-size-multiplier));
 
-  /* ===== Spacing ===== */
+  // ===== Spacing =====
   --spacing-multiplier: 1;
   --spacing-tiny: calc(5px * var(--spacing-multiplier));
   --spacing-small: calc(8px * var(--spacing-multiplier));
@@ -71,7 +69,7 @@ html {
   --spacing-huge: calc(24px * var(--spacing-multiplier));
   --spacing-enormous: calc(28px * var(--spacing-multiplier));
 
-  /* ===== Hue ===== */
+  // ===== Hue =====
   --H-player: 30;
   --H-opponent: 221;
   --H-primary: var(--H-player);
@@ -79,7 +77,7 @@ html {
   --H-piece-black: var(--H-opponent);
   --H-error: 0;
 
-  /* ===== Saturation ===== */
+  // ===== Saturation =====
   --S-primary-text-active: 5%;
   --S-primary-surface-active: 5%;
   --S-primary-surface-top-active: 5%;
@@ -106,8 +104,8 @@ html {
   --S-error-surface-top: 55%;
   --S-error-accent: 85%;
 
-  /* ===== Lightness ===== */
-  /* Light mode */
+  // ===== Lightness =====
+  // Light mode
   --L-light-text: 5%;
   --L-light-surface: 85%;
   --L-light-surface-top: 95%;
@@ -121,7 +119,7 @@ html {
   --L-light-piece-stroke-black: 79%;
   --L-light-backdrop: 100%;
 
-  /* Dark mode */
+  // Dark mode
   --L-dark-text: 95%;
   --L-dark-surface: 10%;
   --L-dark-surface-top: 16%;
@@ -135,7 +133,7 @@ html {
   --L-dark-piece-stroke-black: 79%;
   --L-dark-backdrop: 0%;
 
-  /* Current */
+  // Current
   --L-text: var(--L-dark-text);
   --L-surface: var(--L-dark-surface);
   --L-surface-top: var(--L-dark-surface-top);
@@ -149,82 +147,96 @@ html {
   --L-piece-stroke-white: var(--L-dark-piece-stroke-white);
   --L-piece-stroke-black: var(--L-dark-piece-stroke-black);
 
-  /* ===== Alpha ===== */
+  // ===== Alpha =====
   --A-backdrop: 85%;
 
-  /* ===== Primary ===== */
-  /* Text */
+  // ===== Primary =====
+  // Text
   --color-primary-text: hsl(
     var(--H-primary),
     var(--S-primary-text),
     var(--L-text)
   );
 
-  /* Surface */
+  // Surface
   --color-primary-surface: hsl(
     var(--H-primary),
     var(--S-primary-surface),
     var(--L-surface)
   );
 
-  /* Surface top */
+  // Surface top
   --color-primary-surface-top: hsl(
     var(--H-primary),
     var(--S-primary-surface-top),
     var(--L-surface-top)
   );
 
-  /* Surface accent */
+  // Surface accent
   --color-primary-surface-accent: hsl(
     var(--H-primary),
     var(--S-primary-surface-accent),
     var(--L-surface-accent)
   );
 
-  /* Accent */
+  // Player surface accent
+  --color-player-surface-accent: hsl(
+    var(--H-player),
+    var(--S-primary-surface-accent),
+    var(--L-surface-accent)
+  );
+
+  // Opponent surface accent
+  --color-opponent-surface-accent: hsl(
+    var(--H-opponent),
+    var(--S-primary-surface-accent),
+    var(--L-surface-accent)
+  );
+
+  // Accent
   --color-primary-accent: hsl(
     var(--H-primary),
     var(--S-primary-accent),
     var(--L-accent)
   );
 
-  /* Accent transparent */
+  // Accent transparent
   --color-primary-accent-transparent: hsla(
     var(--H-primary),
     var(--S-primary-accent),
     var(--L-accent),
     40%
   );
-  /* ===== Error ===== */ /* Text */
+  // ===== Error ===== // Text
   --color-error-text: hsl(var(--H-error), var(--S-error-text), var(--L-text));
 
-  /* Surface */
+  // Surface
   --color-error-surface: hsl(
     var(--H-error),
     var(--S-error-surface),
     var(--L-surface)
   );
 
-  /* Surface top */
+  // Surface top
   --color-error-surface-top: hsl(
     var(--H-error),
     var(--S-error-surface-top),
     var(--L-surface-top)
   );
 
-  /* Accent */
+  // Accent
   --color-error-accent: hsl(
     var(--H-error),
     var(--S-error-accent),
     var(--L-accent)
   );
 
-  /* ===== Other ===== */
-  /* Cell */
+  // ===== Other =====
+  // Cell
   --color-cell-white: hsl(var(--H-primary), var(--S-cell), var(--L-cell-white));
   --color-cell-black: hsl(var(--H-primary), var(--S-cell), var(--L-cell-black));
 
-  /* Piece */
+  // Piece
   --color-piece-fill-black: hsl(
     var(--H-piece-black),
     var(--S-piece-fill),
@@ -246,7 +258,7 @@ html {
     var(--L-piece-stroke-white)
   );
 
-  /* Backdrop */
+  // Backdrop
   --color-backdrop: hsla(
     var(--H-primary),
     var(--S-backdrop),

@@ -40,10 +40,14 @@ import TransitionsManager from "./modules/transitions_manager";
 import ConfirmDialog, { type Dialog } from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
-import type { PieceId, PlayerColor } from "./modules/pieces";
+import { Piece, PieceId, PlayerColor } from "./modules/pieces";
 import { activateColors } from "./modules/utils/elements";
 import type { CommonConfigPrint } from "./modules/config_inventory";
 import ConfigInventory from "./modules/config_inventory";
+import ConfigManager, {
+  DEFAULT_BOARD_CONFIG_DEFAULT,
+  DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
+} from "./modules/config_manager";
 
 // Custom components
 import Board from "./components/Board.vue";
@@ -56,11 +60,8 @@ import DialogWindow from "./components/DialogWindow.vue";
 import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
-import ConfigManager, {
-  DEFAULT_BOARD_CONFIG_DEFAULT,
-  DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
-} from "./modules/config_manager";
 import ConfigDialog from "./modules/config_dialog";
+import Info from "./components/Info.vue";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -94,6 +95,8 @@ const configNameRef = ref("");
 const configDescriptionRef = ref("");
 const escCallback = ref(toggleDrawer);
 const configNameInput = ref<null | HTMLInputElement>(null);
+const playerCapturedPieces = ref<Piece[]>([]);
+const opponentCapturedPieces = ref<Piece[]>([]);
 
 // Define user data
 const defaultBoardStateData = new BoardStateData(
@@ -199,7 +202,40 @@ function toggleDrawer() {
 <template>
   <!-- Relative -->
   <div id="game-area">
-    <div class="dead-pieces-placeholder"></div>
+    <div class="player-info">
+      <div id="player-info-player">
+        <div class="player">Player</div>
+        <div class="content">
+          <Info name="captured pieces" class="captured-pieces">
+            <TransitionGroup name="list">
+              <PieceIcon
+                v-for="piece in playerCapturedPieces"
+                :color="piece.color"
+                :piece-set="pieceSetRef"
+                :piece-id="piece.pieceId"
+              ></PieceIcon>
+            </TransitionGroup>
+          </Info>
+          <Info name="remaining time">00:00</Info>
+        </div>
+      </div>
+      <div id="player-info-opponent">
+        <div class="player">Opponent</div>
+        <div class="content">
+          <Info name="captured pieces" class="captured-pieces">
+            <TransitionGroup name="list">
+              <PieceIcon
+                v-for="piece in opponentCapturedPieces"
+                :color="piece.color"
+                :piece-set="pieceSetRef"
+                :piece-id="piece.pieceId"
+              ></PieceIcon>
+            </TransitionGroup>
+          </Info>
+          <Info name="remaining time">00:00</Info>
+        </div>
+      </div>
+    </div>
     <div id="boards-area">
       <Board
         :manager="defaultBoardManager"
@@ -209,7 +245,6 @@ function toggleDrawer() {
         id="primary-board"
       />
     </div>
-    <div class="dead-pieces-placeholder"></div>
   </div>
   <div class="menu-button-placeholder"></div>
 
@@ -654,17 +689,58 @@ function toggleDrawer() {
   @include flex-center;
   @include stretch;
   flex-direction: column;
-  padding: var(--spacing-small) 0;
 }
 
-.dead-pieces-placeholder {
-  height: 40px;
+.player-info {
+  @include shadow;
+  @include no-overrender;
+  margin: 0 var(--spacing-small);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  display: flex;
+  align-items: baseline;
+
+  .info {
+    display: inline-flex;
+  }
+}
+
+#player-info-player,
+#player-info-opponent {
+  height: 100%;
+  display: inline-block;
+
+  .player {
+    padding: var(--spacing-medium);
+    padding-bottom: 0;
+    font-size: var(--font-size-big);
+
+    &.playing {
+      text-decoration: underline;
+    }
+  }
+}
+
+#player-info-player {
+  background-color: var(--color-player-surface-accent);
+}
+
+#player-info-opponent {
+  background-color: var(--color-opponent-surface-accent);
+}
+
+.captured-pieces {
+  .icon {
+    width: var(--font-size-big);
+    height: var(--font-size-big);
+    margin: 0;
+  }
 }
 
 #boards-area {
   @include flex-center;
   width: 100%;
   flex-grow: 1;
+  padding: var(--spacing-small) 0;
 
   .board-container {
     padding: 0 var(--spacing-small);

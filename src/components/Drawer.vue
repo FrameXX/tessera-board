@@ -38,6 +38,11 @@ header {
   }
 }
 
+.board-box {
+  aspect-ratio: 1;
+  height: auto;
+}
+
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition: transform var(--transition-duration-medium)
