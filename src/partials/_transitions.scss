@@ -1,0 +1,57 @@
+// Land
+.land-enter-active {
+  transition: transform var(--transition-duration-medium)
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-medium) linear;
+}
+
+.land-enter-from {
+  transform: translateY(-5px);
+  opacity: 0;
+}
+
+// Slide up
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform var(--transition-duration-medium)
+    var(--transition-timing-jump);
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+}
+
+// [Group] Slide down
+.slide-down-move,
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all var(--transition-duration-medium)
+    var(--transition-timing-jump);
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.slide-down-leave-active {
+  position: absolute;
+}
+
+// [Group] Opacity
+.opacity-move,
+.opacity-enter-active,
+.opacity-leave-active {
+  transition: all var(--transition-duration-medium) ease;
+}
+
+.opacity-enter-from,
+.opacity-leave-to {
+  opacity: 0;
+}
+
+.opacity-leave-active {
+  position: absolute;
+}

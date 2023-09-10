@@ -62,7 +62,8 @@ import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
 import ConfigDialog from "./modules/config_dialog";
-import Info from "./components/Info.vue";
+import ActionsPanel from "./components/ActionsPanel.vue";
+import PlayerInfo from "./components/PlayerInfo.vue";
 
 // Define refs
 const themeValueRef = ref(DEFAULT_THEME_VALUE);
@@ -80,6 +81,7 @@ const cellIndexOpacityRef = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 
 const toastsRef = ref<ToastElement[]>([]);
 const drawerOpenRef = ref(false);
+const actionPanelOpenRef = ref(false);
 const confirmDialogRef = ref<Dialog>({
   message: "",
   confirmText: "",
@@ -205,40 +207,11 @@ function toggleDrawer() {
 <template>
   <!-- Relative -->
   <div id="game-area">
-    <div class="player-info">
-      <div id="player-info-player">
-        <div class="player">Player</div>
-        <div class="content">
-          <Info name="captured pieces" class="captured-pieces">
-            <TransitionGroup name="list">
-              <PieceIcon
-                v-for="piece in playerCapturedPieces"
-                :color="piece.color"
-                :piece-set="pieceSetRef"
-                :piece-id="piece.pieceId"
-              ></PieceIcon>
-            </TransitionGroup>
-          </Info>
-          <Info name="remaining time">00:00</Info>
-        </div>
-      </div>
-      <div id="player-info-opponent">
-        <div class="player">Opponent</div>
-        <div class="content">
-          <Info name="captured pieces" class="captured-pieces">
-            <TransitionGroup name="list">
-              <PieceIcon
-                v-for="piece in opponentCapturedPieces"
-                :color="piece.color"
-                :piece-set="pieceSetRef"
-                :piece-id="piece.pieceId"
-              ></PieceIcon>
-            </TransitionGroup>
-          </Info>
-          <Info name="remaining time">00:00</Info>
-        </div>
-      </div>
-    </div>
+    <PlayerInfo
+      :player-captured-pieces="playerCapturedPieces"
+      :opponent-captured-pieces="opponentCapturedPieces"
+      :piece-set="pieceSetRef"
+    />
     <div id="boards-area">
       <Board
         :manager="defaultBoardManager"
@@ -263,17 +236,6 @@ function toggleDrawer() {
       <h1>Tessera board</h1>
       <small class="version">v0.0.0 (0)</small>
     </header>
-    <div role="status" id="game-status">Loading...</div>
-    <div class="action-buttons-drawer">
-      <button>
-        <Icon icon-id="play-outline" side />
-        Start new game
-      </button>
-      <button>
-        <Icon icon-id="flag-outline" side />
-        Draw
-      </button>
-    </div>
     <!-- Player -->
     <Category name="Player" icon-id="account">
       <Option
@@ -523,12 +485,24 @@ function toggleDrawer() {
     </div>
     <div class="menu-button-placeholder"></div
   ></Drawer>
-  <div class="primary-buttons">
+  <ActionsPanel
+    @open="escCallback = () => (actionPanelOpenRef = !actionPanelOpenRef)"
+    @close="escCallback = toggleDrawer"
+    @backdrop-click="actionPanelOpenRef = false"
+    :open="actionPanelOpenRef"
+  />
+  <nav>
+    <button
+      @click="actionPanelOpenRef = !actionPanelOpenRef"
+      aria-label="Quick actions"
+      title="Quick actions"
+    >
+      <Icon icon-id="flash-outline" />
+    </button>
     <button
       @click="toggleDrawer"
-      id="menu-button"
-      aria-label="Menu"
-      title="Menu"
+      aria-label="Game configuration"
+      title="Game configuration"
     >
       <Icon
         id="open-menu-chevron"
@@ -536,7 +510,7 @@ function toggleDrawer() {
         icon-id="chevron-up"
       />
     </button>
-  </div>
+  </nav>
   <DialogWindow
     id="config-piece"
     title="Configure new piece"
@@ -595,7 +569,7 @@ function toggleDrawer() {
     @close="escCallback = toggleDrawer"
     @backdrop-click="configDialog.onCancel()"
   >
-    <TransitionGroup name="list">
+    <TransitionGroup name="opacity">
       <ConfigItem
         @delete="configDialog.onDeleteConfig($event.id)"
         @rename="
@@ -693,56 +667,13 @@ function toggleDrawer() {
 
 <style lang="scss">
 @import "./partials/mixins";
+@import "./partials/transitions";
+@import "./partials/nav";
 
 #game-area {
   @include flex-center;
   @include stretch;
   flex-direction: column;
-}
-
-.player-info {
-  @include shadow;
-  @include no-overrender;
-  margin: 0 var(--spacing-small);
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
-  display: flex;
-  align-items: baseline;
-
-  .info {
-    display: inline-flex;
-  }
-}
-
-#player-info-player,
-#player-info-opponent {
-  height: 100%;
-  display: inline-block;
-
-  .player {
-    padding: var(--spacing-medium);
-    padding-bottom: 0;
-    font-size: var(--font-size-big);
-
-    &.playing {
-      text-decoration: underline;
-    }
-  }
-}
-
-#player-info-player {
-  background-color: var(--color-player-surface-accent);
-}
-
-#player-info-opponent {
-  background-color: var(--color-opponent-surface-accent);
-}
-
-.captured-pieces {
-  .icon {
-    width: var(--font-size-big);
-    height: var(--font-size-big);
-    margin: 0;
-  }
 }
 
 #boards-area {
@@ -753,22 +684,6 @@ function toggleDrawer() {
 
   .board-container {
     padding: 0 var(--spacing-small);
-  }
-}
-
-.primary-buttons {
-  @include no-shrink;
-  @include flex-center;
-  width: 100%;
-
-  #menu-button {
-    margin: var(--spacing-medium);
-    width: 100px;
-
-    .icon {
-      width: 40px;
-      height: 40px;
-    }
   }
 }
 
@@ -792,20 +707,5 @@ function toggleDrawer() {
   button {
     margin: var(--spacing-medium) var(--spacing-medium) var(--spacing-medium) 0;
   }
-}
-
-.list-move,
-.list-enter-active,
-.list-leave-active {
-  transition: all var(--transition-duration-medium) ease;
-}
-
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-}
-
-.list-leave-active {
-  position: absolute;
 }
 </style>

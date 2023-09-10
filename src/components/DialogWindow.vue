@@ -132,6 +132,14 @@ watch(
   }
 }
 
+#choose-action-dialog {
+  text-align: left;
+
+  button {
+    display: flex;
+  }
+}
+
 .throw-enter-active {
   transition: transform var(--transition-duration-short)
       var(--transition-timing-jump),

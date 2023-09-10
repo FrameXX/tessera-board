@@ -1,0 +1,11 @@
+nav {
+  @include no-shrink;
+  @include flex-center;
+  width: 100%;
+
+  button {
+    margin: var(--spacing-medium);
+    padding: var(--spacing-medium);
+    aspect-ratio: 1;
+  }
+}

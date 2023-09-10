@@ -81,11 +81,6 @@ dialog {
   border: none;
 }
 
-button.fast {
-  padding: var(--spacing-small);
-  aspect-ratio: 1;
-}
-
 input + label,
 textarea + label {
   padding: var(--spacing-tiny) 0;

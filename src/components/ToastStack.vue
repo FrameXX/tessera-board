@@ -15,7 +15,7 @@ defineEmits({
 
 <template>
   <div id="toast-stack" aria-label="Toast notifications">
-    <TransitionGroup name="toast">
+    <TransitionGroup name="slide-down">
       <Toast
         v-for="toast in props.toasts"
         :message="toast.message"

@@ -42,15 +42,4 @@ header {
   aspect-ratio: 1;
   height: auto;
 }
-
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform var(--transition-duration-medium)
-    var(--transition-timing-jump);
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
-}
 </style>

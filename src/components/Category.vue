@@ -25,7 +25,7 @@ const open = ref<Boolean>(false);
         icon-id="chevron-down"
       ></Icon>
     </button>
-    <Transition name="fade-down">
+    <Transition name="land">
       <div v-show="open" class="content" :id="`category-content-${props.name}`">
         <slot></slot>
       </div>
@@ -85,16 +85,5 @@ const open = ref<Boolean>(false);
   > .content {
     padding-top: var(--spacing-big);
   }
-}
-
-.fade-down-enter-active {
-  transition: transform var(--transition-duration-medium)
-      var(--transition-timing-jump),
-    opacity var(--transition-duration-medium) linear;
-}
-
-.fade-down-enter-from {
-  transform: translateY(-5px);
-  opacity: 0;
 }
 </style>

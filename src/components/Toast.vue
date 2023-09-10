@@ -68,21 +68,4 @@ const props = defineProps({
     }
   }
 }
-
-.toast-move,
-.toast-enter-active,
-.toast-leave-active {
-  transition: all var(--transition-duration-medium)
-    var(--transition-timing-jump);
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateY(-100%);
-}
-
-.toast-leave-active {
-  position: absolute;
-}
 </style>
