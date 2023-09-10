@@ -96,12 +96,12 @@ const showConfigsRef = ref(false);
 const showNameConfigRef = ref(false);
 const configNameRef = ref("");
 const configDescriptionRef = ref("");
-const escCallback = ref(toggleDrawer);
-const configNameInput = ref<null | HTMLInputElement>(null);
-const playerCapturedPieces = ref<Piece[]>([]);
-const opponentCapturedPieces = ref<Piece[]>([]);
-const playerBoardMarks = ref<PositionedMark[]>([]);
-const OpponentBoardMarks = ref<PositionedMark[]>([]);
+const escCallbackRef = ref(toggleDrawer);
+const configNameInputRef = ref<null | HTMLInputElement>(null);
+const playerCapturedPiecesRef = ref<Piece[]>([]);
+const opponentCapturedPiecesRef = ref<Piece[]>([]);
+const playerBoardMarksRef = ref<PositionedMark[]>([]);
+const OpponentBoardMarksRef = ref<PositionedMark[]>([]);
 
 // Define user data
 const defaultBoardStateData = new BoardStateData(
@@ -194,7 +194,7 @@ addEventListener("load", () => {
   activateColors();
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") {
-      escCallback.value();
+      escCallbackRef.value();
     }
   });
 });
@@ -208,8 +208,8 @@ function toggleDrawer() {
   <!-- Relative -->
   <div id="game-area">
     <PlayerInfo
-      :player-captured-pieces="playerCapturedPieces"
-      :opponent-captured-pieces="opponentCapturedPieces"
+      :player-captured-pieces="playerCapturedPiecesRef"
+      :opponent-captured-pieces="opponentCapturedPiecesRef"
       :piece-set="pieceSetRef"
     />
     <div id="boards-area">
@@ -486,8 +486,8 @@ function toggleDrawer() {
     <div class="menu-button-placeholder"></div
   ></Drawer>
   <ActionsPanel
-    @open="escCallback = () => (actionPanelOpenRef = !actionPanelOpenRef)"
-    @close="escCallback = toggleDrawer"
+    @open="escCallbackRef = () => (actionPanelOpenRef = !actionPanelOpenRef)"
+    @close="escCallbackRef = toggleDrawer"
     @backdrop-click="actionPanelOpenRef = false"
     :open="actionPanelOpenRef"
   />
@@ -515,8 +515,8 @@ function toggleDrawer() {
     id="config-piece"
     title="Configure new piece"
     :open="showConfigPieceDialogRef"
-    @open="escCallback = configPieceDialog.onCancel"
-    @close="escCallback = toggleDrawer"
+    @open="escCallbackRef = configPieceDialog.onCancel"
+    @close="escCallbackRef = toggleDrawer"
     @backdrop-click="configPieceDialog.onCancel()"
   >
     <div class="piece-preview">
@@ -565,8 +565,8 @@ function toggleDrawer() {
     id="configs"
     title="Manage configurations"
     :open="showConfigsRef"
-    @open="escCallback = configDialog.onCancel"
-    @close="escCallback = toggleDrawer"
+    @open="escCallbackRef = configDialog.onCancel"
+    @close="escCallbackRef = toggleDrawer"
     @backdrop-click="configDialog.onCancel()"
   >
     <TransitionGroup name="opacity">
@@ -604,14 +604,14 @@ function toggleDrawer() {
     id="name-config"
     title="Set configuration name and description"
     :open="showNameConfigRef"
-    :focus-on-open="configNameInput"
-    @open="escCallback = configDialog.onCancelName"
-    @close="escCallback = configDialog.onCancel"
+    :focus-on-open="configNameInputRef"
+    @open="escCallbackRef = configDialog.onCancelName"
+    @close="escCallbackRef = configDialog.onCancel"
   >
     <input
       type="text"
       id="input-config-name"
-      ref="configNameInput"
+      ref="configNameInputRef"
       v-model="configNameRef"
       placeholder="name"
     />
@@ -642,8 +642,8 @@ function toggleDrawer() {
     id="confirm"
     title="Confirm"
     :open="showConfirmDialogRef"
-    @open="escCallback = confirmDialog.onCancel"
-    @close="escCallback = toggleDrawer"
+    @open="escCallbackRef = confirmDialog.onCancel"
+    @close="escCallbackRef = toggleDrawer"
   >
     <p class="message">{{ confirmDialogRef.message }}</p>
     <template #action-buttons>
