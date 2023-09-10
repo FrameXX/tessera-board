@@ -4,42 +4,47 @@ import type ConfigManager from "./config_manager";
 import ConfirmDialog from "./confirm_dialog";
 import ToastManager from "./toast_manager";
 
-class ConfigDialog {
+interface ConfigsDialogRefs {
+  open: Ref<boolean>;
+  configPrintOpen: Ref<boolean>;
+  configsPrints: Ref<CommonConfigPrint[]>;
+  configName: Ref<string>;
+  configDescription: Ref<string>;
+}
+
+class ConfigsDialog {
   private manager?: ConfigManager;
   private resolveName?: (value?: { name: string; description: string }) => void;
 
   constructor(
-    private readonly showConfigsRef: Ref<boolean>,
-    private readonly configsListRef: Ref<CommonConfigPrint[]>,
-    private readonly showNameConfigRef: Ref<boolean>,
-    private readonly configNameRef: Ref<string>,
-    private readonly configDescriptionRef: Ref<string>,
+    private readonly refs: ConfigsDialogRefs,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {}
 
   private updateConfigList() {
     if (this.manager) {
-      this.configsListRef.value = [];
-      this.configsListRef.value = this.manager.inventory.configPrints;
+      // NOTE: The config list sometimes doesn't seem to update apropriately when the configsList ref is not cleared before new value is set
+      this.refs.configsPrints.value = [];
+      this.refs.configsPrints.value = this.manager.inventory.configPrints;
     }
   }
 
   public show = (manager: ConfigManager) => {
     this.manager = manager;
-    this.configsListRef.value = this.manager.inventory.configPrints;
+    this.refs.configsPrints.value = this.manager.inventory.configPrints;
     this.updateConfigList();
-    this.showConfigsRef.value = true;
+    this.refs.open.value = true;
   };
 
   public onCancel = () => {
     this.manager = undefined;
-    this.showConfigsRef.value = false;
+    this.refs.open.value = false;
   };
 
   public onSaveConfig = async () => {
-    this.configNameRef.value = "";
-    this.configDescriptionRef.value = "";
+    this.refs.configName.value = "";
+    this.refs.configDescription.value = "";
     const userPrint = await this.showNameDialog();
     if (!userPrint) {
       return;
@@ -68,8 +73,8 @@ class ConfigDialog {
     currentName: string,
     currentDescription: string
   ) {
-    this.configNameRef.value = currentName;
-    this.configDescriptionRef.value = currentDescription;
+    this.refs.configName.value = currentName;
+    this.refs.configDescription.value = currentDescription;
     const userPrint = await this.showNameDialog();
     if (!userPrint) {
       return;
@@ -96,7 +101,7 @@ class ConfigDialog {
   }
 
   private showNameDialog() {
-    this.showNameConfigRef.value = true;
+    this.refs.configPrintOpen.value = true;
     return new Promise(
       (resolve: (value?: { name: string; description: string }) => void) => {
         this.resolveName = resolve;
@@ -106,7 +111,7 @@ class ConfigDialog {
 
   public onConfirmName = () => {
     if (this.resolveName) {
-      if (this.configNameRef.value === "") {
+      if (this.refs.configName.value === "") {
         this.toastManager.showToast(
           "Configuration name cannot be an empty string.",
           "error",
@@ -115,12 +120,12 @@ class ConfigDialog {
         return;
       }
       this.resolveName({
-        name: this.configNameRef.value,
-        description: this.configDescriptionRef.value,
+        name: this.refs.configName.value,
+        description: this.refs.configDescription.value,
       });
       this.resolveName = undefined;
     }
-    this.showNameConfigRef.value = false;
+    this.refs.configPrintOpen.value = false;
   };
 
   public onCancelName = () => {
@@ -128,8 +133,8 @@ class ConfigDialog {
       this.resolveName();
       this.resolveName = undefined;
     }
-    this.showNameConfigRef.value = false;
+    this.refs.configPrintOpen.value = false;
   };
 }
 
-export default ConfigDialog;
+export default ConfigsDialog;

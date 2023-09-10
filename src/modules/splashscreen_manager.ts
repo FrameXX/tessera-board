@@ -6,14 +6,11 @@ import {
 import TransitionsManager from "./transitions_manager";
 
 class SplashscreenManager {
-  private transitionsManager: TransitionsManager;
   private splashscreen = getElementInstanceById("splashscreen", HTMLElement);
   private cell1 = getElementInstanceById("cell1");
   private cell2 = getElementInstanceById("cell2");
 
-  constructor(transitionsManager: TransitionsManager) {
-    this.transitionsManager = transitionsManager;
-  }
+  constructor(private readonly transitionsManager: TransitionsManager) {}
 
   public async hideSplashscreen() {
     const transition = this.transitionsManager.preferredTransitions;

@@ -14,14 +14,11 @@ class ToastManager {
   private readonly durationPerCharacter = 70;
   private readonly initialDurationMs = 600;
   private readonly maxStackSize = 3;
-  private toastsElements: Ref<ToastElement[]>;
 
-  constructor(toastsRef: Ref<ToastElement[]>) {
-    this.toastsElements = toastsRef;
-  }
+  constructor(private toasts: Ref<ToastElement[]>) {}
 
   private get stackSize() {
-    return this.toastsElements.value.length;
+    return this.toasts.value.length;
   }
 
   public showToast(
@@ -43,7 +40,7 @@ class ToastManager {
         this.initialDurationMs + this.durationPerCharacter * message.length;
     }
 
-    this.toastsElements.value.push({
+    this.toasts.value.push({
       message: message,
       case: toastCase,
       id: id,
@@ -55,13 +52,11 @@ class ToastManager {
   }
 
   public hideToastId(id: string) {
-    this.toastsElements.value = this.toastsElements.value.filter(
-      (toast) => toast.id !== id
-    );
+    this.toasts.value = this.toasts.value.filter((toast) => toast.id !== id);
   }
 
   private hideToastIndex(index: number = 0) {
-    this.toastsElements.value.splice(index, 1);
+    this.toasts.value.splice(index, 1);
   }
 }
 

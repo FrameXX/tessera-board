@@ -1,24 +1,22 @@
 import { Ref } from "vue";
 
-export interface Dialog {
-  message: string;
-  confirmText: string;
-  cancelText: string;
+interface ConfirmDialogRefs {
+  open: Ref<boolean>;
+  message: Ref<string>;
+  confirmText: Ref<string>;
+  cancelText: Ref<string>;
 }
 
 class ConfirmDialog {
   private resolve?: (confirmed: boolean) => void;
 
-  constructor(
-    private readonly dialogRef: Ref<Dialog>,
-    private readonly showDialogRef: Ref<boolean>
-  ) {}
+  constructor(private readonly refs: ConfirmDialogRefs) {}
 
   public onConfirm = () => {
     if (this.resolve) {
       this.resolve(true);
       this.resolve = undefined;
-      this.showDialogRef.value = false;
+      this.refs.open.value = false;
     }
   };
 
@@ -26,7 +24,7 @@ class ConfirmDialog {
     if (this.resolve) {
       this.resolve(false);
       this.resolve = undefined;
-      this.showDialogRef.value = false;
+      this.refs.open.value = false;
     }
   };
 
@@ -35,12 +33,11 @@ class ConfirmDialog {
     confirmText: string = "Confirm",
     cancelText: string = "Cancel"
   ) {
-    this.dialogRef.value = {
-      message,
-      confirmText,
-      cancelText,
-    };
-    this.showDialogRef.value = true;
+    this.refs.message.value = message;
+    this.refs.confirmText.value = confirmText;
+    this.refs.cancelText.value = cancelText;
+    this.refs.open.value = true;
+
     return new Promise((resolve: (confirmed: boolean) => void) => {
       this.resolve = resolve;
     });

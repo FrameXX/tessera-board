@@ -37,7 +37,7 @@ import ToastManager, { type ToastElement } from "./modules/toast_manager";
 import SplashscreenManager from "./modules/splashscreen_manager";
 import ThemeManager from "./modules/theme_manager";
 import TransitionsManager from "./modules/transitions_manager";
-import ConfirmDialog, { type Dialog } from "./modules/confirm_dialog";
+import ConfirmDialog from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
 import { Piece, PieceId, PlayerColor } from "./modules/pieces";
@@ -61,41 +61,23 @@ import DialogWindow from "./components/DialogWindow.vue";
 import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
-import ConfigDialog from "./modules/config_dialog";
+import ConfigsDialog from "./modules/config_dialog";
 import ActionsPanel from "./components/ActionsPanel.vue";
 import PlayerInfo from "./components/PlayerInfo.vue";
 
-// Define refs
-const themeValueRef = ref(DEFAULT_THEME_VALUE);
-const transitionsValueRef = ref(DEFAULT_TRANSITIONS_VALUE);
-const playerHueRef = ref(DEFAULT_PLAYER_HUE_VALUE);
-const opponentHueRef = ref(DEFAULT_OPPONENT_HUE_VALUE);
-const pieceSetRef = ref(DEFAULT_PIECE_SET_VALUE);
-const defaultBoardStateReactive: BoardStateValue = reactive(
-  DEFAULT_BOARD_STATE_VALUE
-);
-const piecePaddingRef = ref(DEFAULT_PIECE_PADDING_VALUE);
-const pieceBorderRef = ref(DEFAULT_PIECE_BORDER_VALUE);
-const transitionDurationRef = ref(DEFAULT_TRANSITION_DURATION_VALUE);
-const cellIndexOpacityRef = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
+// Options refs
+const playerHue = ref(DEFAULT_PLAYER_HUE_VALUE);
+const opponentHue = ref(DEFAULT_OPPONENT_HUE_VALUE);
+const pieceSet = ref(DEFAULT_PIECE_SET_VALUE);
+const piecePadding = ref(DEFAULT_PIECE_PADDING_VALUE);
+const pieceBorder = ref(DEFAULT_PIECE_BORDER_VALUE);
+const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
+const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 
-const toastsRef = ref<ToastElement[]>([]);
-const drawerOpenRef = ref(false);
-const actionPanelOpenRef = ref(false);
-const confirmDialogRef = ref<Dialog>({
-  message: "",
-  confirmText: "",
-  cancelText: "",
-});
-const showConfirmDialogRef = ref(false);
-const configPieceIdRef = ref<PieceId>("pawn");
-const configPieceColorRef = ref<PlayerColor>("white");
-const showConfigPieceDialogRef = ref(false);
-const configsListRef = ref<CommonConfigPrint[]>([]);
-const showConfigsRef = ref(false);
-const showNameConfigRef = ref(false);
-const configNameRef = ref("");
-const configDescriptionRef = ref("");
+// UI refs
+const drawerOpen = ref(false);
+const actionPanelOpen = ref(false);
+
 const escCallbackRef = ref(toggleDrawer);
 const configNameInputRef = ref<null | HTMLInputElement>(null);
 const playerCapturedPiecesRef = ref<Piece[]>([]);
@@ -103,36 +85,71 @@ const opponentCapturedPiecesRef = ref<Piece[]>([]);
 const playerBoardMarksRef = ref<PositionedMark[]>([]);
 const OpponentBoardMarksRef = ref<PositionedMark[]>([]);
 
-// Define user data
-const defaultBoardStateData = new BoardStateData(
-  defaultBoardStateReactive,
-  defaultBoardStateReactive
+// Toast manager
+const toasts = ref<ToastElement[]>([]);
+const toastManager = new ToastManager(toasts);
+
+// Theme manager
+const themeValue = ref(DEFAULT_THEME_VALUE);
+const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
+
+// Transition manager
+const transitionsValue = ref(DEFAULT_TRANSITIONS_VALUE);
+const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
+
+// Confirm dialog
+const confirmDialogOpen = ref(false);
+const confirmDialogMessage = ref<string>("");
+const confirmDialogConfirmText = ref<string>("");
+const confirmDialogCancelText = ref<string>("");
+const confirmDialog = new ConfirmDialog({
+  open: confirmDialogOpen,
+  message: confirmDialogMessage,
+  confirmText: confirmDialogConfirmText,
+  cancelText: confirmDialogCancelText,
+});
+
+// Config piece dialog
+const configPieceId = ref<PieceId>("pawn");
+const configPieceColor = ref<PlayerColor>("white");
+const configPieceOpen = ref(false);
+const configPieceDialog = new ConfigPieceDialog(
+  configPieceId,
+  configPieceColor,
+  configPieceOpen
 );
 
-// Define classes
-const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
-const toastManager = new ToastManager(toastsRef);
-const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
-const confirmDialog = new ConfirmDialog(confirmDialogRef, showConfirmDialogRef);
-const configPieceDialog = new ConfigPieceDialog(
-  configPieceIdRef,
-  configPieceColorRef,
-  showConfigPieceDialogRef
-);
-const configDialog = new ConfigDialog(
-  showConfigsRef,
-  configsListRef,
-  showNameConfigRef,
-  configNameRef,
-  configDescriptionRef,
+// Configs dialog
+const configsPrints = ref<CommonConfigPrint[]>([]);
+const configsOpen = ref(false);
+const configPrintOpen = ref(false);
+const configName = ref("");
+const configDescription = ref("");
+const configsDialog = new ConfigsDialog(
+  {
+    open: configsOpen,
+    configPrintOpen,
+    configsPrints,
+    configName,
+    configDescription,
+  },
   confirmDialog,
   toastManager
 );
+
 const userDataManager = new UserDataManager(confirmDialog, toastManager);
 const splashscreenManager = new SplashscreenManager(transitionsManager);
+
+// Default board manager
+const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
 const defaultBoardManager = new DefaultBoardManager(
-  defaultBoardStateReactive,
+  defaultBoardState,
   configPieceDialog
+);
+
+const defaultBoardStateData = new BoardStateData(
+  defaultBoardState,
+  defaultBoardState
 );
 const defaultBoardConfigInventory = new ConfigInventory(
   "default-board",
@@ -159,23 +176,20 @@ const defaultBoardConfigManager = new ConfigManager(
 );
 
 userDataManager.entries = [
-  new ThemeData(themeValueRef.value, themeValueRef, themeManger),
+  new ThemeData(themeValue.value, themeValue, themeManger),
   new TransitionsData(
-    transitionsValueRef.value,
-    transitionsValueRef,
+    transitionsValue.value,
+    transitionsValue,
     transitionsManager
   ),
-  new HueData(playerHueRef.value, playerHueRef, false),
-  new HueData(opponentHueRef.value, opponentHueRef, true),
-  new PieceSetData(pieceSetRef.value, pieceSetRef),
+  new HueData(playerHue.value, playerHue, false),
+  new HueData(opponentHue.value, opponentHue, true),
+  new PieceSetData(pieceSet.value, pieceSet),
   defaultBoardStateData,
-  new PiecePaddingData(piecePaddingRef.value, piecePaddingRef),
-  new PieceBorderData(pieceBorderRef.value, pieceBorderRef),
-  new TransitionDurationData(
-    transitionDurationRef.value,
-    transitionDurationRef
-  ),
-  new CellIndexOpacityData(cellIndexOpacityRef.value, cellIndexOpacityRef),
+  new PiecePaddingData(piecePadding.value, piecePadding),
+  new PieceBorderData(pieceBorder.value, pieceBorder),
+  new TransitionDurationData(transitionDuration.value, transitionDuration),
+  new CellIndexOpacityData(cellIndexOpacity.value, cellIndexOpacity),
 ];
 
 addEventListener("load", () => {
@@ -200,7 +214,7 @@ addEventListener("load", () => {
 });
 
 function toggleDrawer() {
-  drawerOpenRef.value = !drawerOpenRef.value;
+  drawerOpen.value = !drawerOpen.value;
 }
 </script>
 
@@ -210,28 +224,28 @@ function toggleDrawer() {
     <PlayerInfo
       :player-captured-pieces="playerCapturedPiecesRef"
       :opponent-captured-pieces="opponentCapturedPiecesRef"
-      :piece-set="pieceSetRef"
+      :piece-set="pieceSet"
     />
     <div id="boards-area">
       <Board
         :manager="defaultBoardManager"
-        :state="defaultBoardStateReactive"
-        :piece-set="pieceSetRef"
-        :piece-padding="piecePaddingRef"
+        :state="defaultBoardState"
+        :piece-set="pieceSet"
+        :piece-padding="piecePadding"
         id="primary-board"
       />
       <Board
         :manager="defaultBoardManager"
-        :state="defaultBoardStateReactive"
-        :piece-set="pieceSetRef"
-        :piece-padding="piecePaddingRef"
+        :state="defaultBoardState"
+        :piece-set="pieceSet"
+        :piece-padding="piecePadding"
         id="primary-board"
       />
     </div>
   </div>
 
   <!-- Fixed -->
-  <Drawer :open="drawerOpenRef">
+  <Drawer :open="drawerOpen">
     <header>
       <h1>Tessera board</h1>
       <small class="version">v0.0.0 (0)</small>
@@ -300,16 +314,16 @@ function toggleDrawer() {
       >
         <button
           class="button-configs"
-          @click="configDialog.show(defaultBoardConfigManager)"
+          @click="configsDialog.show(defaultBoardConfigManager)"
         >
           <Icon icon-id="tune" side />Configurations
         </button>
         <div class="board-box">
           <Board
             :manager="defaultBoardManager"
-            :state="defaultBoardStateReactive"
-            :piece-set="pieceSetRef"
-            :piece-padding="piecePaddingRef"
+            :state="defaultBoardState"
+            :piece-set="pieceSet"
+            :piece-padding="piecePadding"
             id="default-board"
           />
         </div>
@@ -324,7 +338,7 @@ function toggleDrawer() {
       <!-- Colors -->
       <span class="category-section">Colors</span>
       <Option name="UI mode" icon-id="brightness-6" option-id="select-ui-mode">
-        <select id="select-ui-mode" v-model="themeValueRef">
+        <select id="select-ui-mode" v-model="themeValue">
           <option value="auto">Auto</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
@@ -346,7 +360,7 @@ function toggleDrawer() {
           min="0"
           max="360"
           id="input-hue-player"
-          v-model="playerHueRef"
+          v-model="playerHue"
         />
         <template #description
           >The UI transitions the overall hue of the app to this hue when you
@@ -363,7 +377,7 @@ function toggleDrawer() {
           min="0"
           max="360"
           id="input-hue-opponent"
-          v-model="opponentHueRef"
+          v-model="opponentHue"
         />
         <template #description
           >The UI transitions the overall hue of the app to this hue when you
@@ -377,7 +391,7 @@ function toggleDrawer() {
         icon-id="chess-pawn"
         option-id="select-piece-set"
       >
-        <select id="select-piece-set" v-model="pieceSetRef">
+        <select id="select-piece-set" v-model="pieceSet">
           <option value="material_design">Material Design</option>
           <option value="font_awesome">Font Awesome</option>
         </select>
@@ -396,7 +410,7 @@ function toggleDrawer() {
           min="0"
           max="20"
           id="input-piece-padding"
-          v-model="piecePaddingRef"
+          v-model="piecePadding"
         />
         <template #description
           >Increases padding of the pieces relative to its cell, but that also
@@ -413,7 +427,7 @@ function toggleDrawer() {
           min="0"
           max="3"
           id="input-piece-border"
-          v-model="pieceBorderRef"
+          v-model="pieceBorder"
         />
         <template #description
           >Increases border/stroke width of the pieces vector, which can improve
@@ -430,7 +444,7 @@ function toggleDrawer() {
           min="0"
           max="100"
           id="input-cell-index-opacity"
-          v-model="cellIndexOpacityRef"
+          v-model="cellIndexOpacity"
         />
         <template #description
           >Opacity of the cell indexes (numbers and letters) written on borders
@@ -446,7 +460,7 @@ function toggleDrawer() {
         icon-id="transition"
         option-id="select-transitions"
       >
-        <select id="select-transitions" v-model="transitionsValueRef">
+        <select id="select-transitions" v-model="transitionsValue">
           <option value="auto">Auto</option>
           <option value="enabled">Enabled</option>
           <option value="disabled">Disabled</option>
@@ -469,7 +483,7 @@ function toggleDrawer() {
           min="0"
           max="300"
           id="input-transition-duration"
-          v-model="transitionDurationRef"
+          v-model="transitionDuration"
         />
         <template #description
           >Changes duration of all the transitions and animations (except for
@@ -486,14 +500,14 @@ function toggleDrawer() {
     <div class="menu-button-placeholder"></div
   ></Drawer>
   <ActionsPanel
-    @open="escCallbackRef = () => (actionPanelOpenRef = !actionPanelOpenRef)"
+    @open="escCallbackRef = () => (actionPanelOpen = !actionPanelOpen)"
     @close="escCallbackRef = toggleDrawer"
-    @backdrop-click="actionPanelOpenRef = false"
-    :open="actionPanelOpenRef"
+    @backdrop-click="actionPanelOpen = false"
+    :open="actionPanelOpen"
   />
   <nav>
     <button
-      @click="actionPanelOpenRef = !actionPanelOpenRef"
+      @click="actionPanelOpen = !actionPanelOpen"
       aria-label="Quick actions"
       title="Quick actions"
     >
@@ -506,7 +520,7 @@ function toggleDrawer() {
     >
       <Icon
         id="open-menu-chevron"
-        :class="drawerOpenRef ? 'open' : ''"
+        :class="drawerOpen ? 'open' : ''"
         icon-id="chevron-up"
       />
     </button>
@@ -514,21 +528,21 @@ function toggleDrawer() {
   <DialogWindow
     id="config-piece"
     title="Configure new piece"
-    :open="showConfigPieceDialogRef"
+    :open="configPieceOpen"
     @open="escCallbackRef = configPieceDialog.onCancel"
     @close="escCallbackRef = toggleDrawer"
     @backdrop-click="configPieceDialog.onCancel()"
   >
     <div class="piece-preview">
       <PieceIcon
-        :piece-set="pieceSetRef"
-        :piece-id="configPieceIdRef"
-        :color="configPieceColorRef"
+        :piece-set="pieceSet"
+        :piece-id="configPieceId"
+        :color="configPieceColor"
       />
     </div>
     <div class="config">
       <Option name="piece" option-id="select-piece-id">
-        <select id="select-piece-id" v-model="configPieceIdRef">
+        <select id="select-piece-id" v-model="configPieceId">
           <option value="rook">Rook</option>
           <option value="knight">Knight</option>
           <option value="bishop">Bishop</option>
@@ -542,7 +556,7 @@ function toggleDrawer() {
         </template>
       </Option>
       <Option name="color" option-id="select-piece-color">
-        <select id="select-piece-color" v-model="configPieceColorRef">
+        <select id="select-piece-color" v-model="configPieceColor">
           <option value="white">White</option>
           <option value="black">Black</option>
         </select>
@@ -564,23 +578,23 @@ function toggleDrawer() {
   <DialogWindow
     id="configs"
     title="Manage configurations"
-    :open="showConfigsRef"
-    @open="escCallbackRef = configDialog.onCancel"
+    :open="configsOpen"
+    @open="escCallbackRef = configsDialog.onCancel"
     @close="escCallbackRef = toggleDrawer"
-    @backdrop-click="configDialog.onCancel()"
+    @backdrop-click="configsDialog.onCancel()"
   >
     <TransitionGroup name="opacity">
       <ConfigItem
-        @delete="configDialog.onDeleteConfig($event.id)"
+        @delete="configsDialog.onDeleteConfig($event.id)"
         @rename="
-          configDialog.onRenameConfig(
+          configsDialog.onRenameConfig(
             $event.id,
             $event.currentName,
             $event.currentDescription
           )
         "
-        @restore="configDialog.onRestoreConfig($event.id, $event.predefined)"
-        v-for="config in configsListRef"
+        @restore="configsDialog.onRestoreConfig($event.id, $event.predefined)"
+        v-for="config in configsPrints"
         :key="config.id"
         :id="config.id"
         :name="config.name"
@@ -589,12 +603,12 @@ function toggleDrawer() {
       />
     </TransitionGroup>
     <template #action-buttons>
-      <button title="Close" @click="configDialog.onCancel()">
+      <button title="Close" @click="configsDialog.onCancel()">
         <Icon side icon-id="close-circle-outline" />Close
       </button>
       <button
         title="Save current configuration"
-        @click="configDialog.onSaveConfig()"
+        @click="configsDialog.onSaveConfig()"
       >
         <Icon side icon-id="content-save-outline" />New config
       </button>
@@ -603,16 +617,16 @@ function toggleDrawer() {
   <DialogWindow
     id="name-config"
     title="Set configuration name and description"
-    :open="showNameConfigRef"
+    :open="configPrintOpen"
     :focus-on-open="configNameInputRef"
-    @open="escCallbackRef = configDialog.onCancelName"
-    @close="escCallbackRef = configDialog.onCancel"
+    @open="escCallbackRef = configsDialog.onCancelName"
+    @close="escCallbackRef = configsDialog.onCancel"
   >
     <input
       type="text"
       id="input-config-name"
       ref="configNameInputRef"
-      v-model="configNameRef"
+      v-model="configName"
       placeholder="name"
     />
     <label for="input-config-name"
@@ -623,16 +637,16 @@ function toggleDrawer() {
     <textarea
       placeholder="description"
       id="input-config-description"
-      v-model="configDescriptionRef"
+      v-model="configDescription"
     />
     <label for="input-config-description">Description is not required.</label>
     <template #action-buttons>
-      <button title="Cancel" @click="configDialog.onCancelName()">
+      <button title="Cancel" @click="configsDialog.onCancelName()">
         <Icon side icon-id="close-circle-outline" />Cancel
       </button>
       <button
         title="Save current configuration"
-        @click="configDialog.onConfirmName()"
+        @click="configsDialog.onConfirmName()"
       >
         <Icon side icon-id="content-save-outline" />Save
       </button>
@@ -641,26 +655,26 @@ function toggleDrawer() {
   <DialogWindow
     id="confirm"
     title="Confirm"
-    :open="showConfirmDialogRef"
+    :open="confirmDialogOpen"
     @open="escCallbackRef = confirmDialog.onCancel"
     @close="escCallbackRef = toggleDrawer"
   >
-    <p class="message">{{ confirmDialogRef.message }}</p>
+    <p class="message">{{ confirmDialogMessage }}</p>
     <template #action-buttons>
       <button @click="confirmDialog.onCancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />{{
-          confirmDialogRef.cancelText
+          confirmDialogCancelText
         }}
       </button>
       <button @click="confirmDialog.onConfirm()" title="Confirm">
         <Icon side icon-id="check-circle-outline" />{{
-          confirmDialogRef.confirmText
+          confirmDialogConfirmText
         }}
       </button>
     </template>
   </DialogWindow>
   <ToastStack
-    :toasts="toastsRef"
+    :toasts="toasts"
     @toast-dismiss="toastManager.hideToastId($event.id)"
   />
 </template>
