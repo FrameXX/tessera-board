@@ -3,7 +3,7 @@ import { getRandomId } from "./utils/misc";
 
 export type ToastCase = "info" | "error";
 
-export interface ToastElement {
+export interface ToastProps {
   message: string;
   case: ToastCase;
   id: string;
@@ -15,7 +15,7 @@ class ToastManager {
   private readonly initialDurationMs = 600;
   private readonly maxStackSize = 3;
 
-  constructor(private toasts: Ref<ToastElement[]>) {}
+  constructor(private toasts: Ref<ToastProps[]>) {}
 
   private get stackSize() {
     return this.toasts.value.length;

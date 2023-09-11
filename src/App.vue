@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// Vue
-import { ref, reactive } from "vue";
+// Import Vue
+import { ref, reactive, onMounted } from "vue";
 
-// User data
+// Import user data
 import UserDataManager from "./modules/user_data_manager";
 import ThemeData, { DEFAULT_THEME_VALUE } from "./modules/user_data/theme";
 import TransitionsData, {
@@ -32,61 +32,50 @@ import CellIndexOpacityData, {
   DEFAULT_CELL_INDEX_OPACITY_VALUE,
 } from "./modules/user_data/cell_index_opacity";
 
-// Classes
-import ToastManager, { type ToastElement } from "./modules/toast_manager";
+// Import other classes
+import ToastManager, { type ToastProps } from "./modules/toast_manager";
 import SplashscreenManager from "./modules/splashscreen_manager";
 import ThemeManager from "./modules/theme_manager";
 import TransitionsManager from "./modules/transitions_manager";
 import ConfirmDialog from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
-import { Piece, PieceId, PlayerColor } from "./modules/pieces";
+import { Piece } from "./modules/pieces";
 import { activateColors } from "./modules/utils/elements";
-import type { CommonConfigPrint } from "./modules/config_inventory";
 import ConfigInventory from "./modules/config_inventory";
-import ConfigManager, {
-  DEFAULT_BOARD_CONFIG_DEFAULT,
-  DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
-} from "./modules/config_manager";
+import ConfigManager from "./modules/config_manager";
 import type { PositionedMark } from "./components/Board.vue";
+import ConfigPrintDialog from "./modules/config_print_dialog";
+import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 
-// Custom components
+// Import components
 import Board from "./components/Board.vue";
 import Icon from "./components/Icon.vue";
 import Drawer from "./components/Drawer.vue";
 import Category from "./components/Category.vue";
-import Option from "./components/Option.vue";
+import UserOption from "./components/UserOption.vue";
 import Checkbox from "./components/Checkbox.vue";
 import DialogWindow from "./components/DialogWindow.vue";
 import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
-import ConfigsDialog from "./modules/config_dialog";
+import ConfigsDialog from "./modules/configs_dialog";
 import ActionsPanel from "./components/ActionsPanel.vue";
 import PlayerInfo from "./components/PlayerInfo.vue";
-
-// Options refs
-const playerHue = ref(DEFAULT_PLAYER_HUE_VALUE);
-const opponentHue = ref(DEFAULT_OPPONENT_HUE_VALUE);
-const pieceSet = ref(DEFAULT_PIECE_SET_VALUE);
-const piecePadding = ref(DEFAULT_PIECE_PADDING_VALUE);
-const pieceBorder = ref(DEFAULT_PIECE_BORDER_VALUE);
-const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
-const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 
 // UI refs
 const drawerOpen = ref(false);
 const actionPanelOpen = ref(false);
-
 const escCallbackRef = ref(toggleDrawer);
-const configNameInputRef = ref<null | HTMLInputElement>(null);
-const playerCapturedPiecesRef = ref<Piece[]>([]);
-const opponentCapturedPiecesRef = ref<Piece[]>([]);
-const playerBoardMarksRef = ref<PositionedMark[]>([]);
-const OpponentBoardMarksRef = ref<PositionedMark[]>([]);
+
+const configNameInput = ref<null | HTMLInputElement>(null);
+const playerCapturedPieces = ref<Piece[]>([]);
+const opponentCapturedPieces = ref<Piece[]>([]);
+const playerBoardMarks = ref<PositionedMark[]>([]);
+const OpponentBoardMarks = ref<PositionedMark[]>([]);
 
 // Toast manager
-const toasts = ref<ToastElement[]>([]);
+const toasts = ref<ToastProps[]>([]);
 const toastManager = new ToastManager(toasts);
 
 // Theme manager
@@ -97,76 +86,73 @@ const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 const transitionsValue = ref(DEFAULT_TRANSITIONS_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 
+// Splashscreen manager
+const splashscreenManager = new SplashscreenManager(transitionsManager);
+
 // Confirm dialog
-const confirmDialogOpen = ref(false);
-const confirmDialogMessage = ref<string>("");
-const confirmDialogConfirmText = ref<string>("");
-const confirmDialogCancelText = ref<string>("");
-const confirmDialog = new ConfirmDialog({
-  open: confirmDialogOpen,
-  message: confirmDialogMessage,
-  confirmText: confirmDialogConfirmText,
-  cancelText: confirmDialogCancelText,
-});
+const confirmDialog = new ConfirmDialog();
 
 // Config piece dialog
-const configPieceId = ref<PieceId>("pawn");
-const configPieceColor = ref<PlayerColor>("white");
-const configPieceOpen = ref(false);
-const configPieceDialog = new ConfigPieceDialog(
-  configPieceId,
-  configPieceColor,
-  configPieceOpen
-);
+const configPieceDialog = new ConfigPieceDialog();
 
 // Configs dialog
-const configsPrints = ref<CommonConfigPrint[]>([]);
-const configsOpen = ref(false);
-const configPrintOpen = ref(false);
-const configName = ref("");
-const configDescription = ref("");
+const configPrintDialog = new ConfigPrintDialog(toastManager);
 const configsDialog = new ConfigsDialog(
-  {
-    open: configsOpen,
-    configPrintOpen,
-    configsPrints,
-    configName,
-    configDescription,
-  },
   confirmDialog,
+  configPrintDialog,
   toastManager
 );
 
-const userDataManager = new UserDataManager(confirmDialog, toastManager);
-const splashscreenManager = new SplashscreenManager(transitionsManager);
+// Options refs
+// Simple values (ref)
+const playerHue = ref(DEFAULT_PLAYER_HUE_VALUE);
+const opponentHue = ref(DEFAULT_OPPONENT_HUE_VALUE);
+const pieceSet = ref(DEFAULT_PIECE_SET_VALUE);
+const piecePadding = ref(DEFAULT_PIECE_PADDING_VALUE);
+const pieceBorder = ref(DEFAULT_PIECE_BORDER_VALUE);
+const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
+const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 
-// Default board manager
+// Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
-const defaultBoardManager = new DefaultBoardManager(
+const defaultBoardStateData = new BoardStateData(
+  DEFAULT_BOARD_STATE_VALUE,
   defaultBoardState,
-  configPieceDialog
+  toastManager
 );
 
-const defaultBoardStateData = new BoardStateData(
-  defaultBoardState,
-  defaultBoardState
-);
+// NOTE: Most of the UserData instances use Ref but some of them may use Reactive if their value is more complex. These classes are extending ComplexUserData class.
+const userDataManager = new UserDataManager(confirmDialog, toastManager);
+userDataManager.entries = [
+  new ThemeData(DEFAULT_THEME_VALUE, themeValue, themeManger, toastManager),
+  new TransitionsData(
+    DEFAULT_TRANSITIONS_VALUE,
+    transitionsValue,
+    transitionsManager,
+    toastManager
+  ),
+  new HueData(DEFAULT_PLAYER_HUE_VALUE, playerHue, false, toastManager),
+  new HueData(DEFAULT_OPPONENT_HUE_VALUE, opponentHue, true, toastManager),
+  new PieceSetData(DEFAULT_PIECE_SET_VALUE, pieceSet, toastManager),
+  new PiecePaddingData(DEFAULT_PIECE_PADDING_VALUE, piecePadding, toastManager),
+  new PieceBorderData(DEFAULT_PIECE_BORDER_VALUE, pieceBorder, toastManager),
+  new TransitionDurationData(
+    DEFAULT_TRANSITION_DURATION_VALUE,
+    transitionDuration,
+    toastManager
+  ),
+  new CellIndexOpacityData(
+    DEFAULT_CELL_INDEX_OPACITY_VALUE,
+    cellIndexOpacity,
+    toastManager
+  ),
+  defaultBoardStateData,
+];
+
+// Default board configurations
 const defaultBoardConfigInventory = new ConfigInventory(
   "default-board",
-  [
-    {
-      id: "default",
-      name: "Default",
-      description: "Classic checkboard setup as you know it.",
-      values: DEFAULT_BOARD_CONFIG_DEFAULT,
-    },
-    {
-      id: "philidor_defence",
-      name: "Philidor Defence",
-      description: `The Philidor Defence (or Philidor's Defence) is a chess opening characterised by the moves: \n1. e4 e5\n2. Nf3 d6.\nThe opening is named after the famous 18th-century player François-André Danican Philidor, who advocated it as an alternative to the common 2...Nc6. His original idea was to challenge White's centre by the pawn thrust ...f7–f5. Source: Wikipedia.`,
-      values: DEFAULT_BOARD_CONFIG_PHILIDOR_DEFENCE,
-    },
-  ],
+  PREDEFINED_DEFAULT_BOARD_CONFIGS,
   toastManager
 );
 const defaultBoardConfigManager = new ConfigManager(
@@ -175,42 +161,38 @@ const defaultBoardConfigManager = new ConfigManager(
   toastManager
 );
 
-userDataManager.entries = [
-  new ThemeData(themeValue.value, themeValue, themeManger),
-  new TransitionsData(
-    transitionsValue.value,
-    transitionsValue,
-    transitionsManager
-  ),
-  new HueData(playerHue.value, playerHue, false),
-  new HueData(opponentHue.value, opponentHue, true),
-  new PieceSetData(pieceSet.value, pieceSet),
-  defaultBoardStateData,
-  new PiecePaddingData(piecePadding.value, piecePadding),
-  new PieceBorderData(pieceBorder.value, pieceBorder),
-  new TransitionDurationData(transitionDuration.value, transitionDuration),
-  new CellIndexOpacityData(cellIndexOpacity.value, cellIndexOpacity),
-];
+// Default board manager
+const defaultBoardManager = new DefaultBoardManager(
+  defaultBoardState,
+  configPieceDialog
+);
 
-addEventListener("load", () => {
-  splashscreenManager.hideSplashscreen();
-  if (navigator.cookieEnabled) {
-    userDataManager.recoverData();
-  } else {
-    toastManager.showToast(
-      "Cookies are disabled. -> No changes will be restored in next session.",
-      "error",
-      "cookie-alert"
-    );
-  }
-  userDataManager.applyData();
-  userDataManager.updateReferences();
-  activateColors();
-  addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      escCallbackRef.value();
-    }
-  });
+// On first mount
+onMounted(() => {
+  console.log("App mounted");
+
+  // Let the app wait another 600ms to make its fully loaded.
+  setTimeout(() => {
+    splashscreenManager.hideSplashscreen();
+    navigator.cookieEnabled
+      ? userDataManager.recoverData()
+      : toastManager.showToast(
+          "Cookies are disabled. -> No changes will be restored in next session.",
+          "error",
+          "cookie-alert"
+        );
+    userDataManager.applyData();
+    userDataManager.updateReferences();
+
+    // NOTE: Sets CSS Saturation variables from 0 to their appropriate user configured values
+    activateColors();
+
+    addEventListener("keydown", (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        escCallbackRef.value();
+      }
+    });
+  }, 600);
 });
 
 function toggleDrawer() {
@@ -222,8 +204,8 @@ function toggleDrawer() {
   <!-- Relative -->
   <div id="game-area">
     <PlayerInfo
-      :player-captured-pieces="playerCapturedPiecesRef"
-      :opponent-captured-pieces="opponentCapturedPiecesRef"
+      :player-captured-pieces="playerCapturedPieces"
+      :opponent-captured-pieces="opponentCapturedPieces"
       :piece-set="pieceSet"
     />
     <div id="boards-area">
@@ -252,7 +234,7 @@ function toggleDrawer() {
     </header>
     <!-- Player -->
     <Category name="Player" icon-id="account">
-      <Option
+      <UserOption
         name="color"
         icon-id="invert-colors"
         option-id="select-player-color"
@@ -265,8 +247,8 @@ function toggleDrawer() {
         <template #description>
           Defines color of your pieces be it black or white.
         </template>
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="computer"
         icon-id="memory"
         option-id="check-computer-player"
@@ -276,11 +258,11 @@ function toggleDrawer() {
           If this option is enabled an algorythm will play instead of a human
           player.
         </template>
-      </Option>
+      </UserOption>
     </Category>
     <!-- Opponent -->
     <Category name="Opponent" icon-id="target-account">
-      <Option
+      <UserOption
         name="over local network"
         icon-id="lan-connect"
         option-id="check-remote-opponent"
@@ -291,8 +273,8 @@ function toggleDrawer() {
           but instead play on another device connected to the same network after
           peer connection is established.</template
         >
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="computer"
         icon-id="memory"
         option-id="check-computer-opponent"
@@ -302,11 +284,11 @@ function toggleDrawer() {
           If this option is enabled an algorythm will play instead of a human
           player.
         </template>
-      </Option>
+      </UserOption>
     </Category>
     <!-- Game rules -->
     <Category name="Game rules" icon-id="rule">
-      <Option
+      <UserOption
         :simple="false"
         name="default piece positions"
         icon-id="checkerboard"
@@ -314,7 +296,7 @@ function toggleDrawer() {
       >
         <button
           class="button-configs"
-          @click="configsDialog.show(defaultBoardConfigManager)"
+          @click="configsDialog.open(defaultBoardConfigManager)"
         >
           <Icon icon-id="tune" side />Configurations
         </button>
@@ -331,13 +313,17 @@ function toggleDrawer() {
           Defines position of each piece at the start of the game. Click on
           piece to remove it. Click on empty cell to add a piece.
         </template>
-      </Option>
+      </UserOption>
     </Category>
     <!-- Look and feel -->
     <Category name="look and feel" icon-id="palette-advanced">
       <!-- Colors -->
       <span class="category-section">Colors</span>
-      <Option name="UI mode" icon-id="brightness-6" option-id="select-ui-mode">
+      <UserOption
+        name="UI mode"
+        icon-id="brightness-6"
+        option-id="select-ui-mode"
+      >
         <select id="select-ui-mode" v-model="themeValue">
           <option value="auto">Auto</option>
           <option value="light">Light</option>
@@ -349,8 +335,8 @@ function toggleDrawer() {
           "Automatic" the app will try to follow theme preferred by your
           browser.
         </template>
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="Player hue"
         icon-id="format-color-fill"
         option-id="input-hue-player"
@@ -366,8 +352,8 @@ function toggleDrawer() {
           >The UI transitions the overall hue of the app to this hue when you
           are currently playing. The value is a hue degree from 0 to 360.
         </template>
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="Opponent hue"
         icon-id="format-color-fill"
         option-id="input-hue-opponent"
@@ -383,10 +369,10 @@ function toggleDrawer() {
           >The UI transitions the overall hue of the app to this hue when you
           are currently playing. The value is a hue degree from 0 to 360.
         </template>
-      </Option>
+      </UserOption>
       <!-- Checkboard -->
       <span class="category-section">Checkboard</span>
-      <Option
+      <UserOption
         name="piece set"
         icon-id="chess-pawn"
         option-id="select-piece-set"
@@ -399,8 +385,8 @@ function toggleDrawer() {
           >Chooses what vector icons are used for pieces. Different icon sets
           have different shapes.
         </template>
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="piece padding (px)"
         icon-id="padding-piece"
         option-id="input-piece-padding"
@@ -416,8 +402,8 @@ function toggleDrawer() {
           >Increases padding of the pieces relative to its cell, but that also
           decreases their overall size.
         </template>
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="piece border (px)"
         icon-id="border-piece"
         option-id="input-piece-border"
@@ -433,8 +419,8 @@ function toggleDrawer() {
           >Increases border/stroke width of the pieces vector, which can improve
           their visibility.
         </template>
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="cell index opacity (%)"
         icon-id="code-array"
         option-id="select-cell-index-opacity"
@@ -450,12 +436,12 @@ function toggleDrawer() {
           >Opacity of the cell indexes (numbers and letters) written on borders
           of checkboard.
         </template>
-      </Option>
+      </UserOption>
       <!-- Elements -->
       <span class="category-section">Elements</span>
       <!-- Transitions -->
       <span class="category-section">Transitions</span>
-      <Option
+      <UserOption
         name="transitions"
         icon-id="transition"
         option-id="select-transitions"
@@ -472,8 +458,8 @@ function toggleDrawer() {
           them. When set to "Automatic" the app will keep tansition effects
           disabled only if your browser requests it.
         </template>
-      </Option>
-      <Option
+      </UserOption>
+      <UserOption
         name="transition duration (%)"
         icon-id="play-speed"
         option-id="select-transition-duration"
@@ -489,7 +475,7 @@ function toggleDrawer() {
           >Changes duration of all the transitions and animations (except for
           the splashscreen animation) in the same ratio.
         </template>
-      </Option>
+      </UserOption>
     </Category>
     <div class="action-buttons-drawer">
       <button @click="userDataManager.requestClearData()">
@@ -528,21 +514,21 @@ function toggleDrawer() {
   <DialogWindow
     id="config-piece"
     title="Configure new piece"
-    :open="configPieceOpen"
-    @open="escCallbackRef = configPieceDialog.onCancel"
+    :open="configPieceDialog.props.open"
+    @open="escCallbackRef = configPieceDialog.cancel"
     @close="escCallbackRef = toggleDrawer"
-    @backdrop-click="configPieceDialog.onCancel()"
+    @backdrop-click="configPieceDialog.cancel()"
   >
     <div class="piece-preview">
       <PieceIcon
         :piece-set="pieceSet"
-        :piece-id="configPieceId"
-        :color="configPieceColor"
+        :piece-id="configPieceDialog.props.pieceId"
+        :color="configPieceDialog.props.color"
       />
     </div>
     <div class="config">
-      <Option name="piece" option-id="select-piece-id">
-        <select id="select-piece-id" v-model="configPieceId">
+      <UserOption name="piece" option-id="select-piece-id">
+        <select id="select-piece-id" v-model="configPieceDialog.props.pieceId">
           <option value="rook">Rook</option>
           <option value="knight">Knight</option>
           <option value="bishop">Bishop</option>
@@ -554,9 +540,9 @@ function toggleDrawer() {
           Different pieces have different look, but mainly their abilities and
           strategic differ.
         </template>
-      </Option>
-      <Option name="color" option-id="select-piece-color">
-        <select id="select-piece-color" v-model="configPieceColor">
+      </UserOption>
+      <UserOption name="color" option-id="select-piece-color">
+        <select id="select-piece-color" v-model="configPieceDialog.props.color">
           <option value="white">White</option>
           <option value="black">Black</option>
         </select>
@@ -564,13 +550,13 @@ function toggleDrawer() {
           >Piece color determines its player. Although pieces here are not
           usually entirely black or white they are darker or brighter.</template
         >
-      </Option>
+      </UserOption>
     </div>
     <template #action-buttons>
-      <button @click="configPieceDialog.onCancel()" title="Cancel">
+      <button @click="configPieceDialog.cancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />Cancel
       </button>
-      <button @click="configPieceDialog.onConfirm()" title="Add piece">
+      <button @click="configPieceDialog.confirm()" title="Add piece">
         <Icon side icon-id="check-circle-outline" />Add piece
       </button>
     </template>
@@ -578,37 +564,37 @@ function toggleDrawer() {
   <DialogWindow
     id="configs"
     title="Manage configurations"
-    :open="configsOpen"
-    @open="escCallbackRef = configsDialog.onCancel"
+    :open="configsDialog.props.open"
+    @open="escCallbackRef = configsDialog.cancel"
     @close="escCallbackRef = toggleDrawer"
-    @backdrop-click="configsDialog.onCancel()"
+    @backdrop-click="configsDialog.cancel()"
   >
     <TransitionGroup name="opacity">
       <ConfigItem
-        @delete="configsDialog.onDeleteConfig($event.id)"
+        @delete="configsDialog.deleteConfig($event.id)"
         @rename="
-          configsDialog.onRenameConfig(
+          configsDialog.renameConfig(
             $event.id,
             $event.currentName,
             $event.currentDescription
           )
         "
-        @restore="configsDialog.onRestoreConfig($event.id, $event.predefined)"
-        v-for="config in configsPrints"
-        :key="config.id"
-        :id="config.id"
-        :name="config.name"
-        :description="config.description"
-        :predefined="config.predefined"
+        @restore="configsDialog.restoreConfig($event.id, $event.predefined)"
+        v-for="print in configsDialog.props.configsPrints"
+        :key="print.id"
+        :id="print.id"
+        :name="print.name"
+        :description="print.description"
+        :predefined="print.predefined"
       />
     </TransitionGroup>
     <template #action-buttons>
-      <button title="Close" @click="configsDialog.onCancel()">
+      <button title="Close" @click="configsDialog.cancel()">
         <Icon side icon-id="close-circle-outline" />Close
       </button>
       <button
         title="Save current configuration"
-        @click="configsDialog.onSaveConfig()"
+        @click="configsDialog.saveConfig()"
       >
         <Icon side icon-id="content-save-outline" />New config
       </button>
@@ -617,16 +603,16 @@ function toggleDrawer() {
   <DialogWindow
     id="name-config"
     title="Set configuration name and description"
-    :open="configPrintOpen"
-    :focus-on-open="configNameInputRef"
-    @open="escCallbackRef = configsDialog.onCancelName"
-    @close="escCallbackRef = configsDialog.onCancel"
+    :open="configPrintDialog.props.open"
+    :focus-on-open="configNameInput"
+    @open="escCallbackRef = configPrintDialog.cancel"
+    @close="escCallbackRef = configsDialog.cancel"
   >
     <input
       type="text"
       id="input-config-name"
-      ref="configNameInputRef"
-      v-model="configName"
+      ref="configNameInput"
+      v-model="configPrintDialog.props.name"
       placeholder="name"
     />
     <label for="input-config-name"
@@ -637,16 +623,16 @@ function toggleDrawer() {
     <textarea
       placeholder="description"
       id="input-config-description"
-      v-model="configDescription"
+      v-model="configPrintDialog.props.description"
     />
     <label for="input-config-description">Description is not required.</label>
     <template #action-buttons>
-      <button title="Cancel" @click="configsDialog.onCancelName()">
+      <button title="Cancel" @click="configPrintDialog.cancel()">
         <Icon side icon-id="close-circle-outline" />Cancel
       </button>
       <button
         title="Save current configuration"
-        @click="configsDialog.onConfirmName()"
+        @click="configPrintDialog.confirm()"
       >
         <Icon side icon-id="content-save-outline" />Save
       </button>
@@ -655,20 +641,20 @@ function toggleDrawer() {
   <DialogWindow
     id="confirm"
     title="Confirm"
-    :open="confirmDialogOpen"
-    @open="escCallbackRef = confirmDialog.onCancel"
+    :open="confirmDialog.props.open"
+    @open="escCallbackRef = confirmDialog.cancel"
     @close="escCallbackRef = toggleDrawer"
   >
-    <p class="message">{{ confirmDialogMessage }}</p>
+    <p class="message">{{ confirmDialog.props.message }}</p>
     <template #action-buttons>
-      <button @click="confirmDialog.onCancel()" title="Cancel">
+      <button @click="confirmDialog.cancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />{{
-          confirmDialogCancelText
+          confirmDialog.props.cancelText
         }}
       </button>
-      <button @click="confirmDialog.onConfirm()" title="Confirm">
+      <button @click="confirmDialog.confirm()" title="Confirm">
         <Icon side icon-id="check-circle-outline" />{{
-          confirmDialogConfirmText
+          confirmDialog.props.confirmText
         }}
       </button>
     </template>
@@ -723,3 +709,4 @@ function toggleDrawer() {
   }
 }
 </style>
+./modules/configs_dialog

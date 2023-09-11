@@ -1,12 +1,17 @@
 import { Ref } from "vue";
 import UserData, { type SaveCallBack } from "./user_data";
 import { setCSSVariable } from "../utils/elements";
+import type ToastManager from "../toast_manager";
 
 export const DEFAULT_PIECE_PADDING_VALUE = 5;
 
 class PiecePaddingData extends UserData<Number> {
-  constructor(value: number, valueRef: Ref<number>) {
-    super("piece_padding", value, valueRef);
+  constructor(
+    value: number,
+    valueRef: Ref<number>,
+    toastManager: ToastManager
+  ) {
+    super("piece_padding", value, toastManager, valueRef);
   }
 
   public load(dumped: string): void {

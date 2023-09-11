@@ -16,7 +16,7 @@ class DefaultBoardManager extends BoardManager {
   }
 
   public async onCellClick(row: number, col: number) {
-    const piece = await this.configPieceDialog.show();
+    const piece = await this.configPieceDialog.open();
     this.boardStateReactive[row][col] = piece;
   }
 }

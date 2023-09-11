@@ -8,8 +8,8 @@ import {
   getPieceById,
 } from "../pieces";
 import { ComplexUserData } from "./user_data";
-
 import type Piece from "../pieces";
+import type ToastManager from "../toast_manager";
 
 export type BoardStateValue = (Piece | null)[][];
 
@@ -61,8 +61,12 @@ export const DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
 ];
 
 class BoardStateData extends ComplexUserData<BoardStateValue> {
-  constructor(value: BoardStateValue, valueReactive: BoardStateValue) {
-    super("board_state", value, valueReactive);
+  constructor(
+    value: BoardStateValue,
+    valueReactive: BoardStateValue,
+    toastManager: ToastManager
+  ) {
+    super("board_state", value, valueReactive, toastManager);
   }
 
   public dump(): string {

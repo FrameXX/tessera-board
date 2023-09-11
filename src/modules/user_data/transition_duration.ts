@@ -1,12 +1,17 @@
 import UserData from "./user_data";
 import { setCSSVariable } from "../utils/elements";
 import type { Ref } from "vue";
+import type ToastManager from "../toast_manager";
 
 export const DEFAULT_TRANSITION_DURATION_VALUE = 100;
 
 class TransitionDurationData extends UserData<number> {
-  constructor(value: number, valueRef: Ref<number>) {
-    super("transition_duration", value, valueRef);
+  constructor(
+    value: number,
+    valueRef: Ref<number>,
+    toastManager: ToastManager
+  ) {
+    super("transition_duration", value, toastManager, valueRef);
   }
 
   public dump(): string {

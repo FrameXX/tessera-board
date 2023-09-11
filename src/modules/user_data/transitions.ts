@@ -1,6 +1,7 @@
 import UserData from "./user_data";
 import type TransitionsManager from "../transitions_manager";
 import type { Ref } from "vue";
+import type ToastManager from "../toast_manager";
 
 export type TransitionsValue = "enabled" | "disabled" | "auto";
 function isTransitionsValue(string: string): string is TransitionsValue {
@@ -15,9 +16,10 @@ class TransitionsData extends UserData<TransitionsValue> {
   constructor(
     value: TransitionsValue,
     valueRef: Ref<TransitionsValue>,
-    transitionsManager: TransitionsManager
+    transitionsManager: TransitionsManager,
+    toastManager: ToastManager
   ) {
-    super("transitions", value, valueRef);
+    super("transitions", value, toastManager, valueRef);
     this.transitionManager = transitionsManager;
   }
 

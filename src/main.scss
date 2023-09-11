@@ -107,11 +107,14 @@ h1 {
 }
 
 .version {
-  @include shadow;
   @include inverted-accent;
   @include round-border;
   padding: var(--spacing-tiny);
   font-size: var(--font-size-tiny);
+}
+
+header.version {
+  @include shadow;
 }
 
 .icon {

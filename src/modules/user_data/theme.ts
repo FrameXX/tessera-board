@@ -1,6 +1,7 @@
 import UserData from "./user_data";
 import type ThemeManager from "../theme_manager";
 import type { Ref } from "vue";
+import type ToastManager from "../toast_manager";
 
 export type ThemeValue = "light" | "dark" | "auto";
 function isThemeValue(string: string): string is ThemeValue {
@@ -15,9 +16,10 @@ class ThemeData extends UserData<ThemeValue> {
   constructor(
     value: ThemeValue,
     valueRef: Ref<ThemeValue>,
-    themeManager: ThemeManager
+    themeManager: ThemeManager,
+    toastManager: ToastManager
   ) {
-    super("theme", value, valueRef);
+    super("theme", value, toastManager, valueRef);
     this.themeManager = themeManager;
   }
 

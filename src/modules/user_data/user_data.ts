@@ -1,5 +1,6 @@
 import type { Ref } from "vue";
 import { watch, toRaw } from "vue";
+import type ToastManager from "../toast_manager";
 
 export type SaveCallBack = () => void;
 
@@ -15,13 +16,13 @@ export class UserDataError extends Error {
 abstract class UserData<ValueType> {
   public static readonly STORAGE_KEY = "tessera_board";
   private valueRef?: Ref<ValueType>;
-  public value: ValueType;
-  public readonly id: string;
 
-  constructor(id: string, value: ValueType, valueRef?: Ref<ValueType>) {
-    this.id = id;
-    this.value = value;
-
+  constructor(
+    public readonly id: string,
+    public value: ValueType,
+    private readonly toastManager: ToastManager,
+    valueRef?: Ref<ValueType>
+  ) {
     // Watch ref for changes, update the original value and save changes.
     if (valueRef) {
       this.valueRef = valueRef;
@@ -45,7 +46,11 @@ abstract class UserData<ValueType> {
 
   protected handleInvalidLoadValue(value: string) {
     console.error("Invalid load value.", value);
-    throw new UserDataError(`"Loaded ${this.id} value was invalid"`);
+    this.toastManager.showToast(
+      "An error occured while trying to load data from local storage. Your data are probably corrupted or invalid and it's recommended that you clear all data.",
+      "error",
+      "database-alert"
+    );
   }
 
   public updateReference() {
@@ -72,12 +77,14 @@ abstract class UserData<ValueType> {
 
 // The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values.
 export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
-  private reactiveValue: ValueType;
+  constructor(
+    id: string,
+    value: ValueType,
+    private reactiveValue: ValueType,
+    toastManager: ToastManager
+  ) {
+    super(id, value, toastManager);
 
-  constructor(id: string, value: ValueType, reactiveValue: ValueType) {
-    super(id, value);
-
-    this.reactiveValue = reactiveValue;
     watch(reactiveValue!, (newValue) => {
       this.onValueChange(newValue);
     });

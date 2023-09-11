@@ -15,6 +15,7 @@ export interface CommonConfigPrint extends UserConfigPrint {
   predefined: boolean;
 }
 
+// Validators
 function isUserConfigPrint(object: any): object is UserConfigPrint {
   if (!("id" in object && "name" in object && "description" in object)) {
     return false;
@@ -56,7 +57,9 @@ class ConfigInventory {
         predefined: true,
       };
     });
-    this.loadUserConfigPrints();
+    if (navigator.cookieEnabled) {
+      this.loadUserConfigPrints();
+    }
   }
 
   private handleErrorOnLoad() {
@@ -152,7 +155,7 @@ class ConfigInventory {
       return;
     }
 
-    // Since all of these are loaded from storage none of them is predefined.
+    // Since all of these are loaded from storage none of them is predefined => All predefined properties will be set to false.
     const commonConfigPrints: CommonConfigPrint[] = configPrints.map(
       (print) => {
         return { ...print, predefined: false };

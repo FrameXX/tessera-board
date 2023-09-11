@@ -1,4 +1,4 @@
-import { Ref } from "vue";
+import { reactive } from "vue";
 import {
   type PieceId,
   type PlayerColor,
@@ -6,39 +6,43 @@ import {
   getPieceById,
 } from "./pieces";
 
+interface ConfigPieceDialogProps {
+  open: boolean;
+  pieceId: PieceId;
+  color: PlayerColor;
+}
+
 class ConfigPieceDialog {
   private resolve?: (piece: Piece) => void;
+  public props: ConfigPieceDialogProps;
 
-  constructor(
-    private configPieceIdRef: Ref<PieceId>,
-    private configPieceColorRef: Ref<PlayerColor>,
-    private showConfigPieceDialogRef: Ref<boolean>
-  ) {}
+  constructor() {
+    this.props = reactive({
+      open: false,
+      pieceId: "pawn",
+      color: "white",
+    });
+  }
 
-  public onConfirm = () => {
-    if (this.resolve) {
-      this.resolve(
-        getPieceById(
-          this.configPieceIdRef.value,
-          this.configPieceColorRef.value
-        )
-      );
-      this.resolve = undefined;
-    }
-    this.showConfigPieceDialogRef.value = false;
-  };
-
-  public onCancel = () => {
-    this.resolve = undefined;
-    this.showConfigPieceDialogRef.value = false;
-  };
-
-  public show(): Promise<Piece> {
-    this.showConfigPieceDialogRef.value = true;
+  public open(): Promise<Piece> {
+    this.props.open = true;
     return new Promise((resolve) => {
       this.resolve = resolve;
     });
   }
+
+  public confirm = () => {
+    if (this.resolve) {
+      this.resolve(getPieceById(this.props.pieceId, this.props.color));
+      this.resolve = undefined;
+    }
+    this.props.open = false;
+  };
+
+  public cancel = () => {
+    this.resolve = undefined;
+    this.props.open = false;
+  };
 }
 
 export default ConfigPieceDialog;
