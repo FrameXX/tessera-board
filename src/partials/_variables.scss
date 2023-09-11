@@ -17,7 +17,7 @@ html {
   // ===== Box shadow =====
   --box-shadow-offset-x: 0;
   --box-shadow-offset-y: 0;
-  --box-shadow-offset-blur: 6px;
+  --box-shadow-offset-blur: 5px;
   --box-shadow-offset-spread: 0;
   --box-shadow-color: rgba(0, 0, 0, 0.75);
   --box-shadow: var(--box-shadow-offset-x) var(--box-shadow-offset-y)
@@ -109,7 +109,7 @@ html {
   --L-light-text: 5%;
   --L-light-surface: 85%;
   --L-light-surface-top: 95%;
-  --L-light-surface-accent: 85%;
+  --L-light-surface-accent: 80%;
   --L-light-accent: 43%;
   --L-light-cell-white: 76%;
   --L-light-cell-black: 23%;
