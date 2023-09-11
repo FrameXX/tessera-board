@@ -47,11 +47,12 @@ import ConfigManager from "./modules/config_manager";
 import type { PositionedMark } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
+import EscapeManager from "./modules/escape_manager";
 
 // Import components
 import Board from "./components/Board.vue";
 import Icon from "./components/Icon.vue";
-import Drawer from "./components/Drawer.vue";
+import ConfigDrawer from "./components/ConfigDrawer.vue";
 import Category from "./components/Category.vue";
 import UserOption from "./components/UserOption.vue";
 import Checkbox from "./components/Checkbox.vue";
@@ -60,13 +61,12 @@ import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
 import ConfigsDialog from "./modules/configs_dialog";
-import ActionsPanel from "./components/ActionsPanel.vue";
+import ActionPanel from "./components/ActionPanel.vue";
 import PlayerInfo from "./components/PlayerInfo.vue";
 
 // UI refs
-const drawerOpen = ref(false);
+const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
-const escCallbackRef = ref(toggleDrawer);
 
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCapturedPieces = ref<Piece[]>([]);
@@ -167,6 +167,9 @@ const defaultBoardManager = new DefaultBoardManager(
   configPieceDialog
 );
 
+// Escape manager
+const escapeManager = new EscapeManager(toggleActionsPanel);
+
 // On first mount
 onMounted(() => {
   console.log("App mounted");
@@ -189,14 +192,30 @@ onMounted(() => {
 
     addEventListener("keydown", (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        escCallbackRef.value();
+        escapeManager.escape();
       }
     });
   }, 600);
 });
 
-function toggleDrawer() {
-  drawerOpen.value = !drawerOpen.value;
+function toggleActionsPanel() {
+  actionPanelOpen.value = !actionPanelOpen.value;
+  actionPanelOpen.value
+    ? escapeManager.addLayer(toggleActionsPanel)
+    : escapeManager.removeLayer();
+
+  if (!actionPanelOpen.value) {
+    if (configDrawerOpen.value) {
+      toggleConfigDrawer();
+    }
+  }
+}
+
+function toggleConfigDrawer() {
+  configDrawerOpen.value = !configDrawerOpen.value;
+  configDrawerOpen.value
+    ? escapeManager.addLayer(toggleActionsPanel)
+    : escapeManager.removeLayer();
 }
 </script>
 
@@ -227,7 +246,13 @@ function toggleDrawer() {
   </div>
 
   <!-- Fixed -->
-  <Drawer :open="drawerOpen">
+  <ActionPanel
+    @backdrop-click="toggleActionsPanel"
+    @configure-game="toggleConfigDrawer"
+    :open="actionPanelOpen"
+  />
+
+  <ConfigDrawer :open="configDrawerOpen">
     <header>
       <h1>Tessera board</h1>
       <small class="version">v0.0.0 (0)</small>
@@ -477,46 +502,39 @@ function toggleDrawer() {
         </template>
       </UserOption>
     </Category>
+    <Category name="about game" icon-id="information-outline"></Category>
     <div class="action-buttons-drawer">
       <button @click="userDataManager.requestClearData()">
         <Icon icon-id="delete-forever-outline" side />
         Clear all data
       </button>
     </div>
-    <div class="menu-button-placeholder"></div
-  ></Drawer>
-  <ActionsPanel
-    @open="escCallbackRef = () => (actionPanelOpen = !actionPanelOpen)"
-    @close="escCallbackRef = toggleDrawer"
-    @backdrop-click="actionPanelOpen = false"
-    :open="actionPanelOpen"
-  />
-  <nav>
-    <button
-      @click="actionPanelOpen = !actionPanelOpen"
-      aria-label="Quick actions"
-      title="Quick actions"
-    >
-      <Icon icon-id="flash-outline" />
-    </button>
-    <button
-      @click="toggleDrawer"
-      aria-label="Game configuration"
-      title="Game configuration"
-    >
-      <Icon
-        id="open-menu-chevron"
-        :class="drawerOpen ? 'open' : ''"
-        icon-id="chevron-up"
-      />
-    </button>
-  </nav>
+    <div class="nav-placeholder"></div
+  ></ConfigDrawer>
+
+  <!-- Action button -->
+  <button
+    id="action-button"
+    @click="toggleActionsPanel"
+    aria-label="Quick actions"
+    title="Quick actions"
+  >
+    <Icon
+      icon-id="plus"
+      id="action-icon"
+      :class="actionPanelOpen ? 'close' : ''"
+      side
+    />
+    Actions
+  </button>
+
+  <!-- Config piece -->
   <DialogWindow
     id="config-piece"
     title="Configure new piece"
     :open="configPieceDialog.props.open"
-    @open="escCallbackRef = configPieceDialog.cancel"
-    @close="escCallbackRef = toggleDrawer"
+    @open="escapeManager.addLayer(configPieceDialog.cancel)"
+    @close="escapeManager.removeLayer()"
     @backdrop-click="configPieceDialog.cancel()"
   >
     <div class="piece-preview">
@@ -561,12 +579,14 @@ function toggleDrawer() {
       </button>
     </template>
   </DialogWindow>
+
+  <!-- Configurations -->
   <DialogWindow
     id="configs"
     title="Manage configurations"
     :open="configsDialog.props.open"
-    @open="escCallbackRef = configsDialog.cancel"
-    @close="escCallbackRef = toggleDrawer"
+    @open="escapeManager.addLayer(configsDialog.cancel)"
+    @close="escapeManager.removeLayer()"
     @backdrop-click="configsDialog.cancel()"
   >
     <TransitionGroup name="opacity">
@@ -600,13 +620,15 @@ function toggleDrawer() {
       </button>
     </template>
   </DialogWindow>
+
+  <!-- New Configuration -->
   <DialogWindow
     id="name-config"
     title="Set configuration name and description"
     :open="configPrintDialog.props.open"
     :focus-on-open="configNameInput"
-    @open="escCallbackRef = configPrintDialog.cancel"
-    @close="escCallbackRef = configsDialog.cancel"
+    @open="escapeManager.addLayer(configPrintDialog.cancel)"
+    @close="escapeManager.removeLayer()"
   >
     <input
       type="text"
@@ -638,12 +660,14 @@ function toggleDrawer() {
       </button>
     </template>
   </DialogWindow>
+
+  <!-- Confirm -->
   <DialogWindow
     id="confirm"
     title="Confirm"
     :open="confirmDialog.props.open"
-    @open="escCallbackRef = confirmDialog.cancel"
-    @close="escCallbackRef = toggleDrawer"
+    @open="escapeManager.addLayer(confirmDialog.cancel)"
+    @close="escapeManager.removeLayer()"
   >
     <p class="message">{{ confirmDialog.props.message }}</p>
     <template #action-buttons>
@@ -659,6 +683,8 @@ function toggleDrawer() {
       </button>
     </template>
   </DialogWindow>
+
+  <!-- Toast stack -->
   <ToastStack
     :toasts="toasts"
     @toast-dismiss="toastManager.hideToastId($event.id)"
@@ -668,7 +694,6 @@ function toggleDrawer() {
 <style lang="scss">
 @import "./partials/mixins";
 @import "./partials/transitions";
-@import "./partials/nav";
 
 #game-area {
   @include flex-center;
@@ -687,12 +712,18 @@ function toggleDrawer() {
   }
 }
 
-#open-menu-chevron {
-  transition: transform var(--transition-duration-medium)
-    var(--transition-timing-bounce);
+#action-button {
+  @include no-shrink;
+  @include flex-center;
+  margin: var(--spacing-big);
+}
 
-  &.open {
-    transform: rotateX(0.5turn);
+#action-icon {
+  transition: transform var(--transition-duration-medium)
+    var(--transition-timing-jump);
+
+  &.close {
+    transform: rotate(-45deg);
   }
 }
 

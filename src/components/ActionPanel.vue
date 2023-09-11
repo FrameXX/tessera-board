@@ -4,7 +4,7 @@ import Backdrop from "./Backdrop.vue";
 import Icon from "./Icon.vue";
 
 const props = defineProps({ open: { type: Boolean, default: false } });
-const emit = defineEmits(["open", "close", "backdropClick"]);
+const emit = defineEmits(["open", "close", "backdropClick", "configureGame"]);
 
 watch(
   () => props.open,
@@ -17,28 +17,32 @@ watch(
 <template>
   <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
   <Transition name="slide-up">
-    <div class="actions-panel" v-show="props.open">
-      <button>
-        <Icon icon-id="play-outline" side />
-        Start new game
+    <nav v-show="props.open">
+      <button @click="$emit('configureGame')">
+        <Icon icon-id="cog-outline" side />
+        Configure game
       </button>
       <button>
         <Icon icon-id="pause" side />
         Pause game
       </button>
       <button>
-        <Icon icon-id="flag-outline" side />
+        <Icon icon-id="flag" side />
         Draw
       </button>
+      <button>
+        <Icon icon-id="play-outline" side />
+        Start new game
+      </button>
       <div class="nav-placeholder"></div>
-    </div>
+    </nav>
   </Transition>
 </template>
 
 <style lang="scss">
 @import "../partials/mixins";
 
-.actions-panel {
+nav {
   @include shadow;
   display: flex;
   flex-direction: column;
@@ -58,7 +62,7 @@ watch(
   }
 
   .nav-placeholder {
-    height: 74px;
+    height: 72px;
   }
 }
 </style>

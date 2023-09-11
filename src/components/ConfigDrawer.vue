@@ -36,6 +36,10 @@ header {
     margin: auto;
     max-width: 450px;
   }
+
+  .nav-placeholder {
+    height: 90px;
+  }
 }
 
 .board-box {

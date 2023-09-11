@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { PropType } from "vue";
 import type Piece from "../modules/pieces";
-import Info from "./Info.vue";
+import SimpleInfo from "./SimpleInfo.vue";
 import PieceIcon from "./PieceIcon.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 
@@ -17,7 +17,7 @@ const props = defineProps({
     <div id="player-info-player">
       <div class="player">Player</div>
       <div class="content">
-        <Info name="captured pieces" class="captured-pieces">
+        <SimpleInfo name="captured pieces" class="captured-pieces">
           <TransitionGroup name="list">
             <PieceIcon
               v-for="piece in props.playerCapturedPieces"
@@ -26,14 +26,14 @@ const props = defineProps({
               :piece-id="piece.pieceId"
             ></PieceIcon>
           </TransitionGroup>
-        </Info>
-        <Info name="remaining time">00:00</Info>
+        </SimpleInfo>
+        <SimpleInfo name="remaining time">00:00</SimpleInfo>
       </div>
     </div>
     <div id="player-info-opponent">
       <div class="player">Opponent</div>
       <div class="content">
-        <Info name="captured pieces" class="captured-pieces">
+        <SimpleInfo name="captured pieces" class="captured-pieces">
           <TransitionGroup name="list">
             <PieceIcon
               v-for="piece in props.opponentCapturedPieces"
@@ -42,8 +42,8 @@ const props = defineProps({
               :piece-id="piece.pieceId"
             ></PieceIcon>
           </TransitionGroup>
-        </Info>
-        <Info name="remaining time">00:00</Info>
+        </SimpleInfo>
+        <SimpleInfo name="remaining time">00:00</SimpleInfo>
       </div>
     </div>
   </div>

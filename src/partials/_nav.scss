@@ -1,11 +1,23 @@
 nav {
-  @include no-shrink;
-  @include flex-center;
-  width: 100%;
+  @include shadow;
+  display: flex;
+  flex-direction: column;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  position: fixed;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  background-color: var(--color-primary-surface);
+  padding: var(--spacing-small);
+  max-width: 450px;
 
   button {
-    margin: var(--spacing-medium);
-    padding: var(--spacing-medium);
-    aspect-ratio: 1;
+    justify-content: left;
+    display: flex;
+  }
+
+  .nav-placeholder {
+    height: 72px;
   }
 }

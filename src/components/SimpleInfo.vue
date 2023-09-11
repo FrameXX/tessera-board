@@ -5,7 +5,7 @@ const props = defineProps({ name: { type: String, required: true } });
 </script>
 
 <template>
-  <div class="info">
+  <div class="simple-info">
     <div class="name">{{ capitalizeFirst(props.name) }}</div>
     <div class="content">
       <slot></slot>
@@ -14,7 +14,7 @@ const props = defineProps({ name: { type: String, required: true } });
 </template>
 
 <style lang="scss">
-.info {
+.simple-info {
   display: flex;
   padding: var(--spacing-medium);
   flex-direction: column;
