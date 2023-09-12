@@ -1,6 +1,6 @@
 import BoardManager from "./board_manager";
 import type { BoardStateValue } from "./user_data/board_state";
-import { PositionedPiece } from "../components/Board.vue";
+import { BoardPieceProps } from "../components/Board.vue";
 import type ConfigPieceDialog from "./config_piece_dialog";
 
 class DefaultBoardManager extends BoardManager {
@@ -11,7 +11,7 @@ class DefaultBoardManager extends BoardManager {
     super(boardStateReactive);
   }
 
-  public onPieceClick(boardPiece: PositionedPiece): void {
+  public onPieceClick(boardPiece: BoardPieceProps): void {
     this.boardStateReactive[boardPiece.row][boardPiece.col] = null;
   }
 

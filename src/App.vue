@@ -44,7 +44,7 @@ import { Piece } from "./modules/pieces";
 import { activateColors } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { PositionedMark } from "./components/Board.vue";
+import type { BoardMarkProps } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
@@ -71,8 +71,8 @@ const actionPanelOpen = ref(false);
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCapturedPieces = ref<Piece[]>([]);
 const opponentCapturedPieces = ref<Piece[]>([]);
-const playerBoardMarks = ref<PositionedMark[]>([]);
-const OpponentBoardMarks = ref<PositionedMark[]>([]);
+const playerBoardMarks = ref<BoardMarkProps[]>([]);
+const OpponentBoardMarks = ref<BoardMarkProps[]>([]);
 
 // Toast manager
 const toasts = ref<ToastProps[]>([]);

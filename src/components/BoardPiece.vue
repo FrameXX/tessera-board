@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import PieceIcon from "./PieceIcon.vue";
-import type { PositionedPiece } from "./Board.vue";
+import type { BoardPieceProps } from "./Board.vue";
 import {
   type PropType,
   computed,
@@ -13,8 +13,8 @@ import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { waitForTransitionEnd } from "../modules/utils/elements";
 
 const props = defineProps({
+  pieceProps: { type: Object as PropType<BoardPieceProps>, required: true },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
-  boardPiece: { type: Object as PropType<PositionedPiece>, required: true },
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
 });
@@ -23,18 +23,25 @@ const element = ref<null | ComponentPublicInstance>(null);
 
 // Values for translating pieces to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
-  return props.boardPiece.col * props.cellSize;
+  return props.pieceProps.col * props.cellSize;
 });
 const translateY = computed(() => {
-  return (7 - props.boardPiece.row) * props.cellSize;
+  return (7 - props.pieceProps.row) * props.cellSize;
 });
 const size = computed(() => {
   return props.cellSize - props.piecePadding * 2;
 });
+// Valus for setting the translate origin of piece wrapper
+const originX = computed(() => {
+  return translateX.value + props.cellSize / 2;
+});
+const originY = computed(() => {
+  return translateY.value + props.cellSize / 2;
+});
 
 // Convert prop to reactive so it can be watched without problems
 const reactiveBoardPiece = computed(() => {
-  return reactive(props.boardPiece);
+  return reactive(props.pieceProps);
 });
 
 // Watch piece for changes in rows, columns or both and set z-index to 1 while moving so it appears on top of other pieces
@@ -59,18 +66,29 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 </script>
 
 <template>
-  <PieceIcon
-    ref="element"
-    class="piece"
-    :style="`transform: translate(${translateX}px,${translateY}px); width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
-    :piece-set="props.pieceSet"
-    :piece-id="props.boardPiece.piece.pieceId"
-    :color="props.boardPiece.piece.color"
-  />
+  <div
+    class="piece-wrapper"
+    :style="`transform-origin: ${originX}px ${originY}px`"
+  >
+    <PieceIcon
+      ref="element"
+      class="piece"
+      :style="`transform: translate(${translateX}px,${translateY}px); width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
+      :piece-set="props.pieceSet"
+      :piece-id="props.pieceProps.piece.pieceId"
+      :color="props.pieceProps.piece.color"
+    />
+  </div>
 </template>
 
 <style lang="scss">
 @import "../partials/mixins";
+
+.piece-wrapper {
+  @include stretch;
+  position: absolute;
+  pointer-events: none;
+}
 
 .piece {
   @include clickable;

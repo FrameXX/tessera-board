@@ -8,13 +8,13 @@ import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 import BoardMark from "./BoardMark.vue";
 
-export interface PositionedPiece {
+export interface BoardPieceProps {
   row: number;
   col: number;
   piece: Piece;
 }
 
-export interface PositionedMark {
+export interface BoardMarkProps {
   row: number;
   col: number;
   mark: "availible" | "capture";
@@ -25,14 +25,16 @@ const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
-  marks: { type: Array as PropType<PositionedMark[]>, default: [] },
+  allMarkProps: { type: Array as PropType<BoardMarkProps[]>, default: [] },
 });
-const boardPieces = computed(() => {
-  const boardPieces: PositionedPiece[] = [];
+
+// All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
+const allPieceProps = computed(() => {
+  const allPieceProps: BoardPieceProps[] = [];
   for (const [rowIndex, row] of props.state.entries()) {
     for (const [colIndex, piece] of row.entries()) {
       if (piece) {
-        boardPieces.push({
+        allPieceProps.push({
           row: rowIndex,
           col: colIndex,
           piece: piece,
@@ -40,8 +42,8 @@ const boardPieces = computed(() => {
       }
     }
   }
-  boardPieces.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
-  return boardPieces;
+  allPieceProps.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
+  return allPieceProps;
 });
 
 const container = ref<HTMLDivElement | null>(null);
@@ -49,9 +51,6 @@ const containerMinSize = ref<number>(0);
 
 const cellSize = computed(() => {
   return containerMinSize.value / 8;
-});
-const halfCell = computed(() => {
-  return cellSize.value / 2;
 });
 
 onMounted(() => {
@@ -87,14 +86,6 @@ function getContainerMinSize() {
     return null;
   }
 }
-
-function getPieceX(col: number) {
-  return col * cellSize.value;
-}
-
-function getPieceY(row: number) {
-  return (7 - row) * cellSize.value;
-}
 </script>
 
 <template>
@@ -114,25 +105,18 @@ function getPieceY(row: number) {
         ></Cell>
       </tr>
       <TransitionGroup name="piece">
-        <div
-          class="piece-wrapper"
-          v-for="boardPiece in boardPieces"
-          :key="boardPiece.piece.id"
-          :style="`transform-origin: ${
-            getPieceX(boardPiece.col) + halfCell
-          }px ${getPieceY(boardPiece.row) + halfCell}px`"
-        >
-          <BoardPiece
-            @click="props.manager.onPieceClick(boardPiece)"
-            :board-piece="boardPiece"
-            :piece-set="props.pieceSet"
-            :cell-size="cellSize"
-            :piece-padding="piecePadding"
-          />
-        </div>
+        <BoardPiece
+          v-for="pieceProps in allPieceProps"
+          :key="pieceProps.piece.id"
+          @click="props.manager.onPieceClick(pieceProps)"
+          :piece-props="pieceProps"
+          :piece-set="props.pieceSet"
+          :cell-size="cellSize"
+          :piece-padding="piecePadding"
+        />
       </TransitionGroup>
       <BoardMark
-        v-for="mark in props.marks"
+        v-for="mark in props.allMarkProps"
         :board-mark="mark"
         :cell-size="cellSize"
       />
@@ -167,12 +151,6 @@ function getPieceY(row: number) {
     padding: 0;
     display: flex;
   }
-}
-
-.piece-wrapper {
-  position: absolute;
-  pointer-events: none;
-  @include stretch;
 }
 
 .index-row-left,

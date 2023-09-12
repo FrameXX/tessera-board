@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { computed, type PropType } from "vue";
-import { PositionedMark } from "./Board.vue";
+import { BoardMarkProps } from "./Board.vue";
 import Icon from "./Icon.vue";
 
 const props = defineProps({
-  boardMark: { type: Object as PropType<PositionedMark>, required: true },
+  boardMark: { type: Object as PropType<BoardMarkProps>, required: true },
   cellSize: { type: Number, required: true },
 });
 
