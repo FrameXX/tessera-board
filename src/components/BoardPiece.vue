@@ -1,19 +1,20 @@
 <script lang="ts" setup>
 import PieceIcon from "./PieceIcon.vue";
-import type { BoardPieceProps } from "./Board.vue";
 import {
   type PropType,
   computed,
   ref,
   watch,
-  reactive,
   type ComponentPublicInstance,
 } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { waitForTransitionEnd } from "../modules/utils/elements";
+import type Piece from "../modules/pieces";
 
 const props = defineProps({
-  pieceProps: { type: Object as PropType<BoardPieceProps>, required: true },
+  piece: { type: Object as PropType<Piece>, required: true },
+  row: { type: Number, required: true },
+  col: { type: Number, required: true },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
@@ -23,15 +24,16 @@ const element = ref<null | ComponentPublicInstance>(null);
 
 // Values for translating pieces to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
-  return props.pieceProps.col * props.cellSize;
+  return props.col * props.cellSize;
 });
 const translateY = computed(() => {
-  return (7 - props.pieceProps.row) * props.cellSize;
+  return (7 - props.row) * props.cellSize;
 });
 const size = computed(() => {
   return props.cellSize - props.piecePadding * 2;
 });
-// Valus for setting the translate origin of piece wrapper
+
+// Values for setting the translate origin of piece wrapper
 const originX = computed(() => {
   return translateX.value + props.cellSize / 2;
 });
@@ -39,29 +41,27 @@ const originY = computed(() => {
   return translateY.value + props.cellSize / 2;
 });
 
-// Convert prop to reactive so it can be watched without problems
-const reactiveBoardPiece = computed(() => {
-  return reactive(props.pieceProps);
+const piecePosition = computed(() => {
+  return { row: props.row, col: props.col };
 });
 
-// Watch piece for changes in rows, columns or both and set z-index to 1 while moving so it appears on top of other pieces
-watch(reactiveBoardPiece, (newValue, oldValue) => {
-  if (newValue.row !== oldValue.row || newValue.col !== oldValue.col) {
-    const boardPieceElement = element.value?.$el;
-    if (!boardPieceElement) {
-      console.error(
-        "Cannot obtain SVGElement instance of boardPiece, thus cannot alter zIndex."
-      );
-      return;
-    }
-    temporarilyMoveToTop(boardPieceElement);
+// Watch piece for position changes and set z-index to 1 while moving so it appears on top of other pieces
+watch(piecePosition, () => {
+  const pieceIconElement = element.value?.$el;
+  if (!(pieceIconElement instanceof SVGElement)) {
+    console.error(
+      "Element of Piece Icon is not accessible, so its z-index cannot be altered."
+    );
+    return;
   }
+  temporarilyMoveToTop(pieceIconElement);
 });
 
-async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
+function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   zIndex.value = "1";
-  await waitForTransitionEnd(boardPieceElement);
-  zIndex.value = "";
+  waitForTransitionEnd(boardPieceElement).then(() => {
+    zIndex.value = "";
+  });
 }
 </script>
 
@@ -75,8 +75,8 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
       class="piece"
       :style="`transform: translate(${translateX}px,${translateY}px); width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
       :piece-set="props.pieceSet"
-      :piece-id="props.pieceProps.piece.pieceId"
-      :color="props.pieceProps.piece.color"
+      :piece-id="props.piece.pieceId"
+      :color="props.piece.color"
     />
   </div>
 </template>

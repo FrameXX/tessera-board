@@ -39,6 +39,7 @@ import ThemeManager from "./modules/theme_manager";
 import TransitionsManager from "./modules/transitions_manager";
 import ConfirmDialog from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
+import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
 import { Piece } from "./modules/pieces";
 import { activateColors } from "./modules/utils/elements";
@@ -115,9 +116,18 @@ const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
+const gameBoardState: BoardStateValue = reactive(
+  structuredClone(DEFAULT_BOARD_STATE_VALUE)
+);
+
 const defaultBoardStateData = new BoardStateData(
   DEFAULT_BOARD_STATE_VALUE,
   defaultBoardState,
+  toastManager
+);
+const gameBoardStateData = new BoardStateData(
+  DEFAULT_BOARD_STATE_VALUE,
+  gameBoardState,
   toastManager
 );
 
@@ -147,6 +157,7 @@ userDataManager.entries = [
     toastManager
   ),
   defaultBoardStateData,
+  gameBoardStateData,
 ];
 
 // Default board configurations
@@ -161,11 +172,13 @@ const defaultBoardConfigManager = new ConfigManager(
   toastManager
 );
 
-// Default board manager
+// Board managers
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
   configPieceDialog
 );
+
+const gameBoardManager = new GameBoardManager(gameBoardState);
 
 // Escape manager
 const escapeManager = new EscapeManager(toggleActionsPanel);
@@ -229,19 +242,19 @@ function toggleConfigDrawer() {
     />
     <div id="boards-area">
       <Board
+        :manager="gameBoardManager"
+        :state="gameBoardState"
+        :piece-set="pieceSet"
+        :piece-padding="piecePadding"
+        id="primary-board"
+      />
+      <!-- <Board
         :manager="defaultBoardManager"
         :state="defaultBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
         id="primary-board"
-      />
-      <Board
-        :manager="defaultBoardManager"
-        :state="defaultBoardState"
-        :piece-set="pieceSet"
-        :piece-padding="piecePadding"
-        id="primary-board"
-      />
+      /> -->
     </div>
   </div>
 

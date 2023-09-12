@@ -1,24 +1,29 @@
 <script lang="ts" setup>
 import { computed, type PropType } from "vue";
-import { BoardMarkProps } from "./Board.vue";
 import Icon from "./Icon.vue";
 
+type Mark = "availible" | "capture";
+
 const props = defineProps({
-  boardMark: { type: Object as PropType<BoardMarkProps>, required: true },
+  row: { type: Number, required: true },
+  col: { type: Number, required: true },
+  mark: { type: String as PropType<Mark>, required: true },
   cellSize: { type: Number, required: true },
 });
 
+const iconId = computed(() => {
+  return props.mark === "availible" ? "circle-small" : "close";
+});
+
+// Values for translating marks to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
-  return props.boardMark.col * props.cellSize;
+  return props.col * props.cellSize;
 });
 const translateY = computed(() => {
-  return (7 - props.boardMark.row) * props.cellSize;
+  return (7 - props.row) * props.cellSize;
 });
 const size = computed(() => {
   return props.cellSize - 8;
-});
-const iconId = computed(() => {
-  return props.boardMark.mark === "availible" ? "circle-small" : "close";
 });
 </script>
 

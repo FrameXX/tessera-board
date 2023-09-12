@@ -109,15 +109,20 @@ function getContainerMinSize() {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
-          :piece-props="pieceProps"
+          :row="pieceProps.row"
+          :col="pieceProps.col"
+          :piece="pieceProps.piece"
           :piece-set="props.pieceSet"
           :cell-size="cellSize"
           :piece-padding="piecePadding"
         />
       </TransitionGroup>
       <BoardMark
-        v-for="mark in props.allMarkProps"
-        :board-mark="mark"
+        v-for="markProps in props.allMarkProps"
+        :key="`${markProps.mark}-${markProps.row}-${markProps.col}`"
+        :row="markProps.row"
+        :col="markProps.col"
+        :mark="markProps.mark"
         :cell-size="cellSize"
       />
     </table>

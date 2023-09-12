@@ -2,10 +2,10 @@ import type { BoardStateValue } from "./user_data/board_state";
 import { BoardPieceProps } from "../components/Board.vue";
 
 abstract class BoardManager {
-  protected readonly boardStateReactive: BoardStateValue;
+  protected readonly boardState: BoardStateValue;
 
-  constructor(boardStateReactive: BoardStateValue) {
-    this.boardStateReactive = boardStateReactive;
+  constructor(boardState: BoardStateValue) {
+    this.boardState = boardState;
   }
 
   public abstract onPieceClick(boardPiece: BoardPieceProps): void;
