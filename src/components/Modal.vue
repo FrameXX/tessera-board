@@ -50,7 +50,7 @@ watch(
   <Transition name="throw">
     <dialog
       v-show="props.open"
-      class="dialog-window"
+      class="modal"
       :id="`${props.id}-dialog`"
       :aria-label="props.title"
     >
@@ -68,7 +68,7 @@ watch(
 <style lang="scss">
 @import "../partials/mixins";
 
-.dialog-window {
+.modal {
   @include fix-centered;
   @include flex-center(inline-block);
   @include shadow;

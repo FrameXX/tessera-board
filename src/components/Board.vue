@@ -19,7 +19,7 @@ const props = defineProps({
   state: { type: Object as PropType<BoardStateValue>, required: true },
   marksState: {
     type: Array as PropType<MarkState>,
-    default: Array(8).fill(Array(8).fill("availible")),
+    default: Array(8).fill(Array(8).fill(null)),
   },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },

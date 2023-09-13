@@ -45,7 +45,7 @@ import { Piece } from "./modules/pieces";
 import { activateColors } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { BoardMarkProps } from "./components/Board.vue";
+import type { BoardPieceProps } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
@@ -57,7 +57,7 @@ import ConfigDrawer from "./components/ConfigDrawer.vue";
 import Category from "./components/Category.vue";
 import UserOption from "./components/UserOption.vue";
 import Checkbox from "./components/Checkbox.vue";
-import DialogWindow from "./components/DialogWindow.vue";
+import Modal from "./components/Modal.vue";
 import ToastStack from "./components/ToastStack.vue";
 import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
@@ -72,8 +72,12 @@ const actionPanelOpen = ref(false);
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCapturedPieces = ref<Piece[]>([]);
 const opponentCapturedPieces = ref<Piece[]>([]);
-const playerBoardMarks = ref<BoardMarkProps[]>([]);
-const OpponentBoardMarks = ref<BoardMarkProps[]>([]);
+const playerBoardMarks = ref<BoardPieceProps[]>(
+  Array(8).fill(Array(8).fill(null))
+);
+const OpponentBoardMarks = ref<BoardPieceProps[]>(
+  Array(8).fill(Array(8).fill(null))
+);
 
 // Toast manager
 const toasts = ref<ToastProps[]>([]);
@@ -543,7 +547,7 @@ function toggleConfigDrawer() {
   </button>
 
   <!-- Config piece -->
-  <DialogWindow
+  <Modal
     id="config-piece"
     title="Configure new piece"
     :open="configPieceDialog.props.open"
@@ -592,10 +596,10 @@ function toggleConfigDrawer() {
         <Icon side icon-id="check-circle-outline" />Add piece
       </button>
     </template>
-  </DialogWindow>
+  </Modal>
 
   <!-- Configurations -->
-  <DialogWindow
+  <Modal
     id="configs"
     title="Manage configurations"
     :open="configsDialog.props.open"
@@ -633,10 +637,10 @@ function toggleConfigDrawer() {
         <Icon side icon-id="content-save-outline" />New config
       </button>
     </template>
-  </DialogWindow>
+  </Modal>
 
   <!-- New Configuration -->
-  <DialogWindow
+  <Modal
     id="name-config"
     title="Set configuration name and description"
     :open="configPrintDialog.props.open"
@@ -674,10 +678,10 @@ function toggleConfigDrawer() {
         <Icon side icon-id="content-save-outline" />Save
       </button>
     </template>
-  </DialogWindow>
+  </Modal>
 
   <!-- Confirm -->
-  <DialogWindow
+  <Modal
     id="confirm"
     title="Confirm"
     :open="confirmDialog.props.open"
@@ -697,7 +701,7 @@ function toggleConfigDrawer() {
         }}
       </button>
     </template>
-  </DialogWindow>
+  </Modal>
 
   <!-- Toast stack -->
   <ToastStack
