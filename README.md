@@ -4,7 +4,9 @@ This is a Single Page Application for playing chess with the aim of creating a f
 
 ## IDE setup
 
-You will need:
+<sup>\*</sup> **I am aware** that this is very basic, but I will include it nevertheless.
+
+Software you will need:
 
 - [NodeJS](https://nodejs.org/en/download)
 - [Git](https://git-scm.com/downloads)
