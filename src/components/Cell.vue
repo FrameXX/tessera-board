@@ -1,9 +1,13 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import { PropType, computed } from "vue";
+import Icon from "./Icon.vue";
+
+export type Mark = "availible" | "capture" | null;
 
 const props = defineProps({
   row: { type: Number, required: true },
   col: { type: Number, required: true },
+  mark: { type: [String, null] as PropType<Mark>, required: true },
 });
 
 const charIndexes = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -29,6 +33,10 @@ const cornerClass = computed(() => {
     return "";
   }
 });
+
+const markIconId = computed(() => {
+  return props.mark === "capture" ? "close" : "circle-small";
+});
 </script>
 
 <template>
@@ -44,6 +52,7 @@ const cornerClass = computed(() => {
     <span class="index-row-right" v-if="boardCol === 'H'">{{ boardRow }}</span>
     <span class="index-col-top" v-if="boardRow === 8">{{ boardCol }}</span>
     <span class="index-col-bottom" v-if="boardRow === 1">{{ boardCol }}</span>
+    <Icon class="mark" :icon-id="markIconId" v-show="props.mark" />
   </td>
 </template>
 
@@ -73,7 +82,10 @@ const cornerClass = computed(() => {
 
   .mark {
     @include absolute-centered;
-    mix-blend-mode: exclusion;
+    mix-blend-mode: overlay;
+    filter: brightness(2);
+    color: var(--color-cell-white);
+    z-index: 1;
     width: 100%;
     height: 100%;
   }

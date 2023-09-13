@@ -2,11 +2,12 @@
 import { computed, type PropType, ref, onMounted } from "vue";
 import type { BoardStateValue } from "../modules/user_data/board_state";
 import Piece from "../modules/pieces";
-import Cell from "./Cell.vue";
+import Cell, { type Mark } from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
-import BoardMark from "./BoardMark.vue";
+
+export type MarkState = Mark[][];
 
 export interface BoardPieceProps {
   row: number;
@@ -14,18 +15,15 @@ export interface BoardPieceProps {
   piece: Piece;
 }
 
-export interface BoardMarkProps {
-  row: number;
-  col: number;
-  mark: "availible" | "capture";
-}
-
 const props = defineProps({
   state: { type: Object as PropType<BoardStateValue>, required: true },
+  marksState: {
+    type: Array as PropType<MarkState>,
+    default: Array(8).fill(Array(8).fill("availible")),
+  },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
-  allMarkProps: { type: Array as PropType<BoardMarkProps[]>, default: [] },
 });
 
 // All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
@@ -102,7 +100,8 @@ function getContainerMinSize() {
           :key="`cell-${row}-${col}`"
           :row="9 - row"
           :col="col"
-        ></Cell>
+          :mark="props.marksState[row - 1][col - 1]"
+        />
       </tr>
       <TransitionGroup name="piece">
         <BoardPiece
@@ -117,14 +116,6 @@ function getContainerMinSize() {
           :piece-padding="piecePadding"
         />
       </TransitionGroup>
-      <BoardMark
-        v-for="markProps in props.allMarkProps"
-        :key="`${markProps.mark}-${markProps.row}-${markProps.col}`"
-        :row="markProps.row"
-        :col="markProps.col"
-        :mark="markProps.mark"
-        :cell-size="cellSize"
-      />
     </table>
   </div>
 </template>
@@ -145,7 +136,6 @@ function getContainerMinSize() {
 .board {
   @include round-border;
   @include shadow;
-  // flex-grow: 1;
   position: absolute;
   background-color: var(--color-cell-black);
   display: flex;
