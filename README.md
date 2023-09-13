@@ -6,6 +6,8 @@ This is a Single Page Application for playing chess with the aim of creating a f
 
 <sup>\*</sup> **I am aware** that this is very basic, but I will include it nevertheless.
 
+---
+
 Software you will need:
 
 - [NodeJS](https://nodejs.org/en/download)
@@ -13,6 +15,10 @@ Software you will need:
 - [VSCodium](https://github.com/VSCodium/vscodium/releases/latest) or [VSCode](https://code.visualstudio.com/).
 
 <sup>\*</sup> It's possible that there may be alternative approaches or software also able to achieve desired task.
+
+---
+
+Install [Vue Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) and [Vue Typescript](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) plugins for VSCode.
 
 ---
 
