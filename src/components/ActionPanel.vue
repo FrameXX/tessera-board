@@ -18,21 +18,27 @@ watch(
   <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
   <Transition name="slide-up">
     <nav v-show="props.open">
-      <button @click="$emit('configureGame')">
+      <span class="section-title">Game</span>
+      <button
+        aria-label="Configure game"
+        title="Configure game"
+        @click="$emit('configureGame')"
+      >
         <Icon icon-id="cog-outline" side />
         Configure game
       </button>
-      <button>
+      <span class="section-title">Current match</span>
+      <button aria-label="Pause match" title="Pause match">
         <Icon icon-id="pause" side />
-        Pause game
+        Pause match
       </button>
-      <button>
+      <button aria-label="Resign" title="Resign">
         <Icon icon-id="flag" side />
-        Draw
+        Resign
       </button>
-      <button>
+      <button aria-label="Start new match" title="Start new match">
         <Icon icon-id="play-outline" side />
-        Start new game
+        Start new match
       </button>
       <div class="nav-placeholder"></div>
     </nav>
@@ -47,6 +53,7 @@ nav {
   z-index: var(--z-index-modal);
   display: flex;
   flex-direction: column;
+  align-items: center;
   bottom: 0;
   left: 0;
   right: 0;
@@ -57,13 +64,19 @@ nav {
   padding: var(--spacing-small);
   max-width: 450px;
 
+  .section-title {
+    width: fit-content;
+    margin: var(--spacing-small);
+  }
+
   button {
+    @include fill-availible;
     justify-content: left;
     display: flex;
   }
 
   .nav-placeholder {
-    height: 72px;
+    height: 80px;
   }
 }
 </style>

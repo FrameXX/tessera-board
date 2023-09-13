@@ -241,6 +241,7 @@ function toggleConfigDrawer() {
   <!-- Relative -->
   <div id="game-area">
     <PlayerInfo
+      v-show="false"
       :player-captured-pieces="playerCapturedPieces"
       :opponent-captured-pieces="opponentCapturedPieces"
       :piece-set="pieceSet"
@@ -253,13 +254,6 @@ function toggleConfigDrawer() {
         :piece-padding="piecePadding"
         id="primary-board"
       />
-      <!-- <Board
-        :manager="defaultBoardManager"
-        :state="defaultBoardState"
-        :piece-set="pieceSet"
-        :piece-padding="piecePadding"
-        id="primary-board"
-      /> -->
     </div>
   </div>
 
@@ -361,7 +355,7 @@ function toggleConfigDrawer() {
     <!-- Look and feel -->
     <Category name="look and feel" icon-id="palette-advanced">
       <!-- Colors -->
-      <span class="category-section">Colors</span>
+      <span class="section-title">Colors</span>
       <UserOption
         name="UI mode"
         icon-id="brightness-6"
@@ -414,7 +408,7 @@ function toggleConfigDrawer() {
         </template>
       </UserOption>
       <!-- Checkboard -->
-      <span class="category-section">Checkboard</span>
+      <span class="section-title">Checkboard</span>
       <UserOption
         name="piece set"
         icon-id="chess-pawn"
@@ -481,9 +475,9 @@ function toggleConfigDrawer() {
         </template>
       </UserOption>
       <!-- Elements -->
-      <span class="category-section">Elements</span>
+      <span class="section-title">Elements</span>
       <!-- Transitions -->
-      <span class="category-section">Transitions</span>
+      <span class="section-title">Transitions</span>
       <UserOption
         name="transitions"
         icon-id="transition"
@@ -531,20 +525,28 @@ function toggleConfigDrawer() {
   ></ConfigDrawer>
 
   <!-- Action button -->
-  <button
-    id="action-button"
-    @click="toggleActionsPanel"
-    aria-label="Quick actions"
-    title="Quick actions"
-  >
-    <Icon
-      icon-id="plus"
-      id="action-icon"
-      :class="actionPanelOpen ? 'close' : ''"
-      side
-    />
-    Actions
-  </button>
+  <div class="primary-buttons">
+    <button aria-label="Cancel move" title="Cancel move" v-show="false">
+      <Icon icon-id="close"></Icon>
+    </button>
+    <button
+      id="action-button"
+      @click="toggleActionsPanel"
+      aria-label="Quick actions"
+      title="Quick actions"
+    >
+      <Icon
+        icon-id="plus"
+        id="action-icon"
+        :class="actionPanelOpen ? 'close' : ''"
+        side
+      />
+      Actions
+    </button>
+    <button aria-label="Confirm move" title="Confirm move" v-show="false">
+      <Icon icon-id="check"></Icon>
+    </button>
+  </div>
 
   <!-- Config piece -->
   <Modal
@@ -731,11 +733,12 @@ function toggleConfigDrawer() {
   }
 }
 
-#action-button {
+.primary-buttons {
   @include no-shrink;
   @include flex-center;
   z-index: var(--z-index-top-fragment);
-  margin: var(--spacing-big);
+  margin: var(--spacing-medium);
+  width: 100%;
 }
 
 #action-icon {
@@ -759,5 +762,13 @@ function toggleConfigDrawer() {
     margin: var(--spacing-medium) var(--spacing-medium) var(--spacing-medium) 0;
   }
 }
+
+.section-title {
+  @include shadow;
+  @include round-border;
+  @include inverted-accent;
+  margin: var(--spacing-big) 0;
+  font-size: var(--font-size-small);
+  padding: var(--spacing-small);
+}
 </style>
-./modules/configs_dialog
