@@ -73,6 +73,7 @@ watch(
   @include flex-center(inline-block);
   @include shadow;
   @include round-border;
+  z-index: var(--z-index-modal);
   padding: var(--spacing-big);
   display: flex;
   flex-direction: column;
@@ -96,6 +97,8 @@ watch(
 }
 
 #name-config-dialog {
+  z-index: var(--z-index-modal-top);
+
   input,
   textarea {
     @include fill-availible;

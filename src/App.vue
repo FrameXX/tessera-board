@@ -645,6 +645,7 @@ function toggleConfigDrawer() {
     @close="escapeManager.removeLayer()"
   >
     <input
+      autocapitalize="on"
       type="text"
       id="input-config-name"
       ref="configNameInput"
@@ -729,6 +730,7 @@ function toggleConfigDrawer() {
 #action-button {
   @include no-shrink;
   @include flex-center;
+  z-index: var(--z-index-top-fragment);
   margin: var(--spacing-big);
 }
 

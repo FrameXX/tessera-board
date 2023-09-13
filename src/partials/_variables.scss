@@ -28,6 +28,15 @@ html {
       var(--box-shadow-color)
   );
 
+  // ===== Z-index layers =====
+  --z-index-alert: 7;
+  --z-index-splashscreen: 6;
+  --z-index-modal-top: 5;
+  --z-index-modal: 4;
+  --z-index-top-fragment: 4;
+  --z-index-piece-top: 3;
+  --z-index-mark: 2;
+
   // ===== Transition =====
   --transition-duration-multiplier-config: 1;
   --transition-duration-multiplier: var(
@@ -44,6 +53,9 @@ html {
   );
   --transition-duration-delayed: calc(
     400ms * var(--transition-duration-multiplier)
+  );
+  --transition-duration-calm: calc(
+    2000ms * var(--transition-duration-multiplier)
   );
   --transition-duration-splashscreen: 500ms;
   --transition-timing-bounce: cubic-bezier(0.5, 1.25, 0.55, 1.05);

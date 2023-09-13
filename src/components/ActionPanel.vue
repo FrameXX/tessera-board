@@ -44,6 +44,7 @@ watch(
 
 nav {
   @include shadow;
+  z-index: var(--z-index-modal);
   display: flex;
   flex-direction: column;
   bottom: 0;

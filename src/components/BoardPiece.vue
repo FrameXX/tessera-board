@@ -19,7 +19,7 @@ const props = defineProps({
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
 });
-const zIndex = ref<"" | "1">("");
+const zIndex = ref<"" | "var(--z-index-piece-top)">("");
 const element = ref<null | ComponentPublicInstance>(null);
 
 // Values for translating pieces to their right position from the absolute position at top left corner of the board

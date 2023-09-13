@@ -32,6 +32,7 @@ defineEmits({
 @import "../partials/mixins";
 
 #toast-stack {
+  z-index: var(--z-index-alert);
   align-items: center;
   position: fixed;
   display: flex;

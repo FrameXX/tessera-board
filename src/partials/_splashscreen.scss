@@ -1,6 +1,7 @@
 #splashscreen {
   @include flex-center;
   @include screen;
+  z-index: var(--z-index-splashscreen);
   flex-direction: column;
   background-color: var(--color-cell-black);
   transition: opacity var(--transition-duration-long) ease-in,

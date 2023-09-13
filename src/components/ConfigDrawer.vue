@@ -7,7 +7,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
 <template>
   <Backdrop v-show="props.open" />
   <Transition name="slide-up">
-    <div class="drawer" v-show="props.open">
+    <div class="config-drawer" v-show="props.open">
       <div class="content">
         <slot></slot>
       </div>
@@ -22,10 +22,11 @@ header {
   margin-bottom: var(--spacing-huge);
 }
 
-.drawer {
+.config-drawer {
   @include fix-centered;
   @include scrollable;
   @include shadow;
+  z-index: var(--z-index-top-fragment);
   height: 100%;
   background-color: var(--color-primary-surface);
 

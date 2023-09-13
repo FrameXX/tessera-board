@@ -85,7 +85,7 @@ const markIconId = computed(() => {
     mix-blend-mode: overlay;
     filter: brightness(2);
     color: var(--color-cell-white);
-    z-index: 1;
+    z-index: var(--z-index-mark);
     width: 100%;
     height: 100%;
   }
