@@ -187,27 +187,28 @@ const escapeManager = new EscapeManager(toggleActionsPanel);
 onMounted(() => {
   console.log("App mounted");
 
-  // Let the app wait another 600ms to make its fully loaded.
+  navigator.cookieEnabled
+    ? userDataManager.recoverData()
+    : toastManager.showToast(
+        "Cookies are disabled. -> No changes will be restored in next session.",
+        "error",
+        "cookie-alert"
+      );
+  userDataManager.applyData();
+  userDataManager.updateReferences();
+
+  // NOTE: Sets CSS Saturation variables from 0 to their appropriate user configured values
+  activateColors();
+
+  addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      escapeManager.escape();
+    }
+  });
+
+  // Let the app wait another 600ms to make sure its fully loaded.
   setTimeout(() => {
     splashscreenManager.hideSplashscreen();
-    navigator.cookieEnabled
-      ? userDataManager.recoverData()
-      : toastManager.showToast(
-          "Cookies are disabled. -> No changes will be restored in next session.",
-          "error",
-          "cookie-alert"
-        );
-    userDataManager.applyData();
-    userDataManager.updateReferences();
-
-    // NOTE: Sets CSS Saturation variables from 0 to their appropriate user configured values
-    activateColors();
-
-    addEventListener("keydown", (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        escapeManager.escape();
-      }
-    });
   }, 600);
 });
 
