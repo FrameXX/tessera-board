@@ -31,6 +31,9 @@ import TransitionDurationData, {
 import CellIndexOpacityData, {
   DEFAULT_CELL_INDEX_OPACITY_VALUE,
 } from "./modules/user_data/cell_index_opacity";
+import PreferredPlayerColor, {
+  DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
+} from "./modules/user_data/preferred_player_color";
 
 // Import other classes
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -117,6 +120,7 @@ const piecePadding = ref(DEFAULT_PIECE_PADDING_VALUE);
 const pieceBorder = ref(DEFAULT_PIECE_BORDER_VALUE);
 const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
 const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
+const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
@@ -158,6 +162,11 @@ userDataManager.entries = [
   new CellIndexOpacityData(
     DEFAULT_CELL_INDEX_OPACITY_VALUE,
     cellIndexOpacity,
+    toastManager
+  ),
+  new PreferredPlayerColor(
+    DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
+    preferredPlayerColor,
     toastManager
   ),
   defaultBoardStateData,
@@ -275,7 +284,7 @@ function toggleConfigDrawer() {
         icon-id="invert-colors"
         option-id="select-player-color"
       >
-        <select id="select-player-color">
+        <select id="select-player-color" v-model="preferredPlayerColor">
           <option value="random">Random</option>
           <option value="white">White</option>
           <option value="black">Black</option>
@@ -285,6 +294,7 @@ function toggleConfigDrawer() {
         </template>
       </UserOption>
       <UserOption
+        v-if="false"
         name="computer"
         icon-id="memory"
         option-id="check-computer-player"
@@ -314,6 +324,7 @@ function toggleConfigDrawer() {
         name="computer"
         icon-id="memory"
         option-id="check-computer-opponent"
+        v-if="false"
       >
         <Checkbox id="check-computer-opponent" />
         <template #description>
