@@ -43,3 +43,22 @@ export function getRandomId(chars: number = 8) {
 export function capitalizeFirst(string: string) {
   return string[0].toUpperCase() + string.slice(1);
 }
+
+export interface MinSecTime {
+  mins: number;
+  secs: number;
+}
+
+export function getMinsAndSecsTime(secs: number): MinSecTime {
+  const mins = Math.trunc(secs / 60);
+  const secsRest = secs - mins * 60;
+  return { mins, secs: secsRest };
+}
+
+export function getDigitStr(number: number, digits: number = 2) {
+  let str = number.toString();
+  while (str.length < digits) {
+    str = "0" + str;
+  }
+  return str;
+}

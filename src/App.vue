@@ -63,7 +63,7 @@ import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
 import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
-import PlayerInfo from "./components/PlayerInfo.vue";
+import Timers from "./components/Timers.vue";
 
 // UI refs
 const configDrawerOpen = ref(false);
@@ -240,21 +240,20 @@ function toggleConfigDrawer() {
 <template>
   <!-- Relative -->
   <div id="game-area">
-    <PlayerInfo
-      v-show="false"
-      :player-captured-pieces="playerCapturedPieces"
-      :opponent-captured-pieces="opponentCapturedPieces"
-      :piece-set="pieceSet"
-    />
+    <Timers :player-secs-all-turns="128" />
+    <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
         :manager="gameBoardManager"
         :state="gameBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
+        :player-captured-pieces="playerCapturedPieces"
+        :opponent-captured-pieces="opponentCapturedPieces"
         id="primary-board"
       />
     </div>
+    <div class="captured-pieces-placeholder"></div>
   </div>
 
   <!-- Fixed -->
@@ -524,11 +523,14 @@ function toggleConfigDrawer() {
     <div class="nav-placeholder"></div
   ></ConfigDrawer>
 
-  <!-- Action button -->
+  <!-- Relative -->
+  <!-- Primary buttons -->
   <div class="primary-buttons">
-    <button aria-label="Cancel move" title="Cancel move" v-show="false">
-      <Icon icon-id="close"></Icon>
-    </button>
+    <Transition name="slide-up">
+      <button aria-label="Cancel move" title="Cancel move" v-show="false">
+        <Icon icon-id="close"></Icon>
+      </button>
+    </Transition>
     <button
       id="action-button"
       @click="toggleActionsPanel"
@@ -543,11 +545,14 @@ function toggleConfigDrawer() {
       />
       Actions
     </button>
-    <button aria-label="Confirm move" title="Confirm move" v-show="false">
-      <Icon icon-id="check"></Icon>
-    </button>
+    <Transition name="slide-up">
+      <button aria-label="Confirm move" title="Confirm move" v-show="false">
+        <Icon icon-id="check"></Icon>
+      </button>
+    </Transition>
   </div>
 
+  <!-- Fixed -->
   <!-- Config piece -->
   <Modal
     id="config-piece"
@@ -731,6 +736,10 @@ function toggleConfigDrawer() {
   .board-container {
     padding: 0 var(--spacing-small);
   }
+}
+
+.captured-pieces-placeholder {
+  height: 40px;
 }
 
 .primary-buttons {

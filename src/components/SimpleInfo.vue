@@ -16,7 +16,7 @@ const props = defineProps({ name: { type: String, required: true } });
 <style lang="scss">
 .simple-info {
   display: flex;
-  padding: var(--spacing-medium);
+  padding: var(--spacing-small);
   flex-direction: column;
 
   .name {

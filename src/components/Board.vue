@@ -6,6 +6,7 @@ import Cell, { type Mark } from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
+import CapturedPieces from "./CapturedPieces.vue";
 
 export type MarkState = Mark[][];
 
@@ -24,6 +25,8 @@ const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
+  playerCapturedPieces: { type: Array as PropType<Piece[]> },
+  opponentCapturedPieces: { type: Array as PropType<Piece[]> },
 });
 
 // All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
@@ -93,6 +96,8 @@ function getContainerMinSize() {
       class="board"
       :style="`width: ${containerMinSize}px; height: ${containerMinSize}px;`"
     >
+      <div class="black captured-pieces"><CapturedPieces /></div>
+      <div class="white captured-pieces"><CapturedPieces /></div>
       <tr class="row" v-for="row in 8" :key="`row-${row}`">
         <Cell
           v-for="col in 8"
@@ -103,6 +108,7 @@ function getContainerMinSize() {
           :mark="props.marksState[row - 1][col - 1]"
         />
       </tr>
+
       <TransitionGroup name="piece">
         <BoardPiece
           v-for="pieceProps in allPieceProps"
@@ -145,6 +151,23 @@ function getContainerMinSize() {
     height: 100%;
     padding: 0;
     display: flex;
+  }
+}
+
+.captured-pieces {
+  @include flex-center;
+  position: absolute;
+  height: 40px;
+  width: 100%;
+
+  &.white {
+    top: 100%;
+    left: 0;
+  }
+
+  &.black {
+    bottom: 100%;
+    right: 0;
   }
 }
 
