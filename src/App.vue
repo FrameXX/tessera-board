@@ -28,12 +28,13 @@ import PieceBorderData, {
 import TransitionDurationData, {
   DEFAULT_TRANSITION_DURATION_VALUE,
 } from "./modules/user_data/transition_duration";
-import CellIndexOpacityData, {
-  DEFAULT_CELL_INDEX_OPACITY_VALUE,
-} from "./modules/user_data/cell_index_opacity";
+import CellIndexOpacityData from "./modules/user_data/cell_index_opacity";
 import PreferredPlayerColor, {
   DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
 } from "./modules/user_data/preferred_player_color";
+import OpponentOverLan, {
+  DEFAULT_OPPONENT_OVER_LAN_VALUE,
+} from "./modules/user_data/opponent_over_lan";
 
 // Import other classes
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -119,8 +120,9 @@ const pieceSet = ref(DEFAULT_PIECE_SET_VALUE);
 const piecePadding = ref(DEFAULT_PIECE_PADDING_VALUE);
 const pieceBorder = ref(DEFAULT_PIECE_BORDER_VALUE);
 const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
-const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
+const cellIndexOpacity = ref();
 const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
+const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
@@ -159,14 +161,15 @@ userDataManager.entries = [
     transitionDuration,
     toastManager
   ),
-  new CellIndexOpacityData(
-    DEFAULT_CELL_INDEX_OPACITY_VALUE,
-    cellIndexOpacity,
-    toastManager
-  ),
+  new CellIndexOpacityData(cellIndexOpacity, toastManager),
   new PreferredPlayerColor(
     DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
     preferredPlayerColor,
+    toastManager
+  ),
+  new OpponentOverLan(
+    DEFAULT_OPPONENT_OVER_LAN_VALUE,
+    opponentOverLan,
     toastManager
   ),
   defaultBoardStateData,
@@ -313,7 +316,7 @@ function toggleConfigDrawer() {
         icon-id="lan-connect"
         option-id="check-remote-opponent"
       >
-        <Checkbox id="check-remote-opponent" />
+        <Checkbox id="check-remote-opponent" v-model="opponentOverLan" />
         <template #description>
           If this option is enabled the opponent won't play on the same device,
           but instead play on another device connected to the same network after
