@@ -89,6 +89,10 @@ textarea + label {
   font-style: italic;
 }
 
+label {
+  @include clickable;
+}
+
 h1 {
   margin: var(--spacing-big) 0 var(--spacing-medium) 0;
 }

@@ -31,12 +31,21 @@ import TransitionDurationData, {
 import CellIndexOpacityData, {
   DEFAULT_CELL_INDEX_OPACITY_VALUE,
 } from "./modules/user_data/cell_index_opacity";
-import PreferredPlayerColor, {
+import PreferredPlayerColorData, {
   DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
 } from "./modules/user_data/preferred_player_color";
-import OpponentOverLan, {
+import OpponentOverLanData, {
   DEFAULT_OPPONENT_OVER_LAN_VALUE,
 } from "./modules/user_data/opponent_over_lan";
+import SecondCheckboardData, {
+  DEFAULT_SECOND_CHECKBOARD_VALUE,
+} from "./modules/user_data/second_checkboard";
+import RotateCheckboardData, {
+  DEFAULT_ROTATE_CHECKBOARD_VALUE,
+} from "./modules/user_data/rotate_checkboard";
+import RequireMoveConfirmData, {
+  DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
+} from "./modules/user_data/require_move_confirm";
 
 // Import other classes
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -125,6 +134,9 @@ const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
 const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
 const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
+const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
+const rotateCheckboard = ref(DEFAULT_ROTATE_CHECKBOARD_VALUE);
+const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
@@ -168,14 +180,29 @@ userDataManager.entries = [
     cellIndexOpacity,
     toastManager
   ),
-  new PreferredPlayerColor(
+  new PreferredPlayerColorData(
     DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
     preferredPlayerColor,
     toastManager
   ),
-  new OpponentOverLan(
+  new OpponentOverLanData(
     DEFAULT_OPPONENT_OVER_LAN_VALUE,
     opponentOverLan,
+    toastManager
+  ),
+  new SecondCheckboardData(
+    DEFAULT_SECOND_CHECKBOARD_VALUE,
+    secondCheckboard,
+    toastManager
+  ),
+  new RotateCheckboardData(
+    DEFAULT_ROTATE_CHECKBOARD_VALUE,
+    rotateCheckboard,
+    toastManager
+  ),
+  new RequireMoveConfirmData(
+    DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
+    requireMoveConfirm,
     toastManager
   ),
   defaultBoardStateData,
@@ -264,7 +291,7 @@ function toggleConfigDrawer() {
 <template>
   <!-- Relative -->
   <div id="game-area">
-    <Timers :player-secs-move="9" />
+    <Timers :player-secs-move="16" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
@@ -452,7 +479,7 @@ function toggleConfigDrawer() {
         icon-id="checkerboard-plus"
         option-id="check-second-checkboard"
       >
-        <Checkbox id="check-second-checkboard" />
+        <Checkbox id="check-second-checkboard" v-model="secondCheckboard" />
         <template #description>
           Shows second checkboard on the screen rotated for the second player.
           This option is great for separating player zone for each player
@@ -466,7 +493,7 @@ function toggleConfigDrawer() {
         icon-id="screen-rotation"
         option-id="check-rotate-checkboard"
       >
-        <Checkbox id="check-rotate-checkboard" />
+        <Checkbox id="check-rotate-checkboard" v-model="rotateCheckboard" />
         <template #description>
           The checkboard will be rotated when the black player plays, so it as
           if he was looking from the opossite side of the board.
@@ -477,7 +504,10 @@ function toggleConfigDrawer() {
         icon-id="check-all"
         option-id="check-require-move-confirm"
       >
-        <Checkbox id="check-require-move-confirm" />
+        <Checkbox
+          id="check-require-move-confirm"
+          v-model="requireMoveConfirm"
+        />
         <template #description>
           Requires player or opponent (if also playing on this device) to
           confirm move using buttons that appear next to the action button. This
