@@ -31,11 +31,11 @@ defineEmits(["click"]);
   flex-direction: column;
   width: 60px;
   height: 100px;
-  padding: var(--spacing-small);
+  padding: var(--spacing-medium);
 
   > button {
     @include no-shrink;
-    padding: var(--spacing-tiny);
+    padding: var(--spacing-small);
   }
 
   > .title {
