@@ -264,7 +264,7 @@ function toggleConfigDrawer() {
 <template>
   <!-- Relative -->
   <div id="game-area">
-    <Timers :player-secs-all-turns="128" />
+    <Timers :player-secs-move="9" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board

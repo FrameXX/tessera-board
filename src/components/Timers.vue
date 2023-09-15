@@ -17,13 +17,13 @@ const props = defineProps({
 const playerTimeMove = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(props.playerSecsMove);
 });
-const playerTimeAllMoves = computed<MinSecTime>(() => {
+const playerTimeMatch = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(props.playerSecsMatch);
 });
 const opponentTimeMove = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(props.opponentSecsMove);
 });
-const opponentTimeAllMoves = computed<MinSecTime>(() => {
+const opponentTimeMatch = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(props.opponentSecsMatch);
 });
 </script>
@@ -31,15 +31,20 @@ const opponentTimeAllMoves = computed<MinSecTime>(() => {
 <template>
   <div class="player-timers">
     <div id="player-timers-player">
-      <SimpleInfo name="move" v-show="props.playerSecsMove !== -1">{{
-        getDigitStr(playerTimeMove.mins) +
-        ":" +
-        getDigitStr(playerTimeMove.secs)
-      }}</SimpleInfo>
+      <SimpleInfo
+        :class="`${props.playerSecsMove < 16 ? 'pulsing' : ''}`"
+        name="move"
+        v-show="props.playerSecsMove !== -1"
+        >{{
+          getDigitStr(playerTimeMove.mins) +
+          ":" +
+          getDigitStr(playerTimeMove.secs)
+        }}</SimpleInfo
+      >
       <SimpleInfo name="match" v-show="props.playerSecsMatch !== -1">{{
-        getDigitStr(playerTimeAllMoves.mins) +
+        getDigitStr(playerTimeMatch.mins) +
         ":" +
-        getDigitStr(playerTimeAllMoves.secs)
+        getDigitStr(playerTimeMatch.secs)
       }}</SimpleInfo>
     </div>
     <div id="player-timers-opponent">
@@ -49,9 +54,9 @@ const opponentTimeAllMoves = computed<MinSecTime>(() => {
         getDigitStr(opponentTimeMove.secs)
       }}</SimpleInfo>
       <SimpleInfo name="match" v-show="props.opponentSecsMatch !== -1">{{
-        getDigitStr(opponentTimeAllMoves.mins) +
+        getDigitStr(opponentTimeMatch.mins) +
         ":" +
-        getDigitStr(opponentTimeAllMoves.secs)
+        getDigitStr(opponentTimeMatch.secs)
       }}</SimpleInfo>
     </div>
   </div>
@@ -76,7 +81,7 @@ const opponentTimeAllMoves = computed<MinSecTime>(() => {
 #player-timers-player,
 #player-timers-opponent {
   display: inline-block;
-  padding: var(--spacing-small);
+  padding: var(--spacing-tiny);
 }
 
 #player-timers-player {
@@ -85,5 +90,23 @@ const opponentTimeAllMoves = computed<MinSecTime>(() => {
 
 #player-timers-opponent {
   background-color: var(--color-opponent-surface-accent);
+}
+
+.pulsing {
+  animation: 1000ms var(--transition-timing-bounce) pulse infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: none;
+  }
+
+  12% {
+    transform: scale(1.2);
+  }
+
+  24% {
+    transform: none;
+  }
 }
 </style>
