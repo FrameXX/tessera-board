@@ -9,11 +9,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <svg
-    ref="element"
-    :class="`icon ${props.side ? 'side' : ''}`"
-    aria-hidden="true"
-  >
+  <svg :class="`icon ${props.side ? 'side' : ''}`" aria-hidden="true">
     <title v-if="title">{{ props.title }}</title>
     <use :href="`${props.sourceFile}#${props.iconId}`"></use>
   </svg>
