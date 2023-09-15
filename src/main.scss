@@ -71,7 +71,8 @@ button {
     margin: var(--spacing-big) 0;
   }
 
-  &:hover:not(.checkbox) {
+  &:hover:not(.checkbox),
+  &:focus:not(.checkbox) {
     outline: var(--border-width) solid var(--color-primary-accent);
   }
 }
