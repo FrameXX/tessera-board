@@ -99,11 +99,11 @@ const toasts = ref<ToastProps[]>([]);
 const toastManager = new ToastManager(toasts);
 
 // Theme manager
-const themeValue = ref(DEFAULT_THEME_VALUE);
+const theme = ref(DEFAULT_THEME_VALUE);
 const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 
 // Transition manager
-const transitionsValue = ref(DEFAULT_TRANSITIONS_VALUE);
+const transitions = ref(DEFAULT_TRANSITIONS_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 
 // Splashscreen manager
@@ -158,10 +158,10 @@ const gameBoardStateData = new BoardStateData(
 // NOTE: Most of the UserData instances use Ref but some of them may use Reactive if their value is more complex. These classes are extending ComplexUserData class.
 const userDataManager = new UserDataManager(confirmDialog, toastManager);
 userDataManager.entries = [
-  new ThemeData(DEFAULT_THEME_VALUE, themeValue, themeManger, toastManager),
+  new ThemeData(DEFAULT_THEME_VALUE, theme, themeManger, toastManager),
   new TransitionsData(
     DEFAULT_TRANSITIONS_VALUE,
-    transitionsValue,
+    transitions,
     transitionsManager,
     toastManager
   ),
@@ -522,7 +522,7 @@ function toggleConfigDrawer() {
         icon-id="brightness-6"
         option-id="select-ui-mode"
       >
-        <select id="select-ui-mode" v-model="themeValue">
+        <select id="select-ui-mode" v-model="theme">
           <option value="auto">Auto</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
@@ -642,7 +642,7 @@ function toggleConfigDrawer() {
         icon-id="transition"
         option-id="select-transitions"
       >
-        <select id="select-transitions" v-model="transitionsValue">
+        <select id="select-transitions" v-model="transitions">
           <option value="auto">Auto</option>
           <option value="enabled">Enabled</option>
           <option value="disabled">Disabled</option>
