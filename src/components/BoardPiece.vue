@@ -58,7 +58,7 @@ watch(piecePosition, () => {
 });
 
 function temporarilyMoveToTop(boardPieceElement: SVGElement) {
-  zIndex.value = "1";
+  zIndex.value = "var(--z-index-piece-top)";
   waitForTransitionEnd(boardPieceElement).then(() => {
     zIndex.value = "";
   });
