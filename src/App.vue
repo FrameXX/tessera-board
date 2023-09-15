@@ -28,7 +28,9 @@ import PieceBorderData, {
 import TransitionDurationData, {
   DEFAULT_TRANSITION_DURATION_VALUE,
 } from "./modules/user_data/transition_duration";
-import CellIndexOpacityData from "./modules/user_data/cell_index_opacity";
+import CellIndexOpacityData, {
+  DEFAULT_CELL_INDEX_OPACITY_VALUE,
+} from "./modules/user_data/cell_index_opacity";
 import PreferredPlayerColor, {
   DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
 } from "./modules/user_data/preferred_player_color";
@@ -112,7 +114,7 @@ const configsDialog = new ConfigsDialog(
   toastManager
 );
 
-// Options refs
+// Other options refs
 // Simple values (ref)
 const playerHue = ref(DEFAULT_PLAYER_HUE_VALUE);
 const opponentHue = ref(DEFAULT_OPPONENT_HUE_VALUE);
@@ -120,7 +122,7 @@ const pieceSet = ref(DEFAULT_PIECE_SET_VALUE);
 const piecePadding = ref(DEFAULT_PIECE_PADDING_VALUE);
 const pieceBorder = ref(DEFAULT_PIECE_BORDER_VALUE);
 const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
-const cellIndexOpacity = ref();
+const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
 const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
 
@@ -161,7 +163,11 @@ userDataManager.entries = [
     transitionDuration,
     toastManager
   ),
-  new CellIndexOpacityData(cellIndexOpacity, toastManager),
+  new CellIndexOpacityData(
+    DEFAULT_CELL_INDEX_OPACITY_VALUE,
+    cellIndexOpacity,
+    toastManager
+  ),
   new PreferredPlayerColor(
     DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
     preferredPlayerColor,
@@ -194,7 +200,13 @@ const defaultBoardManager = new DefaultBoardManager(
   configPieceDialog
 );
 
-const gameBoardManager = new GameBoardManager(gameBoardState);
+const gameBoardManager = new GameBoardManager(
+  gameBoardState,
+  playerCapturedPieces,
+  opponentCapturedPieces,
+  playerBoardMarks,
+  OpponentBoardMarks
+);
 
 // Escape manager
 const escapeManager = new EscapeManager(toggleActionsPanel);
@@ -281,7 +293,7 @@ function toggleConfigDrawer() {
       <small class="version">v0.0.0 (0)</small>
     </header>
     <!-- Player -->
-    <Category name="Player" icon-id="account">
+    <Category name="Player (you)" icon-id="account">
       <UserOption
         name="color"
         icon-id="invert-colors"
@@ -338,6 +350,72 @@ function toggleConfigDrawer() {
     </Category>
     <!-- Game rules -->
     <Category name="Game rules" icon-id="rule">
+      <!-- Time restrictions -->
+      <span class="section-title">Time restrictions</span>
+      <UserOption
+        name="Player seconds per move"
+        icon-id="timer-outline"
+        option-id="input-player-seconds-per-move"
+      >
+        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <template #description
+          >Limits player's time per move. If the time runs out (expires) an
+          action specified in the option below will be performed.
+          <b>The limit is disabled when the value is set to 0.</b></template
+        >
+      </UserOption>
+      <UserOption
+        name="Opponent seconds per move"
+        icon-id="timer-outline"
+        option-id="input-player-seconds-per-move"
+      >
+        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <template #description
+          >Limits opponent's time per move. If the time runs out (expires) an
+          action specified in the option below will be performed.
+          <b>The limit is disabled when the value is set to 0.</b></template
+        >
+      </UserOption>
+      <UserOption
+        name="Player seconds per match"
+        icon-id="clock-outline"
+        option-id="input-player-seconds-per-move"
+      >
+        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <template #description
+          >Limits player's time for whole match (game). If the time runs out the
+          player looses and opponent wins.
+          <b>The limit is disabled when the value is set to 0.</b></template
+        >
+      </UserOption>
+      <UserOption
+        name="Opponent seconds per match"
+        icon-id="clock-outline"
+        option-id="input-player-seconds-per-move"
+      >
+        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <template #description
+          >Limits opponent's time for whole match (game). If the time runs out
+          the opponent looses and player wins.
+          <b>The limit is disabled when the value is set to 0.</b></template
+        >
+      </UserOption>
+      <UserOption
+        name="Seconds per move expiration reaction"
+        icon-id="timer-alert-outline"
+        option-id="seconds-per-move-expiration-reaction"
+      >
+        <select id="seconds-per-move-expiration-reaction">
+          <option value="loose_game">Random move</option>
+          <option value="light">Loose game</option>
+        </select>
+        <template #description
+          >Defines how to punish the player or opponent when they run out of
+          seconds per move.
+        </template>
+      </UserOption>
+      <!-- Checkboard -->
+      <span class="section-title">Checkboard</span>
       <UserOption
         :simple="false"
         name="default piece positions"
@@ -489,6 +567,31 @@ function toggleConfigDrawer() {
       </UserOption>
       <!-- Elements -->
       <span class="section-title">Elements</span>
+      <UserOption
+        name="second checkboard"
+        icon-id="checkerboard-plus"
+        option-id="check-second-checkboard"
+      >
+        <Checkbox id="check-second-checkboard" />
+        <template #description>
+          Shows second checkboard on the screen rotated for the second player.
+          This option is great for separating player zone for each player
+          especially if you are playing on a larger screen, but it's not
+          recommended on a smaller screen. The second checkboard won't show if
+          you are playing with your opponent over a local network.
+        </template>
+      </UserOption>
+      <UserOption
+        name="rotate checkboard"
+        icon-id="screen-rotation"
+        option-id="check-rotate-checkboard"
+      >
+        <Checkbox id="check-rotate-checkboard" />
+        <template #description>
+          The checkboard will be rotated when the black player plays, so it as
+          if he was looking from the opossite side of the board.
+        </template>
+      </UserOption>
       <!-- Transitions -->
       <span class="section-title">Transitions</span>
       <UserOption

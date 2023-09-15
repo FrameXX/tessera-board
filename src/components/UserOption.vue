@@ -58,6 +58,10 @@ const props = defineProps({
   }
 
   .input {
+    input {
+      max-width: 200px;
+    }
+
     &.simple {
       @include flex-center;
       height: 40px;

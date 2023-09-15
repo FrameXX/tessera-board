@@ -8,50 +8,50 @@ import {
 } from "../modules/utils/misc";
 
 const props = defineProps({
-  playerSecsTurn: { type: Number, required: true },
-  playerSecsAllTurns: { type: Number, required: true },
-  opponentSecsTurn: { type: Number, required: true },
-  opponentSecsAllTurns: { type: Number, required: true },
+  playerSecsMove: { type: Number, required: true },
+  playerSecsMatch: { type: Number, required: true },
+  opponentSecsMove: { type: Number, required: true },
+  opponentSecsMatch: { type: Number, required: true },
 });
 
-const playerTimeTurn = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.playerSecsTurn);
+const playerTimeMove = computed<MinSecTime>(() => {
+  return getMinsAndSecsTime(props.playerSecsMove);
 });
-const playerTimeAllTurns = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.playerSecsAllTurns);
+const playerTimeAllMoves = computed<MinSecTime>(() => {
+  return getMinsAndSecsTime(props.playerSecsMatch);
 });
-const opponentTimeTurn = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.opponentSecsTurn);
+const opponentTimeMove = computed<MinSecTime>(() => {
+  return getMinsAndSecsTime(props.opponentSecsMove);
 });
-const opponentTimeAllTurns = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.opponentSecsAllTurns);
+const opponentTimeAllMoves = computed<MinSecTime>(() => {
+  return getMinsAndSecsTime(props.opponentSecsMatch);
 });
 </script>
 
 <template>
   <div class="player-timers">
     <div id="player-timers-player">
-      <SimpleInfo name="this turn" v-show="props.playerSecsTurn !== -1">{{
-        getDigitStr(playerTimeTurn.mins) +
+      <SimpleInfo name="move" v-show="props.playerSecsMove !== -1">{{
+        getDigitStr(playerTimeMove.mins) +
         ":" +
-        getDigitStr(playerTimeTurn.secs)
+        getDigitStr(playerTimeMove.secs)
       }}</SimpleInfo>
-      <SimpleInfo name="all turns" v-show="props.playerSecsAllTurns !== -1">{{
-        getDigitStr(playerTimeAllTurns.mins) +
+      <SimpleInfo name="match" v-show="props.playerSecsMatch !== -1">{{
+        getDigitStr(playerTimeAllMoves.mins) +
         ":" +
-        getDigitStr(playerTimeAllTurns.secs)
+        getDigitStr(playerTimeAllMoves.secs)
       }}</SimpleInfo>
     </div>
     <div id="player-timers-opponent">
-      <SimpleInfo name="this turn" v-show="props.opponentSecsAllTurns !== -1">{{
-        getDigitStr(opponentTimeTurn.mins) +
+      <SimpleInfo name="move" v-show="props.opponentSecsMatch !== -1">{{
+        getDigitStr(opponentTimeMove.mins) +
         ":" +
-        getDigitStr(opponentTimeTurn.secs)
+        getDigitStr(opponentTimeMove.secs)
       }}</SimpleInfo>
-      <SimpleInfo name="all turns" v-show="props.opponentSecsAllTurns !== -1">{{
-        getDigitStr(opponentTimeAllTurns.mins) +
+      <SimpleInfo name="match" v-show="props.opponentSecsMatch !== -1">{{
+        getDigitStr(opponentTimeAllMoves.mins) +
         ":" +
-        getDigitStr(opponentTimeAllTurns.secs)
+        getDigitStr(opponentTimeAllMoves.secs)
       }}</SimpleInfo>
     </div>
   </div>
