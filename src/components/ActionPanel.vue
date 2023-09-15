@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { watch } from "vue";
 import Backdrop from "./Backdrop.vue";
-import Icon from "./Icon.vue";
+import FastButton from "./FastButton.vue";
 
 const props = defineProps({ open: { type: Boolean, default: false } });
 const emit = defineEmits(["open", "close", "backdropClick", "configureGame"]);
@@ -18,28 +18,14 @@ watch(
   <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
   <Transition name="slide-up">
     <nav v-show="props.open">
-      <span class="section-title">Game</span>
-      <button
-        aria-label="Configure game"
-        title="Configure game"
+      <FastButton
         @click="$emit('configureGame')"
-      >
-        <Icon icon-id="cog-outline" side />
-        Configure game
-      </button>
-      <span class="section-title">Current match</span>
-      <button aria-label="Pause match" title="Pause match">
-        <Icon icon-id="pause" side />
-        Pause match
-      </button>
-      <button aria-label="Resign" title="Resign">
-        <Icon icon-id="flag" side />
-        Resign
-      </button>
-      <button aria-label="Start new match" title="Start new match">
-        <Icon icon-id="play-outline" side />
-        Start new match
-      </button>
+        icon-id="cog-outline"
+        title="Config game"
+      />
+      <FastButton icon-id="pause" title="Pause match" />
+      <FastButton icon-id="flag" title="Resign" />
+      <FastButton icon-id="play-outline" title="New match" />
       <div class="nav-placeholder"></div>
     </nav>
   </Transition>
@@ -50,10 +36,9 @@ watch(
 
 nav {
   @include shadow;
+  width: fit-content;
+  text-align: center;
   z-index: var(--z-index-modal);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   bottom: 0;
   left: 0;
   right: 0;
@@ -62,18 +47,6 @@ nav {
   border-radius: var(--border-radius) var(--border-radius) 0 0;
   background-color: var(--color-primary-surface);
   padding: var(--spacing-small);
-  max-width: 450px;
-
-  .section-title {
-    width: fit-content;
-    margin: var(--spacing-small);
-  }
-
-  button {
-    @include fill-availible;
-    justify-content: left;
-    display: flex;
-  }
 
   .nav-placeholder {
     height: 80px;
