@@ -428,13 +428,13 @@ function toggleConfigDrawer() {
         >
       </UserOption>
       <UserOption
-        name="Seconds per move expiration reaction"
+        name="Seconds per move expiration punishment"
         icon-id="timer-alert-outline"
-        option-id="seconds-per-move-expiration-reaction"
+        option-id="seconds-per-move-expiration-punishment"
       >
-        <select id="seconds-per-move-expiration-reaction">
-          <option value="loose_game">Random move</option>
-          <option value="light">Loose game</option>
+        <select id="seconds-per-move-expiration-punishment">
+          <option value="lose_game">Random move</option>
+          <option value="light">Lose game</option>
         </select>
         <template #description
           >Defines how to punish the player or opponent when they run out of
