@@ -1,12 +1,11 @@
 <script lang="ts" setup>
 import Icon from "./Icon.vue";
 import { PropType, computed } from "vue";
-import {
-  PIECE_SETS_DIR,
-  type PieceSetValue,
-} from "../modules/user_data/piece_set";
+import { type PieceSetValue } from "../modules/user_data/piece_set";
 import { PieceId, PlayerColor } from "../modules/pieces";
 import { capitalizeFirst } from "../modules/utils/misc";
+
+const PIECE_SETS_DIR = "assets/img/";
 
 const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },

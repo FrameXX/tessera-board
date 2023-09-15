@@ -75,6 +75,76 @@ abstract class UserData<ValueType> {
   public abstract load(dumped: string): void;
 }
 
+export abstract class SelectUserData<
+  ValueType extends string
+> extends UserData<ValueType> {
+  constructor(
+    id: string,
+    value: ValueType,
+    private readonly validate: (string: string) => string is ValueType,
+    toastManager: ToastManager,
+    valueRef?: Ref<ValueType>
+  ) {
+    super(id, value, toastManager, valueRef);
+  }
+
+  public dump(): string {
+    return this.value;
+  }
+
+  public load(dumped: string): void {
+    if (this.validate(dumped)) {
+      this.value = dumped;
+    } else {
+      this.handleInvalidLoadValue(dumped);
+    }
+  }
+}
+
+export abstract class NumberUserData extends UserData<number> {
+  constructor(
+    id: string,
+    value: number,
+    toastManager: ToastManager,
+    valueRef?: Ref<number>,
+    private readonly minValue?: number,
+    private readonly maxValue?: number
+  ) {
+    super(id, value, toastManager, valueRef);
+  }
+
+  public dump(): string {
+    return this.value.toString();
+  }
+
+  public load(dumped: string): void {
+    this.value = Math.max(
+      Math.min(+dumped, this.maxValue ?? Number.MAX_VALUE),
+      this.minValue ?? Number.MIN_VALUE
+    );
+  }
+}
+
+export abstract class BooleanUserData extends UserData<boolean> {
+  constructor(
+    id: string,
+    value: boolean,
+    toastManager: ToastManager,
+    valueRef?: Ref<boolean>
+  ) {
+    super(id, value, toastManager, valueRef);
+  }
+
+  public dump(): string {
+    const numRepr = this.value ? 1 : 0;
+    return numRepr.toString();
+  }
+
+  public load(dumped: string): void {
+    this.value = Boolean(+dumped);
+  }
+}
+
 // The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values.
 export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   constructor(

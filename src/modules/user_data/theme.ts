@@ -1,4 +1,4 @@
-import UserData from "./user_data";
+import { SelectUserData } from "./user_data";
 import type ThemeManager from "../theme_manager";
 import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";
@@ -10,7 +10,7 @@ function isThemeValue(string: string): string is ThemeValue {
 
 export const DEFAULT_THEME_VALUE: ThemeValue = "auto";
 
-class ThemeData extends UserData<ThemeValue> {
+class ThemeData extends SelectUserData<ThemeValue> {
   private themeManager: ThemeManager;
 
   constructor(
@@ -19,20 +19,8 @@ class ThemeData extends UserData<ThemeValue> {
     themeManager: ThemeManager,
     toastManager: ToastManager
   ) {
-    super("theme", value, toastManager, valueRef);
+    super("theme", value, isThemeValue, toastManager, valueRef);
     this.themeManager = themeManager;
-  }
-
-  public load(dumped: string): void {
-    if (isThemeValue(dumped)) {
-      this.value = dumped;
-    } else {
-      this.handleInvalidLoadValue(dumped);
-    }
-  }
-
-  public dump(): string {
-    return this.value;
   }
 
   public apply(): void {

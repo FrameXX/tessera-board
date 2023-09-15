@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-import UserData from "./user_data";
+import { SelectUserData } from "./user_data";
 import type ToastManager from "../toast_manager";
 
 export const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PreferredPlayerColorValue =
@@ -12,23 +12,19 @@ function isPreferredPlayerColorValue(
   return string === "white" || string === "black" || string === "random";
 }
 
-class PreferredPlayerColor extends UserData<PreferredPlayerColorValue> {
+class PreferredPlayerColor extends SelectUserData<PreferredPlayerColorValue> {
   constructor(
     value: PreferredPlayerColorValue,
     valueRef: Ref<PreferredPlayerColorValue>,
     toastManager: ToastManager
   ) {
-    super("preferred_player_color", value, toastManager, valueRef);
-  }
-
-  public load(dumped: string): void {
-    isPreferredPlayerColorValue(dumped)
-      ? (this.value = dumped)
-      : this.handleInvalidLoadValue(dumped);
-  }
-
-  public dump(): string {
-    return this.value;
+    super(
+      "preferred_player_color",
+      value,
+      isPreferredPlayerColorValue,
+      toastManager,
+      valueRef
+    );
   }
 
   public apply(): void {}

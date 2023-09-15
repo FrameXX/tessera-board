@@ -1,4 +1,4 @@
-import UserData from "./user_data";
+import { SelectUserData } from "./user_data";
 import type TransitionsManager from "../transitions_manager";
 import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";
@@ -10,7 +10,7 @@ function isTransitionsValue(string: string): string is TransitionsValue {
 
 export const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
 
-class TransitionsData extends UserData<TransitionsValue> {
+class TransitionsData extends SelectUserData<TransitionsValue> {
   private transitionManager: TransitionsManager;
 
   constructor(
@@ -19,20 +19,8 @@ class TransitionsData extends UserData<TransitionsValue> {
     transitionsManager: TransitionsManager,
     toastManager: ToastManager
   ) {
-    super("transitions", value, toastManager, valueRef);
+    super("transitions", value, isTransitionsValue, toastManager, valueRef);
     this.transitionManager = transitionsManager;
-  }
-
-  public load(dumped: string): void {
-    if (isTransitionsValue(dumped)) {
-      this.value = dumped;
-    } else {
-      this.handleInvalidLoadValue(dumped);
-    }
-  }
-
-  public dump(): string {
-    return this.value;
   }
 
   public apply(): void {
