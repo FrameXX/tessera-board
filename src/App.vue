@@ -565,8 +565,8 @@ function toggleConfigDrawer() {
           of checkboard.
         </template>
       </UserOption>
-      <!-- Elements -->
-      <span class="section-title">Elements</span>
+      <!-- Elements and behavior -->
+      <span class="section-title">Elements and behavior</span>
       <UserOption
         name="second checkboard"
         icon-id="checkerboard-plus"
@@ -590,6 +590,19 @@ function toggleConfigDrawer() {
         <template #description>
           The checkboard will be rotated when the black player plays, so it as
           if he was looking from the opossite side of the board.
+        </template>
+      </UserOption>
+      <UserOption
+        name="require move confirm"
+        icon-id="check-all"
+        option-id="check-require-move-confirm"
+      >
+        <Checkbox id="check-require-move-confirm" />
+        <template #description>
+          Requires player or opponent (if also playing on this device) to
+          confirm move using buttons that appear next to the action button. This
+          can be useful when you are playing on a touchscreen and you often
+          click accidentally in wrong positions.
         </template>
       </UserOption>
       <!-- Transitions -->
