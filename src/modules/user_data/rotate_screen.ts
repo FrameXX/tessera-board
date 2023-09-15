@@ -2,9 +2,9 @@ import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";
 import { BooleanUserData } from "./user_data";
 
-export const DEFAULT_ROTATE_CHECKBOARD_VALUE = true;
+export const DEFAULT_ROTATE_SCREEN_VALUE = false;
 
-class RotateCheckboardData extends BooleanUserData {
+class RotateScreenData extends BooleanUserData {
   constructor(
     value: boolean,
     valueRef: Ref<boolean>,
@@ -16,4 +16,4 @@ class RotateCheckboardData extends BooleanUserData {
   public apply(): void {}
 }
 
-export default RotateCheckboardData;
+export default RotateScreenData;

@@ -40,9 +40,9 @@ import OpponentOverLanData, {
 import SecondCheckboardData, {
   DEFAULT_SECOND_CHECKBOARD_VALUE,
 } from "./modules/user_data/second_checkboard";
-import RotateCheckboardData, {
-  DEFAULT_ROTATE_CHECKBOARD_VALUE,
-} from "./modules/user_data/rotate_checkboard";
+import RotateScreenData, {
+  DEFAULT_ROTATE_SCREEN_VALUE,
+} from "./modules/user_data/rotate_screen";
 import RequireMoveConfirmData, {
   DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
 } from "./modules/user_data/require_move_confirm";
@@ -135,7 +135,7 @@ const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
 const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
 const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
-const rotateCheckboard = ref(DEFAULT_ROTATE_CHECKBOARD_VALUE);
+const rotateCheckboard = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 
 // Complex values (reactive)
@@ -195,8 +195,8 @@ userDataManager.entries = [
     secondCheckboard,
     toastManager
   ),
-  new RotateCheckboardData(
-    DEFAULT_ROTATE_CHECKBOARD_VALUE,
+  new RotateScreenData(
+    DEFAULT_ROTATE_SCREEN_VALUE,
     rotateCheckboard,
     toastManager
   ),
@@ -489,14 +489,17 @@ function toggleConfigDrawer() {
         </template>
       </UserOption>
       <UserOption
-        name="rotate checkboard"
+        name="rotate screen"
         icon-id="screen-rotation"
-        option-id="check-rotate-checkboard"
+        option-id="check-rotate-screen"
       >
-        <Checkbox id="check-rotate-checkboard" v-model="rotateCheckboard" />
+        <Checkbox id="check-rotate-screen" v-model="rotateCheckboard" />
         <template #description>
-          The checkboard will be rotated when the black player plays, so it as
-          if he was looking from the opossite side of the board.
+          The whole user interface will get rotated (excluding the checkboard)
+          when the black player plays. This can be useful when you are playing
+          on a mobile phone sitting opposite to each other and the screen
+          rotates automatically instead of you having to rotate it every time
+          the other player plays.
         </template>
       </UserOption>
       <UserOption
@@ -941,3 +944,4 @@ function toggleConfigDrawer() {
   padding: var(--spacing-small);
 }
 </style>
+./modules/user_data/rotate_screen
