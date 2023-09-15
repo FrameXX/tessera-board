@@ -67,11 +67,11 @@ function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 </script>
 
 <template>
-  <div class="rotation-wrapper">
-    <div
-      class="piece-wrapper"
-      :style="`transform-origin: ${originX}px ${originY}px`"
-    >
+  <div
+    class="piece-wrapper"
+    :style="`transform-origin: ${originX}px ${originY}px`"
+  >
+    <div class="rotation-wrapper">
       <PieceIcon
         ref="element"
         class="piece"
@@ -90,7 +90,6 @@ function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 .rotation-wrapper {
   @include stretch;
   position: absolute;
-  pointer-events: none;
 }
 
 .board.rotated {
@@ -101,8 +100,8 @@ function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 
 .piece-wrapper {
   @include stretch;
-  position: absolute;
   pointer-events: none;
+  position: absolute;
 }
 
 .piece {
@@ -121,22 +120,5 @@ function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   &:hover {
     opacity: 0.3;
   }
-}
-
-.piece-leave-active,
-.piece-enter-active {
-  transition: transform var(--transition-duration-long)
-      var(--transition-timing-jump),
-    opacity var(--transition-duration-long) linear;
-}
-
-.piece-enter-from {
-  opacity: 0;
-  transform: translateY(-15px) scale(1.1);
-}
-
-.piece-leave-to {
-  opacity: 0;
-  transform: translateY(-100px) rotate(135deg) scale(2);
 }
 </style>

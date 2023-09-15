@@ -26,6 +26,7 @@ header {
   @include fix-centered;
   @include scrollable;
   @include shadow;
+  overflow-x: hidden;
   z-index: var(--z-index-top-fragment);
   height: 100%;
   background-color: var(--color-primary-surface);

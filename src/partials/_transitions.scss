@@ -22,6 +22,24 @@
   transform: translateY(100%);
 }
 
+// [Group] piece
+.piece-leave-active,
+.piece-enter-active {
+  transition: transform var(--transition-duration-long)
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-long) linear;
+}
+
+.piece-enter-from {
+  opacity: 0;
+  transform: translateY(-15px) scale(1.1);
+}
+
+.piece-leave-to {
+  opacity: 0;
+  transform: translateY(-100px) rotate(135deg) scale(2);
+}
+
 // [Group] Slide down
 .slide-down-move,
 .slide-down-enter-active,
