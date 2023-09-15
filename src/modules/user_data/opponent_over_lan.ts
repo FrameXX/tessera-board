@@ -4,7 +4,7 @@ import { BooleanUserData } from "./user_data";
 
 export const DEFAULT_OPPONENT_OVER_LAN_VALUE = false;
 
-class OpponentOverLan extends BooleanUserData {
+class OpponentOverLanData extends BooleanUserData {
   constructor(
     value: boolean,
     valueRef: Ref<boolean>,
@@ -16,4 +16,4 @@ class OpponentOverLan extends BooleanUserData {
   public apply(): void {}
 }
 
-export default OpponentOverLan;
+export default OpponentOverLanData;

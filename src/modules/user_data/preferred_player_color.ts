@@ -12,7 +12,7 @@ function isPreferredPlayerColorValue(
   return string === "white" || string === "black" || string === "random";
 }
 
-class PreferredPlayerColor extends SelectUserData<PreferredPlayerColorValue> {
+class PreferredPlayerColorData extends SelectUserData<PreferredPlayerColorValue> {
   constructor(
     value: PreferredPlayerColorValue,
     valueRef: Ref<PreferredPlayerColorValue>,
@@ -30,4 +30,4 @@ class PreferredPlayerColor extends SelectUserData<PreferredPlayerColorValue> {
   public apply(): void {}
 }
 
-export default PreferredPlayerColor;
+export default PreferredPlayerColorData;

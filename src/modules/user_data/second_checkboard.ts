@@ -4,7 +4,7 @@ import { BooleanUserData } from "./user_data";
 
 export const DEFAULT_SECOND_CHECKBOARD_VALUE = false;
 
-class SecondCheckboard extends BooleanUserData {
+class SecondCheckboardData extends BooleanUserData {
   constructor(
     value: boolean,
     valueRef: Ref<boolean>,
@@ -16,4 +16,4 @@ class SecondCheckboard extends BooleanUserData {
   public apply(): void {}
 }
 
-export default SecondCheckboard;
+export default SecondCheckboardData;

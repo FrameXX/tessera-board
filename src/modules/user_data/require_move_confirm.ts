@@ -4,7 +4,7 @@ import { BooleanUserData } from "./user_data";
 
 export const DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE = false;
 
-class RequireMoveConfirm extends BooleanUserData {
+class RequireMoveConfirmData extends BooleanUserData {
   constructor(
     value: boolean,
     valueRef: Ref<boolean>,
@@ -16,4 +16,4 @@ class RequireMoveConfirm extends BooleanUserData {
   public apply(): void {}
 }
 
-export default RequireMoveConfirm;
+export default RequireMoveConfirmData;

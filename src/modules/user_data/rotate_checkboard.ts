@@ -4,7 +4,7 @@ import { BooleanUserData } from "./user_data";
 
 export const DEFAULT_ROTATE_CHECKBOARD_VALUE = true;
 
-class RotateCheckboard extends BooleanUserData {
+class RotateCheckboardData extends BooleanUserData {
   constructor(
     value: boolean,
     valueRef: Ref<boolean>,
@@ -16,4 +16,4 @@ class RotateCheckboard extends BooleanUserData {
   public apply(): void {}
 }
 
-export default RotateCheckboard;
+export default RotateCheckboardData;
