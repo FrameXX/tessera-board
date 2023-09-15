@@ -27,6 +27,7 @@ const props = defineProps({
   manager: { type: Object as PropType<BoardManager>, required: true },
   playerCapturedPieces: { type: Array as PropType<Piece[]> },
   opponentCapturedPieces: { type: Array as PropType<Piece[]> },
+  rotated: { type: Boolean, default: false },
 });
 
 // All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
@@ -93,7 +94,7 @@ function getContainerMinSize() {
   <div class="board-container" ref="container">
     <table
       role="grid"
-      class="board"
+      :class="`board ${props.rotated ? 'rotated' : ''}`"
       :style="`width: ${containerMinSize}px; height: ${containerMinSize}px;`"
     >
       <div class="black captured-pieces"><CapturedPieces /></div>
@@ -120,6 +121,7 @@ function getContainerMinSize() {
           :piece-set="props.pieceSet"
           :cell-size="cellSize"
           :piece-padding="piecePadding"
+          :rotated="props.rotated"
         />
       </TransitionGroup>
     </table>
@@ -147,6 +149,10 @@ function getContainerMinSize() {
   display: flex;
   flex-direction: column;
 
+  &.rotated {
+    transform: rotate(-0.5turn);
+  }
+
   .row {
     height: 100%;
     padding: 0;
@@ -171,6 +177,12 @@ function getContainerMinSize() {
   }
 }
 
+.board.rotated {
+  .captured-pieces {
+    transform: rotate(-0.5turn);
+  }
+}
+
 .index-row-left,
 .index-row-right,
 .index-col-bottom,
@@ -187,6 +199,15 @@ function getContainerMinSize() {
   font-size: var(--font-size-tiny);
   padding: calc(var(--spacing-tiny) / 2);
   opacity: var(--cell-index-opacity);
+}
+
+.board.rotated {
+  .index-row-left,
+  .index-row-right,
+  .index-col-bottom,
+  .index-col-top {
+    transform: rotate(-0.5turn);
+  }
 }
 
 .index-row-left,

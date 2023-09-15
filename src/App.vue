@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Import Vue
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 
 // Import user data
 import UserDataManager from "./modules/user_data_manager";
@@ -57,7 +57,7 @@ import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
 import { Piece } from "./modules/pieces";
-import { activateColors } from "./modules/utils/elements";
+import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
 import type { BoardPieceProps } from "./components/Board.vue";
@@ -83,6 +83,10 @@ import Timers from "./components/Timers.vue";
 // UI refs
 const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
+const screenRotated = ref(false);
+watch(screenRotated, (newValue) => {
+  updateScreenRotation(newValue);
+});
 
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCapturedPieces = ref<Piece[]>([]);
@@ -135,7 +139,7 @@ const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
 const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
 const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
-const rotateCheckboard = ref(DEFAULT_ROTATE_SCREEN_VALUE);
+const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 
 // Complex values (reactive)
@@ -195,11 +199,7 @@ userDataManager.entries = [
     secondCheckboard,
     toastManager
   ),
-  new RotateScreenData(
-    DEFAULT_ROTATE_SCREEN_VALUE,
-    rotateCheckboard,
-    toastManager
-  ),
+  new RotateScreenData(DEFAULT_ROTATE_SCREEN_VALUE, rotateScreen, toastManager),
   new RequireMoveConfirmData(
     DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
     requireMoveConfirm,
@@ -286,6 +286,12 @@ function toggleConfigDrawer() {
     ? escapeManager.addLayer(toggleActionsPanel)
     : escapeManager.removeLayer();
 }
+
+function updateScreenRotation(rotate: boolean): void {
+  rotate
+    ? setCSSVariable("app-transform", "rotate(-0.5turn)")
+    : setCSSVariable("app-transform", "");
+}
 </script>
 
 <template>
@@ -295,6 +301,7 @@ function toggleConfigDrawer() {
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
+        :rotated="screenRotated"
         :manager="gameBoardManager"
         :state="gameBoardState"
         :piece-set="pieceSet"
@@ -493,7 +500,7 @@ function toggleConfigDrawer() {
         icon-id="screen-rotation"
         option-id="check-rotate-screen"
       >
-        <Checkbox id="check-rotate-screen" v-model="rotateCheckboard" />
+        <Checkbox id="check-rotate-screen" v-model="rotateScreen" />
         <template #description>
           The whole user interface will get rotated (excluding the checkboard)
           when the black player plays. This can be useful when you are playing
