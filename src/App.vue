@@ -445,6 +445,46 @@ function toggleConfigDrawer() {
     </Category>
     <!-- Look and feel -->
     <Category name="look and feel" icon-id="palette-advanced">
+      <!-- Elements and behavior -->
+      <span class="section-title">Elements and behavior</span>
+      <UserOption
+        name="second checkboard"
+        icon-id="checkerboard-plus"
+        option-id="check-second-checkboard"
+      >
+        <Checkbox id="check-second-checkboard" />
+        <template #description>
+          Shows second checkboard on the screen rotated for the second player.
+          This option is great for separating player zone for each player
+          especially if you are playing on a larger screen, but it's not
+          recommended on a smaller screen. The second checkboard won't show if
+          you are playing with your opponent over a local network.
+        </template>
+      </UserOption>
+      <UserOption
+        name="rotate checkboard"
+        icon-id="screen-rotation"
+        option-id="check-rotate-checkboard"
+      >
+        <Checkbox id="check-rotate-checkboard" />
+        <template #description>
+          The checkboard will be rotated when the black player plays, so it as
+          if he was looking from the opossite side of the board.
+        </template>
+      </UserOption>
+      <UserOption
+        name="require move confirm"
+        icon-id="check-all"
+        option-id="check-require-move-confirm"
+      >
+        <Checkbox id="check-require-move-confirm" />
+        <template #description>
+          Requires player or opponent (if also playing on this device) to
+          confirm move using buttons that appear next to the action button. This
+          can be useful when you are playing on a touchscreen and you often
+          click accidentally in wrong positions.
+        </template>
+      </UserOption>
       <!-- Colors -->
       <span class="section-title">Colors</span>
       <UserOption
@@ -563,46 +603,6 @@ function toggleConfigDrawer() {
         <template #description
           >Opacity of the cell indexes (numbers and letters) written on borders
           of checkboard.
-        </template>
-      </UserOption>
-      <!-- Elements and behavior -->
-      <span class="section-title">Elements and behavior</span>
-      <UserOption
-        name="second checkboard"
-        icon-id="checkerboard-plus"
-        option-id="check-second-checkboard"
-      >
-        <Checkbox id="check-second-checkboard" />
-        <template #description>
-          Shows second checkboard on the screen rotated for the second player.
-          This option is great for separating player zone for each player
-          especially if you are playing on a larger screen, but it's not
-          recommended on a smaller screen. The second checkboard won't show if
-          you are playing with your opponent over a local network.
-        </template>
-      </UserOption>
-      <UserOption
-        name="rotate checkboard"
-        icon-id="screen-rotation"
-        option-id="check-rotate-checkboard"
-      >
-        <Checkbox id="check-rotate-checkboard" />
-        <template #description>
-          The checkboard will be rotated when the black player plays, so it as
-          if he was looking from the opossite side of the board.
-        </template>
-      </UserOption>
-      <UserOption
-        name="require move confirm"
-        icon-id="check-all"
-        option-id="check-require-move-confirm"
-      >
-        <Checkbox id="check-require-move-confirm" />
-        <template #description>
-          Requires player or opponent (if also playing on this device) to
-          confirm move using buttons that appear next to the action button. This
-          can be useful when you are playing on a touchscreen and you often
-          click accidentally in wrong positions.
         </template>
       </UserOption>
       <!-- Transitions -->
