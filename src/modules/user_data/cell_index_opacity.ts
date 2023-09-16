@@ -3,8 +3,6 @@ import { setCSSVariable } from "../utils/elements";
 import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";
 
-export const DEFAULT_CELL_INDEX_OPACITY_VALUE = 80;
-
 class CellIndexOpacityData extends NumberUserData {
   constructor(
     value: number,

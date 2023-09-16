@@ -3,8 +3,6 @@ import { setCSSVariable } from "../utils/elements";
 import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";
 
-export const DEFAULT_TRANSITION_DURATION_VALUE = 100;
-
 class TransitionDurationData extends NumberUserData {
   constructor(
     value: number,

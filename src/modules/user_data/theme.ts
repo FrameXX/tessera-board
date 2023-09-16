@@ -8,8 +8,6 @@ function isThemeValue(string: string): string is ThemeValue {
   return string === "light" || string === "dark" || string === "auto";
 }
 
-export const DEFAULT_THEME_VALUE: ThemeValue = "auto";
-
 class ThemeData extends SelectUserData<ThemeValue> {
   private themeManager: ThemeManager;
 

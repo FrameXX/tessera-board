@@ -5,48 +5,28 @@ import { ref, reactive, onMounted, watch } from "vue";
 // Import user data
 import { SelectUserData } from "./modules/user_data/user_data";
 import UserDataManager from "./modules/user_data_manager";
-import ThemeData, { DEFAULT_THEME_VALUE } from "./modules/user_data/theme";
+import ThemeData, { type ThemeValue } from "./modules/user_data/theme";
 import TransitionsData, {
-  DEFAULT_TRANSITIONS_VALUE,
+  type TransitionsValue,
 } from "./modules/user_data/transitions";
-import HueData, {
-  DEFAULT_PLAYER_HUE_VALUE,
-  DEFAULT_OPPONENT_HUE_VALUE,
-} from "./modules/user_data/hue";
+import HueData from "./modules/user_data/hue";
 import PieceSetData, {
-  DEFAULT_PIECE_SET_VALUE,
+  type PieceSetValue,
 } from "./modules/user_data/piece_set";
 import BoardStateData, {
   type BoardStateValue,
-  DEFAULT_BOARD_STATE_VALUE,
 } from "./modules/user_data/board_state";
-import PiecePaddingData, {
-  DEFAULT_PIECE_PADDING_VALUE,
-} from "./modules/user_data/piece_padding";
-import PieceBorderData, {
-  DEFAULT_PIECE_BORDER_VALUE,
-} from "./modules/user_data/piece_border";
-import TransitionDurationData, {
-  DEFAULT_TRANSITION_DURATION_VALUE,
-} from "./modules/user_data/transition_duration";
-import CellIndexOpacityData, {
-  DEFAULT_CELL_INDEX_OPACITY_VALUE,
-} from "./modules/user_data/cell_index_opacity";
+import PiecePaddingData from "./modules/user_data/piece_padding";
+import PieceBorderData from "./modules/user_data/piece_border";
+import TransitionDurationData from "./modules/user_data/transition_duration";
+import CellIndexOpacityData from "./modules/user_data/cell_index_opacity";
 import PreferredPlayerColorData, {
-  DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
+  type PreferredPlayerColorValue,
 } from "./modules/user_data/preferred_player_color";
-import OpponentOverLanData, {
-  DEFAULT_OPPONENT_OVER_LAN_VALUE,
-} from "./modules/user_data/opponent_over_lan";
-import SecondCheckboardData, {
-  DEFAULT_SECOND_CHECKBOARD_VALUE,
-} from "./modules/user_data/second_checkboard";
-import RotateScreenData, {
-  DEFAULT_ROTATE_SCREEN_VALUE,
-} from "./modules/user_data/rotate_screen";
-import RequireMoveConfirmData, {
-  DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
-} from "./modules/user_data/require_move_confirm";
+import OpponentOverLanData from "./modules/user_data/opponent_over_lan";
+import SecondCheckboardData from "./modules/user_data/second_checkboard";
+import RotateScreenData from "./modules/user_data/rotate_screen";
+import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 
 // Import other classes
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -57,7 +37,17 @@ import ConfirmDialog from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
-import { type Piece, type PlayerColor, isPlayerColor } from "./modules/pieces";
+import {
+  type Piece,
+  type PlayerColor,
+  isPlayerColor,
+  Bishop,
+  King,
+  Knight,
+  Pawn,
+  Queen,
+  Rook,
+} from "./modules/pieces";
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
@@ -82,6 +72,70 @@ import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
 
+const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
+  [
+    new Rook("white"),
+    new Knight("white"),
+    new Bishop("white"),
+    new Queen("white"),
+    new King("white"),
+    new Bishop("white"),
+    new Knight("white"),
+    new Rook("white"),
+  ],
+  [
+    new Pawn("white"),
+    new Pawn("white"),
+    new Pawn("white"),
+    new Pawn("white"),
+    new Pawn("white"),
+    new Pawn("white"),
+    new Pawn("white"),
+    new Pawn("white"),
+  ],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [
+    new Pawn("black"),
+    new Pawn("black"),
+    new Pawn("black"),
+    new Pawn("black"),
+    new Pawn("black"),
+    new Pawn("black"),
+    new Pawn("black"),
+    new Pawn("black"),
+  ],
+  [
+    new Rook("black"),
+    new Knight("black"),
+    new Bishop("black"),
+    new Queen("black"),
+    new King("black"),
+    new Bishop("black"),
+    new Knight("black"),
+    new Rook("black"),
+  ],
+];
+const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(Array(8).fill(null));
+const DEFAULT_CELL_INDEX_OPACITY_VALUE = 80;
+const DEFAULT_PLAYER_HUE_VALUE = 37;
+const DEFAULT_OPPONENT_HUE_VALUE = 212;
+const DEFAULT_OPPONENT_OVER_LAN_VALUE = false;
+const DEFAULT_PIECE_BORDER_VALUE = 1.1;
+const DEFAULT_PIECE_PADDING_VALUE = 5;
+const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "material_design";
+const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PreferredPlayerColorValue =
+  "random";
+const DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE = false;
+const DEFAULT_ROTATE_SCREEN_VALUE = false;
+const DEFAULT_SECOND_CHECKBOARD_VALUE = false;
+const DEFAULT_THEME_VALUE: ThemeValue = "auto";
+const DEFAULT_TRANSITION_DURATION_VALUE = 100;
+const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
+const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
+
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
@@ -91,10 +145,12 @@ watch(screenRotated, (newValue) => {
 });
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
-const playerCapturedPieces = ref<Piece[]>([]);
-const opponentCapturedPieces = ref<Piece[]>([]);
-const playerBoardMarks = ref<MarkState>(Array(8).fill(Array(8).fill(null)));
-const OpponentBoardMarks = ref<MarkState>(Array(8).fill(Array(8).fill(null)));
+const playerBoardMarks: MarkState = reactive(
+  Array(8).fill(Array(8).fill(null))
+);
+const OpponentBoardMarks: MarkState = reactive(
+  Array(8).fill(Array(8).fill(null))
+);
 
 // Other options refs
 // Simple values (ref)
@@ -114,13 +170,19 @@ const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 
 // Game specific
-const playerColor = ref<PlayerColor>("white");
+const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerPlaying = ref(true);
 const gamePaused = ref(false);
+const playerCapturedPieces = ref<Piece[]>([]);
+const opponentCapturedPieces = ref<Piece[]>([]);
 
 // Complex values (reactive)
-const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
-const gameBoardState: BoardStateValue = reactive(Array(Array(8).fill(null)));
+const defaultBoardState: BoardStateValue = reactive(
+  DEFAULT_DEFAULT_BOARD_STATE_VALUE
+);
+const gameBoardState: BoardStateValue = reactive(
+  DEFAULT_GAME_BOARD_STATE_VALUE
+);
 
 // Confirm dialog
 const confirmDialog = new ConfirmDialog();
@@ -147,12 +209,12 @@ const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 
 // Data
 const defaultBoardStateData = new BoardStateData(
-  DEFAULT_BOARD_STATE_VALUE,
+  DEFAULT_DEFAULT_BOARD_STATE_VALUE,
   defaultBoardState,
   toastManager
 );
 const gameBoardStateData = new BoardStateData(
-  gameBoardState,
+  DEFAULT_GAME_BOARD_STATE_VALUE,
   gameBoardState,
   toastManager
 );
@@ -213,7 +275,7 @@ const userDataManager = new UserDataManager(
     ),
     new SelectUserData(
       "player_color",
-      playerColor.value,
+      DEFAULT_PLAYER_COLOR_VALUE,
       isPlayerColor,
       toastManager,
       playerColor
@@ -264,19 +326,20 @@ const game = new Game(
   preferredPlayerColor
 );
 
+// Load data
+navigator.cookieEnabled
+  ? userDataManager.recoverData()
+  : toastManager.showToast(
+      "Cookies are disabled. -> No changes will be restored in next session.",
+      "error",
+      "cookie-alert"
+    );
+userDataManager.applyData();
+userDataManager.updateReferences();
+
 // On first mount
 onMounted(() => {
   console.log("App mounted");
-
-  navigator.cookieEnabled
-    ? userDataManager.recoverData()
-    : toastManager.showToast(
-        "Cookies are disabled. -> No changes will be restored in next session.",
-        "error",
-        "cookie-alert"
-      );
-  userDataManager.applyData();
-  userDataManager.updateReferences();
 
   // NOTE: Sets CSS Saturation variables from 0 to their appropriate user configured values
   activateColors();

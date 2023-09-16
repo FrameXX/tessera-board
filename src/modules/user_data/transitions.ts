@@ -8,8 +8,6 @@ function isTransitionsValue(string: string): string is TransitionsValue {
   return string === "enabled" || string === "disabled" || string === "auto";
 }
 
-export const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
-
 class TransitionsData extends SelectUserData<TransitionsValue> {
   private transitionManager: TransitionsManager;
 

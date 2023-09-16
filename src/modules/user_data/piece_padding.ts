@@ -3,8 +3,6 @@ import { NumberUserData } from "./user_data";
 import { setCSSVariable } from "../utils/elements";
 import type ToastManager from "../toast_manager";
 
-export const DEFAULT_PIECE_PADDING_VALUE = 5;
-
 class PiecePaddingData extends NumberUserData {
   constructor(
     value: number,

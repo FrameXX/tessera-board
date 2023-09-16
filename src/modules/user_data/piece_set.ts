@@ -7,8 +7,6 @@ function isPieceSetValue(string: string): string is PieceSetValue {
   return string === "material_design" || string === "font_awesome";
 }
 
-export const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "material_design";
-
 class PieceSetData extends SelectUserData<PieceSetValue> {
   constructor(
     value: PieceSetValue,

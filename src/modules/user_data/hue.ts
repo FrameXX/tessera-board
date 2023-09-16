@@ -3,9 +3,6 @@ import { setCSSVariable } from "../utils/elements";
 import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";
 
-export const DEFAULT_PLAYER_HUE_VALUE = 37;
-export const DEFAULT_OPPONENT_HUE_VALUE = 212;
-
 class HueData extends NumberUserData {
   private forOpponent: boolean;
 

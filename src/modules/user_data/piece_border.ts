@@ -3,8 +3,6 @@ import { NumberUserData } from "./user_data";
 import { setCSSVariable } from "../utils/elements";
 import type ToastManager from "../toast_manager";
 
-export const DEFAULT_PIECE_BORDER_VALUE = 1.1;
-
 class PieceBorderData extends NumberUserData {
   constructor(
     value: number,
