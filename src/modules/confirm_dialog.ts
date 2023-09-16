@@ -36,11 +36,11 @@ class ConfirmDialog {
     }
   };
 
-  public show(
+  public show = (
     message: string,
     confirmText: string = "Confirm",
     cancelText: string = "Cancel"
-  ) {
+  ) => {
     this.props.message = message;
     this.props.confirmText = confirmText;
     this.props.cancelText = cancelText;
@@ -49,7 +49,7 @@ class ConfirmDialog {
     return new Promise((resolve: (confirmed: boolean) => void) => {
       this.resolve = resolve;
     });
-  }
+  };
 }
 
 export default ConfirmDialog;
