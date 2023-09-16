@@ -75,7 +75,8 @@ abstract class UserData<ValueType> {
   public abstract load(dumped: string): void;
 }
 
-export abstract class SelectUserData<
+// These 3 classes implement all of the mandatory methods of UserData for their extending classes already. It's up to the extending class to override any of the methods if needed. They are not abstract and can be used as they are.
+export class SelectUserData<
   ValueType extends string
 > extends UserData<ValueType> {
   constructor(
@@ -99,9 +100,11 @@ export abstract class SelectUserData<
       this.handleInvalidLoadValue(dumped);
     }
   }
+
+  public apply(): void {}
 }
 
-export abstract class NumberUserData extends UserData<number> {
+export class NumberUserData extends UserData<number> {
   constructor(
     id: string,
     value: number,
@@ -123,9 +126,11 @@ export abstract class NumberUserData extends UserData<number> {
       this.minValue ?? Number.MIN_VALUE
     );
   }
+
+  public apply(): void {}
 }
 
-export abstract class BooleanUserData extends UserData<boolean> {
+export class BooleanUserData extends UserData<boolean> {
   constructor(
     id: string,
     value: boolean,
@@ -143,9 +148,11 @@ export abstract class BooleanUserData extends UserData<boolean> {
   public load(dumped: string): void {
     this.value = Boolean(+dumped);
   }
+
+  public apply(): void {}
 }
 
-// The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values.
+// The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values. This is still an abstract class and some methods need to be implemented by extending classes (children).
 export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   constructor(
     id: string,
@@ -173,6 +180,8 @@ export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
       this.reactiveValue[key] = this.value[key];
     }
   }
+
+  public apply(): void {}
 }
 
 export default UserData;

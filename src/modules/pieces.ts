@@ -2,6 +2,9 @@ import { UserDataError } from "./user_data/user_data";
 import { getRandomId } from "./utils/misc";
 
 export type PlayerColor = "white" | "black";
+export function isPlayerColor(string: string): string is PlayerColor {
+  return string === "white" || string === "black";
+}
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 
 export abstract class Piece {

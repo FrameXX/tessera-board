@@ -5,9 +5,12 @@ import type ToastManager from "./toast_manager";
 class UserDataManager {
   private readonly dialogManager: ConfirmDialog;
   private readonly toastManager: ToastManager;
-  public entries: UserData<any>[] = [];
 
-  constructor(dialogManager: ConfirmDialog, toastManager: ToastManager) {
+  constructor(
+    public entries: UserData<any>[],
+    dialogManager: ConfirmDialog,
+    toastManager: ToastManager
+  ) {
     this.dialogManager = dialogManager;
     this.toastManager = toastManager;
   }

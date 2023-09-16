@@ -97,8 +97,6 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
       this.handleInvalidLoadValue(dumped);
     }
   }
-
-  public apply(): void {}
 }
 
 export default BoardStateData;

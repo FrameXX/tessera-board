@@ -5,7 +5,7 @@ import type ToastManager from "../toast_manager";
 export const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PreferredPlayerColorValue =
   "random";
 
-type PreferredPlayerColorValue = "white" | "black" | "random";
+export type PreferredPlayerColorValue = "white" | "black" | "random";
 function isPreferredPlayerColorValue(
   string: string
 ): string is PreferredPlayerColorValue {

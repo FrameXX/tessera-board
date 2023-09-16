@@ -3,6 +3,7 @@
 import { ref, reactive, onMounted, watch } from "vue";
 
 // Import user data
+import { SelectUserData } from "./modules/user_data/user_data";
 import UserDataManager from "./modules/user_data_manager";
 import ThemeData, { DEFAULT_THEME_VALUE } from "./modules/user_data/theme";
 import TransitionsData, {
@@ -56,7 +57,7 @@ import ConfirmDialog from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
-import { Piece } from "./modules/pieces";
+import { type Piece, type PlayerColor, isPlayerColor } from "./modules/pieces";
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
@@ -64,6 +65,7 @@ import type { MarkState } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
+import Game from "./modules/game";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -80,51 +82,24 @@ import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
 
-// UI refs
+// UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
 const screenRotated = ref(false);
 watch(screenRotated, (newValue) => {
   updateScreenRotation(newValue);
 });
-
+const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCapturedPieces = ref<Piece[]>([]);
 const opponentCapturedPieces = ref<Piece[]>([]);
 const playerBoardMarks = ref<MarkState>(Array(8).fill(Array(8).fill(null)));
 const OpponentBoardMarks = ref<MarkState>(Array(8).fill(Array(8).fill(null)));
 
-// Toast manager
-const toasts = ref<ToastProps[]>([]);
-const toastManager = new ToastManager(toasts);
-
-// Theme manager
-const theme = ref(DEFAULT_THEME_VALUE);
-const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
-
-// Transition manager
-const transitions = ref(DEFAULT_TRANSITIONS_VALUE);
-const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
-
-// Splashscreen manager
-const splashscreenManager = new SplashscreenManager(transitionsManager);
-
-// Confirm dialog
-const confirmDialog = new ConfirmDialog();
-
-// Config piece dialog
-const configPieceDialog = new ConfigPieceDialog();
-
-// Configs dialog
-const configPrintDialog = new ConfigPrintDialog(toastManager);
-const configsDialog = new ConfigsDialog(
-  confirmDialog,
-  configPrintDialog,
-  toastManager
-);
-
 // Other options refs
 // Simple values (ref)
+const theme = ref(DEFAULT_THEME_VALUE);
+const transitions = ref(DEFAULT_TRANSITIONS_VALUE);
 const playerHue = ref(DEFAULT_PLAYER_HUE_VALUE);
 const opponentHue = ref(DEFAULT_OPPONENT_HUE_VALUE);
 const pieceSet = ref(DEFAULT_PIECE_SET_VALUE);
@@ -138,72 +113,116 @@ const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
 const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 
+// Game specific
+const playerColor = ref<PlayerColor>("white");
+const playerPlaying = ref(true);
+const gamePaused = ref(false);
+
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(DEFAULT_BOARD_STATE_VALUE);
-const gameBoardState: BoardStateValue = reactive(
-  structuredClone(DEFAULT_BOARD_STATE_VALUE)
+const gameBoardState: BoardStateValue = reactive(Array(Array(8).fill(null)));
+
+// Confirm dialog
+const confirmDialog = new ConfirmDialog();
+
+// Config piece dialog
+const configPieceDialog = new ConfigPieceDialog();
+
+// Toast manager
+const toastManager = new ToastManager(toasts);
+
+// Configs dialog
+const configPrintDialog = new ConfigPrintDialog(toastManager);
+const configsDialog = new ConfigsDialog(
+  confirmDialog,
+  configPrintDialog,
+  toastManager
 );
 
+// Theme manager
+const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
+
+// Transition manager
+const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
+
+// Data
 const defaultBoardStateData = new BoardStateData(
   DEFAULT_BOARD_STATE_VALUE,
   defaultBoardState,
   toastManager
 );
 const gameBoardStateData = new BoardStateData(
-  DEFAULT_BOARD_STATE_VALUE,
+  gameBoardState,
   gameBoardState,
   toastManager
 );
 
 // NOTE: Most of the UserData instances use Ref but some of them may use Reactive if their value is more complex. These classes are extending ComplexUserData class.
-const userDataManager = new UserDataManager(confirmDialog, toastManager);
-userDataManager.entries = [
-  new ThemeData(DEFAULT_THEME_VALUE, theme, themeManger, toastManager),
-  new TransitionsData(
-    DEFAULT_TRANSITIONS_VALUE,
-    transitions,
-    transitionsManager,
-    toastManager
-  ),
-  new HueData(DEFAULT_PLAYER_HUE_VALUE, playerHue, false, toastManager),
-  new HueData(DEFAULT_OPPONENT_HUE_VALUE, opponentHue, true, toastManager),
-  new PieceSetData(DEFAULT_PIECE_SET_VALUE, pieceSet, toastManager),
-  new PiecePaddingData(DEFAULT_PIECE_PADDING_VALUE, piecePadding, toastManager),
-  new PieceBorderData(DEFAULT_PIECE_BORDER_VALUE, pieceBorder, toastManager),
-  new TransitionDurationData(
-    DEFAULT_TRANSITION_DURATION_VALUE,
-    transitionDuration,
-    toastManager
-  ),
-  new CellIndexOpacityData(
-    DEFAULT_CELL_INDEX_OPACITY_VALUE,
-    cellIndexOpacity,
-    toastManager
-  ),
-  new PreferredPlayerColorData(
-    DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
-    preferredPlayerColor,
-    toastManager
-  ),
-  new OpponentOverLanData(
-    DEFAULT_OPPONENT_OVER_LAN_VALUE,
-    opponentOverLan,
-    toastManager
-  ),
-  new SecondCheckboardData(
-    DEFAULT_SECOND_CHECKBOARD_VALUE,
-    secondCheckboard,
-    toastManager
-  ),
-  new RotateScreenData(DEFAULT_ROTATE_SCREEN_VALUE, rotateScreen, toastManager),
-  new RequireMoveConfirmData(
-    DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
-    requireMoveConfirm,
-    toastManager
-  ),
-  defaultBoardStateData,
-  gameBoardStateData,
-];
+const userDataManager = new UserDataManager(
+  [
+    new ThemeData(DEFAULT_THEME_VALUE, theme, themeManger, toastManager),
+    new TransitionsData(
+      DEFAULT_TRANSITIONS_VALUE,
+      transitions,
+      transitionsManager,
+      toastManager
+    ),
+    new HueData(DEFAULT_PLAYER_HUE_VALUE, playerHue, false, toastManager),
+    new HueData(DEFAULT_OPPONENT_HUE_VALUE, opponentHue, true, toastManager),
+    new PieceSetData(DEFAULT_PIECE_SET_VALUE, pieceSet, toastManager),
+    new PiecePaddingData(
+      DEFAULT_PIECE_PADDING_VALUE,
+      piecePadding,
+      toastManager
+    ),
+    new PieceBorderData(DEFAULT_PIECE_BORDER_VALUE, pieceBorder, toastManager),
+    new TransitionDurationData(
+      DEFAULT_TRANSITION_DURATION_VALUE,
+      transitionDuration,
+      toastManager
+    ),
+    new CellIndexOpacityData(
+      DEFAULT_CELL_INDEX_OPACITY_VALUE,
+      cellIndexOpacity,
+      toastManager
+    ),
+    new PreferredPlayerColorData(
+      DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
+      preferredPlayerColor,
+      toastManager
+    ),
+    new OpponentOverLanData(
+      DEFAULT_OPPONENT_OVER_LAN_VALUE,
+      opponentOverLan,
+      toastManager
+    ),
+    new SecondCheckboardData(
+      DEFAULT_SECOND_CHECKBOARD_VALUE,
+      secondCheckboard,
+      toastManager
+    ),
+    new RotateScreenData(
+      DEFAULT_ROTATE_SCREEN_VALUE,
+      rotateScreen,
+      toastManager
+    ),
+    new RequireMoveConfirmData(
+      DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
+      requireMoveConfirm,
+      toastManager
+    ),
+    new SelectUserData(
+      "player_color",
+      playerColor.value,
+      isPlayerColor,
+      toastManager,
+      playerColor
+    ),
+    gameBoardStateData,
+  ],
+  confirmDialog,
+  toastManager
+);
 
 // Default board configurations
 const defaultBoardConfigInventory = new ConfigInventory(
@@ -231,8 +250,19 @@ const gameBoardManager = new GameBoardManager(
   OpponentBoardMarks
 );
 
+// Splashscreen manager
+const splashscreenManager = new SplashscreenManager(transitionsManager);
+
 // Escape manager
 const escapeManager = new EscapeManager(toggleActionsPanel);
+
+// Game manager
+const game = new Game(
+  gameBoardStateData,
+  defaultBoardStateData,
+  playerColor,
+  preferredPlayerColor
+);
 
 // On first mount
 onMounted(() => {
@@ -297,6 +327,17 @@ function updateScreenRotation(rotate: boolean): void {
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
+        :rotated="screenRotated"
+        :manager="gameBoardManager"
+        :state="gameBoardState"
+        :piece-set="pieceSet"
+        :piece-padding="piecePadding"
+        :player-captured-pieces="playerCapturedPieces"
+        :opponent-captured-pieces="opponentCapturedPieces"
+        id="primary-board"
+      />
+      <Board
+        v-if="secondCheckboard"
         :rotated="screenRotated"
         :manager="gameBoardManager"
         :state="gameBoardState"
