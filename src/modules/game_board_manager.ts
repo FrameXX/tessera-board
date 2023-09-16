@@ -9,10 +9,10 @@ class GameBoardManager extends BoardManager {
 
   constructor(
     boardState: BoardStateValue,
-    private readonly playerCapturedPiecesRef: Ref<Piece[]>,
-    private readonly opponentCapturedPiecesRef: Ref<Piece[]>,
-    private readonly playerBoardMarksRef: Ref<MarkState>,
-    private readonly OpponentBoardMarksRef: Ref<MarkState>
+    private readonly playerCapturedPieces: Ref<Piece[]>,
+    private readonly opponentCapturedPiecesf: Ref<Piece[]>,
+    private readonly playerBoardMarks: MarkState,
+    private readonly OpponentBoardMarks: MarkState
   ) {
     super(boardState);
   }

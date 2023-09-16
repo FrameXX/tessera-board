@@ -135,6 +135,8 @@ const DEFAULT_THEME_VALUE: ThemeValue = "auto";
 const DEFAULT_TRANSITION_DURATION_VALUE = 100;
 const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
 const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
+const DEFAULT_PLAYER_CAPTURED_PIECES_VALUE: Piece[] = [];
+const DEFAULT_OPPONENT_CAPTURED_PIECES_VALUE: Piece[] = [];
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
@@ -173,8 +175,10 @@ const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerPlaying = ref(true);
 const gamePaused = ref(false);
-const playerCapturedPieces = ref<Piece[]>([]);
-const opponentCapturedPieces = ref<Piece[]>([]);
+const playerCapturedPieces = ref<Piece[]>(DEFAULT_PLAYER_CAPTURED_PIECES_VALUE);
+const opponentCapturedPieces = ref<Piece[]>(
+  DEFAULT_OPPONENT_CAPTURED_PIECES_VALUE
+);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(
