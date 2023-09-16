@@ -90,7 +90,7 @@ defineEmits({
 
   .title {
     padding-bottom: var(--spacing-small);
-    font-weight: 600;
+    font-weight: bold;
     font-size: var(--font-size-big);
   }
 

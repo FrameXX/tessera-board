@@ -2,6 +2,24 @@
 @import "./partials/splashscreen";
 @import "./partials/variables";
 
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("assets/fonts/JetBrainsMono-Regular.woff2") format("woff2"),
+    url("assets/fonts/JetBrainsMono-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("assets/fonts/JetBrainsMono-Italic.woff2") format("woff2"),
+    url("assets/fonts/JetBrainsMono-Italic.woff") format("woff");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
 ::selection {
   background-color: var(--color-primary-accent);
   color: var(--color-primary-surface);
@@ -61,7 +79,7 @@ button {
   @include round-border;
   @include flex-center(inline-flex);
   margin: var(--spacing-small);
-  font-weight: 500;
+  font-weight: bold;
   text-transform: uppercase;
   background-color: var(--color-primary-surface-top);
   color: var(--color-primary-accent);

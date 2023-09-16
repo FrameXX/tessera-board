@@ -948,6 +948,7 @@ function updateScreenRotation(rotate: boolean): void {
   @include inverted-accent;
   margin: var(--spacing-big) 0;
   font-size: var(--font-size-small);
+  font-weight: bold;
   padding: var(--spacing-small);
 }
 </style>
