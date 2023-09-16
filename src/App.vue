@@ -60,7 +60,7 @@ import { Piece } from "./modules/pieces";
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { BoardPieceProps } from "./components/Board.vue";
+import type { MarkState } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
@@ -91,12 +91,8 @@ watch(screenRotated, (newValue) => {
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCapturedPieces = ref<Piece[]>([]);
 const opponentCapturedPieces = ref<Piece[]>([]);
-const playerBoardMarks = ref<BoardPieceProps[]>(
-  Array(8).fill(Array(8).fill(null))
-);
-const OpponentBoardMarks = ref<BoardPieceProps[]>(
-  Array(8).fill(Array(8).fill(null))
-);
+const playerBoardMarks = ref<MarkState>(Array(8).fill(Array(8).fill(null)));
+const OpponentBoardMarks = ref<MarkState>(Array(8).fill(Array(8).fill(null)));
 
 // Toast manager
 const toasts = ref<ToastProps[]>([]);

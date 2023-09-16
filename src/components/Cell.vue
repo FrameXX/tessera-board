@@ -2,12 +2,12 @@
 import { PropType, computed } from "vue";
 import Icon from "./Icon.vue";
 
-export type Mark = "availible" | "capture" | null;
+export type Mark = "availible" | "capture";
 
 const props = defineProps({
   row: { type: Number, required: true },
   col: { type: Number, required: true },
-  mark: { type: [String, null] as PropType<Mark>, required: true },
+  mark: { type: [String, null] as PropType<Mark | null>, required: true },
 });
 
 const charIndexes = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -35,7 +35,19 @@ const cornerClass = computed(() => {
 });
 
 const markIconId = computed(() => {
-  return props.mark === "capture" ? "close" : "circle-small";
+  let iconId: string;
+  switch (props.mark) {
+    case "capture":
+      iconId = "close";
+      break;
+    case "availible":
+      iconId = "circle-small";
+      break;
+    default:
+      iconId = "";
+      break;
+  }
+  return iconId;
 });
 </script>
 

@@ -8,7 +8,7 @@ import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
 
-export type MarkState = Mark[][];
+export type MarkState = (Mark | null)[][];
 
 export interface BoardPieceProps {
   row: number;

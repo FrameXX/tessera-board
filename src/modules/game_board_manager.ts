@@ -1,7 +1,7 @@
 import type { Ref } from "vue";
 import BoardManager from "./board_manager";
 import type Piece from "./pieces";
-import type { BoardMarkProps, BoardPieceProps } from "../components/Board.vue";
+import type { BoardPieceProps, MarkState } from "../components/Board.vue";
 import type { BoardStateValue } from "./user_data/board_state";
 
 class GameBoardManager extends BoardManager {
@@ -11,8 +11,8 @@ class GameBoardManager extends BoardManager {
     boardState: BoardStateValue,
     private readonly playerCapturedPiecesRef: Ref<Piece[]>,
     private readonly opponentCapturedPiecesRef: Ref<Piece[]>,
-    private readonly playerBoardMarksRef: Ref<BoardMarkProps>,
-    private readonly OpponentBoardMarksRef: Ref<BoardMarkProps>
+    private readonly playerBoardMarksRef: Ref<MarkState>,
+    private readonly OpponentBoardMarksRef: Ref<MarkState>
   ) {
     super(boardState);
   }
