@@ -10,9 +10,12 @@ import CapturedPieces from "./CapturedPieces.vue";
 
 export type MarkState = (Mark | null)[][];
 
-export interface BoardPieceProps {
+export interface BoardPosition {
   row: number;
   col: number;
+}
+
+export interface BoardPieceProps extends BoardPosition {
   piece: Piece;
 }
 

@@ -3,7 +3,7 @@
 import { ref, reactive, onMounted, watch } from "vue";
 
 // Import user data
-import { SelectUserData } from "./modules/user_data/user_data";
+import { BooleanUserData, SelectUserData } from "./modules/user_data/user_data";
 import UserDataManager from "./modules/user_data_manager";
 import ThemeData, { type ThemeValue } from "./modules/user_data/theme";
 import TransitionsData, {
@@ -71,6 +71,7 @@ import ConfigItem from "./components/ConfigItem.vue";
 import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
+import GenericBoardStateData from "./modules/user_data/generic_board_state";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -137,6 +138,8 @@ const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
 const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
 const DEFAULT_PLAYER_CAPTURED_PIECES_VALUE: Piece[] = [];
 const DEFAULT_OPPONENT_CAPTURED_PIECES_VALUE: Piece[] = [];
+const DEFAULT_PLAYER_PLAYING_VALUE = true;
+const DEFAULT_GAME_PAUSED_VALUE = false;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
@@ -173,8 +176,8 @@ const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 
 // Game specific
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
-const playerPlaying = ref(true);
-const gamePaused = ref(false);
+const playerPlaying = ref(DEFAULT_PLAYER_PLAYING_VALUE);
+const gamePaused = ref(DEFAULT_GAME_PAUSED_VALUE);
 const playerCapturedPieces = ref<Piece[]>(DEFAULT_PLAYER_CAPTURED_PIECES_VALUE);
 const opponentCapturedPieces = ref<Piece[]>(
   DEFAULT_OPPONENT_CAPTURED_PIECES_VALUE
@@ -212,7 +215,7 @@ const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 
 // Data
-const defaultBoardStateData = new BoardStateData(
+const defaultBoardStateData = new GenericBoardStateData(
   DEFAULT_DEFAULT_BOARD_STATE_VALUE,
   defaultBoardState,
   toastManager
@@ -284,6 +287,18 @@ const userDataManager = new UserDataManager(
       toastManager,
       playerColor
     ),
+    new BooleanUserData(
+      "player_playing",
+      DEFAULT_PLAYER_PLAYING_VALUE,
+      toastManager,
+      playerPlaying
+    ),
+    new BooleanUserData(
+      "game_paused",
+      DEFAULT_GAME_PAUSED_VALUE,
+      toastManager,
+      gamePaused
+    ),
     gameBoardStateData,
   ],
   confirmDialog,
@@ -331,13 +346,18 @@ const game = new Game(
 );
 
 // Load data
-navigator.cookieEnabled
-  ? userDataManager.recoverData()
-  : toastManager.showToast(
-      "Cookies are disabled. -> No changes will be restored in next session.",
-      "error",
-      "cookie-alert"
-    );
+if (localStorage.length !== 0) {
+  navigator.cookieEnabled
+    ? userDataManager.recoverData()
+    : toastManager.showToast(
+        "Cookies are disabled. -> No changes will be restored in next session.",
+        "error",
+        "cookie-alert"
+      );
+} else {
+  game.restart();
+}
+
 userDataManager.applyData();
 userDataManager.updateReferences();
 

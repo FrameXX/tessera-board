@@ -3,7 +3,7 @@ import {
   type PieceId,
   type PlayerColor,
   type Piece,
-  getPieceById,
+  getPieceFromGeneric as getPieceFromGenerics,
 } from "./pieces";
 
 interface ConfigPieceDialogProps {
@@ -33,7 +33,12 @@ class ConfigPieceDialog {
 
   public confirm = () => {
     if (this.resolve) {
-      this.resolve(getPieceById(this.props.pieceId, this.props.color));
+      this.resolve(
+        getPieceFromGenerics({
+          pieceId: this.props.pieceId,
+          color: this.props.color,
+        })
+      );
       this.resolve = undefined;
     }
     this.props.open = false;

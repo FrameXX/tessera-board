@@ -6,19 +6,60 @@ export function isPlayerColor(string: string): string is PlayerColor {
   return string === "white" || string === "black";
 }
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
+function isPieceId(string: string): string is PieceId {
+  return (
+    string === "rook" ||
+    string === "knight" ||
+    string === "bishop" ||
+    string === "queen" ||
+    string === "king" ||
+    string === "pawn"
+  );
+}
+
+export interface GenericPiece {
+  pieceId: PieceId;
+  color: PlayerColor;
+}
+export function isGenericPiece(object: any): object is GenericPiece {
+  if (typeof object.pieceId !== "string") {
+    return false;
+  }
+  if (typeof object.color !== "string") {
+    return false;
+  }
+  if (!isPieceId(object.pieceId)) {
+    return false;
+  }
+  if (!isPlayerColor(object.color)) {
+    return false;
+  }
+  return true;
+}
+
+export interface GamePiece extends GenericPiece {
+  moved: boolean;
+}
+export function isGamePiece(object: any): object is GamePiece {
+  if (!isGenericPiece(object)) {
+    return false;
+  }
+  // @ts-ignore
+  if (typeof object.moved !== "boolean") {
+    return false;
+  }
+  return true;
+}
 
 export abstract class Piece {
   public readonly id: string;
+  public moved?: boolean;
 
   constructor(
     public readonly color: PlayerColor,
     public readonly pieceId: PieceId
   ) {
     this.id = getRandomId();
-  }
-
-  public get genericObject() {
-    return { pieceId: this.pieceId, color: this.color };
   }
 
   public abstract getPossibleMoves(): unknown;
@@ -84,29 +125,31 @@ export class Pawn extends Piece {
   }
 }
 
-export function getPieceById(id: PieceId, color: PlayerColor): Piece {
+export function getPieceFromGeneric(genericPiece: GenericPiece): Piece {
   let piece: Piece | null;
-  switch (id) {
+  switch (genericPiece.pieceId) {
     case "bishop":
-      piece = new Bishop(color);
+      piece = new Bishop(genericPiece.color);
       break;
     case "king":
-      piece = new King(color);
+      piece = new King(genericPiece.color);
       break;
     case "knight":
-      piece = new Knight(color);
+      piece = new Knight(genericPiece.color);
       break;
     case "pawn":
-      piece = new Pawn(color);
+      piece = new Pawn(genericPiece.color);
       break;
     case "queen":
-      piece = new Queen(color);
+      piece = new Queen(genericPiece.color);
       break;
     case "rook":
-      piece = new Rook(color);
+      piece = new Rook(genericPiece.color);
       break;
     default:
-      throw new UserDataError(`Provided pieceId "${id}" is invalid.`);
+      throw new UserDataError(
+        `Provided pieceId "${genericPiece.pieceId}" is invalid.`
+      );
   }
   return piece;
 }

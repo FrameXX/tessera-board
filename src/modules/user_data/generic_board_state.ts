@@ -1,39 +1,37 @@
-import { getPieceFromGeneric, isGamePiece, isGenericPiece } from "../pieces";
+import { getPieceFromGeneric, isGenericPiece } from "../pieces";
 import { ComplexUserData } from "./user_data";
 import type Piece from "../pieces";
 import type ToastManager from "../toast_manager";
 
 export type BoardStateValue = (Piece | null)[][];
 
-class BoardStateData extends ComplexUserData<BoardStateValue> {
+class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     value: BoardStateValue,
     valueReactive: BoardStateValue,
     toastManager: ToastManager
   ) {
-    super("game_board_state", value, valueReactive, toastManager);
+    super("default_board_state", value, valueReactive, toastManager);
   }
 
   public dump(): string {
-    // Save piece as GamePiece
+    // Save piece as GenericPiece
     return JSON.stringify(
       this.value.map((row) =>
         row.map((piece) =>
-          piece
-            ? { pieceId: piece.pieceId, color: piece.color, moved: piece.moved }
-            : null
+          piece ? { pieceId: piece.pieceId, color: piece.color } : null
         )
       )
     );
   }
 
-  public load(dumped: string, fromGeneric: boolean = false): void {
+  public load(dumped: string): void {
     let value;
     try {
       value = JSON.parse(dumped);
     } catch (error) {
       console.error(
-        "An error occured while trying to parse board state.",
+        "An error occured while trying to parse generic board state.",
         error
       );
       this.handleInvalidLoadValue(dumped);
@@ -42,12 +40,9 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
       for (const colIndex in value[rowIndex]) {
         const pieceObject = value[rowIndex][colIndex];
         if (pieceObject) {
-          if (
-            (!isGamePiece(pieceObject) && !fromGeneric) ||
-            (!isGenericPiece(pieceObject) && fromGeneric)
-          ) {
+          if (!isGenericPiece(pieceObject)) {
             console.error(
-              `Could not restore piece of ${this.id} on row ${rowIndex}, ${colIndex}. The piece does not match its type. Data are invalid or corrupted. Setting piece to null.`
+              `Could not restore generic piece of ${this.id} on row ${rowIndex}, ${colIndex}. The piece does not match its type. Data are invalid or corrupted. Setting piece to null.`
             );
             value[rowIndex][colIndex] = null;
             continue;
@@ -56,9 +51,7 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
             pieceId: pieceObject.pieceId,
             color: pieceObject.color,
           });
-          if (!fromGeneric) {
-            piece.moved = pieceObject.moved;
-          }
+          console.log(piece);
           value[rowIndex][colIndex] = piece;
         }
       }
@@ -68,4 +61,4 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
   }
 }
 
-export default BoardStateData;
+export default GenericBoardStateData;

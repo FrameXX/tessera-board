@@ -14,7 +14,7 @@ class Game {
 
   private setupDefaultBoardState() {
     // Copy default checkboard
-    this.gameBoardStateData.load(this.defaultBoardStateData.dump());
+    this.gameBoardStateData.load(this.defaultBoardStateData.dump(), true);
     this.gameBoardStateData.updateReference();
   }
 
@@ -33,7 +33,7 @@ class Game {
     this.choosePlayerColor();
   }
 
-  public turn() {}
+  public finishTurn() {}
 }
 
 export default Game;
