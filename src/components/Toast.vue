@@ -2,7 +2,7 @@
 
 <script lang="ts" setup>
 import Icon from "./Icon.vue";
-import { PropType } from "vue/dist/vue.js";
+import { PropType } from "vue";
 import { ToastCase } from "../modules/toast_manager";
 
 const props = defineProps({
