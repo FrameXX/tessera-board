@@ -27,6 +27,7 @@ import OpponentOverLanData from "./modules/user_data/opponent_over_lan";
 import SecondCheckboardData from "./modules/user_data/second_checkboard";
 import RotateScreenData from "./modules/user_data/rotate_screen";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
+import CapturedPiecesData from "./modules/user_data/captured_pieces";
 
 // Import other classes
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -38,7 +39,6 @@ import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
 import {
-  type Piece,
   type PlayerColor,
   isPlayerColor,
   Bishop,
@@ -72,6 +72,7 @@ import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
 import GenericBoardStateData from "./modules/user_data/generic_board_state";
+import { PieceId } from "./modules/pieces";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -136,8 +137,8 @@ const DEFAULT_THEME_VALUE: ThemeValue = "auto";
 const DEFAULT_TRANSITION_DURATION_VALUE = 100;
 const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
 const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
-const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: Piece[] = [];
-const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: Piece[] = [];
+const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: PieceId[] = [];
+const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: PieceId[] = [];
 const DEFAULT_PLAYER_PLAYING_VALUE = true;
 const DEFAULT_GAME_PAUSED_VALUE = false;
 
@@ -178,8 +179,8 @@ const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerPlaying = ref(DEFAULT_PLAYER_PLAYING_VALUE);
 const gamePaused = ref(DEFAULT_GAME_PAUSED_VALUE);
-const whiteCapturedPieces = ref<Piece[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
-const blackCapturedPieces = ref<Piece[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
+const whiteCapturedPieces = ref<PieceId[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
+const blackCapturedPieces = ref<PieceId[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(
@@ -297,6 +298,18 @@ const userDataManager = new UserDataManager(
       toastManager,
       gamePaused
     ),
+    new CapturedPiecesData(
+      DEFAULT_WHITE_CAPTURED_PIECES_VALUE,
+      whiteCapturedPieces,
+      "white",
+      toastManager
+    ),
+    new CapturedPiecesData(
+      DEFAULT_BLACK_CAPTURED_PIECES_VALUE,
+      blackCapturedPieces,
+      "black",
+      toastManager
+    ),
     defaultBoardStateData,
     gameBoardStateData,
   ],
@@ -327,6 +340,7 @@ const game = new Game(
   gameBoardStateData,
   defaultBoardStateData,
   playerColor,
+  playerPlaying,
   preferredPlayerColor
 );
 

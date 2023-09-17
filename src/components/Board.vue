@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed, type PropType, ref, onMounted } from "vue";
 import type { BoardStateValue } from "../modules/user_data/board_state";
-import Piece from "../modules/pieces";
+import type { PieceId } from "../modules/pieces";
+import type Piece from "../modules/pieces";
 import Cell, { type Mark } from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
@@ -28,8 +29,8 @@ const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
-  whiteCapturedPieces: { type: Array as PropType<Piece[]> },
-  blackCapturedPieces: { type: Array as PropType<Piece[]> },
+  whiteCapturedPieces: { type: Array as PropType<PieceId[]> },
+  blackCapturedPieces: { type: Array as PropType<PieceId[]> },
   rotated: { type: Boolean, default: false },
 });
 
@@ -103,13 +104,15 @@ function getContainerMinSize() {
       <div class="black captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
-          :pieces="props.blackCapturedPieces"
+          :piece-ids="props.blackCapturedPieces"
+          color="black"
         />
       </div>
       <div class="white captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
-          :pieces="props.whiteCapturedPieces"
+          :piece-ids="props.whiteCapturedPieces"
+          color="white"
         />
       </div>
       <tr class="row" v-for="row in 8" :key="`row-${row}`">

@@ -9,6 +9,7 @@ class Game {
     private readonly gameBoardStateData: BoardStateData,
     private readonly defaultBoardStateData: BoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
+    private readonly playerPlaying: Ref<boolean>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColorValue>
   ) {}
 
@@ -33,7 +34,9 @@ class Game {
     this.choosePlayerColor();
   }
 
-  public finishTurn() {}
+  public onTurnStart() {}
+
+  public onTurnEnd() {}
 }
 
 export default Game;

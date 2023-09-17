@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { PropType } from "vue";
-import type Piece from "../modules/pieces";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
+import type { PieceId, PlayerColor } from "../modules/pieces";
 
 const props = defineProps({
-  pieces: { type: Array as PropType<Piece[]> },
+  pieceIds: { type: Array as PropType<PieceId[]> },
+  color: { type: String as PropType<PlayerColor>, required: true },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
 });
 </script>
@@ -14,10 +15,10 @@ const props = defineProps({
   <div class="captured-pieces">
     <TransitionGroup name="list">
       <PieceIcon
-        v-for="piece in props.pieces"
-        :color="piece.color"
+        v-for="pieceId in props.pieceIds"
+        :color="props.color"
         :piece-set="props.pieceSet"
-        :piece-id="piece.pieceId"
+        :piece-id="pieceId"
       ></PieceIcon>
     </TransitionGroup>
   </div>

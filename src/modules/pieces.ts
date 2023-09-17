@@ -7,7 +7,7 @@ export function isPlayerColor(string: string): string is PlayerColor {
 }
 
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
-function isPieceId(string: string): string is PieceId {
+export function isPieceId(string: string): string is PieceId {
   return (
     string === "rook" ||
     string === "knight" ||
