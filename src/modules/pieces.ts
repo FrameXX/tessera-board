@@ -5,6 +5,7 @@ export type PlayerColor = "white" | "black";
 export function isPlayerColor(string: string): string is PlayerColor {
   return string === "white" || string === "black";
 }
+
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 function isPieceId(string: string): string is PieceId {
   return (
@@ -50,6 +51,8 @@ export function isGamePiece(object: any): object is GamePiece {
   }
   return true;
 }
+
+export interface Turn {}
 
 export abstract class Piece {
   public readonly id: string;

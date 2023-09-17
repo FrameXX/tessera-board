@@ -3,11 +3,13 @@ import BoardManager from "./board_manager";
 import type Piece from "./pieces";
 import type { BoardPieceProps, MarkState } from "../components/Board.vue";
 import type { BoardStateValue } from "./user_data/board_state";
+import type Game from "./game";
 
 class GameBoardManager extends BoardManager {
   private selectedPiece: BoardPieceProps | null = null;
 
   constructor(
+    game: Game,
     boardState: BoardStateValue,
     private readonly playerCapturedPieces: Ref<Piece[]>,
     private readonly opponentCapturedPiecesf: Ref<Piece[]>,

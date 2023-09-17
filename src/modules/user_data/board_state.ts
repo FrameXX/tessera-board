@@ -56,15 +56,14 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
             pieceId: pieceObject.pieceId,
             color: pieceObject.color,
           });
-          if (!fromGeneric) {
-            piece.moved = pieceObject.moved;
-          }
+          fromGeneric
+            ? (piece.moved = false)
+            : (piece.moved = pieceObject.moved);
           value[rowIndex][colIndex] = piece;
         }
       }
     }
     this.value = value;
-    console.log(value);
   }
 }
 

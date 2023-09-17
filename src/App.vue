@@ -299,6 +299,7 @@ const userDataManager = new UserDataManager(
       toastManager,
       gamePaused
     ),
+    defaultBoardStateData,
     gameBoardStateData,
   ],
   confirmDialog,
@@ -317,20 +318,6 @@ const defaultBoardConfigManager = new ConfigManager(
   toastManager
 );
 
-// Board managers
-const defaultBoardManager = new DefaultBoardManager(
-  defaultBoardState,
-  configPieceDialog
-);
-
-const gameBoardManager = new GameBoardManager(
-  gameBoardState,
-  playerCapturedPieces,
-  opponentCapturedPieces,
-  playerBoardMarks,
-  OpponentBoardMarks
-);
-
 // Splashscreen manager
 const splashscreenManager = new SplashscreenManager(transitionsManager);
 
@@ -343,6 +330,21 @@ const game = new Game(
   defaultBoardStateData,
   playerColor,
   preferredPlayerColor
+);
+
+// Board managers
+const defaultBoardManager = new DefaultBoardManager(
+  defaultBoardState,
+  configPieceDialog
+);
+
+const gameBoardManager = new GameBoardManager(
+  game,
+  gameBoardState,
+  playerCapturedPieces,
+  opponentCapturedPieces,
+  playerBoardMarks,
+  OpponentBoardMarks
 );
 
 // Load data
