@@ -136,8 +136,8 @@ const DEFAULT_THEME_VALUE: ThemeValue = "auto";
 const DEFAULT_TRANSITION_DURATION_VALUE = 100;
 const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
 const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
-const DEFAULT_PLAYER_CAPTURED_PIECES_VALUE: Piece[] = [];
-const DEFAULT_OPPONENT_CAPTURED_PIECES_VALUE: Piece[] = [];
+const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: Piece[] = [];
+const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: Piece[] = [];
 const DEFAULT_PLAYER_PLAYING_VALUE = true;
 const DEFAULT_GAME_PAUSED_VALUE = false;
 
@@ -178,10 +178,8 @@ const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerPlaying = ref(DEFAULT_PLAYER_PLAYING_VALUE);
 const gamePaused = ref(DEFAULT_GAME_PAUSED_VALUE);
-const playerCapturedPieces = ref<Piece[]>(DEFAULT_PLAYER_CAPTURED_PIECES_VALUE);
-const opponentCapturedPieces = ref<Piece[]>(
-  DEFAULT_OPPONENT_CAPTURED_PIECES_VALUE
-);
+const whiteCapturedPieces = ref<Piece[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
+const blackCapturedPieces = ref<Piece[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(
@@ -341,8 +339,8 @@ const defaultBoardManager = new DefaultBoardManager(
 const gameBoardManager = new GameBoardManager(
   game,
   gameBoardState,
-  playerCapturedPieces,
-  opponentCapturedPieces,
+  whiteCapturedPieces,
+  blackCapturedPieces,
   playerBoardMarks,
   OpponentBoardMarks
 );
@@ -421,8 +419,8 @@ function updateScreenRotation(rotate: boolean): void {
         :state="gameBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
-        :player-captured-pieces="playerCapturedPieces"
-        :opponent-captured-pieces="opponentCapturedPieces"
+        :player-captured-pieces="whiteCapturedPieces"
+        :black-captured-pieces="blackCapturedPieces"
         id="primary-board"
       />
       <Board
@@ -432,8 +430,8 @@ function updateScreenRotation(rotate: boolean): void {
         :state="gameBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
-        :player-captured-pieces="playerCapturedPieces"
-        :opponent-captured-pieces="opponentCapturedPieces"
+        :player-captured-pieces="whiteCapturedPieces"
+        :black-captured-pieces="blackCapturedPieces"
         id="primary-board"
       />
     </div>

@@ -28,8 +28,8 @@ const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
-  playerCapturedPieces: { type: Array as PropType<Piece[]> },
-  opponentCapturedPieces: { type: Array as PropType<Piece[]> },
+  whiteCapturedPieces: { type: Array as PropType<Piece[]> },
+  blackCapturedPieces: { type: Array as PropType<Piece[]> },
   rotated: { type: Boolean, default: false },
 });
 
@@ -100,8 +100,18 @@ function getContainerMinSize() {
       :class="`board ${props.rotated ? 'rotated' : ''}`"
       :style="`width: ${containerMinSize}px; height: ${containerMinSize}px;`"
     >
-      <div class="black captured-pieces"><CapturedPieces /></div>
-      <div class="white captured-pieces"><CapturedPieces /></div>
+      <div class="black captured-pieces">
+        <CapturedPieces
+          :piece-set="props.pieceSet"
+          :pieces="props.blackCapturedPieces"
+        />
+      </div>
+      <div class="white captured-pieces">
+        <CapturedPieces
+          :piece-set="props.pieceSet"
+          :pieces="props.whiteCapturedPieces"
+        />
+      </div>
       <tr class="row" v-for="row in 8" :key="`row-${row}`">
         <Cell
           v-for="col in 8"
