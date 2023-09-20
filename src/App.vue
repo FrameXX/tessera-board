@@ -433,6 +433,7 @@ function updateScreenRotation(rotate: boolean): void {
         :state="gameBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
+        :piece-border="pieceBorder"
         :player-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         id="primary-board"
@@ -444,6 +445,7 @@ function updateScreenRotation(rotate: boolean): void {
         :state="gameBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
+        :piece-border="pieceBorder"
         :player-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         id="primary-board"
@@ -606,6 +608,7 @@ function updateScreenRotation(rotate: boolean): void {
             :state="defaultBoardState"
             :piece-set="pieceSet"
             :piece-padding="piecePadding"
+            :piece-border="pieceBorder"
             id="default-board"
           />
         </div>

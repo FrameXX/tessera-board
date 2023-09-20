@@ -51,13 +51,11 @@ class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
             pieceId: pieceObject.pieceId,
             color: pieceObject.color,
           });
-          console.log(piece);
           value[rowIndex][colIndex] = piece;
         }
       }
     }
     this.value = value;
-    console.log(value);
   }
 }
 

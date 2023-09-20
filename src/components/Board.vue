@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, type PropType, ref, onMounted } from "vue";
 import type { BoardStateValue } from "../modules/user_data/board_state";
-import type { PieceId } from "../modules/pieces";
+import type { PieceId, PlayerColor } from "../modules/pieces";
 import type Piece from "../modules/pieces";
 import Cell, { type Mark } from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
@@ -20,6 +20,15 @@ export interface BoardPieceProps extends BoardPosition {
   piece: Piece;
 }
 
+interface Arrow {
+  color: PlayerColor;
+  origin: BoardPosition;
+  target: BoardPosition;
+}
+
+const BORDER_PERCENT_DELTA = 100 / 7;
+const CELL_PERCENT_DELTA = (100 - BORDER_PERCENT_DELTA) / 7;
+
 const props = defineProps({
   state: { type: Object as PropType<BoardStateValue>, required: true },
   marksState: {
@@ -28,10 +37,15 @@ const props = defineProps({
   },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
+  pieceBorder: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
   whiteCapturedPieces: { type: Array as PropType<PieceId[]> },
   blackCapturedPieces: { type: Array as PropType<PieceId[]> },
   rotated: { type: Boolean, default: false },
+  arrows: {
+    type: Array as PropType<Arrow[]>,
+    default: [],
+  },
 });
 
 // All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
@@ -53,14 +67,14 @@ const allPieceProps = computed(() => {
 });
 
 const container = ref<HTMLDivElement | null>(null);
-const containerMinSize = ref<number>(0);
+const containerSize = ref<number>(0);
 
 const cellSize = computed(() => {
-  return containerMinSize.value / 8;
+  return containerSize.value / 8;
 });
 
 onMounted(() => {
-  const observer = new ResizeObserver(updateContainerMinSize);
+  const observer = new ResizeObserver(updateContainerSize);
   if (container.value) {
     observer.observe(container.value);
   } else {
@@ -70,14 +84,10 @@ onMounted(() => {
   }
 });
 
-function updateContainerMinSize() {
+function updateContainerSize() {
   const minSize = getContainerMinSize();
-  if (minSize !== null) {
-    containerMinSize.value = minSize;
-  } else {
-    console.error(
-      "Board container element reference is null. Cannot update minSize."
-    );
+  if (minSize) {
+    containerSize.value = minSize;
   }
 }
 
@@ -89,6 +99,9 @@ function getContainerMinSize() {
     );
     return minSize;
   } else {
+    console.error(
+      "Board container element reference is null. Cannot get minSize."
+    );
     return null;
   }
 }
@@ -99,7 +112,7 @@ function getContainerMinSize() {
     <table
       role="grid"
       :class="`board ${props.rotated ? 'rotated' : ''}`"
-      :style="`width: ${containerMinSize}px; height: ${containerMinSize}px;`"
+      :style="`width: ${containerSize}px; height: ${containerSize}px;`"
     >
       <div class="black captured-pieces">
         <CapturedPieces
@@ -140,6 +153,43 @@ function getContainerMinSize() {
           :rotated="props.rotated"
         />
       </TransitionGroup>
+
+      <svg id="arrows">
+        <line
+          v-for="arrow in props.arrows"
+          :x1="`${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.col
+          }%`"
+          :y1="`${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.row
+          }%`"
+          :x2="`calc(${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+          }% + ${props.pieceBorder * 4}px)`"
+          :y2="`calc(${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+          }% + ${props.pieceBorder * 4}px)`"
+          :stroke="`var(--color-piece-stroke-${arrow.color})`"
+          :stroke-width="`calc(1% + ${props.pieceBorder * 8}px)`"
+        />
+        <line
+          v-for="arrow in props.arrows"
+          :x1="`${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.col
+          }%`"
+          :y1="`${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.row
+          }%`"
+          :x2="`${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+          }%`"
+          :y2="`${
+            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+          }%`"
+          :stroke="`var(--color-piece-fill-${arrow.color})`"
+          stroke-width="1%"
+        />
+      </svg>
     </table>
   </div>
 </template>
@@ -174,6 +224,12 @@ function getContainerMinSize() {
     padding: 0;
     display: flex;
   }
+}
+
+#arrows {
+  @include stretch;
+  position: absolute;
+  pointer-events: none;
 }
 
 .captured-pieces {
