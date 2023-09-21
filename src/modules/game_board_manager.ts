@@ -78,6 +78,9 @@ class GameBoardManager extends BoardManager {
       const originValue = this.boardState[move.origin.row][move.origin.col];
       this.boardState[move.origin.row][move.origin.col] = null;
       this.boardState[move.target.row][move.target.col] = originValue;
+      if (originValue) {
+        originValue.moved = true;
+      }
     }
   }
 
