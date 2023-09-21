@@ -10,6 +10,7 @@ import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
 
 export type MarkState = (Mark | null)[][];
+export type SelectedState = boolean[][];
 
 export interface BoardPosition {
   row: number;
@@ -33,6 +34,10 @@ const props = defineProps({
   state: { type: Object as PropType<BoardStateValue>, required: true },
   marksState: {
     type: Array as PropType<MarkState>,
+    default: Array(8).fill(Array(8).fill(null)),
+  },
+  selectedState: {
+    type: Array as PropType<SelectedState>,
     default: Array(8).fill(Array(8).fill(null)),
   },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
@@ -105,6 +110,10 @@ function getContainerMinSize() {
     return null;
   }
 }
+
+function onCellClick(position: BoardPosition) {
+  props.manager.onCellClick(8 - position.row, position.col - 1);
+}
 </script>
 
 <template>
@@ -131,11 +140,12 @@ function getContainerMinSize() {
       <tr class="row" v-for="row in 8" :key="`row-${row}`">
         <Cell
           v-for="col in 8"
-          @click="props.manager.onCellClick(8 - row, col - 1)"
+          @keyup.enter="onCellClick({ row, col })"
+          @click="onCellClick({ row, col })"
           :key="`cell-${row}-${col}`"
           :row="9 - row"
           :col="col"
-          :mark="props.marksState[row - 1][col - 1]"
+          :mark="props.marksState[8 - row][col - 1]"
         />
       </tr>
 
@@ -144,6 +154,7 @@ function getContainerMinSize() {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
+          :selected="props.selectedState[pieceProps.row][pieceProps.col]"
           :row="pieceProps.row"
           :col="pieceProps.col"
           :piece="pieceProps.piece"

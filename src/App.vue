@@ -29,7 +29,7 @@ import RotateScreenData from "./modules/user_data/rotate_screen";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 import CapturedPiecesData from "./modules/user_data/captured_pieces";
 
-// Import other classes
+// Import other classes and functions
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
 import SplashscreenManager from "./modules/splashscreen_manager";
 import ThemeManager from "./modules/theme_manager";
@@ -51,7 +51,7 @@ import {
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { MarkState } from "./components/Board.vue";
+import type { MarkState, SelectedState } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
@@ -151,11 +151,25 @@ watch(screenRotated, (newValue) => {
 });
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
-const playerBoardMarks: MarkState = reactive(
-  Array(8).fill(Array(8).fill(null))
+const playerCellMarks: MarkState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(null))
 );
-const OpponentBoardMarks: MarkState = reactive(
-  Array(8).fill(Array(8).fill(null))
+const OpponentCellMarks: MarkState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(null))
+);
+const playerSelectedPieces: SelectedState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(false))
+);
+const opponentSelectedPieces: SelectedState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(false))
 );
 
 // Other options refs
@@ -355,8 +369,10 @@ const gameBoardManager = new GameBoardManager(
   gameBoardState,
   whiteCapturedPieces,
   blackCapturedPieces,
-  playerBoardMarks,
-  OpponentBoardMarks
+  playerCellMarks,
+  OpponentCellMarks,
+  playerSelectedPieces,
+  opponentSelectedPieces
 );
 
 // Load data
@@ -424,10 +440,12 @@ function updateScreenRotation(rotate: boolean): void {
 <template>
   <!-- Relative -->
   <div id="game-area">
-    <Timers :player-secs-move="16" />
+    <Timers :player-secs-move="168" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
+        :selected-state="playerSelectedPieces"
+        :marks-state="playerCellMarks"
         :rotated="screenRotated"
         :manager="gameBoardManager"
         :state="gameBoardState"
@@ -440,6 +458,7 @@ function updateScreenRotation(rotate: boolean): void {
       />
       <Board
         v-if="secondCheckboard"
+        :selected-state="opponentSelectedPieces"
         :rotated="screenRotated"
         :manager="gameBoardManager"
         :state="gameBoardState"

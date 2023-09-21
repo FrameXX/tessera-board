@@ -1,5 +1,8 @@
+import type { BoardPosition } from "../components/Board.vue";
+import { CHAR_INDEXES } from "./board_manager";
+import type { BoardStateValue } from "./user_data/board_state";
 import { UserDataError } from "./user_data/user_data";
-import { getRandomId } from "./utils/misc";
+import { getRandomId, sumPositions } from "./utils/misc";
 
 export type PlayerColor = "white" | "black";
 export function isPlayerColor(string: string): string is PlayerColor {
@@ -52,7 +55,24 @@ export function isGamePiece(object: any): object is GamePiece {
   return true;
 }
 
-export interface Turn {}
+interface BoardPositionValue extends BoardPosition {
+  value: Piece | null;
+}
+
+type MoveAction = "move" | "switch" | "transform";
+
+export interface Move {
+  captures: BoardPositionValue[];
+  action: MoveAction;
+  notation: string;
+  origin: BoardPosition;
+  target: BoardPosition;
+}
+
+export interface Turn {
+  move: Move;
+  clickablePositions: BoardPosition[];
+}
 
 export abstract class Piece {
   public readonly id: string;
@@ -65,66 +85,139 @@ export abstract class Piece {
     this.id = getRandomId();
   }
 
-  public abstract getPossibleMoves(): unknown;
+  public abstract getPossibleMoves(
+    position: BoardPosition,
+    gameBoardState: BoardStateValue
+  ): Turn[];
 }
 
 export class Rook extends Piece {
+  public static notationSign: string = "R";
+
   constructor(color: PlayerColor) {
     super(color, "rook");
   }
 
-  public getPossibleMoves(): unknown {
-    return;
+  public getPossibleMoves(
+    position: BoardPosition,
+    gameBoardState: BoardStateValue
+  ): Turn[] {
+    return [];
   }
 }
 
 export class Knight extends Piece {
+  public static notationSign: string = "N";
+
   constructor(color: PlayerColor) {
     super(color, "knight");
   }
 
-  public getPossibleMoves(): unknown {
-    return;
+  public getPossibleMoves(
+    position: BoardPosition,
+    gameBoardState: BoardStateValue
+  ): Turn[] {
+    return [];
   }
 }
 
 export class Bishop extends Piece {
+  public static notationSign: string = "B";
   constructor(color: PlayerColor) {
     super(color, "bishop");
   }
 
-  public getPossibleMoves(): unknown {
-    return;
+  public getPossibleMoves(
+    position: BoardPosition,
+    gameBoardState: BoardStateValue
+  ): Turn[] {
+    return [];
   }
 }
 
 export class Queen extends Piece {
+  public static notationSign: string = "Q";
   constructor(color: PlayerColor) {
     super(color, "queen");
   }
 
-  public getPossibleMoves(): unknown {
-    return;
+  public getPossibleMoves(
+    position: BoardPosition,
+    gameBoardState: BoardStateValue
+  ): Turn[] {
+    return [];
   }
 }
 
 export class King extends Piece {
+  public static notationSign: string = "K";
   constructor(color: PlayerColor) {
     super(color, "king");
   }
 
-  public getPossibleMoves(): unknown {
-    return;
+  public getPossibleMoves(
+    position: BoardPosition,
+    gameBoardState: BoardStateValue
+  ): Turn[] {
+    return [];
   }
 }
 
 export class Pawn extends Piece {
+  public static notationSign: string = "";
   constructor(color: PlayerColor) {
     super(color, "pawn");
   }
 
-  public getPossibleMoves(): unknown {
-    return;
+  public getPossibleMoves(
+    position: BoardPosition,
+    boardState: BoardStateValue
+  ): Turn[] {
+    const turns: Turn[] = [];
+    let target: BoardPosition;
+
+    let yDelta: number = 0;
+    let xDelta: number = 0;
+
+    // Move one cell forward
+    this.color === "white" ? (yDelta = 1) : (yDelta = -1);
+    target = sumPositions(position, { row: yDelta, col: xDelta });
+    if (boardState[target.row][target.col] === null) {
+      turns.push({
+        move: {
+          captures: [],
+          action: "move",
+          notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
+            target.row
+          }`,
+          origin: position,
+          target: target,
+        },
+        clickablePositions: [target],
+      });
+    }
+
+    // Move 2 cells forward
+    if (!this.moved) {
+      this.color === "white" ? (yDelta = 2) : (yDelta = -2);
+      target = sumPositions(position, { row: yDelta, col: xDelta });
+      if (boardState[target.row][target.col] === null) {
+        turns.push({
+          move: {
+            captures: [],
+            action: "move",
+            notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
+              target.row
+            }`,
+            origin: position,
+            target: target,
+          },
+          clickablePositions: [target],
+        });
+      }
+    }
+
+    return turns;
   }
 }
 

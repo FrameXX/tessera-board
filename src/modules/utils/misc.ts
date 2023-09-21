@@ -1,3 +1,5 @@
+import type { BoardPosition } from "../../components/Board.vue";
+
 export function getRandomNumber(min: number, max: number) {
   var number = Math.round(Math.random() * (max + 1 - min) + (min - 0.5)) * 1;
   return number === -0 ? 0 : number;
@@ -61,4 +63,11 @@ export function getDigitStr(number: number, digits: number = 2) {
     str = "0" + str;
   }
   return str;
+}
+
+export function sumPositions(
+  pos1: BoardPosition,
+  pos2: BoardPosition
+): BoardPosition {
+  return { row: pos1.row + pos2.row, col: pos1.col + pos2.col };
 }

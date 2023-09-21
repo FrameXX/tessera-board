@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { PropType, computed } from "vue";
 import Icon from "./Icon.vue";
+import { CHAR_INDEXES } from "../modules/board_manager";
 
 export type Mark = "availible" | "capture";
 
@@ -10,23 +11,21 @@ const props = defineProps({
   mark: { type: [String, null] as PropType<Mark | null>, required: true },
 });
 
-const charIndexes = ["A", "B", "C", "D", "E", "F", "G", "H"];
-
-const cellIsWhite = (-1) ** (props.col + props.row) === 1;
-const boardRow = props.row;
-const boardCol = charIndexes[props.col - 1];
+const cellIsWhite = computed(() => (-1) ** (props.col + props.row) === 1);
+const rowText = computed(() => props.row);
+const colText = computed(() => CHAR_INDEXES[props.col - 1].toUpperCase());
 
 const cornerClass = computed(() => {
-  if (boardRow === 1) {
-    if (boardCol === "A") {
+  if (rowText.value === 1) {
+    if (colText.value === "A") {
       return "bottom-left";
-    } else if (boardCol === "H") {
+    } else if (colText.value === "H") {
       return "bottom-right";
     }
-  } else if (boardRow === 8) {
-    if (boardCol === "A") {
+  } else if (rowText.value === 8) {
+    if (colText.value === "A") {
       return "top-left";
-    } else if (boardCol === "H") {
+    } else if (colText.value === "H") {
       return "top-right";
     }
   } else {
@@ -53,18 +52,22 @@ const markIconId = computed(() => {
 
 <template>
   <td
+    :data-row="props.row"
+    :data-col="props.col"
     :class="`cell ${cornerClass} ${cellIsWhite ? 'white' : 'black'}`"
     tabindex="0"
     role="gridcell"
-    :aria-label="`${boardCol}${boardRow}`"
-    :title="`${boardCol}${boardRow}`"
+    :aria-label="`${colText}${rowText}`"
+    :title="`${colText}${rowText}`"
   >
     <!-- Show indexes only at borders of the board -->
-    <span class="index-row-left" v-if="boardCol === 'A'">{{ boardRow }}</span>
-    <span class="index-row-right" v-if="boardCol === 'H'">{{ boardRow }}</span>
-    <span class="index-col-top" v-if="boardRow === 8">{{ boardCol }}</span>
-    <span class="index-col-bottom" v-if="boardRow === 1">{{ boardCol }}</span>
-    <Icon class="mark" :icon-id="markIconId" v-show="props.mark" />
+    <span class="index-row-left" v-if="colText === 'A'">{{ rowText }}</span>
+    <span class="index-row-right" v-if="colText === 'H'">{{ rowText }}</span>
+    <span class="index-col-top" v-if="rowText === 8">{{ colText }}</span>
+    <span class="index-col-bottom" v-if="rowText === 1">{{ colText }}</span>
+    <Transition name="scale">
+      <Icon class="mark" :icon-id="markIconId" v-show="props.mark" />
+    </Transition>
   </td>
 </template>
 

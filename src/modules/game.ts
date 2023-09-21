@@ -4,8 +4,17 @@ import type BoardStateData from "./user_data/board_state";
 import type { PreferredPlayerColorValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
 
+export class GameLogicError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, GameLogicError.prototype);
+    this.name = GameLogicError.name;
+  }
+}
+
 class Game {
   constructor(
+    // It's better to have gameBoardState data object itself rather than its ref as it allows for manual update of the ref.
     private readonly gameBoardStateData: BoardStateData,
     private readonly defaultBoardStateData: BoardStateData,
     private readonly playerColor: Ref<PlayerColor>,

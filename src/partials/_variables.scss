@@ -27,6 +27,9 @@ html {
     var(--box-shadow-offset-x) var(--box-shadow-offset-x) 2px
       var(--box-shadow-color)
   );
+  --piece-selected-shadow-filter: drop-shadow(
+    var(--box-shadow-offset-x) var(--box-shadow-offset-x) 5px black
+  );
 
   // ===== Z-index layers =====
   --z-index-alert: 7;
