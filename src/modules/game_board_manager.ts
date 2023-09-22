@@ -139,6 +139,7 @@ class GameBoardManager extends BoardManager {
 
       if (matchingTurns.length > 0) {
         this.interpretMove(matchingTurns[0].move);
+        this.avalibleTurns = [];
         moveInterpreted = true;
       }
     }

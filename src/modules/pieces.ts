@@ -87,7 +87,7 @@ export abstract class Piece {
 
   public abstract getPossibleMoves(
     position: BoardPosition,
-    gameBoardState: BoardStateValue
+    boardStateValue: BoardStateValue
   ): Turn[];
 }
 
@@ -100,7 +100,7 @@ export class Rook extends Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    gameBoardState: BoardStateValue
+    boardStateValue: BoardStateValue
   ): Turn[] {
     return [];
   }
@@ -115,9 +115,43 @@ export class Knight extends Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    gameBoardState: BoardStateValue
+    boardStateValue: BoardStateValue
   ): Turn[] {
-    return [];
+    const turns: Turn[] = [];
+
+    for (const xDelta of [-2, -1, 1, 2]) {
+      for (const yDelta of [-2, -1, 1, 2]) {
+        if (Math.abs(xDelta) === Math.abs(yDelta)) {
+          continue;
+        }
+        const target = getTarget(position, xDelta, yDelta);
+        if (isTargetOnBoard(target)) {
+          let captures: BoardPositionValue[] = [];
+          const piece = boardStateValue[target.row][target.col];
+          if (piece) {
+            if (piece.color !== this.color) {
+              captures.push({ ...target, value: piece });
+            } else {
+              continue;
+            }
+          }
+          turns.push({
+            move: {
+              captures: captures,
+              action: "move",
+              notation: `${Knight.notationSign}${CHAR_INDEXES[target.col - 1]}${
+                target.row
+              }`,
+              origin: position,
+              target: target,
+            },
+            clickablePositions: [target],
+          });
+        }
+      }
+    }
+
+    return turns;
   }
 }
 
@@ -129,7 +163,7 @@ export class Bishop extends Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    gameBoardState: BoardStateValue
+    boardStateValue: BoardStateValue
   ): Turn[] {
     return [];
   }
@@ -143,7 +177,7 @@ export class Queen extends Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    gameBoardState: BoardStateValue
+    boardStateValue: BoardStateValue
   ): Turn[] {
     return [];
   }
@@ -157,7 +191,7 @@ export class King extends Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    gameBoardState: BoardStateValue
+    boardStateValue: BoardStateValue
   ): Turn[] {
     return [];
   }
@@ -165,6 +199,7 @@ export class King extends Piece {
 
 export class Pawn extends Piece {
   public static notationSign: string = "";
+
   constructor(color: PlayerColor) {
     super(color, "pawn");
   }
@@ -206,18 +241,20 @@ export class Pawn extends Piece {
       target = getTarget(position, xDelta, yDelta);
       piece = boardStateData[target.row][target.col];
       if (piece) {
-        turns.push({
-          move: {
-            captures: [{ ...target, value: piece }],
-            action: "move",
-            notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
-              target.row
-            }`,
-            origin: position,
-            target: target,
-          },
-          clickablePositions: [target],
-        });
+        if (piece.color !== this.color) {
+          turns.push({
+            move: {
+              captures: [{ ...target, value: piece }],
+              action: "move",
+              notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
+                target.row
+              }`,
+              origin: position,
+              target: target,
+            },
+            clickablePositions: [target],
+          });
+        }
       }
     }
 
@@ -251,6 +288,12 @@ function getTarget(
   yDelta: number
 ): BoardPosition {
   return sumPositions(position, { row: yDelta, col: xDelta });
+}
+
+function isTargetOnBoard(target: BoardPosition) {
+  return (
+    target.row >= 0 && target.row <= 7 && target.col >= 0 && target.col <= 7
+  );
 }
 
 export function getPieceFromGeneric(genericPiece: GenericPiece): Piece {
