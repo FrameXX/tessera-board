@@ -83,14 +83,12 @@ const markIconId = computed(() => {
   aspect-ratio: 1;
   width: 100%;
   position: relative;
-  transition: filter var(--transition-duration-medium)
-    var(--transition-timing-jump);
 
   &.white {
     background-color: var(--color-cell-white);
 
     &.highlighted {
-      outline: var(--border-width) dotted var(--color-cell-white);
+      outline-color: var(--color-cell-white);
     }
   }
 
@@ -98,11 +96,13 @@ const markIconId = computed(() => {
     background-color: var(--color-cell-black);
 
     &.highlighted {
-      outline: var(--border-width) dotted var(--color-cell-black);
+      outline-color: var(--color-cell-black);
     }
   }
 
   &.highlighted {
+    outline-style: dotted;
+    outline-width: calc(var(--border-width) * 1.5);
     z-index: var(--z-index-piece);
   }
 
