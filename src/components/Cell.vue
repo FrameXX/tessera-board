@@ -9,6 +9,7 @@ const props = defineProps({
   row: { type: Number, required: true },
   col: { type: Number, required: true },
   mark: { type: [String, null] as PropType<Mark | null>, required: true },
+  highlighted: { type: Boolean, default: false },
 });
 
 const cellIsWhite = computed(() => (-1) ** (props.col + props.row) === 1);
@@ -54,7 +55,9 @@ const markIconId = computed(() => {
   <td
     :data-row="props.row"
     :data-col="props.col"
-    :class="`cell ${cornerClass} ${cellIsWhite ? 'white' : 'black'}`"
+    :class="`cell ${cornerClass} ${cellIsWhite ? 'white' : 'black'} ${
+      props.highlighted ? 'highlighted' : ''
+    }`"
     tabindex="0"
     role="gridcell"
     :aria-label="`${colText}${rowText}`"
@@ -80,13 +83,27 @@ const markIconId = computed(() => {
   aspect-ratio: 1;
   width: 100%;
   position: relative;
+  transition: filter var(--transition-duration-medium)
+    var(--transition-timing-jump);
 
   &.white {
     background-color: var(--color-cell-white);
+
+    &.highlighted {
+      outline: var(--border-width) dotted var(--color-cell-white);
+    }
   }
 
   &.black {
     background-color: var(--color-cell-black);
+
+    &.highlighted {
+      outline: var(--border-width) dotted var(--color-cell-black);
+    }
+  }
+
+  &.highlighted {
+    z-index: var(--z-index-piece);
   }
 
   &:hover {

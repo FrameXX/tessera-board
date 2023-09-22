@@ -4,7 +4,13 @@ import Backdrop from "./Backdrop.vue";
 import FastButton from "./FastButton.vue";
 
 const props = defineProps({ open: { type: Boolean, default: false } });
-const emit = defineEmits(["open", "close", "backdropClick", "configureGame"]);
+const emit = defineEmits([
+  "open",
+  "close",
+  "backdropClick",
+  "configureGame",
+  "restartGame",
+]);
 
 watch(
   () => props.open,
@@ -25,7 +31,11 @@ watch(
       />
       <FastButton icon-id="pause" title="Pause match" />
       <FastButton icon-id="flag" title="Resign" />
-      <FastButton icon-id="play-outline" title="New match" />
+      <FastButton
+        @click="$emit('restartGame')"
+        icon-id="play-outline"
+        title="New match"
+      />
       <div class="nav-placeholder"></div>
     </nav>
   </Transition>

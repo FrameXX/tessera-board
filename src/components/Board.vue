@@ -10,7 +10,7 @@ import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
 
 export type MarkState = (Mark | null)[][];
-export type SelectedState = boolean[][];
+export type BooleanState = boolean[][];
 
 export interface BoardPosition {
   row: number;
@@ -37,8 +37,12 @@ const props = defineProps({
     default: Array(8).fill(Array(8).fill(null)),
   },
   selectedState: {
-    type: Array as PropType<SelectedState>,
-    default: Array(8).fill(Array(8).fill(null)),
+    type: Array as PropType<BooleanState>,
+    default: Array(8).fill(Array(8).fill(false)),
+  },
+  highlightedState: {
+    type: Array as PropType<BooleanState>,
+    default: Array(8).fill(Array(8).fill(false)),
   },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
@@ -146,6 +150,7 @@ function onCellClick(position: BoardPosition) {
           :row="9 - row"
           :col="col"
           :mark="props.marksState[8 - row][col - 1]"
+          :highlighted="props.highlightedState[8 - row][col - 1]"
         />
       </tr>
 

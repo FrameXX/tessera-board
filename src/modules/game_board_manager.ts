@@ -3,7 +3,7 @@ import BoardManager from "./board_manager";
 import type {
   BoardPieceProps,
   MarkState,
-  SelectedState,
+  BooleanState,
 } from "../components/Board.vue";
 import type { BoardStateValue } from "./user_data/board_state";
 import type Game from "./game";
@@ -21,8 +21,9 @@ class GameBoardManager extends BoardManager {
     private readonly blackCapturedPieces: Ref<PieceId[]>,
     private readonly playerCellMarks: MarkState,
     private readonly opponentBoardMarks: MarkState,
-    private readonly playerSelectedPieces: SelectedState,
-    private readonly opponentSelectedPieces: SelectedState
+    private readonly playerSelectedPieces: BooleanState,
+    private readonly opponentSelectedPieces: BooleanState,
+    private readonly higlightedCells: BooleanState
   ) {
     super(boardState);
   }
@@ -34,9 +35,17 @@ class GameBoardManager extends BoardManager {
     }
   }
 
+  private clearHihlightedCells() {
+    for (const rowIndex in this.higlightedCells) {
+      for (const colIndex in this.higlightedCells[rowIndex]) {
+        this.higlightedCells[rowIndex][colIndex] = false;
+      }
+    }
+  }
+
   private hideAllCellMarks() {
     for (const rowIndex in this.playerCellMarks) {
-      for (const colIndex in this.playerCellMarks) {
+      for (const colIndex in this.playerCellMarks[rowIndex]) {
         this.playerCellMarks[rowIndex][colIndex] = null;
       }
     }
@@ -68,6 +77,8 @@ class GameBoardManager extends BoardManager {
   }
 
   private interpretMove(move: Move, reverse: boolean = false) {
+    this.clearHihlightedCells();
+
     // Capture pieces
     for (const capturePosition of move.captures) {
       this.boardState[capturePosition.row][capturePosition.col] = null;
@@ -81,6 +92,9 @@ class GameBoardManager extends BoardManager {
       if (originValue) {
         originValue.moved = true;
       }
+
+      this.higlightedCells[move.origin.row][move.origin.col] = true;
+      this.higlightedCells[move.target.row][move.target.col] = true;
     }
   }
 
@@ -90,7 +104,9 @@ class GameBoardManager extends BoardManager {
 
   public onCellClick(row: number, col: number): void {
     this.selectedPieceProps = null;
+
     let moveInterpreted = false;
+
     if (this.avalibleTurns) {
       const matchingTurns = this.avalibleTurns.filter((turn) => {
         const matchingPositions = turn.clickablePositions.filter(

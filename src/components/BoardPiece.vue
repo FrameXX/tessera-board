@@ -112,6 +112,7 @@ function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 .piece {
   @include clickable;
   filter: var(--svg-shadow-filter);
+  z-index: var(--z-index-piece);
   outline: none;
   pointer-events: all;
   margin: 0;

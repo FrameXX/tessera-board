@@ -51,7 +51,7 @@ import {
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { MarkState, SelectedState } from "./components/Board.vue";
+import type { MarkState, BooleanState } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
@@ -161,12 +161,17 @@ const OpponentCellMarks: MarkState = reactive(
     .fill(null)
     .map(() => new Array(8).fill(null))
 );
-const playerSelectedPieces: SelectedState = reactive(
+const playerSelectedPieces: BooleanState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(false))
 );
-const opponentSelectedPieces: SelectedState = reactive(
+const opponentSelectedPieces: BooleanState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(false))
+);
+const highlightedCells: BooleanState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(false))
@@ -372,7 +377,8 @@ const gameBoardManager = new GameBoardManager(
   playerCellMarks,
   OpponentCellMarks,
   playerSelectedPieces,
-  opponentSelectedPieces
+  opponentSelectedPieces,
+  highlightedCells
 );
 
 // Load data
@@ -445,6 +451,7 @@ function updateScreenRotation(rotate: boolean): void {
     <div id="boards-area">
       <Board
         :selected-state="playerSelectedPieces"
+        :highlighted-state="highlightedCells"
         :marks-state="playerCellMarks"
         :rotated="screenRotated"
         :manager="gameBoardManager"
@@ -459,6 +466,7 @@ function updateScreenRotation(rotate: boolean): void {
       <Board
         v-if="secondCheckboard"
         :selected-state="opponentSelectedPieces"
+        :highlighted-state="highlightedCells"
         :rotated="screenRotated"
         :manager="gameBoardManager"
         :state="gameBoardState"
@@ -477,6 +485,7 @@ function updateScreenRotation(rotate: boolean): void {
   <ActionPanel
     @backdrop-click="toggleActionsPanel"
     @configure-game="toggleConfigDrawer"
+    @restart-game="game.restart()"
     :open="actionPanelOpen"
   />
 
