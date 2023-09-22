@@ -1,23 +1,23 @@
 import BoardManager from "./board_manager";
-import type { BoardStateValue } from "./user_data/board_state";
 import { BoardPieceProps } from "../components/Board.vue";
 import type ConfigPieceDialog from "./config_piece_dialog";
+import { BoardStateValue } from "./user_data/board_state";
 
 class DefaultBoardManager extends BoardManager {
   constructor(
-    boardState: BoardStateValue,
+    private readonly board: BoardStateValue,
     private configPieceDialog: ConfigPieceDialog
   ) {
-    super(boardState);
+    super();
   }
 
   public onPieceClick(boardPiece: BoardPieceProps): void {
-    this.boardState[boardPiece.row][boardPiece.col] = null;
+    this.board[boardPiece.row][boardPiece.col] = null;
   }
 
   public async onCellClick(row: number, col: number) {
     const piece = await this.configPieceDialog.open();
-    this.boardState[row][col] = piece;
+    this.board[row][col] = piece;
   }
 }
 

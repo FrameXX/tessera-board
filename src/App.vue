@@ -354,15 +354,6 @@ const splashscreenManager = new SplashscreenManager(transitionsManager);
 // Escape manager
 const escapeManager = new EscapeManager(toggleActionsPanel);
 
-// Game manager
-const game = new Game(
-  gameBoardStateData,
-  defaultBoardStateData,
-  playerColor,
-  playerPlaying,
-  preferredPlayerColor
-);
-
 // Board managers
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
@@ -370,7 +361,7 @@ const defaultBoardManager = new DefaultBoardManager(
 );
 
 const gameBoardManager = new GameBoardManager(
-  game,
+  gameBoardStateData,
   gameBoardState,
   whiteCapturedPieces,
   blackCapturedPieces,
@@ -379,6 +370,16 @@ const gameBoardManager = new GameBoardManager(
   playerSelectedPieces,
   opponentSelectedPieces,
   highlightedCells
+);
+
+// Game manager
+const game = new Game(
+  gameBoardManager,
+  gameBoardStateData,
+  defaultBoardStateData,
+  playerColor,
+  playerPlaying,
+  preferredPlayerColor
 );
 
 // Load data

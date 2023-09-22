@@ -55,14 +55,15 @@ const markIconId = computed(() => {
   <td
     :data-row="props.row"
     :data-col="props.col"
-    :class="`cell ${cornerClass} ${cellIsWhite ? 'white' : 'black'} ${
-      props.highlighted ? 'highlighted' : ''
-    }`"
+    :class="`cell ${cornerClass} ${cellIsWhite ? 'white' : 'black'}`"
     tabindex="0"
     role="gridcell"
     :aria-label="`${colText}${rowText}`"
     :title="`${colText}${rowText}`"
   >
+    <Transition name="scale">
+      <Icon icon-id="rhombus" class="highlighter" v-show="props.highlighted" />
+    </Transition>
     <!-- Show indexes only at borders of the board -->
     <span class="index-row-left" v-if="colText === 'A'">{{ rowText }}</span>
     <span class="index-row-right" v-if="colText === 'H'">{{ rowText }}</span>
@@ -84,26 +85,22 @@ const markIconId = computed(() => {
   width: 100%;
   position: relative;
 
+  .highlighter {
+    @include centered;
+    width: 80%;
+    height: 80%;
+    position: absolute;
+    filter: brightness(2);
+    color: var(--color-cell-white);
+    mix-blend-mode: overlay;
+  }
+
   &.white {
     background-color: var(--color-cell-white);
-
-    &.highlighted {
-      outline-color: var(--color-cell-white);
-    }
   }
 
   &.black {
     background-color: var(--color-cell-black);
-
-    &.highlighted {
-      outline-color: var(--color-cell-black);
-    }
-  }
-
-  &.highlighted {
-    outline-style: dotted;
-    outline-width: calc(var(--border-width) * 1.5);
-    z-index: var(--z-index-piece);
   }
 
   &:hover {

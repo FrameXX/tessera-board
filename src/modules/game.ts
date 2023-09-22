@@ -3,6 +3,7 @@ import type { PlayerColor } from "./pieces";
 import type BoardStateData from "./user_data/board_state";
 import type { PreferredPlayerColorValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
+import GameBoardManager from "./game_board_manager";
 
 export class GameLogicError extends Error {
   constructor(message: string) {
@@ -14,13 +15,15 @@ export class GameLogicError extends Error {
 
 class Game {
   constructor(
-    // It's better to have gameBoardState data object itself rather than its ref as it allows for manual update of the ref.
+    private readonly gameBoardManager: GameBoardManager,
     private readonly gameBoardStateData: BoardStateData,
     private readonly defaultBoardStateData: BoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
     private readonly playerPlaying: Ref<boolean>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColorValue>
-  ) {}
+  ) {
+    this.gameBoardManager.onMove = this.onTurnEnd;
+  }
 
   private setupDefaultBoardState() {
     // Copy default checkboard
@@ -41,6 +44,8 @@ class Game {
   public restart() {
     this.setupDefaultBoardState();
     this.choosePlayerColor();
+    this.gameBoardManager.selectedPieceProps = null;
+    this.gameBoardManager.clearHihlightedCells();
   }
 
   public onTurnStart() {}

@@ -19,7 +19,7 @@ abstract class UserData<ValueType> {
 
   constructor(
     public readonly id: string,
-    public value: ValueType,
+    protected value: ValueType,
     private readonly toastManager: ToastManager,
     valueRef?: Ref<ValueType>
   ) {
@@ -157,7 +157,7 @@ export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   constructor(
     id: string,
     value: ValueType,
-    private reactiveValue: ValueType,
+    protected reactiveValue: ValueType,
     toastManager: ToastManager
   ) {
     super(id, value, toastManager);

@@ -5,18 +5,20 @@ import type {
   MarkState,
   BooleanState,
 } from "../components/Board.vue";
-import type { BoardStateValue } from "./user_data/board_state";
 import type Game from "./game";
 import type { Turn, PieceId, Move } from "./pieces";
 import { GameLogicError } from "./game";
+import type BoardStateData from "./user_data/board_state";
+import type { BoardStateValue } from "./user_data/board_state";
 
 class GameBoardManager extends BoardManager {
+  public onMove?: () => any;
   private _selectedPieceProps: BoardPieceProps | null = null;
   private avalibleTurns: Turn[] = [];
 
   constructor(
-    private readonly game: Game,
-    boardState: BoardStateValue,
+    private readonly boardStateData: BoardStateData,
+    private readonly boardStateValue: BoardStateValue,
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
     private readonly playerCellMarks: MarkState,
@@ -25,17 +27,47 @@ class GameBoardManager extends BoardManager {
     private readonly opponentSelectedPieces: BooleanState,
     private readonly higlightedCells: BooleanState
   ) {
-    super(boardState);
+    super();
   }
 
   private showAvalibleCellsMarks(turns: Turn[]) {
     for (const turn of turns) {
-      this.playerCellMarks[turn.move.target.row][turn.move.target.col] =
-        "availible";
+      this.boardStateValue[turn.move.target.row][turn.move.target.col]
+        ? (this.playerCellMarks[turn.move.target.row][turn.move.target.col] =
+            "capture")
+        : (this.playerCellMarks[turn.move.target.row][turn.move.target.col] =
+            "availible");
     }
   }
 
-  private clearHihlightedCells() {
+  private interpretMove(move: Move, reverse: boolean = false) {
+    this.clearHihlightedCells();
+
+    // Capture pieces
+    for (const capturePosition of move.captures) {
+      this.boardStateValue[capturePosition.row][capturePosition.col] = null;
+    }
+
+    // Move piece
+    if (move.action == "move") {
+      const originValue =
+        this.boardStateValue[move.origin.row][move.origin.col];
+      this.boardStateValue[move.origin.row][move.origin.col] = null;
+      this.boardStateValue[move.target.row][move.target.col] = originValue;
+      if (originValue) {
+        originValue.moved = true;
+      }
+
+      this.higlightedCells[move.origin.row][move.origin.col] = true;
+      this.higlightedCells[move.target.row][move.target.col] = true;
+    }
+
+    if (this.onMove) {
+      this.onMove();
+    }
+  }
+
+  public clearHihlightedCells() {
     for (const rowIndex in this.higlightedCells) {
       for (const colIndex in this.higlightedCells[rowIndex]) {
         this.higlightedCells[rowIndex][colIndex] = false;
@@ -43,7 +75,7 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  private hideAllCellMarks() {
+  public hideAllCellMarks() {
     for (const rowIndex in this.playerCellMarks) {
       for (const colIndex in this.playerCellMarks[rowIndex]) {
         this.playerCellMarks[rowIndex][colIndex] = null;
@@ -51,7 +83,7 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  private set selectedPieceProps(pieceProps: BoardPieceProps | null) {
+  public set selectedPieceProps(pieceProps: BoardPieceProps | null) {
     if (this.selectedPieceProps) {
       this.playerSelectedPieces[this.selectedPieceProps.row][
         this.selectedPieceProps.col
@@ -64,7 +96,7 @@ class GameBoardManager extends BoardManager {
       const turns = pieceProps.piece.getPossibleMoves(
         // BoardPieceProps extends BoardPosition and thus can be used as a BoardPosition argument.
         pieceProps,
-        this.boardState
+        this.boardStateValue
       );
       this.showAvalibleCellsMarks(turns);
       this._selectedPieceProps = pieceProps;
@@ -72,30 +104,8 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  private get selectedPieceProps(): BoardPieceProps | null {
+  public get selectedPieceProps(): BoardPieceProps | null {
     return this._selectedPieceProps;
-  }
-
-  private interpretMove(move: Move, reverse: boolean = false) {
-    this.clearHihlightedCells();
-
-    // Capture pieces
-    for (const capturePosition of move.captures) {
-      this.boardState[capturePosition.row][capturePosition.col] = null;
-    }
-
-    // Move piece
-    if (move.action == "move") {
-      const originValue = this.boardState[move.origin.row][move.origin.col];
-      this.boardState[move.origin.row][move.origin.col] = null;
-      this.boardState[move.target.row][move.target.col] = originValue;
-      if (originValue) {
-        originValue.moved = true;
-      }
-
-      this.higlightedCells[move.origin.row][move.origin.col] = true;
-      this.higlightedCells[move.target.row][move.target.col] = true;
-    }
   }
 
   public onPieceClick(boardPiece: BoardPieceProps): void {
@@ -112,6 +122,7 @@ class GameBoardManager extends BoardManager {
         const matchingPositions = turn.clickablePositions.filter(
           (position) => position.row === row && position.col === col
         );
+
         if (matchingPositions.length > 1) {
           throw new GameLogicError(
             `Single turn has multiple same clickable positions for row ${row}, col ${col}. Turn: ${turn}.`
@@ -119,18 +130,20 @@ class GameBoardManager extends BoardManager {
         }
         return matchingPositions.length > 0;
       });
+
       if (matchingTurns.length > 1) {
         throw new GameLogicError(
           `Multiple turns have same clickable positions for row ${row}, col ${col}.`
         );
       }
+
       if (matchingTurns.length > 0) {
         this.interpretMove(matchingTurns[0].move);
         moveInterpreted = true;
       }
     }
     if (!moveInterpreted) {
-      const piece = this.boardState[row][col];
+      const piece = this.boardStateValue[row][col];
       if (piece) {
         this.onPieceClick({ row, col, piece });
       }

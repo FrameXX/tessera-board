@@ -171,18 +171,22 @@ export class Pawn extends Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    boardState: BoardStateValue
+    boardStateData: BoardStateValue
   ): Turn[] {
     const turns: Turn[] = [];
     let target: BoardPosition;
 
     let yDelta: number = 0;
     let xDelta: number = 0;
+    let piece: Piece | null;
+
+    let frontIsOccupied = true;
 
     // Move one cell forward
     this.color === "white" ? (yDelta = 1) : (yDelta = -1);
-    target = sumPositions(position, { row: yDelta, col: xDelta });
-    if (boardState[target.row][target.col] === null) {
+    target = getTarget(position, xDelta, yDelta);
+    if (boardStateData[target.row][target.col] === null) {
+      frontIsOccupied = false;
       turns.push({
         move: {
           captures: [],
@@ -197,11 +201,31 @@ export class Pawn extends Piece {
       });
     }
 
+    // Capture
+    for (const xDelta of [1, -1]) {
+      target = getTarget(position, xDelta, yDelta);
+      piece = boardStateData[target.row][target.col];
+      if (piece) {
+        turns.push({
+          move: {
+            captures: [{ ...target, value: piece }],
+            action: "move",
+            notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
+              target.row
+            }`,
+            origin: position,
+            target: target,
+          },
+          clickablePositions: [target],
+        });
+      }
+    }
+
     // Move 2 cells forward
-    if (!this.moved) {
+    if (!this.moved && !frontIsOccupied) {
       this.color === "white" ? (yDelta = 2) : (yDelta = -2);
-      target = sumPositions(position, { row: yDelta, col: xDelta });
-      if (boardState[target.row][target.col] === null) {
+      target = getTarget(position, xDelta, yDelta);
+      if (boardStateData[target.row][target.col] === null) {
         turns.push({
           move: {
             captures: [],
@@ -219,6 +243,14 @@ export class Pawn extends Piece {
 
     return turns;
   }
+}
+
+function getTarget(
+  position: BoardPosition,
+  xDelta: number,
+  yDelta: number
+): BoardPosition {
+  return sumPositions(position, { row: yDelta, col: xDelta });
 }
 
 export function getPieceFromGeneric(genericPiece: GenericPiece): Piece {
