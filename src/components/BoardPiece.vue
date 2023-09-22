@@ -78,7 +78,9 @@ function temporarilyMoveToTop(boardPieceElement: SVGElement) {
         :class="`piece ${props.selected ? 'selected' : ''} ${
           props.piece.color === 'white' ? 'white' : 'black'
         }`"
-        :style="`transform: translate(${translateX}px,${translateY}px); width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
+        :style="`transform: translate(${translateX}px,${translateY}px) ${
+          props.selected ? 'scale(1.05)' : ''
+        }; width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
         :piece-set="props.pieceSet"
         :piece-id="props.piece.pieceId"
         :color="props.piece.color"
