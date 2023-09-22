@@ -569,9 +569,9 @@ function updateScreenRotation(rotate: boolean): void {
       <UserOption
         name="Opponent seconds per move"
         icon-id="timer-outline"
-        option-id="input-player-seconds-per-move"
+        option-id="input-opponent-seconds-per-move"
       >
-        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <input type="number" min="0" id="input-opponent-seconds-per-move" />
         <template #description
           >Limits opponent's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
@@ -581,9 +581,9 @@ function updateScreenRotation(rotate: boolean): void {
       <UserOption
         name="Player seconds per match"
         icon-id="clock-outline"
-        option-id="input-player-seconds-per-move"
+        option-id="input-player-seconds-per-match"
       >
-        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <input type="number" min="0" id="input-player-seconds-per-match" />
         <template #description
           >Limits player's time for whole match (game). If the time runs out the
           player looses and opponent wins.
@@ -593,9 +593,9 @@ function updateScreenRotation(rotate: boolean): void {
       <UserOption
         name="Opponent seconds per match"
         icon-id="clock-outline"
-        option-id="input-player-seconds-per-move"
+        option-id="input-opponent-seconds-per-match"
       >
-        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <input type="number" min="0" id="input-opponent-seconds-per-match" />
         <template #description
           >Limits opponent's time for whole match (game). If the time runs out
           the opponent looses and player wins.
@@ -800,7 +800,7 @@ function updateScreenRotation(rotate: boolean): void {
       <UserOption
         name="cell index opacity (%)"
         icon-id="code-array"
-        option-id="select-cell-index-opacity"
+        option-id="input-cell-index-opacity"
       >
         <input
           type="number"
@@ -837,7 +837,7 @@ function updateScreenRotation(rotate: boolean): void {
       <UserOption
         name="transition duration (%)"
         icon-id="play-speed"
-        option-id="select-transition-duration"
+        option-id="input-transition-duration"
       >
         <input
           type="number"
