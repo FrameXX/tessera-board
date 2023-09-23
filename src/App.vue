@@ -644,7 +644,7 @@ function onPieceMove() {
         option-id="default-board"
       >
         <button
-          class="button-configs"
+          class="single"
           @click="configsDialog.open(defaultBoardConfigManager)"
         >
           <Icon icon-id="tune" side />Configurations
@@ -881,7 +881,21 @@ function onPieceMove() {
         </template>
       </UserOption>
     </Category>
-    <Category name="about game" icon-id="information-outline"></Category>
+    <Category name="about game" icon-id="information-outline">
+      <p>Made with ❤️ by Jiří Král</p>
+      <p>
+        Source code is availible at
+        <a href="https://github.com/FrameXX/tessera-board" target="_blank"
+          >Github repository</a
+        >.
+      </p>
+      <p>
+        Licensed under
+        <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
+          >General public license V3</a
+        >
+      </p>
+    </Category>
     <div class="action-buttons-drawer">
       <button @click="userDataManager.requestClearData()">
         <Icon icon-id="delete-forever-outline" side />

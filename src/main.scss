@@ -47,6 +47,10 @@ body {
   margin: 0;
 }
 
+a {
+  color: var(--color-primary-accent);
+}
+
 button,
 input,
 textarea,
@@ -85,7 +89,7 @@ button {
   color: var(--color-primary-accent);
   padding: var(--spacing-tiny) var(--spacing-big);
 
-  &.button-configs {
+  &.single {
     margin: var(--spacing-big) 0;
   }
 
