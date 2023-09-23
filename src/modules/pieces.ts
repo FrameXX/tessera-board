@@ -106,80 +106,47 @@ export class Rook extends Piece {
     let piece: Piece | null;
 
     // Check row
-    for (const xDelta of [-1, 1]) {
-      let totalXDelta = 0;
-      while (true) {
-        totalXDelta += xDelta;
-        const target = getTarget(position, totalXDelta, 0);
-        if (!isTargetOnBoard(target)) {
-          break;
-        }
-        let captures: BoardPositionValue[] = [];
-        piece = boardStateValue[target.row][target.col];
-        if (piece) {
-          if (piece.color !== this.color) {
-            captures = [{ ...target, value: piece }];
-          } else {
+    for (const axis of ["x", "y"]) {
+      for (const delta of [-1, 1]) {
+        let totalDelta = 0;
+        while (true) {
+          totalDelta += delta;
+          let target: BoardPosition;
+          axis === "x"
+            ? (target = getTarget(position, totalDelta, 0))
+            : (target = getTarget(position, 0, totalDelta));
+          if (!isTargetOnBoard(target)) {
             break;
           }
-        }
+          let captures: BoardPositionValue[] = [];
+          piece = boardStateValue[target.row][target.col];
+          if (piece) {
+            if (piece.color === this.color) {
+              break;
+            }
+            captures = [{ ...target, value: piece }];
+          }
 
-        turns.push({
-          move: {
-            captures: captures,
-            action: "move",
-            notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
-              target.row
-            }`,
-            origin: position,
-            target: target,
-          },
-          clickablePositions: [target],
-        });
+          turns.push({
+            move: {
+              captures: captures,
+              action: "move",
+              notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
+                target.row
+              }`,
+              origin: position,
+              target: target,
+            },
+            clickablePositions: [target],
+          });
 
-        if (piece) {
-          break;
+          if (piece) {
+            break;
+          }
         }
       }
     }
 
-    // Check column
-    for (const yDelta of [-1, 1]) {
-      let totalYDelta = 0;
-      while (true) {
-        totalYDelta += yDelta;
-        const target = getTarget(position, 0, totalYDelta);
-        if (!isTargetOnBoard(target)) {
-          break;
-        }
-        let captures: BoardPositionValue[] = [];
-        piece = boardStateValue[target.row][target.col];
-        if (piece) {
-          if (piece.color !== this.color) {
-            captures = [{ ...target, value: piece }];
-          } else {
-            break;
-          }
-        }
-
-        turns.push({
-          move: {
-            captures: captures,
-            action: "move",
-            notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
-              target.row
-            }`,
-            origin: position,
-            target: target,
-          },
-          clickablePositions: [target],
-        });
-
-        if (piece) {
-          break;
-        }
-      }
-    }
     return turns;
   }
 }
@@ -245,7 +212,51 @@ export class Bishop extends Piece {
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Turn[] {
-    return [];
+    const turns: Turn[] = [];
+    let piece: Piece | null;
+
+    // Check row
+    for (const xDelta of [-1, 1]) {
+      for (const yDelta of [-1, 1]) {
+        let totalXDelta = 0;
+        let totalYDelta = 0;
+        while (true) {
+          totalXDelta += xDelta;
+          totalYDelta += yDelta;
+          const target = getTarget(position, totalXDelta, totalYDelta);
+          if (!isTargetOnBoard(target)) {
+            break;
+          }
+          let captures: BoardPositionValue[] = [];
+          piece = boardStateValue[target.row][target.col];
+          if (piece) {
+            if (piece.color === this.color) {
+              break;
+            }
+            captures = [{ ...target, value: piece }];
+          }
+
+          turns.push({
+            move: {
+              captures: captures,
+              action: "move",
+              notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
+                target.row
+              }`,
+              origin: position,
+              target: target,
+            },
+            clickablePositions: [target],
+          });
+
+          if (piece) {
+            break;
+          }
+        }
+      }
+    }
+
+    return turns;
   }
 }
 
@@ -259,7 +270,12 @@ export class Queen extends Piece {
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Turn[] {
-    return [];
+    const rook = new Rook(this.color);
+    const bishop = new Bishop(this.color);
+    const rookMoves = rook.getPossibleMoves(position, boardStateValue);
+    const bishopMoves = bishop.getPossibleMoves(position, boardStateValue);
+    // NOTE: Possible moves of qeen are same as possible moves of rook and bishop in same state joined together. There's no overlap between rook and bishop moves which is great.
+    return [...rookMoves, ...bishopMoves];
   }
 }
 
