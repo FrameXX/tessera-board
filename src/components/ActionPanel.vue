@@ -33,7 +33,7 @@ watch(
       <FastButton icon-id="flag" title="Resign" />
       <FastButton
         @click="$emit('restartGame')"
-        icon-id="play-outline"
+        icon-id="restart"
         title="New match"
       />
       <div class="nav-placeholder"></div>

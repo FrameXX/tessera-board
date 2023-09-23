@@ -892,7 +892,7 @@ function onPieceMove() {
       <p>
         Licensed under
         <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
-          >General public license v3</a
+          >General Public License v3</a
         >
       </p>
     </Category>
