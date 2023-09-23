@@ -56,6 +56,7 @@ const props = defineProps({
     default: [],
   },
 });
+defineEmits(["pieceMove"]);
 
 // All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
 const allPieceProps = computed(() => {
@@ -159,6 +160,7 @@ function onCellClick(position: BoardPosition) {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
+          @move="$emit('pieceMove')"
           :selected="props.selectedState[pieceProps.row][pieceProps.col]"
           :row="pieceProps.row"
           :col="pieceProps.col"

@@ -21,6 +21,7 @@ const props = defineProps({
   rotated: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
 });
+const emit = defineEmits(["move"]);
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
 const element = ref<null | ComponentPublicInstance>(null);
 
@@ -48,7 +49,7 @@ const piecePosition = computed(() => {
 });
 
 // Watch piece for position changes and set z-index to 1 while moving so it appears on top of other pieces
-watch(piecePosition, () => {
+watch(piecePosition, async () => {
   const pieceIconElement = element.value?.$el;
   if (!(pieceIconElement instanceof SVGElement)) {
     console.error(
@@ -56,14 +57,14 @@ watch(piecePosition, () => {
     );
     return;
   }
-  temporarilyMoveToTop(pieceIconElement);
+  await temporarilyMoveToTop(pieceIconElement);
+  emit("move");
 });
 
-function temporarilyMoveToTop(boardPieceElement: SVGElement) {
+async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   zIndex.value = "var(--z-index-piece-top)";
-  waitForTransitionEnd(boardPieceElement).then(() => {
-    zIndex.value = "";
-  });
+  await waitForTransitionEnd(boardPieceElement);
+  zIndex.value = "";
 }
 </script>
 

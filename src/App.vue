@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// Import Vue
+// Import from packages
 import { ref, reactive, onMounted, watch } from "vue";
+import { Howl } from "howler";
 
 // Import user data
 import { BooleanUserData, SelectUserData } from "./modules/user_data/user_data";
@@ -74,6 +75,8 @@ import Timers from "./components/Timers.vue";
 import GenericBoardStateData from "./modules/user_data/generic_board_state";
 import { PieceId } from "./modules/pieces";
 
+const moveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
+
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
     new Rook("white"),
@@ -141,6 +144,7 @@ const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: PieceId[] = [];
 const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: PieceId[] = [];
 const DEFAULT_PLAYER_PLAYING_VALUE = true;
 const DEFAULT_GAME_PAUSED_VALUE = false;
+const DEFAULT_AUDIO_EFFECTS_VALUE = true;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
@@ -193,6 +197,7 @@ const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
 const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
 const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
+const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
 
 // Game specific
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
@@ -316,6 +321,12 @@ const userDataManager = new UserDataManager(
       DEFAULT_GAME_PAUSED_VALUE,
       toastManager,
       gamePaused
+    ),
+    new BooleanUserData(
+      "audio_effects",
+      DEFAULT_AUDIO_EFFECTS_VALUE,
+      toastManager,
+      audioEffects
     ),
     new CapturedPiecesData(
       DEFAULT_WHITE_CAPTURED_PIECES_VALUE,
@@ -442,6 +453,12 @@ function updateScreenRotation(rotate: boolean): void {
     ? setCSSVariable("app-transform", "rotate(-0.5turn)")
     : setCSSVariable("app-transform", "");
 }
+
+function onPieceMove() {
+  if (audioEffects.value) {
+    moveAudioEffect.play();
+  }
+}
 </script>
 
 <template>
@@ -451,6 +468,7 @@ function updateScreenRotation(rotate: boolean): void {
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
+        @piece-move="onPieceMove()"
         :selected-state="playerSelectedPieces"
         :highlighted-state="highlightedCells"
         :marks-state="playerCellMarks"
@@ -815,8 +833,18 @@ function updateScreenRotation(rotate: boolean): void {
           of checkboard.
         </template>
       </UserOption>
-      <!-- Transitions -->
-      <span class="section-title">Transitions</span>
+      <!-- Effects -->
+      <span class="section-title">Effects</span>
+      <UserOption
+        name="audio effects"
+        icon-id="surround-sound"
+        option-id="check-audio-effects"
+      >
+        <Checkbox id="check-audio-effects" v-model="audioEffects" />
+        <template #description>
+          Enables simple audio effects when a piece is moved and similiar.
+        </template>
+      </UserOption>
       <UserOption
         name="transitions"
         icon-id="transition"
