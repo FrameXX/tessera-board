@@ -478,7 +478,7 @@ function onPieceMove() {
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
         :piece-border="pieceBorder"
-        :player-captured-pieces="whiteCapturedPieces"
+        :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         id="primary-board"
       />
@@ -492,7 +492,7 @@ function onPieceMove() {
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
         :piece-border="pieceBorder"
-        :player-captured-pieces="whiteCapturedPieces"
+        :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         id="primary-board"
       />
@@ -892,7 +892,7 @@ function onPieceMove() {
       <p>
         Licensed under
         <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
-          >General public license V3</a
+          >General public license v3</a
         >
       </p>
     </Category>

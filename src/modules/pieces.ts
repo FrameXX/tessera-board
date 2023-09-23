@@ -102,7 +102,85 @@ export class Rook extends Piece {
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Turn[] {
-    return [];
+    const turns: Turn[] = [];
+    let piece: Piece | null;
+
+    // Check row
+    for (const xDelta of [-1, 1]) {
+      let totalXDelta = 0;
+      while (true) {
+        totalXDelta += xDelta;
+        const target = getTarget(position, totalXDelta, 0);
+        if (!isTargetOnBoard(target)) {
+          break;
+        }
+        let captures: BoardPositionValue[] = [];
+        piece = boardStateValue[target.row][target.col];
+        if (piece) {
+          if (piece.color !== this.color) {
+            captures = [{ ...target, value: piece }];
+          } else {
+            break;
+          }
+        }
+
+        turns.push({
+          move: {
+            captures: captures,
+            action: "move",
+            notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
+              target.row
+            }`,
+            origin: position,
+            target: target,
+          },
+          clickablePositions: [target],
+        });
+
+        if (piece) {
+          break;
+        }
+      }
+    }
+
+    // Check column
+    for (const yDelta of [-1, 1]) {
+      let totalYDelta = 0;
+      while (true) {
+        totalYDelta += yDelta;
+        const target = getTarget(position, 0, totalYDelta);
+        if (!isTargetOnBoard(target)) {
+          break;
+        }
+        let captures: BoardPositionValue[] = [];
+        piece = boardStateValue[target.row][target.col];
+        if (piece) {
+          if (piece.color !== this.color) {
+            captures = [{ ...target, value: piece }];
+          } else {
+            break;
+          }
+        }
+
+        turns.push({
+          move: {
+            captures: captures,
+            action: "move",
+            notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
+              target.row
+            }`,
+            origin: position,
+            target: target,
+          },
+          clickablePositions: [target],
+        });
+
+        if (piece) {
+          break;
+        }
+      }
+    }
+    return turns;
   }
 }
 
@@ -125,29 +203,31 @@ export class Knight extends Piece {
           continue;
         }
         const target = getTarget(position, xDelta, yDelta);
-        if (isTargetOnBoard(target)) {
-          let captures: BoardPositionValue[] = [];
-          const piece = boardStateValue[target.row][target.col];
-          if (piece) {
-            if (piece.color !== this.color) {
-              captures.push({ ...target, value: piece });
-            } else {
-              continue;
-            }
-          }
-          turns.push({
-            move: {
-              captures: captures,
-              action: "move",
-              notation: `${Knight.notationSign}${CHAR_INDEXES[target.col - 1]}${
-                target.row
-              }`,
-              origin: position,
-              target: target,
-            },
-            clickablePositions: [target],
-          });
+        if (!isTargetOnBoard(target)) {
+          continue;
         }
+        let captures: BoardPositionValue[] = [];
+        const piece = boardStateValue[target.row][target.col];
+        if (piece) {
+          if (piece.color !== this.color) {
+            captures.push({ ...target, value: piece });
+          } else {
+            continue;
+          }
+        }
+
+        turns.push({
+          move: {
+            captures: captures,
+            action: "move",
+            notation: `${Knight.notationSign}${CHAR_INDEXES[target.col - 1]}${
+              target.row
+            }`,
+            origin: position,
+            target: target,
+          },
+          clickablePositions: [target],
+        });
       }
     }
 

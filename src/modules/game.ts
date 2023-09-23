@@ -44,8 +44,7 @@ class Game {
   public restart() {
     this.setupDefaultBoardState();
     this.choosePlayerColor();
-    this.gameBoardManager.selectedPieceProps = null;
-    this.gameBoardManager.clearHihlightedCells();
+    this.gameBoardManager.clearBoard();
   }
 
   public onTurnStart() {}

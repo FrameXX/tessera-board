@@ -3,6 +3,7 @@ import { PropType } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
 import type { PieceId, PlayerColor } from "../modules/pieces";
+import { getRandomId } from "../modules/utils/misc";
 
 const props = defineProps({
   pieceIds: { type: Array as PropType<PieceId[]> },
@@ -13,9 +14,10 @@ const props = defineProps({
 
 <template>
   <div class="captured-pieces">
-    <TransitionGroup name="list">
+    <TransitionGroup name="opacity">
       <PieceIcon
         v-for="pieceId in props.pieceIds"
+        :key="getRandomId()"
         :color="props.color"
         :piece-set="props.pieceSet"
         :piece-id="pieceId"

@@ -132,14 +132,14 @@ function onCellClick(position: BoardPosition) {
         <CapturedPieces
           :piece-set="props.pieceSet"
           :piece-ids="props.blackCapturedPieces"
-          color="black"
+          color="white"
         />
       </div>
       <div class="white captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
           :piece-ids="props.whiteCapturedPieces"
-          color="white"
+          color="black"
         />
       </div>
       <tr class="row" v-for="row in 8" :key="`row-${row}`">

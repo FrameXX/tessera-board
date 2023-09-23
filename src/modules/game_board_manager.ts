@@ -45,7 +45,17 @@ class GameBoardManager extends BoardManager {
 
     // Capture pieces
     for (const capturePosition of move.captures) {
+      const piece =
+        this.boardStateValue[capturePosition.row][capturePosition.col];
       this.boardStateValue[capturePosition.row][capturePosition.col] = null;
+
+      if (piece) {
+        if (piece.color === "white") {
+          this.blackCapturedPieces.value.push(piece.pieceId);
+        } else {
+          this.whiteCapturedPieces.value.push(piece.pieceId);
+        }
+      }
     }
 
     // Move piece
@@ -67,7 +77,7 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  public clearHihlightedCells() {
+  private clearHihlightedCells() {
     for (const rowIndex in this.higlightedCells) {
       for (const colIndex in this.higlightedCells[rowIndex]) {
         this.higlightedCells[rowIndex][colIndex] = false;
@@ -75,7 +85,7 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  public hideAllCellMarks() {
+  private hideAllCellMarks() {
     for (const rowIndex in this.playerCellMarks) {
       for (const colIndex in this.playerCellMarks[rowIndex]) {
         this.playerCellMarks[rowIndex][colIndex] = null;
@@ -83,7 +93,12 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  public set selectedPieceProps(pieceProps: BoardPieceProps | null) {
+  private clearCapturedPieces() {
+    this.whiteCapturedPieces.value = [];
+    this.blackCapturedPieces.value = [];
+  }
+
+  private set selectedPieceProps(pieceProps: BoardPieceProps | null) {
     if (this.selectedPieceProps) {
       this.playerSelectedPieces[this.selectedPieceProps.row][
         this.selectedPieceProps.col
@@ -104,8 +119,14 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  public get selectedPieceProps(): BoardPieceProps | null {
+  private get selectedPieceProps(): BoardPieceProps | null {
     return this._selectedPieceProps;
+  }
+
+  public clearBoard() {
+    this.selectedPieceProps = null;
+    this.clearHihlightedCells();
+    this.clearCapturedPieces();
   }
 
   public onPieceClick(boardPiece: BoardPieceProps): void {
