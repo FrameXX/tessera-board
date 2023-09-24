@@ -4,8 +4,8 @@ import type {
   BoardPieceProps,
   MarkState,
   BooleanState,
+  BoardPosition,
 } from "../components/Board.vue";
-import type Game from "./game";
 import type { Turn, PieceId, Move } from "./pieces";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
@@ -30,13 +30,17 @@ class GameBoardManager extends BoardManager {
     super();
   }
 
-  private showAvalibleCellsMarks(turns: Turn[]) {
+  private showCellsMarks(turns: Turn[]) {
     for (const turn of turns) {
-      this.boardStateValue[turn.move.target.row][turn.move.target.col]
-        ? (this.playerCellMarks[turn.move.target.row][turn.move.target.col] =
-            "capture")
-        : (this.playerCellMarks[turn.move.target.row][turn.move.target.col] =
-            "availible");
+      for (const clickablePosition of turn.clickablePositions) {
+        positionIsCapturedByTurn(turn, clickablePosition)
+          ? (this.playerCellMarks[clickablePosition.row][
+              clickablePosition.col
+            ] = "capture")
+          : (this.playerCellMarks[clickablePosition.row][
+              clickablePosition.col
+            ] = "availible");
+      }
     }
   }
 
@@ -113,7 +117,7 @@ class GameBoardManager extends BoardManager {
         pieceProps,
         this.boardStateValue
       );
-      this.showAvalibleCellsMarks(turns);
+      this.showCellsMarks(turns);
       this._selectedPieceProps = pieceProps;
       this.avalibleTurns = turns;
     }
@@ -121,6 +125,27 @@ class GameBoardManager extends BoardManager {
 
   private get selectedPieceProps(): BoardPieceProps | null {
     return this._selectedPieceProps;
+  }
+
+  private getPositionMatchingMove(position: BoardPosition): Move | null {
+    if (!this.avalibleTurns) {
+      return null;
+    }
+
+    const matchingTurns = this.avalibleTurns.filter((turn) => {
+      return turnHasClickablePosition(turn, position);
+    });
+
+    if (matchingTurns.length > 1) {
+      throw new GameLogicError(
+        `Multiple turns have same clickable positions for row ${position.row}, col ${position.col}.`
+      );
+    }
+
+    if (matchingTurns.length !== 1) {
+      return null;
+    }
+    return matchingTurns[0].move;
   }
 
   public clearBoard() {
@@ -133,44 +158,73 @@ class GameBoardManager extends BoardManager {
     this.selectedPieceProps = boardPiece;
   }
 
-  public onCellClick(row: number, col: number): void {
+  public onCellClick(position: BoardPosition): void {
     this.selectedPieceProps = null;
 
     let moveInterpreted = false;
 
-    if (this.avalibleTurns) {
-      const matchingTurns = this.avalibleTurns.filter((turn) => {
-        const matchingPositions = turn.clickablePositions.filter(
-          (position) => position.row === row && position.col === col
-        );
+    // Check if cell is on any of the clickable position of any of the turns and thus has its move
+    const matchingMove = this.getPositionMatchingMove(position);
 
-        if (matchingPositions.length > 1) {
-          throw new GameLogicError(
-            `Single turn has multiple same clickable positions for row ${row}, col ${col}. Turn: ${turn}.`
-          );
-        }
-        return matchingPositions.length > 0;
-      });
-
-      if (matchingTurns.length > 1) {
-        throw new GameLogicError(
-          `Multiple turns have same clickable positions for row ${row}, col ${col}.`
-        );
-      }
-
-      if (matchingTurns.length > 0) {
-        this.interpretMove(matchingTurns[0].move);
-        this.avalibleTurns = [];
-        moveInterpreted = true;
-      }
+    if (matchingMove) {
+      this.interpretMove(matchingMove);
+      this.avalibleTurns = [];
+      moveInterpreted = true;
     }
+
+    // Take the cell click as a piece click if no move was performed on that position. This is useful if the cells with pieces are selected using tabindex.
     if (!moveInterpreted) {
-      const piece = this.boardStateValue[row][col];
+      const piece = this.boardStateValue[position.row][position.col];
       if (piece) {
-        this.onPieceClick({ row, col, piece });
+        this.onPieceClick({ ...position, piece });
       }
     }
   }
+}
+
+function turnHasClickablePosition(
+  turn: Turn,
+  position: BoardPosition
+): boolean {
+  const matchingPositions = getMatchingPositions(
+    turn.clickablePositions,
+    position
+  );
+
+  // There should be no duplicates in clickable positions!
+  if (matchingPositions.length > 1) {
+    throw new GameLogicError(
+      `Single turn has same clickable positions for row ${position.row}, col ${position.col}. Turn: ${turn}.`
+    );
+  }
+
+  return matchingPositions.length !== 0;
+}
+
+function positionIsCapturedByTurn(turn: Turn, position: BoardPosition) {
+  const matchingPositions = getMatchingPositions(turn.move.captures, position);
+
+  // There should be no duplicates in turn captured positions!
+  if (matchingPositions.length > 1) {
+    throw new GameLogicError(
+      `Single turn has duplicate capture positions for row ${position.row}, col ${position.col}. Turn: ${turn}.`
+    );
+  }
+
+  return matchingPositions.length !== 0;
+}
+
+function getMatchingPositions(
+  positionsArray: BoardPosition[],
+  position: BoardPosition
+) {
+  return positionsArray.filter((arrayMember) =>
+    positionsEqual(arrayMember, position)
+  );
+}
+
+function positionsEqual(position1: BoardPosition, position2: BoardPosition) {
+  return position1.row === position2.row && position1.col === position2.col;
 }
 
 export default GameBoardManager;

@@ -117,7 +117,7 @@ function getContainerMinSize() {
 }
 
 function onCellClick(position: BoardPosition) {
-  props.manager.onCellClick(8 - position.row, position.col - 1);
+  props.manager.onCellClick({ row: 8 - position.row, col: position.col - 1 });
 }
 </script>
 

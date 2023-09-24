@@ -275,7 +275,8 @@ export class Queen extends Piece {
     const rookMoves = rook.getPossibleMoves(position, boardStateValue);
     const bishopMoves = bishop.getPossibleMoves(position, boardStateValue);
     // NOTE: Possible moves of qeen are same as possible moves of rook and bishop in same state joined together. There's no overlap between rook and bishop moves which is great.
-    return [...rookMoves, ...bishopMoves];
+    const turns: Turn[] = [...rookMoves, ...bishopMoves];
+    return turns;
   }
 }
 
