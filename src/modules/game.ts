@@ -22,7 +22,7 @@ class Game {
     private readonly playerPlaying: Ref<boolean>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColorValue>
   ) {
-    this.gameBoardManager.onMove = this.onTurnEnd;
+    this.gameBoardManager.onInterpretMove = this.onTurnEnd;
   }
 
   private setupDefaultBoardState() {
@@ -44,7 +44,7 @@ class Game {
   public restart() {
     this.setupDefaultBoardState();
     this.choosePlayerColor();
-    this.gameBoardManager.clearBoard();
+    this.gameBoardManager.resetBoard();
   }
 
   public onTurnStart() {}

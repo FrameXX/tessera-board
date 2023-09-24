@@ -19,7 +19,7 @@ const props = defineProps({
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
   rotated: { type: Boolean, default: false },
-  selected: { type: Boolean, default: false },
+  highlighted: { type: Boolean, default: false },
 });
 const emit = defineEmits(["move"]);
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
@@ -76,11 +76,11 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
     <div class="rotation-wrapper">
       <PieceIcon
         ref="element"
-        :class="`piece ${props.selected ? 'selected' : ''} ${
+        :class="`piece ${props.highlighted ? 'highlighted' : ''} ${
           props.piece.color === 'white' ? 'white' : 'black'
         }`"
         :style="`transform: translate(${translateX}px,${translateY}px) ${
-          props.selected ? 'scale(1.05)' : ''
+          props.highlighted ? 'scale(1.05)' : ''
         }; width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
         :piece-set="props.pieceSet"
         :piece-id="props.piece.pieceId"
@@ -124,7 +124,7 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   transition: transform var(--transition-duration-medium) ease-in-out,
     filter var(--transition-duration-short) linear;
 
-  &.selected {
+  &.highlighted {
     filter: var(--piece-selected-shadow-filter);
   }
 }

@@ -52,7 +52,7 @@ import {
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { MarkState, BooleanState } from "./components/Board.vue";
+import type { MarkBoardState, BooleanBoardState } from "./components/Board.vue";
 import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
@@ -155,27 +155,27 @@ watch(screenRotated, (newValue) => {
 });
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
-const playerCellMarks: MarkState = reactive(
+const playerCellMarks: MarkBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(null))
 );
-const OpponentCellMarks: MarkState = reactive(
+const OpponentCellMarks: MarkBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(null))
 );
-const playerSelectedPieces: BooleanState = reactive(
+const playerHighlightedPieces: BooleanBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(false))
 );
-const opponentSelectedPieces: BooleanState = reactive(
+const opponentHighlightedPieces: BooleanBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(false))
 );
-const highlightedCells: BooleanState = reactive(
+const highlightedCells: BooleanBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(false))
@@ -378,8 +378,8 @@ const gameBoardManager = new GameBoardManager(
   blackCapturedPieces,
   playerCellMarks,
   OpponentCellMarks,
-  playerSelectedPieces,
-  opponentSelectedPieces,
+  playerHighlightedPieces,
+  opponentHighlightedPieces,
   highlightedCells
 );
 
@@ -469,8 +469,8 @@ function onPieceMove() {
     <div id="boards-area">
       <Board
         @piece-move="onPieceMove()"
-        :selected-state="playerSelectedPieces"
-        :highlighted-state="highlightedCells"
+        :highlighted-pieces-state="playerHighlightedPieces"
+        :highlighted-cells-state="highlightedCells"
         :marks-state="playerCellMarks"
         :rotated="screenRotated"
         :manager="gameBoardManager"
@@ -484,8 +484,8 @@ function onPieceMove() {
       />
       <Board
         v-if="secondCheckboard"
-        :selected-state="opponentSelectedPieces"
-        :highlighted-state="highlightedCells"
+        :highlighted-pieces-state="opponentHighlightedPieces"
+        :highlighted-cells-state="highlightedCells"
         :rotated="screenRotated"
         :manager="gameBoardManager"
         :state="gameBoardState"

@@ -10,7 +10,20 @@
   opacity: 0;
 }
 
-// Scale
+// Slide up
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform var(--transition-duration-medium)
+    var(--transition-timing-jump);
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+}
+
+// [Group] Scale
+.scale-move,
 .scale-enter-active,
 .scale-leave-active {
   transition: transform var(--transition-duration-medium)
@@ -22,16 +35,8 @@
   transform: scale(0);
 }
 
-// Slide up
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform var(--transition-duration-medium)
-    var(--transition-timing-jump);
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
+.scale-leave-active {
+  position: absolute;
 }
 
 // [Group] piece
@@ -50,6 +55,24 @@
 .piece-leave-to {
   opacity: 0;
   transform: translateY(-100px) rotate(135deg) scale(2);
+}
+
+// [Group] Slide left
+.slide-left-move,
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all var(--transition-duration-medium)
+    var(--transition-timing-jump);
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(20%);
+}
+
+.slide-left-leave-active {
+  position: absolute;
 }
 
 // [Group] Slide down

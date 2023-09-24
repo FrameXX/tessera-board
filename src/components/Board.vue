@@ -9,8 +9,8 @@ import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
 
-export type MarkState = (Mark | null)[][];
-export type BooleanState = boolean[][];
+export type MarkBoardState = (Mark | null)[][];
+export type BooleanBoardState = boolean[][];
 
 export interface BoardPosition {
   row: number;
@@ -33,15 +33,15 @@ const CELL_PERCENT_DELTA = (100 - BORDER_PERCENT_DELTA) / 7;
 const props = defineProps({
   state: { type: Object as PropType<BoardStateValue>, required: true },
   marksState: {
-    type: Array as PropType<MarkState>,
+    type: Array as PropType<MarkBoardState>,
     default: Array(8).fill(Array(8).fill(null)),
   },
-  selectedState: {
-    type: Array as PropType<BooleanState>,
+  highlightedPiecesState: {
+    type: Array as PropType<BooleanBoardState>,
     default: Array(8).fill(Array(8).fill(false)),
   },
-  highlightedState: {
-    type: Array as PropType<BooleanState>,
+  highlightedCellsState: {
+    type: Array as PropType<BooleanBoardState>,
     default: Array(8).fill(Array(8).fill(false)),
   },
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
@@ -151,7 +151,7 @@ function onCellClick(position: BoardPosition) {
           :row="9 - row"
           :col="col"
           :mark="props.marksState[8 - row][col - 1]"
-          :highlighted="props.highlightedState[8 - row][col - 1]"
+          :highlighted="props.highlightedCellsState[8 - row][col - 1]"
         />
       </tr>
 
@@ -161,7 +161,9 @@ function onCellClick(position: BoardPosition) {
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
           @move="$emit('pieceMove')"
-          :selected="props.selectedState[pieceProps.row][pieceProps.col]"
+          :highlighted="
+            props.highlightedPiecesState[pieceProps.row][pieceProps.col]
+          "
           :row="pieceProps.row"
           :col="pieceProps.col"
           :piece="pieceProps.piece"

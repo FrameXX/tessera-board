@@ -14,7 +14,7 @@ const props = defineProps({
 
 <template>
   <div class="captured-pieces">
-    <TransitionGroup name="opacity">
+    <TransitionGroup name="slide-left">
       <PieceIcon
         v-for="pieceId in props.pieceIds"
         :key="getRandomId()"

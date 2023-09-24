@@ -26,9 +26,13 @@ abstract class UserData<ValueType> {
     // Watch ref for changes, update the original value and save changes.
     if (valueRef) {
       this.valueRef = valueRef;
-      watch(valueRef, async (newValue) => {
-        this.onValueChange(newValue);
-      });
+      watch(
+        valueRef,
+        async (newValue) => {
+          this.onValueChange(newValue);
+        },
+        { deep: true }
+      );
     }
   }
 
