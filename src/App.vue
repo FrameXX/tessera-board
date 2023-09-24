@@ -890,10 +890,10 @@ function onPieceMove() {
         >.
       </p>
       <p>
-        Licensed under
+        This work is licensed under
         <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
           >General Public License v3</a
-        >
+        >.
       </p>
     </Category>
     <div class="action-buttons-drawer">
