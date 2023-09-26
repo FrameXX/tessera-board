@@ -6,7 +6,7 @@ import type {
   BooleanBoardState,
   BoardPosition,
 } from "../components/Board.vue";
-import type { Turn, PieceId, Move } from "./pieces/piece_utils";
+import type { Turn, PieceId, Move } from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
@@ -74,10 +74,6 @@ class GameBoardManager extends BoardManager {
     const originValue = this.boardStateValue[origin.row][origin.col];
     this.boardStateValue[origin.row][origin.col] = null;
     this.boardStateValue[target.row][target.col] = originValue;
-
-    if (originValue) {
-      originValue.moved = true;
-    }
   }
 
   private highlightCellsPositions(positions: BoardPosition[]) {
@@ -167,7 +163,7 @@ class GameBoardManager extends BoardManager {
     return this._selectedPieceProps;
   }
 
-  private getPositionMatchingMove(position: BoardPosition): Move | null {
+  private getPositionMatchingTurn(position: BoardPosition): Turn | null {
     if (!this.avalibleTurns) {
       return null;
     }
@@ -185,7 +181,7 @@ class GameBoardManager extends BoardManager {
     if (matchingTurns.length !== 1) {
       return null;
     }
-    return matchingTurns[0].move;
+    return matchingTurns[0];
   }
 
   public resetBoard() {
@@ -205,12 +201,16 @@ class GameBoardManager extends BoardManager {
     let moveInterpreted = false;
 
     // Check if cell is on any of the clickable position of any of the turns and thus has its move
-    const matchingMove = this.getPositionMatchingMove(position);
+    const matchingTurn = this.getPositionMatchingTurn(position);
 
-    if (matchingMove) {
+    if (matchingTurn) {
       this.clearHihlightedCellsPositions();
-      this.highlightCellsPositions([matchingMove.origin, matchingMove.target]);
-      this.interpretMove(matchingMove);
+      this.highlightCellsPositions([
+        matchingTurn.move.origin,
+        matchingTurn.move.target,
+      ]);
+      this.interpretMove(matchingTurn.move);
+      matchingTurn.author.onMove(matchingTurn.move);
       moveInterpreted = true;
     }
 

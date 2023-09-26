@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, type PropType, ref, onMounted } from "vue";
 import type { BoardStateValue } from "../modules/user_data/board_state";
-import type { PieceId, PlayerColor } from "../modules/pieces/piece_utils";
+import type { PieceId, PlayerColor } from "../modules/pieces/piece";
 import type Piece from "../modules/pieces/piece";
 import Cell, { type Mark } from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";

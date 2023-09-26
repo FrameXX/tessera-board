@@ -1,9 +1,5 @@
 import { reactive } from "vue";
-import {
-  type PieceId,
-  type PlayerColor,
-  getPieceFromGeneric as getPieceFromGenerics,
-} from "./pieces/piece_utils";
+import { type PieceId, type PlayerColor } from "./pieces/piece";
 import type Piece from "./pieces/piece";
 
 interface ConfigPieceDialogProps {
@@ -51,3 +47,9 @@ class ConfigPieceDialog {
 }
 
 export default ConfigPieceDialog;
+function getPieceFromGenerics(arg0: {
+  pieceId: PieceId;
+  color: PlayerColor;
+}): Piece {
+  throw new Error("Function not implemented.");
+}

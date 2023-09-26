@@ -8,7 +8,7 @@ import {
   Turn,
   getTarget,
   isTargetOnBoard,
-} from "./piece_utils";
+} from "./piece";
 
 export class Knight extends Piece {
   public static notationSign: string = "N";
@@ -53,6 +53,7 @@ export class Knight extends Piece {
             target: target,
           },
           clickablePositions: [target],
+          author: this,
         });
       }
     }

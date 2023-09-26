@@ -1,5 +1,5 @@
 import { type Ref } from "vue";
-import type { PlayerColor } from "./pieces/piece_utils";
+import type { PlayerColor } from "./pieces/piece";
 import type BoardStateData from "./user_data/board_state";
 import type { PreferredPlayerColorValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";

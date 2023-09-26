@@ -2,7 +2,7 @@ import type { BoardPosition } from "../../components/Board.vue";
 import type { BoardStateValue } from "../user_data/board_state";
 import { Bishop } from "./bishop";
 import Piece from "./piece";
-import { type PlayerColor, type Turn } from "./piece_utils";
+import { type PlayerColor, type Turn } from "./piece";
 import Rook from "./rook";
 
 export class Queen extends Piece {

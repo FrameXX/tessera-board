@@ -1,11 +1,7 @@
-import {
-  getPieceFromGeneric,
-  isGamePiece,
-  isGenericPiece,
-} from "../pieces/piece_utils";
 import { ComplexUserData } from "./user_data";
 import type Piece from "../pieces/piece";
 import type ToastManager from "../toast_manager";
+import { isRawPiece, restorePieceFromRaw } from "../pieces/rawPiece";
 
 export type BoardStateValue = (Piece | null)[][];
 
@@ -22,16 +18,12 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
     // Save piece as GamePiece
     return JSON.stringify(
       this.value.map((row) =>
-        row.map((piece) =>
-          piece
-            ? { pieceId: piece.pieceId, color: piece.color, moved: piece.moved }
-            : null
-        )
+        row.map((piece) => (piece ? piece.dumpObject() : null))
       )
     );
   }
 
-  public load(dumped: string, fromGeneric: boolean = false): void {
+  public load(dumped: string, fromRaw: boolean = false): void {
     let value;
     try {
       value = JSON.parse(dumped);
@@ -46,23 +38,15 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
       for (const colIndex in value[rowIndex]) {
         const pieceObject = value[rowIndex][colIndex];
         if (pieceObject) {
-          if (
-            (!isGamePiece(pieceObject) && !fromGeneric) ||
-            (!isGenericPiece(pieceObject) && fromGeneric)
-          ) {
+          if (!isRawPiece(pieceObject)) {
             console.error(
               `Could not restore piece of ${this.id} on row ${rowIndex}, ${colIndex}. The piece does not match its type. Data are invalid or corrupted. Setting piece to null.`
             );
             value[rowIndex][colIndex] = null;
             continue;
           }
-          const piece = getPieceFromGeneric({
-            pieceId: pieceObject.pieceId,
-            color: pieceObject.color,
-          });
-          fromGeneric
-            ? (piece.moved = false)
-            : (piece.moved = pieceObject.moved);
+          const piece = restorePieceFromRaw(pieceObject);
+          if (!fromRaw) piece.loadCustomProps(pieceObject);
           value[rowIndex][colIndex] = piece;
         }
       }

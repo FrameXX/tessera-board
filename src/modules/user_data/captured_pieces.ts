@@ -1,9 +1,5 @@
 import type { Ref } from "vue";
-import {
-  isPieceId,
-  type PieceId,
-  type PlayerColor,
-} from "../pieces/piece_utils";
+import { isPieceId, type PieceId, type PlayerColor } from "../pieces/piece";
 import UserData from "./user_data";
 import type ToastManager from "../toast_manager";
 

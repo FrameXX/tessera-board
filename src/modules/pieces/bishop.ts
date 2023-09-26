@@ -8,7 +8,7 @@ import {
   type Turn,
   getTarget,
   isTargetOnBoard,
-} from "./piece_utils";
+} from "./piece";
 import Rook from "./rook";
 
 export class Bishop extends Piece {
@@ -56,6 +56,7 @@ export class Bishop extends Piece {
               target: target,
             },
             clickablePositions: [target],
+            author: this,
           });
 
           if (piece) {

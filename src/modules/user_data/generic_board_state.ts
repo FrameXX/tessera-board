@@ -1,7 +1,11 @@
-import { getPieceFromGeneric, isGenericPiece } from "../pieces/piece_utils";
 import { ComplexUserData } from "./user_data";
 import type ToastManager from "../toast_manager";
 import type { BoardStateValue } from "./board_state";
+import {
+  getRawPiece,
+  isRawPiece,
+  restorePieceFromRaw,
+} from "../pieces/rawPiece";
 
 class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
@@ -16,9 +20,7 @@ class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
     // Save piece as GenericPiece
     return JSON.stringify(
       this.value.map((row) =>
-        row.map((piece) =>
-          piece ? { pieceId: piece.pieceId, color: piece.color } : null
-        )
+        row.map((piece) => (piece ? getRawPiece(piece) : null))
       )
     );
   }
@@ -38,17 +40,14 @@ class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
       for (const colIndex in value[rowIndex]) {
         const pieceObject = value[rowIndex][colIndex];
         if (pieceObject) {
-          if (!isGenericPiece(pieceObject)) {
+          if (!isRawPiece(pieceObject)) {
             console.error(
               `Could not restore generic piece of ${this.id} on row ${rowIndex}, ${colIndex}. The piece does not match its type. Data are invalid or corrupted. Setting piece to null.`
             );
             value[rowIndex][colIndex] = null;
             continue;
           }
-          const piece = getPieceFromGeneric({
-            pieceId: pieceObject.pieceId,
-            color: pieceObject.color,
-          });
+          const piece = restorePieceFromRaw(pieceObject);
           value[rowIndex][colIndex] = piece;
         }
       }

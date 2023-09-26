@@ -1,14 +1,40 @@
 import type { BoardPosition } from "../../components/Board.vue";
 import { CHAR_INDEXES } from "../board_manager";
 import type { BoardStateValue } from "../user_data/board_state";
-import Piece from "./piece";
-import { type PlayerColor, type Turn, getTarget } from "./piece_utils";
+import Piece, { Move } from "./piece";
+import { type PlayerColor, type Turn, getTarget } from "./piece";
+import { RawPiece, getRawPiece } from "./rawPiece";
+
+interface RawPawn extends RawPiece {
+  hasMoved: boolean;
+}
+
+function isRawPawn(rawPiece: RawPiece): rawPiece is RawPawn {
+  return typeof rawPiece.hasPiece !== "boolean";
+}
 
 export class Pawn extends Piece {
   public static notationSign: string = "";
+  private hasMoved: boolean = false;
 
   constructor(color: PlayerColor) {
     super(color, "pawn");
+  }
+
+  public onMove(move: Move): void {
+    this.hasMoved = true;
+  }
+
+  public dumpObject(): object {
+    return { ...getRawPiece(this), hasMoved: this.hasMoved };
+  }
+
+  public loadCustomProps(rawPiece: RawPiece): void {
+    if (!isRawPawn(rawPiece)) {
+      console.error("Given raw piece is not a rawPawn. No props were loaded.");
+      return;
+    }
+    this.hasMoved = rawPiece.hasMoved;
   }
 
   public getPossibleMoves(
@@ -40,6 +66,7 @@ export class Pawn extends Piece {
           target: target,
         },
         clickablePositions: [target],
+        author: this,
       });
     }
 
@@ -60,13 +87,14 @@ export class Pawn extends Piece {
               target: target,
             },
             clickablePositions: [target],
+            author: this,
           });
         }
       }
     }
 
     // Move 2 cells forward
-    if (!this.moved && !frontIsOccupied) {
+    if (!this.hasMoved && !frontIsOccupied) {
       this.color === "white" ? (yDelta = 2) : (yDelta = -2);
       target = getTarget(position, xDelta, yDelta);
       if (boardStateData[target.row][target.col] === null) {
@@ -81,6 +109,7 @@ export class Pawn extends Piece {
             target: target,
           },
           clickablePositions: [target],
+          author: this,
         });
       }
     }

@@ -8,7 +8,7 @@ import {
   Turn,
   getTarget,
   isTargetOnBoard,
-} from "./piece_utils";
+} from "./piece";
 
 export class Rook extends Piece {
   public static notationSign: string = "R";
@@ -57,6 +57,7 @@ export class Rook extends Piece {
               target: target,
             },
             clickablePositions: [target],
+            author: this,
           });
 
           if (piece) {
