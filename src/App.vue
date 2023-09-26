@@ -39,7 +39,11 @@ import ConfirmDialog from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
-import { type PlayerColor, isPlayerColor } from "./modules/pieces/piece";
+import {
+  type PlayerColor,
+  isPlayerColor,
+  PIECE_IDS,
+} from "./modules/pieces/piece";
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
@@ -71,6 +75,33 @@ import ConfigItem from "./components/ConfigItem.vue";
 import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
+import { capitalizeFirst } from "./modules/utils/misc";
+
+function toggleActionsPanel() {
+  actionPanelOpen.value = !actionPanelOpen.value;
+  actionPanelOpen.value
+    ? escapeManager.addLayer(toggleActionsPanel)
+    : escapeManager.removeLayer();
+
+  if (!actionPanelOpen.value) {
+    if (configDrawerOpen.value) {
+      toggleConfigDrawer();
+    }
+  }
+}
+
+function toggleConfigDrawer() {
+  configDrawerOpen.value = !configDrawerOpen.value;
+  configDrawerOpen.value
+    ? escapeManager.addLayer(toggleActionsPanel)
+    : escapeManager.removeLayer();
+}
+
+function updateScreenRotation(rotate: boolean): void {
+  rotate
+    ? setCSSVariable("app-transform", "rotate(-0.5turn)")
+    : setCSSVariable("app-transform", "");
+}
 
 const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
 
@@ -426,32 +457,6 @@ onMounted(() => {
     splashscreenManager.hideSplashscreen();
   }, 600);
 });
-
-function toggleActionsPanel() {
-  actionPanelOpen.value = !actionPanelOpen.value;
-  actionPanelOpen.value
-    ? escapeManager.addLayer(toggleActionsPanel)
-    : escapeManager.removeLayer();
-
-  if (!actionPanelOpen.value) {
-    if (configDrawerOpen.value) {
-      toggleConfigDrawer();
-    }
-  }
-}
-
-function toggleConfigDrawer() {
-  configDrawerOpen.value = !configDrawerOpen.value;
-  configDrawerOpen.value
-    ? escapeManager.addLayer(toggleActionsPanel)
-    : escapeManager.removeLayer();
-}
-
-function updateScreenRotation(rotate: boolean): void {
-  rotate
-    ? setCSSVariable("app-transform", "rotate(-0.5turn)")
-    : setCSSVariable("app-transform", "");
-}
 </script>
 
 <template>
@@ -946,12 +951,9 @@ function updateScreenRotation(rotate: boolean): void {
     <div class="config">
       <UserOption name="piece" option-id="select-piece-id">
         <select id="select-piece-id" v-model="configPieceDialog.props.pieceId">
-          <option value="rook">Rook</option>
-          <option value="knight">Knight</option>
-          <option value="bishop">Bishop</option>
-          <option value="queen">Queen</option>
-          <option value="king">King</option>
-          <option value="pawn">Pawn</option>
+          <option v-for="pieceId in PIECE_IDS" :value="pieceId">
+            {{ capitalizeFirst(pieceId) }}
+          </option>
         </select>
         <template #description>
           Different pieces have different look, but mainly their abilities and

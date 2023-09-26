@@ -24,7 +24,7 @@ export interface BoardPositionValue extends BoardPosition {
   value: Piece | null;
 }
 
-type MoveAction = "move" | "switch" | "revive";
+type MoveAction = "move" | "switch" | "transform";
 
 export interface Move {
   captures: BoardPositionValue[];
@@ -82,5 +82,7 @@ export function isTargetOnBoard(target: BoardPosition) {
     target.row >= 0 && target.row <= 7 && target.col >= 0 && target.col <= 7
   );
 }
+
+export const PIECE_IDS = ["rook", "knight", "bishop", "queen", "king", "pawn"];
 
 export default Piece;
