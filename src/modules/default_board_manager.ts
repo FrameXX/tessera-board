@@ -6,9 +6,10 @@ import { BoardStateValue } from "./user_data/board_state";
 class DefaultBoardManager extends BoardManager {
   constructor(
     private readonly board: BoardStateValue,
-    private configPieceDialog: ConfigPieceDialog
+    private configPieceDialog: ConfigPieceDialog,
+    pieceMoveAudioEffect: Howl
   ) {
-    super();
+    super(pieceMoveAudioEffect);
   }
 
   public onPieceClick(boardPiece: BoardPieceProps): void {

@@ -6,14 +6,13 @@ import type {
   BooleanBoardState,
   BoardPosition,
 } from "../components/Board.vue";
-import type { Turn, PieceId, Move, Piece } from "./pieces";
+import type { Turn, PieceId, Move } from "./pieces/piece_utils";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
-import { RefSymbol } from "@vue/reactivity";
+import type Piece from "./pieces/piece";
 
 class GameBoardManager extends BoardManager {
-  public onInterpretMove?: () => any;
   private _selectedPieceProps: BoardPieceProps | null = null;
   private avalibleTurns: Turn[] = [];
 
@@ -26,9 +25,10 @@ class GameBoardManager extends BoardManager {
     private readonly opponentBoardMarks: MarkBoardState,
     private readonly playerHighlightedPieces: BooleanBoardState,
     private readonly opponentHighlightedPieces: BooleanBoardState,
-    private readonly higlightedCells: BooleanBoardState
+    private readonly higlightedCells: BooleanBoardState,
+    pieceMoveAudioEffect: Howl
   ) {
-    super();
+    super(pieceMoveAudioEffect);
   }
 
   private showCellsMarks(turns: Turn[]) {
@@ -94,9 +94,7 @@ class GameBoardManager extends BoardManager {
       this.movePiece(move.origin, move.target);
     }
 
-    if (this.onInterpretMove) {
-      this.onInterpretMove();
-    }
+    this.dispatchEvent(new Event("interpret-move"));
   }
 
   private clearHihlightedCellsPositions() {

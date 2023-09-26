@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, type PropType, ref, onMounted } from "vue";
 import type { BoardStateValue } from "../modules/user_data/board_state";
-import type { PieceId, PlayerColor } from "../modules/pieces/piece";
+import type { PieceId, PlayerColor } from "../modules/pieces/piece_utils";
 import type Piece from "../modules/pieces/piece";
 import Cell, { type Mark } from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
@@ -56,7 +56,6 @@ const props = defineProps({
     default: [],
   },
 });
-defineEmits(["pieceMove"]);
 
 // All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
 const allPieceProps = computed(() => {
@@ -160,7 +159,7 @@ function onCellClick(position: BoardPosition) {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
-          @move="$emit('pieceMove')"
+          @move="props.manager.onPieceMove()"
           :highlighted="
             props.highlightedPiecesState[pieceProps.row][pieceProps.col]
           "

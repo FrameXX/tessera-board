@@ -9,7 +9,7 @@ import {
 } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { waitForTransitionEnd } from "../modules/utils/elements";
-import type Piece from "../modules/pieces";
+import type Piece from "../modules/pieces/piece";
 
 const props = defineProps({
   piece: { type: Object as PropType<Piece>, required: true },

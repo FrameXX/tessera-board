@@ -1,5 +1,5 @@
 import { type Ref } from "vue";
-import type { PlayerColor } from "./pieces";
+import type { PlayerColor } from "./pieces/piece_utils";
 import type BoardStateData from "./user_data/board_state";
 import type { PreferredPlayerColorValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
@@ -22,7 +22,9 @@ class Game {
     private readonly playerPlaying: Ref<boolean>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColorValue>
   ) {
-    this.gameBoardManager.onInterpretMove = this.onTurnEnd;
+    this.gameBoardManager.addEventListener("interpret-move", () =>
+      this.onTurnEnd()
+    );
   }
 
   private setupDefaultBoardState() {

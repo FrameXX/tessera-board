@@ -72,7 +72,7 @@ import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
 
-const moveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
+const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -365,7 +365,8 @@ const escapeManager = new EscapeManager(toggleActionsPanel);
 // Board managers
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
-  configPieceDialog
+  configPieceDialog,
+  pieceMoveAudioEffect
 );
 
 const gameBoardManager = new GameBoardManager(
@@ -377,7 +378,8 @@ const gameBoardManager = new GameBoardManager(
   OpponentCellMarks,
   playerHighlightedPieces,
   opponentHighlightedPieces,
-  highlightedCells
+  highlightedCells,
+  pieceMoveAudioEffect
 );
 
 // Game manager
@@ -450,12 +452,6 @@ function updateScreenRotation(rotate: boolean): void {
     ? setCSSVariable("app-transform", "rotate(-0.5turn)")
     : setCSSVariable("app-transform", "");
 }
-
-function onPieceMove() {
-  if (audioEffects.value) {
-    moveAudioEffect.play();
-  }
-}
 </script>
 
 <template>
@@ -465,7 +461,6 @@ function onPieceMove() {
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
-        @piece-move="onPieceMove()"
         :highlighted-pieces-state="playerHighlightedPieces"
         :highlighted-cells-state="highlightedCells"
         :marks-state="playerCellMarks"
