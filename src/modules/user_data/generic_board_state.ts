@@ -1,9 +1,7 @@
-import { getPieceFromGeneric, isGenericPiece } from "../pieces";
+import { getPieceFromGeneric, isGenericPiece } from "../pieces/piece_utils";
 import { ComplexUserData } from "./user_data";
-import type Piece from "../pieces";
 import type ToastManager from "../toast_manager";
-
-export type BoardStateValue = (Piece | null)[][];
+import type { BoardStateValue } from "./board_state";
 
 class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(

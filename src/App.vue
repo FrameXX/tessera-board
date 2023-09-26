@@ -39,16 +39,7 @@ import ConfirmDialog from "./modules/confirm_dialog";
 import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/config_piece_dialog";
-import {
-  type PlayerColor,
-  isPlayerColor,
-  Bishop,
-  King,
-  Knight,
-  Pawn,
-  Queen,
-  Rook,
-} from "./modules/pieces";
+import { type PlayerColor, isPlayerColor } from "./modules/pieces/piece_utils";
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
@@ -57,6 +48,14 @@ import ConfigPrintDialog from "./modules/config_print_dialog";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
 import Game from "./modules/game";
+import GenericBoardStateData from "./modules/user_data/generic_board_state";
+import { PieceId } from "./modules/pieces/piece_utils";
+import Bishop from "./modules/pieces/bishop";
+import King from "./modules/pieces/king";
+import Knight from "./modules/pieces/knight";
+import Pawn from "./modules/pieces/pawn";
+import Queen from "./modules/pieces/queen";
+import Rook from "./modules/pieces/rook";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -72,8 +71,6 @@ import ConfigItem from "./components/ConfigItem.vue";
 import ConfigsDialog from "./modules/configs_dialog";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
-import GenericBoardStateData from "./modules/user_data/generic_board_state";
-import { PieceId } from "./modules/pieces";
 
 const moveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
 

@@ -1,6 +1,10 @@
-import { getPieceFromGeneric, isGamePiece, isGenericPiece } from "../pieces";
+import {
+  getPieceFromGeneric,
+  isGamePiece,
+  isGenericPiece,
+} from "../pieces/piece_utils";
 import { ComplexUserData } from "./user_data";
-import type Piece from "../pieces";
+import type Piece from "../pieces/piece";
 import type ToastManager from "../toast_manager";
 
 export type BoardStateValue = (Piece | null)[][];

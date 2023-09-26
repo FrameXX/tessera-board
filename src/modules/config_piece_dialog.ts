@@ -2,9 +2,9 @@ import { reactive } from "vue";
 import {
   type PieceId,
   type PlayerColor,
-  type Piece,
   getPieceFromGeneric as getPieceFromGenerics,
-} from "./pieces";
+} from "./pieces/piece_utils";
+import type Piece from "./pieces/piece";
 
 interface ConfigPieceDialogProps {
   open: boolean;

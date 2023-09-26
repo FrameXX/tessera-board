@@ -2,7 +2,7 @@
 import Icon from "./Icon.vue";
 import { PropType, computed } from "vue";
 import { type PieceSetValue } from "../modules/user_data/piece_set";
-import { PieceId, PlayerColor } from "../modules/pieces";
+import { PieceId, PlayerColor } from "../modules/pieces/piece";
 import { capitalizeFirst } from "../modules/utils/misc";
 
 const PIECE_SETS_DIR = "assets/img/";
