@@ -1,7 +1,7 @@
 import { ComplexUserData } from "./user_data";
 import type Piece from "../pieces/piece";
 import type ToastManager from "../toast_manager";
-import { isRawPiece, restorePieceFromRaw } from "../pieces/rawPiece";
+import { isRawPiece, getPieceFromRaw } from "../pieces/rawPiece";
 
 export type BoardStateValue = (Piece | null)[][];
 
@@ -45,7 +45,7 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
             value[rowIndex][colIndex] = null;
             continue;
           }
-          const piece = restorePieceFromRaw(pieceObject);
+          const piece = getPieceFromRaw(pieceObject);
           if (!fromRaw) piece.loadCustomProps(pieceObject);
           value[rowIndex][colIndex] = piece;
         }

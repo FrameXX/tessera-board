@@ -1,11 +1,7 @@
 import { ComplexUserData } from "./user_data";
 import type ToastManager from "../toast_manager";
 import type { BoardStateValue } from "./board_state";
-import {
-  getRawPiece,
-  isRawPiece,
-  restorePieceFromRaw,
-} from "../pieces/rawPiece";
+import { getRawPiece, isRawPiece, getPieceFromRaw } from "../pieces/rawPiece";
 
 class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
@@ -47,7 +43,7 @@ class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
             value[rowIndex][colIndex] = null;
             continue;
           }
-          const piece = restorePieceFromRaw(pieceObject);
+          const piece = getPieceFromRaw(pieceObject);
           value[rowIndex][colIndex] = piece;
         }
       }

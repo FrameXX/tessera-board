@@ -39,7 +39,7 @@ export function getRawPiece(piece: Piece): RawPiece {
   return { color: piece.color, pieceId: piece.pieceId };
 }
 
-export function restorePieceFromRaw(genericPiece: RawPiece): Piece {
+export function getPieceFromRaw(genericPiece: RawPiece): Piece {
   let piece: Piece | null;
   switch (genericPiece.pieceId) {
     case "bishop":

@@ -1,6 +1,7 @@
 import { reactive } from "vue";
 import { type PieceId, type PlayerColor } from "./pieces/piece";
 import type Piece from "./pieces/piece";
+import { getPieceFromRaw } from "./pieces/rawPiece";
 
 interface ConfigPieceDialogProps {
   open: boolean;
@@ -30,7 +31,7 @@ class ConfigPieceDialog {
   public confirm = () => {
     if (this.resolve) {
       this.resolve(
-        getPieceFromGenerics({
+        getPieceFromRaw({
           pieceId: this.props.pieceId,
           color: this.props.color,
         })
@@ -47,9 +48,3 @@ class ConfigPieceDialog {
 }
 
 export default ConfigPieceDialog;
-function getPieceFromGenerics(arg0: {
-  pieceId: PieceId;
-  color: PlayerColor;
-}): Piece {
-  throw new Error("Function not implemented.");
-}
