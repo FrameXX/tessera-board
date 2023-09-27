@@ -1,4 +1,5 @@
 import type { BoardPosition } from "../../components/Board.vue";
+import type Move from "../moves/move";
 import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
 import { RawPiece, getRawPiece } from "./rawPiece";
@@ -24,22 +25,6 @@ export interface BoardPositionValue extends BoardPosition {
   value: Piece | null;
 }
 
-type MoveAction = "move" | "switch" | "transform";
-
-export interface Move {
-  captures: BoardPositionValue[];
-  action: MoveAction;
-  notation: string;
-  origin: BoardPosition;
-  target: BoardPosition;
-}
-
-export interface Turn {
-  move: Move;
-  clickablePositions: BoardPosition[];
-  author: Piece;
-}
-
 export abstract class Piece {
   public readonly id: string;
 
@@ -49,10 +34,6 @@ export abstract class Piece {
   ) {
     this.id = getRandomId();
   }
-
-  // Every piece can override this function which is called after move that has same origin is interpreted
-  // @ts-ignore
-  public onMove(move: Move) {}
 
   // Every piece can override this method and possibly load some custom properties from the restored raw piece object.
   // @ts-ignore
@@ -66,7 +47,7 @@ export abstract class Piece {
   public abstract getPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
-  ): Turn[];
+  ): Move[];
 }
 
 export function getTarget(

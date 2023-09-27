@@ -1,18 +1,16 @@
 import { BoardPosition } from "../../components/Board.vue";
-import { CHAR_INDEXES } from "../board_manager";
+import type Move from "../moves/move";
+import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
 import Piece from "./piece";
 import {
   BoardPositionValue,
   PlayerColor,
-  Turn,
   getTarget,
   isTargetOnBoard,
 } from "./piece";
 
 export class Knight extends Piece {
-  public static notationSign: string = "N";
-
   constructor(color: PlayerColor) {
     super(color, "knight");
   }
@@ -20,8 +18,8 @@ export class Knight extends Piece {
   public getPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
-  ): Turn[] {
-    const turns: Turn[] = [];
+  ): Move[] {
+    const moves: Move[] = [];
 
     for (const xDelta of [-2, -1, 1, 2]) {
       for (const yDelta of [-2, -1, 1, 2]) {
@@ -32,33 +30,21 @@ export class Knight extends Piece {
         if (!isTargetOnBoard(target)) {
           continue;
         }
-        let captures: BoardPositionValue[] = [];
+        let captures: BoardPositionValue | undefined = undefined;
         const piece = boardStateValue[target.row][target.col];
         if (piece) {
           if (piece.color !== this.color) {
-            captures.push({ ...target, value: piece });
+            captures = { ...target, value: piece };
           } else {
             continue;
           }
         }
 
-        turns.push({
-          move: {
-            captures: captures,
-            action: "move",
-            notation: `${Knight.notationSign}${CHAR_INDEXES[target.col - 1]}${
-              target.row
-            }`,
-            origin: position,
-            target: target,
-          },
-          clickablePositions: [target],
-          author: this,
-        });
+        moves.push(new Shift(this.pieceId, position, target, captures));
       }
     }
 
-    return turns;
+    return moves;
   }
 }
 

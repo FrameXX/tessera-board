@@ -75,6 +75,7 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   >
     <div class="rotation-wrapper">
       <PieceIcon
+        :id="`piece-${props.piece.id}`"
         ref="element"
         :class="`piece ${props.highlighted ? 'highlighted' : ''} ${
           props.piece.color === 'white' ? 'white' : 'black'

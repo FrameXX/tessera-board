@@ -1,18 +1,16 @@
-import { BoardPosition } from "../../components/Board.vue";
-import { CHAR_INDEXES } from "../board_manager";
+import type { BoardPosition } from "../../components/Board.vue";
+import type Move from "../moves/move";
+import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
 import Piece from "./piece";
 import {
   type BoardPositionValue,
   type PlayerColor,
-  type Turn,
   getTarget,
   isTargetOnBoard,
 } from "./piece";
-import Rook from "./rook";
 
 export class Bishop extends Piece {
-  public static notationSign: string = "B";
   constructor(color: PlayerColor) {
     super(color, "bishop");
   }
@@ -20,9 +18,8 @@ export class Bishop extends Piece {
   public getPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
-  ): Turn[] {
-    const turns: Turn[] = [];
-    let piece: Piece | null;
+  ): Move[] {
+    const moves: Move[] = [];
 
     // Check row
     for (const xDelta of [-1, 1]) {
@@ -36,28 +33,17 @@ export class Bishop extends Piece {
           if (!isTargetOnBoard(target)) {
             break;
           }
-          let captures: BoardPositionValue[] = [];
-          piece = boardStateValue[target.row][target.col];
+
+          let captures: BoardPositionValue | undefined = undefined;
+          const piece = boardStateValue[target.row][target.col];
           if (piece) {
             if (piece.color === this.color) {
               break;
             }
-            captures = [{ ...target, value: piece }];
+            captures = { ...target, value: piece };
           }
 
-          turns.push({
-            move: {
-              captures: captures,
-              action: "move",
-              notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
-                target.row
-              }`,
-              origin: position,
-              target: target,
-            },
-            clickablePositions: [target],
-            author: this,
-          });
+          moves.push(new Shift(this.pieceId, position, target, captures));
 
           if (piece) {
             break;
@@ -66,7 +52,7 @@ export class Bishop extends Piece {
       }
     }
 
-    return turns;
+    return moves;
   }
 }
 

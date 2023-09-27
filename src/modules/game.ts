@@ -23,7 +23,7 @@ class Game {
     private readonly preferredPlayerColor: Ref<PreferredPlayerColorValue>
   ) {
     this.gameBoardManager.addEventListener("interpret-move", () =>
-      this.onTurnEnd()
+      this.onmoveEnd()
     );
   }
 
@@ -49,9 +49,9 @@ class Game {
     this.gameBoardManager.resetBoard();
   }
 
-  public onTurnStart() {}
+  public onmoveStart() {}
 
-  public onTurnEnd() {}
+  public onmoveEnd() {}
 }
 
 export default Game;

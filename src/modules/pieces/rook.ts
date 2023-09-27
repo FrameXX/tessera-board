@@ -1,18 +1,16 @@
 import { BoardPosition } from "../../components/Board.vue";
-import { CHAR_INDEXES } from "../board_manager";
+import type Move from "../moves/move";
+import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
 import Piece from "./piece";
 import {
   BoardPositionValue,
   PlayerColor,
-  Turn,
   getTarget,
   isTargetOnBoard,
 } from "./piece";
 
 export class Rook extends Piece {
-  public static notationSign: string = "R";
-
   constructor(color: PlayerColor) {
     super(color, "rook");
   }
@@ -20,8 +18,8 @@ export class Rook extends Piece {
   public getPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
-  ): Turn[] {
-    const turns: Turn[] = [];
+  ): Move[] {
+    const moves: Move[] = [];
     let piece: Piece | null;
 
     // Check row
@@ -37,28 +35,17 @@ export class Rook extends Piece {
           if (!isTargetOnBoard(target)) {
             break;
           }
-          let captures: BoardPositionValue[] = [];
+
+          let captures: BoardPositionValue | undefined = undefined;
           piece = boardStateValue[target.row][target.col];
           if (piece) {
             if (piece.color === this.color) {
               break;
             }
-            captures = [{ ...target, value: piece }];
+            captures = { ...target, value: piece };
           }
 
-          turns.push({
-            move: {
-              captures: captures,
-              action: "move",
-              notation: `${Rook.notationSign}${CHAR_INDEXES[target.col - 1]}${
-                target.row
-              }`,
-              origin: position,
-              target: target,
-            },
-            clickablePositions: [target],
-            author: this,
-          });
+          moves.push(new Shift(this.pieceId, position, target, captures));
 
           if (piece) {
             break;
@@ -67,7 +54,7 @@ export class Rook extends Piece {
       }
     }
 
-    return turns;
+    return moves;
   }
 }
 

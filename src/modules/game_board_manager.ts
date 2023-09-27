@@ -6,15 +6,15 @@ import type {
   BooleanBoardState,
   BoardPosition,
 } from "../components/Board.vue";
-import type { Turn, PieceId, Move } from "./pieces/piece";
+import type { Piece, PieceId } from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
-import type Piece from "./pieces/piece";
+import Move from "./moves/move";
 
 class GameBoardManager extends BoardManager {
   private _selectedPieceProps: BoardPieceProps | null = null;
-  private avalibleTurns: Turn[] = [];
+  private availibleMoves: Move[] = [];
 
   constructor(
     private readonly boardStateData: BoardStateData,
@@ -29,68 +29,6 @@ class GameBoardManager extends BoardManager {
     pieceMoveAudioEffect: Howl
   ) {
     super(pieceMoveAudioEffect);
-  }
-
-  private showCellsMarks(turns: Turn[]) {
-    for (const turn of turns) {
-      for (const clickablePosition of turn.clickablePositions) {
-        positionIsCapturedByTurn(turn, clickablePosition)
-          ? (this.playerCellMarks[clickablePosition.row][
-              clickablePosition.col
-            ] = "capture")
-          : (this.playerCellMarks[clickablePosition.row][
-              clickablePosition.col
-            ] = "availible");
-      }
-    }
-  }
-
-  private capturePieces(capturePositions: BoardPosition[]) {
-    const pieces: Piece[] = [];
-
-    for (const position of capturePositions) {
-      const piece = this.boardStateValue[position.row][position.col];
-      if (!piece) {
-        continue;
-      }
-      this.boardStateValue[position.row][position.col] = null;
-      pieces.push(piece);
-    }
-
-    return pieces;
-  }
-
-  private addCapturedPieces(pieces: Piece[]) {
-    for (const piece of pieces) {
-      if (piece.color === "white") {
-        this.blackCapturedPieces.value.push(piece.pieceId);
-      } else {
-        this.whiteCapturedPieces.value.push(piece.pieceId);
-      }
-    }
-  }
-
-  private movePiece(origin: BoardPosition, target: BoardPosition) {
-    const originValue = this.boardStateValue[origin.row][origin.col];
-    this.boardStateValue[origin.row][origin.col] = null;
-    this.boardStateValue[target.row][target.col] = originValue;
-  }
-
-  private highlightCellsPositions(positions: BoardPosition[]) {
-    for (const position of positions) {
-      this.higlightedCells[position.row][position.col] = true;
-    }
-  }
-
-  private interpretMove(move: Move, reverse: boolean = false) {
-    const pieces = this.capturePieces(move.captures);
-    this.addCapturedPieces(pieces);
-
-    if (move.action == "move") {
-      this.movePiece(move.origin, move.target);
-    }
-
-    this.dispatchEvent(new Event("interpret-move"));
   }
 
   private clearHihlightedCellsPositions() {
@@ -114,8 +52,8 @@ class GameBoardManager extends BoardManager {
     this.blackCapturedPieces.value = [];
   }
 
-  private clearAvailibleTurns() {
-    this.avalibleTurns = [];
+  private clearAvailibleMoves() {
+    this.availibleMoves = [];
   }
 
   private clearHighlightedPiece() {
@@ -141,20 +79,24 @@ class GameBoardManager extends BoardManager {
 
     this.clearCellsMarks();
     this.clearHighlightedPiece();
-    this.clearAvailibleTurns();
+    this.clearAvailibleMoves();
     this._selectedPieceProps = null;
+
+    // Player unselected
     if (!pieceProps) {
       return;
     }
 
     if (pieceProps) {
       this.playerHighlightedPieces[pieceProps.row][pieceProps.col] = true;
-      const turns = pieceProps.piece.getPossibleMoves(
+      const moves = pieceProps.piece.getPossibleMoves(
         pieceProps,
         this.boardStateValue
       );
-      this.showCellsMarks(turns);
-      this.avalibleTurns = turns;
+      moves.forEach((move) =>
+        move.showCellMarks(this.playerCellMarks, this.boardStateValue)
+      );
+      this.availibleMoves = moves;
       this._selectedPieceProps = pieceProps;
     }
   }
@@ -163,25 +105,53 @@ class GameBoardManager extends BoardManager {
     return this._selectedPieceProps;
   }
 
-  private getPositionMatchingTurn(position: BoardPosition): Turn | null {
-    if (!this.avalibleTurns) {
+  private getPositionMatchingMove(position: BoardPosition): Move | null {
+    if (!this.availibleMoves) {
       return null;
     }
 
-    const matchingTurns = this.avalibleTurns.filter((turn) => {
-      return turnHasClickablePosition(turn, position);
+    const matchingMoves = this.availibleMoves.filter((move) => {
+      return moveHasClickablePosition(move, position);
     });
 
-    if (matchingTurns.length > 1) {
+    if (matchingMoves.length > 1) {
       throw new GameLogicError(
-        `Multiple turns have same clickable positions for row ${position.row}, col ${position.col}.`
+        `Multiple moves have same clickable positions for row ${position.row}, col ${position.col}.`
       );
     }
 
-    if (matchingTurns.length !== 1) {
+    if (matchingMoves.length !== 1) {
       return null;
     }
-    return matchingTurns[0];
+    return matchingMoves[0];
+  }
+
+  private getPiecePosition(id: string): BoardPosition | null {
+    for (const rowIndex in this.playerCellMarks) {
+      for (const colIndex in this.playerCellMarks[rowIndex]) {
+        const piece = this.boardStateValue[rowIndex][colIndex];
+        if (!piece) {
+          continue;
+        }
+        if (piece.id != id) {
+          continue;
+        }
+        return { row: +rowIndex, col: +colIndex };
+      }
+    }
+
+    return null;
+  }
+
+  private interpretMove(move: Move) {
+    move.perform(
+      this.boardStateValue,
+      this.blackCapturedPieces,
+      this.whiteCapturedPieces,
+      this.higlightedCells
+    );
+    this.clearHihlightedCellsPositions();
+    this.selectedPieceProps = null;
   }
 
   public resetBoard() {
@@ -192,7 +162,17 @@ class GameBoardManager extends BoardManager {
 
   // Called by Board component
   public onPieceClick(boardPiece: BoardPieceProps): void {
-    // There's no need to handle cases where user clicks on a piece to capture it because the mark shows over the piece making the click register as a cell click.
+    if (this.availibleMoves) {
+      const position = this.getPiecePosition(boardPiece.piece.id);
+      if (position) {
+        const matchingMove = this.getPositionMatchingMove(position);
+        if (matchingMove) {
+          this.interpretMove(matchingMove);
+          return;
+        }
+      }
+    }
+
     this.selectedPieceProps = boardPiece;
   }
 
@@ -200,58 +180,35 @@ class GameBoardManager extends BoardManager {
   public onCellClick(position: BoardPosition): void {
     let moveInterpreted = false;
 
-    // Check if cell is on any of the clickable position of any of the turns and thus has its move
-    const matchingTurn = this.getPositionMatchingTurn(position);
+    // Check if cell is on any of the clickable position of any of the availible moves
+    const matchingMove = this.getPositionMatchingMove(position);
 
-    if (matchingTurn) {
-      this.clearHihlightedCellsPositions();
-      this.highlightCellsPositions([
-        matchingTurn.move.origin,
-        matchingTurn.move.target,
-      ]);
-      this.interpretMove(matchingTurn.move);
-      matchingTurn.author.onMove(matchingTurn.move);
+    if (matchingMove) {
+      this.interpretMove(matchingMove);
       moveInterpreted = true;
     }
-
-    this.selectedPieceProps = null;
 
     // Take the cell click as a piece click if no move was performed on that position. This is useful if the cells with pieces are selected using tabindex.
     if (!moveInterpreted) {
       const piece = this.boardStateValue[position.row][position.col];
-      if (piece) {
-        this.onPieceClick({ ...position, piece });
-      }
+      if (piece) this.onPieceClick({ ...position, piece });
     }
   }
 }
 
-function turnHasClickablePosition(
-  turn: Turn,
+function moveHasClickablePosition(
+  move: Move,
   position: BoardPosition
 ): boolean {
   const matchingPositions = getMatchingPositions(
-    turn.clickablePositions,
+    move.getClickablePositions(),
     position
   );
 
   // There should be no duplicates in clickable positions!
   if (matchingPositions.length > 1) {
     throw new GameLogicError(
-      `Single turn has same clickable positions for row ${position.row}, col ${position.col}. Turn: ${turn}.`
-    );
-  }
-
-  return matchingPositions.length !== 0;
-}
-
-function positionIsCapturedByTurn(turn: Turn, position: BoardPosition) {
-  const matchingPositions = getMatchingPositions(turn.move.captures, position);
-
-  // There should be no duplicates in turn captured positions!
-  if (matchingPositions.length > 1) {
-    throw new GameLogicError(
-      `Single turn has duplicate capture positions for row ${position.row}, col ${position.col}. Turn: ${turn}.`
+      `Single move has same clickable positions for row ${position.row}, col ${position.col}. move: ${move}.`
     );
   }
 

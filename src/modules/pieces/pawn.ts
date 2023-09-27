@@ -1,8 +1,9 @@
 import type { BoardPosition } from "../../components/Board.vue";
-import { CHAR_INDEXES } from "../board_manager";
+import type Move from "../moves/move";
+import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
-import Piece, { Move } from "./piece";
-import { type PlayerColor, type Turn, getTarget } from "./piece";
+import Piece, { BoardPositionValue } from "./piece";
+import { type PlayerColor, getTarget } from "./piece";
 import { RawPiece, getRawPiece } from "./rawPiece";
 
 interface RawPawn extends RawPiece {
@@ -14,14 +15,13 @@ function isRawPawn(rawPiece: RawPiece): rawPiece is RawPawn {
 }
 
 export class Pawn extends Piece {
-  public static notationSign: string = "";
   private hasMoved: boolean = false;
 
   constructor(color: PlayerColor) {
     super(color, "pawn");
   }
 
-  public onMove(move: Move): void {
+  public onPerformMove(): void {
     this.hasMoved = true;
   }
 
@@ -40,81 +40,47 @@ export class Pawn extends Piece {
   public getPossibleMoves(
     position: BoardPosition,
     boardStateData: BoardStateValue
-  ): Turn[] {
-    const turns: Turn[] = [];
-    let target: BoardPosition;
-
-    let yDelta: number = 0;
-    let xDelta: number = 0;
-    let piece: Piece | null;
-
-    let frontIsOccupied = true;
+  ): Move[] {
+    const moves: Move[] = [];
 
     // Move one cell forward
-    this.color === "white" ? (yDelta = 1) : (yDelta = -1);
-    target = getTarget(position, xDelta, yDelta);
-    if (boardStateData[target.row][target.col] === null) {
-      frontIsOccupied = false;
-      turns.push({
-        move: {
-          captures: [],
-          action: "move",
-          notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
-            target.row
-          }`,
-          origin: position,
-          target: target,
-        },
-        clickablePositions: [target],
-        author: this,
-      });
+    for (let yDelta of [1, 2]) {
+      if (this.color === "black") yDelta = yDelta * -1;
+      const target = getTarget(position, 0, yDelta);
+      if (boardStateData[target.row][target.col]) {
+        break;
+      }
+      moves.push(
+        new Shift(this.pieceId, position, target, undefined, () => {
+          this.onPerformMove();
+        })
+      );
     }
 
     // Capture
     for (const xDelta of [1, -1]) {
-      target = getTarget(position, xDelta, yDelta);
-      piece = boardStateData[target.row][target.col];
+      const target = getTarget(
+        position,
+        xDelta,
+        this.color === "white" ? 1 : -1
+      );
+      const piece = boardStateData[target.row][target.col];
       if (piece) {
+        const captures: BoardPositionValue = {
+          ...target,
+          value: piece,
+        };
         if (piece.color !== this.color) {
-          turns.push({
-            move: {
-              captures: [{ ...target, value: piece }],
-              action: "move",
-              notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
-                target.row
-              }`,
-              origin: position,
-              target: target,
-            },
-            clickablePositions: [target],
-            author: this,
-          });
+          moves.push(
+            new Shift(this.pieceId, position, target, captures, () => {
+              this.onPerformMove();
+            })
+          );
         }
       }
     }
 
-    // Move 2 cells forward
-    if (!this.hasMoved && !frontIsOccupied) {
-      this.color === "white" ? (yDelta = 2) : (yDelta = -2);
-      target = getTarget(position, xDelta, yDelta);
-      if (boardStateData[target.row][target.col] === null) {
-        turns.push({
-          move: {
-            captures: [],
-            action: "move",
-            notation: `${Pawn.notationSign}${CHAR_INDEXES[target.col - 1]}${
-              target.row
-            }`,
-            origin: position,
-            target: target,
-          },
-          clickablePositions: [target],
-          author: this,
-        });
-      }
-    }
-
-    return turns;
+    return moves;
   }
 }
 

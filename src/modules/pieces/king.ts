@@ -1,10 +1,9 @@
 import type { BoardPosition } from "../../components/Board.vue";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece from "./piece";
-import { type PlayerColor, type Turn } from "./piece";
+import { type PlayerColor, type move } from "./piece";
 
 export class King extends Piece {
-  public static notationSign: string = "K";
   constructor(color: PlayerColor) {
     super(color, "king");
   }
@@ -12,7 +11,7 @@ export class King extends Piece {
   public getPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
-  ): Turn[] {
+  ): Move[] {
     return [];
   }
 }
