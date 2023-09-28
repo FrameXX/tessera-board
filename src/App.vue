@@ -61,6 +61,7 @@ import Knight from "./modules/pieces/knight";
 import Pawn from "./modules/pieces/pawn";
 import Queen from "./modules/pieces/queen";
 import Rook from "./modules/pieces/rook";
+import { RawPiece } from "./modules/pieces/rawPiece";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -76,7 +77,7 @@ import ConfigsDialog from "./modules/dialogs/configs";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
 import SelectPiece from "./components/SelectPiece.vue";
-import { RawPiece } from "./modules/pieces/rawPiece";
+import TimeDurationInput from "./components/TimeDurationInput.vue";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;
@@ -591,7 +592,7 @@ const configPieceSelectOptions = computed(() => {
         icon-id="timer-outline"
         option-id="input-player-seconds-per-move"
       >
-        <input type="number" min="0" id="input-player-seconds-per-move" />
+        <TimeDurationInput id="input-player-seconds-per-movee" />
         <template #description
           >Limits player's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
@@ -603,7 +604,7 @@ const configPieceSelectOptions = computed(() => {
         icon-id="timer-outline"
         option-id="input-opponent-seconds-per-move"
       >
-        <input type="number" min="0" id="input-opponent-seconds-per-move" />
+        <TimeDurationInput id="input-opponent-seconds-per-move" />
         <template #description
           >Limits opponent's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
@@ -615,7 +616,7 @@ const configPieceSelectOptions = computed(() => {
         icon-id="clock-outline"
         option-id="input-player-seconds-per-match"
       >
-        <input type="number" min="0" id="input-player-seconds-per-match" />
+        <TimeDurationInput id="input-player-seconds-per-match" />
         <template #description
           >Limits player's time for whole match (game). If the time runs out the
           player looses and opponent wins.
@@ -625,9 +626,9 @@ const configPieceSelectOptions = computed(() => {
       <UserOption
         name="Opponent seconds per match"
         icon-id="clock-outline"
-        option-id="input-opponent-seconds-per-match"
+        option-id="minutes-input-opponent-seconds-per-match"
       >
-        <input type="number" min="0" id="input-opponent-seconds-per-match" />
+        <TimeDurationInput id="input-opponent-seconds-per-match" />
         <template #description
           >Limits opponent's time for whole match (game). If the time runs out
           the opponent looses and player wins.

@@ -73,6 +73,10 @@ select {
   margin: var(--spacing-small);
 }
 
+input[type="number"] {
+  max-width: 80px;
+}
+
 select,
 button {
   @include clickable;

@@ -53,7 +53,7 @@ export interface MinSecTime {
 
 export function getMinsAndSecsTime(secs: number): MinSecTime {
   const mins = Math.trunc(secs / 60);
-  const secsRest = secs - mins * 60;
+  const secsRest = secs % 60;
   return { mins, secs: secsRest };
 }
 

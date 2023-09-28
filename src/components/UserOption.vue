@@ -12,7 +12,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="simple-option">
+  <div class="user-option">
     <label :for="props.optionId">
       <Icon v-if="props.iconId" :icon-id="props.iconId" side />
       <span class="title">{{ capitalizeFirst(props.name) }}</span>
@@ -32,7 +32,7 @@ const props = defineProps({
 <style lang="scss">
 @import "../partials/mixins";
 
-.simple-option {
+.user-option {
   display: flex;
   margin: var(--spacing-huge) 0;
   flex-direction: column;
@@ -58,10 +58,6 @@ const props = defineProps({
   }
 
   .input {
-    input {
-      max-width: 200px;
-    }
-
     &.simple {
       @include flex-center;
       height: 40px;
