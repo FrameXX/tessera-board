@@ -59,10 +59,10 @@ export abstract class Piece {
 
 export function getTarget(
   position: BoardPosition,
-  xDelta: number,
-  yDelta: number
+  colDelta: number,
+  rowDelta: number
 ): BoardPosition {
-  return sumPositions(position, { row: yDelta, col: xDelta });
+  return sumPositions(position, { row: rowDelta, col: colDelta });
 }
 
 export function isTargetOnBoard(target: BoardPosition) {

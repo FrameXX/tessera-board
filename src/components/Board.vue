@@ -55,6 +55,7 @@ const props = defineProps({
     type: Array as PropType<Arrow[]>,
     default: [],
   },
+  primary: { type: Boolean, default: false },
 });
 
 // All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
@@ -127,7 +128,7 @@ function onCellClick(position: BoardPosition) {
       :class="`board ${props.rotated ? 'rotated' : ''}`"
       :style="`width: ${containerSize}px; height: ${containerSize}px;`"
     >
-      <div class="black captured-pieces">
+      <div v-if="primary" class="black captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
           :piece-ids="
@@ -136,7 +137,7 @@ function onCellClick(position: BoardPosition) {
           color="white"
         />
       </div>
-      <div class="white captured-pieces">
+      <div v-if="primary" class="white captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
           :piece-ids="

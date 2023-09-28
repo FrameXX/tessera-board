@@ -47,13 +47,18 @@ export async function waitForTransitionEnd(
       );
     }, abortionTimoutMs);
 
-    element.ontransitionend = (event: TransitionEvent) => {
+    element.addEventListener("transitionend", (event: Event) => {
+      if (!(event instanceof TransitionEvent)) {
+        console.error(
+          "Transitionend listener did not return a TransitionEvent."
+        );
+        return;
+      }
       if (!propertyName || event.propertyName === propertyName) {
-        element.ontransitionend = null;
         clearTimeout(abortionTimeout);
         resolve();
       }
-    };
+    });
   });
 }
 

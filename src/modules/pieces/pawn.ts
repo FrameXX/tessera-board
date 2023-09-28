@@ -1,6 +1,7 @@
 import type { BoardPosition } from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
+import Transform from "../moves/transform";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece, { BoardPositionValue } from "./piece";
 import { type PlayerColor, getTarget } from "./piece";
@@ -19,6 +20,15 @@ export class Pawn extends Piece {
 
   constructor(color: PlayerColor) {
     super(color, "pawn");
+  }
+
+  private get transformOptions(): [RawPiece, ...RawPiece[]] {
+    return [
+      { pieceId: "queen", color: this.color },
+      { pieceId: "rook", color: this.color },
+      { pieceId: "bishop", color: this.color },
+      { pieceId: "knight", color: this.color },
+    ];
   }
 
   public onPerformMove(): void {
@@ -44,24 +54,38 @@ export class Pawn extends Piece {
     const moves: Move[] = [];
 
     // Move one cell forward
-    for (let yDelta of [1, 2]) {
-      if (this.color === "black") yDelta = yDelta * -1;
-      const target = getTarget(position, 0, yDelta);
+    for (let rowDelta of [1, 2]) {
+      if (rowDelta === 2 && this.hasMoved) {
+        break;
+      }
+      if (this.color === "black") rowDelta = rowDelta * -1;
+      const target = getTarget(position, 0, rowDelta);
       if (boardStateData[target.row][target.col]) {
         break;
       }
-      moves.push(
-        new Shift(this.pieceId, position, target, undefined, () => {
-          this.onPerformMove();
-        })
-      );
+      if (
+        ((target.row === 7 && this.color === "white") ||
+          (target.row === 0 && this.color === "black")) &&
+        Math.abs(rowDelta) === 1
+      ) {
+        moves.push(
+          new Transform(this.pieceId, position, target, this.transformOptions)
+        );
+        break;
+      } else {
+        moves.push(
+          new Shift(this.pieceId, position, target, undefined, () => {
+            this.onPerformMove();
+          })
+        );
+      }
     }
 
     // Capture
-    for (const xDelta of [1, -1]) {
+    for (const colDelta of [1, -1]) {
       const target = getTarget(
         position,
-        xDelta,
+        colDelta,
         this.color === "white" ? 1 : -1
       );
       const piece = boardStateData[target.row][target.col];
@@ -71,11 +95,27 @@ export class Pawn extends Piece {
           value: piece,
         };
         if (piece.color !== this.color) {
-          moves.push(
-            new Shift(this.pieceId, position, target, captures, () => {
-              this.onPerformMove();
-            })
-          );
+          if (
+            ((target.row === 7 && this.color === "white") ||
+              (target.row === 0 && this.color === "black")) &&
+            Math.abs(colDelta) === 1
+          ) {
+            moves.push(
+              new Transform(
+                this.pieceId,
+                position,
+                target,
+                this.transformOptions,
+                captures
+              )
+            );
+          } else {
+            moves.push(
+              new Shift(this.pieceId, position, target, captures, () => {
+                this.onPerformMove();
+              })
+            );
+          }
         }
       }
     }

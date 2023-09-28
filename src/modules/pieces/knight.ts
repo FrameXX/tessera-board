@@ -21,12 +21,12 @@ export class Knight extends Piece {
   ): Move[] {
     const moves: Move[] = [];
 
-    for (const xDelta of [-2, -1, 1, 2]) {
-      for (const yDelta of [-2, -1, 1, 2]) {
-        if (Math.abs(xDelta) === Math.abs(yDelta)) {
+    for (const colDelta of [-2, -1, 1, 2]) {
+      for (const rowDelta of [-2, -1, 1, 2]) {
+        if (Math.abs(colDelta) === Math.abs(rowDelta)) {
           continue;
         }
-        const target = getTarget(position, xDelta, yDelta);
+        const target = getTarget(position, colDelta, rowDelta);
         if (!isTargetOnBoard(target)) {
           continue;
         }

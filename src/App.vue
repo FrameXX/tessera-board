@@ -415,6 +415,7 @@ const gameBoardManager = new GameBoardManager(
   playerHighlightedPieces,
   opponentHighlightedPieces,
   highlightedCells,
+  selectPieceDialog,
   pieceMoveAudioEffect
 );
 
@@ -490,6 +491,7 @@ const configPieceSelectOptions = computed(() => {
         :piece-border="pieceBorder"
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
+        primary
         id="primary-board"
       />
       <Board
@@ -504,6 +506,7 @@ const configPieceSelectOptions = computed(() => {
         :piece-border="pieceBorder"
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
+        primary
         id="primary-board"
       />
     </div>
@@ -948,7 +951,7 @@ const configPieceSelectOptions = computed(() => {
   <!-- Select piece -->
   <Modal
     id="select-piece"
-    title="Select piece"
+    title="Select promotion piece"
     :open="selectPieceDialog.props.open"
     @open="escapeManager.addLayer(selectPieceDialog.cancel)"
   >
@@ -1044,12 +1047,13 @@ const configPieceSelectOptions = computed(() => {
 
   <!-- New Configuration -->
   <Modal
-    id="name-config"
+    id="config-print"
     title="Set configuration name and description"
     :open="configPrintDialog.props.open"
     :focus-on-open="configNameInput"
     @open="escapeManager.addLayer(configPrintDialog.cancel)"
     @close="escapeManager.removeLayer()"
+    @backdrop-click="configPrintDialog.cancel()"
   >
     <input
       autocapitalize="on"

@@ -120,7 +120,7 @@ watch(
   }
 }
 
-#name-config-dialog {
+#config-print-dialog {
   z-index: var(--z-index-modal-top);
 
   input,

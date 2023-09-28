@@ -7,18 +7,22 @@ import type {
 import type { BoardPositionValue, PieceId } from "../pieces/piece";
 import type { BoardStateValue } from "../user_data/board_state";
 import Move from "./move";
-import { CHAR_INDEXES } from "../board_manager";
+import { getPieceNotation, getPositionNotation } from "../board_manager";
+import { capturePosition, movePositionValue } from "../game_board_manager";
+
+export function isMoveShift(move: Move): move is Shift {
+  return move.moveId == "shift";
+}
 
 class Shift extends Move {
   constructor(
-    pieceId: string,
+    private readonly pieceId: PieceId,
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
     private readonly captures?: BoardPositionValue,
     private readonly onPerform?: (move: Move) => void
   ) {
-    const notation = `{${pieceId}}${CHAR_INDEXES[target.col - 1]}${target.row}`;
-    super("shift", notation);
+    super("shift");
   }
 
   public perform(
@@ -26,21 +30,29 @@ class Shift extends Move {
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
     higlightedCells: BooleanBoardState
-  ): void {
+  ): string {
     if (this.captures)
-      this.capturePieces(
-        [this.captures],
+      capturePosition(
+        this.captures,
         boardStateValue,
         blackCapturedPieces,
         whiteCapturedPieces
       );
-    const originValue = boardStateValue[this.origin.row][this.origin.col];
-    boardStateValue[this.origin.row][this.origin.col] = null;
-    boardStateValue[this.target.row][this.target.col] = originValue;
+    movePositionValue(this.origin, this.target, boardStateValue);
 
     higlightedCells[this.origin.row][this.origin.col] = true;
     higlightedCells[this.target.row][this.target.col] = true;
     if (this.onPerform) this.onPerform(this);
+
+    let notation: string;
+    this.captures
+      ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
+          this.captures
+        )}`)
+      : (notation = `${getPieceNotation(this.pieceId)}${getPositionNotation(
+          this.target
+        )}`);
+    return notation;
   }
 
   public getClickablePositions(): BoardPosition[] {

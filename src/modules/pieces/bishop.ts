@@ -22,13 +22,13 @@ export class Bishop extends Piece {
     const moves: Move[] = [];
 
     // Check row
-    for (const xDelta of [-1, 1]) {
-      for (const yDelta of [-1, 1]) {
+    for (const colDelta of [-1, 1]) {
+      for (const rowDelta of [-1, 1]) {
         let totalXDelta = 0;
         let totalYDelta = 0;
         while (true) {
-          totalXDelta += xDelta;
-          totalYDelta += yDelta;
+          totalXDelta += colDelta;
+          totalYDelta += rowDelta;
           const target = getTarget(position, totalXDelta, totalYDelta);
           if (!isTargetOnBoard(target)) {
             break;

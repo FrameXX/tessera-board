@@ -22,6 +22,9 @@ class SelectPieceDialog {
 
   public open(pieceOptions: RawPiece[]): Promise<RawPiece> {
     this.props.pieceOptions = pieceOptions;
+    if (pieceOptions.length > 0) {
+      this.props.selectedPiece = pieceOptions[0];
+    }
     this.props.open = true;
     return new Promise((resolve) => {
       this.resolve = resolve;

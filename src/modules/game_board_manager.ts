@@ -6,11 +6,16 @@ import type {
   BooleanBoardState,
   BoardPosition,
 } from "../components/Board.vue";
-import type { PieceId } from "./pieces/piece";
+import type { Piece, PieceId } from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
 import Move from "./moves/move";
+import SelectPieceDialog from "./dialogs/select_piece";
+import { getPieceFromRaw, type RawPiece } from "./pieces/rawPiece";
+import { getElementInstanceById, waitForTransitionEnd } from "./utils/elements";
+import { isMoveShift } from "./moves/shift";
+import { isMoveTransform } from "./moves/transform";
 
 class GameBoardManager extends BoardManager {
   private _selectedPieceProps: BoardPieceProps | null = null;
@@ -26,6 +31,7 @@ class GameBoardManager extends BoardManager {
     private readonly playerHighlightedPieces: BooleanBoardState,
     private readonly opponentHighlightedPieces: BooleanBoardState,
     private readonly higlightedCells: BooleanBoardState,
+    private readonly selectPieceDialog: SelectPieceDialog,
     pieceMoveAudioEffect: Howl
   ) {
     super(pieceMoveAudioEffect);
@@ -146,12 +152,22 @@ class GameBoardManager extends BoardManager {
   private interpretMove(move: Move) {
     this.selectedPieceProps = null;
     this.clearHihlightedCellsPositions();
-    move.perform(
-      this.boardStateValue,
-      this.blackCapturedPieces,
-      this.whiteCapturedPieces,
-      this.higlightedCells
-    );
+    if (isMoveShift(move)) {
+      move.perform(
+        this.boardStateValue,
+        this.blackCapturedPieces,
+        this.whiteCapturedPieces,
+        this.higlightedCells
+      );
+    } else if (isMoveTransform(move)) {
+      move.perform(
+        this.boardStateValue,
+        this.blackCapturedPieces,
+        this.whiteCapturedPieces,
+        this.higlightedCells,
+        this.selectPieceDialog
+      );
+    }
     this.dispatchEvent(new Event("move"));
   }
 
@@ -227,6 +243,55 @@ function getMatchingPositions(
 
 function positionsEqual(position1: BoardPosition, position2: BoardPosition) {
   return position1.row === position2.row && position1.col === position2.col;
+}
+
+export function addCapturedPiece(
+  piece: Piece,
+  blackCapturedPieces: Ref<PieceId[]>,
+  whiteCapturedPieces: Ref<PieceId[]>
+) {
+  if (piece.color === "white") {
+    blackCapturedPieces.value.push(piece.pieceId);
+  } else {
+    whiteCapturedPieces.value.push(piece.pieceId);
+  }
+}
+
+export async function transformPositionValue(
+  position: BoardPosition,
+  piece: RawPiece,
+  boardStateValue: BoardStateValue
+) {
+  boardStateValue[position.row][position.col] = getPieceFromRaw(piece);
+}
+
+export async function movePositionValue(
+  origin: BoardPosition,
+  target: BoardPosition,
+  boardStateValue: BoardStateValue
+) {
+  const piece = boardStateValue[origin.row][origin.col];
+  if (!piece) {
+    return;
+  }
+  boardStateValue[target.row][target.col] = piece;
+  boardStateValue[origin.row][origin.col] = null;
+  const pieceElement = getElementInstanceById(`piece-${piece.id}`, SVGElement);
+  await waitForTransitionEnd(pieceElement);
+}
+
+export function capturePosition(
+  position: BoardPosition,
+  boardStateValue: BoardStateValue,
+  blackCapturedPieces: Ref<PieceId[]>,
+  whiteCapturedPieces: Ref<PieceId[]>
+) {
+  const piece = boardStateValue[position.row][position.col];
+  if (!piece) {
+    return;
+  }
+  boardStateValue[position.row][position.col] = null;
+  addCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
 }
 
 export default GameBoardManager;
