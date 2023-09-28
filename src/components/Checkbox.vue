@@ -7,7 +7,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["update:modelValue"]);
 
-let checked = ref(props.modelValue);
+const checked = ref(props.modelValue);
 
 watch(
   () => props.modelValue,

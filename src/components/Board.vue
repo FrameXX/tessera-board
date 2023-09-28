@@ -130,14 +130,18 @@ function onCellClick(position: BoardPosition) {
       <div class="black captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
-          :piece-ids="props.blackCapturedPieces"
+          :piece-ids="
+            props.rotated ? props.whiteCapturedPieces : blackCapturedPieces
+          "
           color="white"
         />
       </div>
       <div class="white captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
-          :piece-ids="props.whiteCapturedPieces"
+          :piece-ids="
+            props.rotated ? props.blackCapturedPieces : whiteCapturedPieces
+          "
           color="black"
         />
       </div>
@@ -249,28 +253,5 @@ function onCellClick(position: BoardPosition) {
   @include stretch;
   position: absolute;
   pointer-events: none;
-}
-
-.captured-pieces {
-  @include flex-center;
-  position: absolute;
-  height: 40px;
-  width: 100%;
-
-  &.white {
-    top: 100%;
-    left: 0;
-  }
-
-  &.black {
-    bottom: 100%;
-    right: 0;
-  }
-}
-
-.board.rotated {
-  .captured-pieces {
-    transform: rotate(-0.5turn);
-  }
 }
 </style>

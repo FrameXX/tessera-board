@@ -2,7 +2,7 @@
 import { PropType } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
-import type { PieceId, PlayerColor } from "../modules/pieces";
+import type { PieceId, PlayerColor } from "../modules/pieces/piece";
 import { getRandomId } from "../modules/utils/misc";
 
 const props = defineProps({
@@ -26,11 +26,36 @@ const props = defineProps({
   </div>
 </template>
 
-<style lang="scss" scoped>
-.icon {
-  width: var(--font-size-big);
-  height: var(--font-size-big);
-  flex-shrink: 1;
-  margin: 0;
+<style lang="scss">
+@import "../partials/mixins";
+
+.captured-pieces {
+  @include flex-center;
+  position: absolute;
+  height: 40px;
+  width: 100%;
+
+  &.white {
+    top: 100%;
+    left: 0;
+  }
+
+  &.black {
+    bottom: 100%;
+    right: 0;
+  }
+
+  .icon {
+    width: var(--font-size-big);
+    height: var(--font-size-big);
+    flex-shrink: 1;
+    margin: 0;
+  }
+}
+
+.board.rotated {
+  .captured-pieces {
+    transform: rotate(-0.25turn);
+  }
 }
 </style>

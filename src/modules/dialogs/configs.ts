@@ -1,9 +1,9 @@
 import { reactive } from "vue";
-import { CommonConfigPrint } from "./config_inventory";
-import type ConfigManager from "./config_manager";
-import type ConfigPrintDialog from "./config_print_dialog";
-import ConfirmDialog from "./confirm_dialog";
-import ToastManager from "./toast_manager";
+import { CommonConfigPrint } from "../config_inventory";
+import type ConfigManager from "../config_manager";
+import type ConfigPrintDialog from "./config_print";
+import ConfirmDialog from "./confirm";
+import ToastManager from "../toast_manager";
 
 interface ConfigsDialogProps {
   open: boolean;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Import from packages
-import { ref, reactive, onMounted, watch } from "vue";
+import { ref, reactive, onMounted, watch, computed } from "vue";
 import { Howl } from "howler";
 
 // Import user data
@@ -35,10 +35,11 @@ import ToastManager, { type ToastProps } from "./modules/toast_manager";
 import SplashscreenManager from "./modules/splashscreen_manager";
 import ThemeManager from "./modules/theme_manager";
 import TransitionsManager from "./modules/transitions_manager";
-import ConfirmDialog from "./modules/confirm_dialog";
+import ConfirmDialog from "./modules/dialogs/confirm";
 import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
-import ConfigPieceDialog from "./modules/config_piece_dialog";
+import ConfigPieceDialog from "./modules/dialogs/config_piece";
+import SelectPieceDilog from "./modules/dialogs/select_piece";
 import {
   type PlayerColor,
   isPlayerColor,
@@ -48,7 +49,7 @@ import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
 import type { MarkBoardState, BooleanBoardState } from "./components/Board.vue";
-import ConfigPrintDialog from "./modules/config_print_dialog";
+import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
 import Game from "./modules/game";
@@ -70,12 +71,12 @@ import UserOption from "./components/UserOption.vue";
 import Checkbox from "./components/Checkbox.vue";
 import Modal from "./components/Modal.vue";
 import ToastStack from "./components/ToastStack.vue";
-import PieceIcon from "./components/PieceIcon.vue";
 import ConfigItem from "./components/ConfigItem.vue";
-import ConfigsDialog from "./modules/configs_dialog";
+import ConfigsDialog from "./modules/dialogs/configs";
 import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
-import { capitalizeFirst } from "./modules/utils/misc";
+import SelectPiece from "./components/SelectPiece.vue";
+import { RawPiece } from "./modules/pieces/rawPiece";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;
@@ -181,6 +182,7 @@ const screenRotated = ref(false);
 watch(screenRotated, (newValue) => {
   updateScreenRotation(newValue);
 });
+updateScreenRotation(screenRotated.value);
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
 const playerCellMarks: MarkBoardState = reactive(
@@ -250,6 +252,9 @@ const configPieceDialog = new ConfigPieceDialog();
 
 // Toast manager
 const toastManager = new ToastManager(toasts);
+
+// Select piece dialog
+const selectPieceDialog = new SelectPieceDilog(toastManager);
 
 // Configs dialog
 const configPrintDialog = new ConfigPrintDialog(toastManager);
@@ -456,6 +461,14 @@ onMounted(() => {
   setTimeout(() => {
     splashscreenManager.hideSplashscreen();
   }, 600);
+});
+
+const configPieceSelectOptions = computed(() => {
+  const pieces: RawPiece[] = [];
+  for (const pieceId of PIECE_IDS) {
+    pieces.push({ pieceId, color: configPieceDialog.props.color });
+  }
+  return pieces;
 });
 </script>
 
@@ -879,7 +892,7 @@ onMounted(() => {
       </UserOption>
     </Category>
     <Category name="about game" icon-id="information-outline">
-      <p>Made with ❤️ by Jiří Král</p>
+      <p>Made with ❤️ by Jiří Král.</p>
       <p>
         Source code is availible at
         <a href="https://github.com/FrameXX/tessera-board" target="_blank"
@@ -919,7 +932,7 @@ onMounted(() => {
       <Icon
         icon-id="plus"
         id="action-icon"
-        :class="actionPanelOpen ? 'close' : ''"
+        :class="{ close: actionPanelOpen }"
         side
       />
       Actions
@@ -932,6 +945,25 @@ onMounted(() => {
   </div>
 
   <!-- Fixed -->
+  <!-- Select piece -->
+  <Modal
+    id="select-piece"
+    title="Select piece"
+    :open="selectPieceDialog.props.open"
+    @open="escapeManager.addLayer(selectPieceDialog.cancel)"
+  >
+    <SelectPiece
+      :pieces="selectPieceDialog.props.pieceOptions"
+      :piece-set="pieceSet"
+      v-model="selectPieceDialog.props.selectedPiece"
+    />
+    <template #action-buttons>
+      <button title="Choose piece" @click="selectPieceDialog.confirm">
+        <Icon side icon-id="check-circle-outline" />Choose piece
+      </button>
+    </template>
+  </Modal>
+
   <!-- Config piece -->
   <Modal
     id="config-piece"
@@ -941,33 +973,21 @@ onMounted(() => {
     @close="escapeManager.removeLayer()"
     @backdrop-click="configPieceDialog.cancel()"
   >
-    <div class="piece-preview">
-      <PieceIcon
-        :piece-set="pieceSet"
-        :piece-id="configPieceDialog.props.pieceId"
-        :color="configPieceDialog.props.color"
-      />
-    </div>
+    <SelectPiece
+      :pieces="configPieceSelectOptions"
+      :piece-set="pieceSet"
+      v-model="configPieceDialog.props.selectedPiece"
+    />
     <div class="config">
-      <UserOption name="piece" option-id="select-piece-id">
-        <select id="select-piece-id" v-model="configPieceDialog.props.pieceId">
-          <option v-for="pieceId in PIECE_IDS" :value="pieceId">
-            {{ capitalizeFirst(pieceId) }}
-          </option>
-        </select>
-        <template #description>
-          Different pieces have different look, but mainly their abilities and
-          strategic differ.
-        </template>
-      </UserOption>
       <UserOption name="color" option-id="select-piece-color">
         <select id="select-piece-color" v-model="configPieceDialog.props.color">
           <option value="white">White</option>
           <option value="black">Black</option>
         </select>
         <template #description
-          >Piece color determines its player. Although pieces here are not
-          usually entirely black or white they are darker or brighter.</template
+          >Piece color determines its player. Although pieces are colored and
+          not usually entirely black or white they are darker or
+          brighter.</template
         >
       </UserOption>
     </div>
@@ -1158,4 +1178,6 @@ onMounted(() => {
   padding: var(--spacing-small);
 }
 </style>
-./modules/user_data/rotate_screen
+./modules/user_data/rotate_screen ./modules/dialogs/config_piece_dialog
+./modules/dialogs/config_print_dialog ./modules/dialogs/configs_dialog
+./modules/dialogs/confirm_dialog

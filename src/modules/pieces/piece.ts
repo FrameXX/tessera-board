@@ -25,6 +25,11 @@ export interface BoardPositionValue extends BoardPosition {
   value: Piece | null;
 }
 
+interface BoardPositionPath {
+  origin: BoardPosition;
+  target: BoardPosition;
+}
+
 export abstract class Piece {
   public readonly id: string;
 
@@ -48,6 +53,8 @@ export abstract class Piece {
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Move[];
+
+  public abstract getEndangeredPositions(): BoardPositionPath[];
 }
 
 export function getTarget(
@@ -64,6 +71,13 @@ export function isTargetOnBoard(target: BoardPosition) {
   );
 }
 
-export const PIECE_IDS = ["rook", "knight", "bishop", "queen", "king", "pawn"];
+export const PIECE_IDS: PieceId[] = [
+  "rook",
+  "knight",
+  "bishop",
+  "queen",
+  "king",
+  "pawn",
+];
 
 export default Piece;

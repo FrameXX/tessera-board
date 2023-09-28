@@ -37,6 +37,7 @@ class Shift extends Move {
     const originValue = boardStateValue[this.origin.row][this.origin.col];
     boardStateValue[this.origin.row][this.origin.col] = null;
     boardStateValue[this.target.row][this.target.col] = originValue;
+
     higlightedCells[this.origin.row][this.origin.col] = true;
     higlightedCells[this.target.row][this.target.col] = true;
     if (this.onPerform) this.onPerform(this);

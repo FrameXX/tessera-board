@@ -96,6 +96,30 @@ watch(
   }
 }
 
+.select-piece-group {
+  text-align: center;
+}
+
+.piece-option {
+  @include flex-center(inline-flex);
+  @include round-border;
+  @include clickable;
+  margin: var(--spacing-medium);
+  background-color: var(--color-primary-surface-top);
+  transition: outline var(--transition-duration-short)
+    var(--transition-timing-jump);
+  padding: var(--spacing-small);
+
+  &.selected {
+    outline: var(--border-width) solid var(--color-primary-accent);
+  }
+
+  .icon {
+    width: 55px;
+    height: 55px;
+  }
+}
+
 #name-config-dialog {
   z-index: var(--z-index-modal-top);
 
@@ -141,27 +165,5 @@ watch(
   button {
     display: flex;
   }
-}
-
-.throw-enter-active {
-  transition: transform var(--transition-duration-short)
-      var(--transition-timing-jump),
-    opacity var(--transition-duration-short) linear;
-}
-
-.throw-leave-active {
-  transition: transform var(--transition-duration-medium)
-      var(--transition-timing-jump),
-    opacity var(--transition-duration-medium) linear;
-}
-
-.throw-leave-to {
-  opacity: 0;
-  transform: translateX(100%) rotate(0.5turn);
-}
-
-.throw-enter-from {
-  opacity: 0;
-  transform: translateY(-5px);
 }
 </style>

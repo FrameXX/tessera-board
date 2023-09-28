@@ -22,9 +22,7 @@ class Game {
     private readonly playerPlaying: Ref<boolean>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColorValue>
   ) {
-    this.gameBoardManager.addEventListener("interpret-move", () =>
-      this.onmoveEnd()
-    );
+    this.gameBoardManager.addEventListener("move", () => this.onMoveEnd());
   }
 
   private setupDefaultBoardState() {
@@ -49,9 +47,9 @@ class Game {
     this.gameBoardManager.resetBoard();
   }
 
-  public onmoveStart() {}
+  public onMoveStart() {}
 
-  public onmoveEnd() {}
+  public onMoveEnd() {}
 }
 
 export default Game;

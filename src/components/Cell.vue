@@ -87,8 +87,8 @@ const markIconId = computed(() => {
 
   .highlighter {
     @include centered;
-    width: 80%;
-    height: 80%;
+    width: 85%;
+    height: 85%;
     position: absolute;
     filter: brightness(2);
     color: var(--color-cell-white);

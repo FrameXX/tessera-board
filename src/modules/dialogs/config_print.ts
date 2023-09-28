@@ -1,4 +1,4 @@
-import type ToastManager from "./toast_manager";
+import type ToastManager from "../toast_manager";
 import { reactive } from "vue";
 
 interface ConfigPrintDialogProps {

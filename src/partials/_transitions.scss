@@ -10,6 +10,30 @@
   opacity: 0;
 }
 
+// Throw
+
+.throw-enter-active {
+  transition: transform var(--transition-duration-short)
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-short) linear;
+}
+
+.throw-leave-active {
+  transition: transform var(--transition-duration-medium)
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-medium) linear;
+}
+
+.throw-leave-to {
+  opacity: 0;
+  transform: translateX(100%) rotate(0.5turn);
+}
+
+.throw-enter-from {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
 // Slide up
 .slide-up-enter-active,
 .slide-up-leave-active {
@@ -39,7 +63,7 @@
   position: absolute;
 }
 
-// [Group] piece
+// [Group] Piece
 .piece-leave-active,
 .piece-enter-active {
   transition: transform var(--transition-duration-long)
@@ -55,6 +79,18 @@
 .piece-leave-to {
   opacity: 0;
   transform: translateY(-100px) rotate(135deg) scale(2);
+}
+
+.board.rotated {
+  .piece-enter-from {
+    opacity: 0;
+    transform: translateY(15px) scale(1.1);
+  }
+
+  .piece-leave-to {
+    opacity: 0;
+    transform: translateY(100px) rotate(-135deg) scale(2);
+  }
 }
 
 // [Group] Slide left

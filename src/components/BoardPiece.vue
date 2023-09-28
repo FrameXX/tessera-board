@@ -27,10 +27,10 @@ const element = ref<null | ComponentPublicInstance>(null);
 
 // Values for translating pieces to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
-  return (props.rotated ? 7 - props.col : props.col) * props.cellSize;
+  return props.col * props.cellSize;
 });
 const translateY = computed(() => {
-  return (props.rotated ? props.row : 7 - props.row) * props.cellSize;
+  return (7 - props.row) * props.cellSize;
 });
 const size = computed(() => {
   return props.cellSize - props.piecePadding * 2;
@@ -73,37 +73,29 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
     class="piece-wrapper"
     :style="`transform-origin: ${originX}px ${originY}px`"
   >
-    <div class="rotation-wrapper">
-      <PieceIcon
-        :id="`piece-${props.piece.id}`"
-        ref="element"
-        :class="`piece ${props.highlighted ? 'highlighted' : ''} ${
-          props.piece.color === 'white' ? 'white' : 'black'
-        }`"
-        :style="`transform: translate(${translateX}px,${translateY}px) ${
-          props.highlighted ? 'scale(1.05)' : ''
-        }; width: ${size}px; height: ${size}px; z-index: ${zIndex};`"
-        :piece-set="props.pieceSet"
-        :piece-id="props.piece.pieceId"
-        :color="props.piece.color"
-      />
-    </div>
+    <PieceIcon
+      :id="`piece-${props.piece.id}`"
+      ref="element"
+      class="piece"
+      :class="[{ highlighted: props.highlighted }, props.piece.color]"
+      :style="{
+        transform: `translate(${translateX}px, ${translateY}px)
+            ${props.highlighted ? 'scale(1.05)' : ''} ${
+          props.rotated ? 'rotate(-0.5turn)' : ''
+        }`,
+        width: `${size}px`,
+        height: `${size}px`,
+        zIndex: zIndex,
+      }"
+      :piece-set="props.pieceSet"
+      :piece-id="props.piece.pieceId"
+      :color="props.piece.color"
+    />
   </div>
 </template>
 
 <style lang="scss">
 @import "../partials/mixins";
-
-.rotation-wrapper {
-  @include stretch;
-  position: absolute;
-}
-
-.board.rotated {
-  .rotation-wrapper {
-    transform: rotate(-0.5turn);
-  }
-}
 
 .piece-wrapper {
   @include stretch;
@@ -114,6 +106,7 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
 .piece {
   @include clickable;
   filter: var(--svg-shadow-filter);
+  -webkit-tap-highlight-color: transparent;
   z-index: var(--z-index-piece);
   outline: none;
   pointer-events: all;

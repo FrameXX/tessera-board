@@ -6,7 +6,7 @@ import type {
   BooleanBoardState,
   BoardPosition,
 } from "../components/Board.vue";
-import type { Piece, PieceId } from "./pieces/piece";
+import type { PieceId } from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
@@ -144,14 +144,15 @@ class GameBoardManager extends BoardManager {
   }
 
   private interpretMove(move: Move) {
+    this.selectedPieceProps = null;
+    this.clearHihlightedCellsPositions();
     move.perform(
       this.boardStateValue,
       this.blackCapturedPieces,
       this.whiteCapturedPieces,
       this.higlightedCells
     );
-    this.clearHihlightedCellsPositions();
-    this.selectedPieceProps = null;
+    this.dispatchEvent(new Event("move"));
   }
 
   public resetBoard() {

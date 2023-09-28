@@ -1,11 +1,11 @@
-import { reactive } from "vue";
-import { type PieceId, type PlayerColor } from "./pieces/piece";
-import type Piece from "./pieces/piece";
-import { getPieceFromRaw } from "./pieces/rawPiece";
+import { reactive, watch } from "vue";
+import type { PlayerColor } from "../pieces/piece";
+import type Piece from "../pieces/piece";
+import { RawPiece, getPieceFromRaw } from "../pieces/rawPiece";
 
 interface ConfigPieceDialogProps {
   open: boolean;
-  pieceId: PieceId;
+  selectedPiece: RawPiece;
   color: PlayerColor;
 }
 
@@ -16,9 +16,16 @@ class ConfigPieceDialog {
   constructor() {
     this.props = reactive({
       open: false,
-      pieceId: "pawn",
+      selectedPiece: { pieceId: "pawn", color: "white" },
       color: "white",
     });
+
+    watch(
+      () => this.props.color,
+      (newValue) => {
+        this.props.selectedPiece.color = newValue;
+      }
+    );
   }
 
   public open(): Promise<Piece> {
@@ -30,12 +37,7 @@ class ConfigPieceDialog {
 
   public confirm = () => {
     if (this.resolve) {
-      this.resolve(
-        getPieceFromRaw({
-          pieceId: this.props.pieceId,
-          color: this.props.color,
-        })
-      );
+      this.resolve(getPieceFromRaw(this.props.selectedPiece));
       this.resolve = undefined;
     }
     this.props.open = false;
