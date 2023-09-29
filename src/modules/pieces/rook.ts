@@ -2,7 +2,10 @@ import { BoardPosition } from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
-import Piece from "./piece";
+import Piece, {
+  getTargetPiece as getTargetValue,
+  isFriendlyPiece,
+} from "./piece";
 import {
   BoardPositionValue,
   PlayerColor,
@@ -33,11 +36,9 @@ export class Rook extends Piece {
           if (!isTargetOnBoard(target)) {
             break;
           }
-          const piece = boardStateValue[target.row][target.col];
-          if (piece) {
-            if (piece.color === this.color) {
-              break;
-            }
+          const piece = getTargetValue(target, boardStateValue);
+          if (isFriendlyPiece(piece, this.color)) {
+            break;
           }
           capturingPositions.push(target);
           if (piece) {

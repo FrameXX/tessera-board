@@ -68,6 +68,23 @@ export function getTarget(
   return sumPositions(position, { row: rowDelta, col: colDelta });
 }
 
+export function getTargetPiece(
+  target: BoardPosition,
+  boardStateValue: BoardStateValue
+) {
+  return boardStateValue[target.row][target.col];
+}
+
+export function isFriendlyPiece(
+  piece: Piece | null,
+  friendlyColor: PlayerColor
+) {
+  if (!piece) {
+    return false;
+  }
+  return piece.color === friendlyColor;
+}
+
 export function isTargetOnBoard(target: BoardPosition) {
   return (
     target.row >= 0 && target.row <= 7 && target.col >= 0 && target.col <= 7

@@ -3,7 +3,11 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import Transform from "../moves/transform";
 import type { BoardStateValue } from "../user_data/board_state";
-import Piece, { type BoardPositionValue } from "./piece";
+import Piece, {
+  getTargetPiece,
+  type BoardPositionValue,
+  isFriendlyPiece,
+} from "./piece";
 import { type PlayerColor, getTarget } from "./piece";
 import { RawPiece, getRawPiece } from "./rawPiece";
 
@@ -47,7 +51,10 @@ export class Pawn extends Piece {
     this.hasMoved = rawPiece.hasMoved;
   }
 
-  public getCapturingPositions(position: BoardPosition): BoardPosition[] {
+  public getCapturingPositions(
+    position: BoardPosition,
+    boardStateValue: BoardStateValue
+  ): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
     for (const colDelta of [1, -1]) {
       const target = getTarget(
@@ -55,6 +62,10 @@ export class Pawn extends Piece {
         colDelta,
         this.color === "white" ? 1 : -1
       );
+      const piece = getTargetPiece(target, boardStateValue);
+      if (isFriendlyPiece(piece, this.color)) {
+        continue;
+      }
       capturingPositions.push(target);
     }
     return capturingPositions;
@@ -62,7 +73,7 @@ export class Pawn extends Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    boardStateData: BoardStateValue
+    boardStateValue: BoardStateValue
   ): Move[] {
     const moves: Move[] = [];
 
@@ -73,7 +84,7 @@ export class Pawn extends Piece {
       }
       if (this.color === "black") rowDelta = rowDelta * -1;
       const target = getTarget(position, 0, rowDelta);
-      if (boardStateData[target.row][target.col]) {
+      if (getTargetPiece(target, boardStateValue)) {
         break;
       }
       if (
@@ -95,37 +106,39 @@ export class Pawn extends Piece {
     }
 
     // Capture
-    const capturingPositions = this.getCapturingPositions(position);
+    const capturingPositions = this.getCapturingPositions(
+      position,
+      boardStateValue
+    );
     for (const [index, target] of capturingPositions.entries()) {
-      const piece = boardStateData[target.row][target.col];
-      if (piece) {
-        const captures: BoardPositionValue = {
-          ...target,
-          value: piece,
-        };
-        if (piece.color !== this.color) {
-          if (
-            ((target.row === 7 && this.color === "white") ||
-              (target.row === 0 && this.color === "black")) &&
-            index === 0
-          ) {
-            moves.push(
-              new Transform(
-                this.pieceId,
-                position,
-                target,
-                this.transformOptions,
-                captures
-              )
-            );
-          } else {
-            moves.push(
-              new Shift(this.pieceId, position, target, captures, () => {
-                this.onPerformMove();
-              })
-            );
-          }
-        }
+      const piece = getTargetPiece(target, boardStateValue);
+      if (!piece) {
+        continue;
+      }
+      const captures: BoardPositionValue = {
+        ...target,
+        value: piece,
+      };
+      if (
+        ((target.row === 7 && this.color === "white") ||
+          (target.row === 0 && this.color === "black")) &&
+        index === 0
+      ) {
+        moves.push(
+          new Transform(
+            this.pieceId,
+            position,
+            target,
+            this.transformOptions,
+            captures
+          )
+        );
+      } else {
+        moves.push(
+          new Shift(this.pieceId, position, target, captures, () => {
+            this.onPerformMove();
+          })
+        );
       }
     }
 
