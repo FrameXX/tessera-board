@@ -2,9 +2,13 @@ import type { Ref } from "vue";
 import { SelectUserData } from "./user_data";
 import type ToastManager from "../toast_manager";
 
-export type PieceSetValue = "material_design" | "font_awesome";
+export type PieceSetValue = "material_design" | "font_awesome" | "tabler";
 function isPieceSetValue(string: string): string is PieceSetValue {
-  return string === "material_design" || string === "font_awesome";
+  return (
+    string === "material_design" ||
+    string === "font_awesome" ||
+    string === "tabler"
+  );
 }
 
 class PieceSetData extends SelectUserData<PieceSetValue> {

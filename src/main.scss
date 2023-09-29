@@ -59,7 +59,7 @@ select {
   @include round-border;
   padding: var(--spacing-tiny);
   border: none;
-  outline: none;
+  outline-color: transparent;
   font-family: inherit;
   font-weight: inherit;
 }

@@ -51,6 +51,11 @@ export abstract class Piece {
     return getRawPiece(this);
   }
 
+  public invalidateCache() {
+    this.capturingPositionsCache = undefined;
+    this.possibleMovesCache = undefined;
+  }
+
   public abstract getCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue

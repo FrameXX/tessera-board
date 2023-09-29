@@ -110,7 +110,7 @@ export class Pawn extends Piece {
       position,
       boardStateValue
     );
-    for (const [index, target] of capturingPositions.entries()) {
+    for (const target of capturingPositions) {
       const piece = getTargetPiece(target, boardStateValue);
       if (!piece) {
         continue;

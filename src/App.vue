@@ -819,6 +819,7 @@ const configPieceSelectOptions = computed(() => {
         <select id="select-piece-set" v-model="pieceSet">
           <option value="material_design">Material Design</option>
           <option value="font_awesome">Font Awesome</option>
+          <option value="tabler">Tabler</option>
         </select>
         <template #description
           >Chooses what vector icons are used for pieces. Different icon sets
@@ -984,6 +985,7 @@ const configPieceSelectOptions = computed(() => {
     title="Select promotion piece"
     :open="selectPieceDialog.props.open"
     @open="escapeManager.addLayer(selectPieceDialog.cancel)"
+    @close="escapeManager.removeLayer()"
   >
     <SelectPiece
       :pieces="selectPieceDialog.props.pieceOptions"

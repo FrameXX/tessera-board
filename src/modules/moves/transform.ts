@@ -78,7 +78,9 @@ class Transform extends Move {
   }
 
   public showCellMarks(cellMarks: MarkBoardState): void {
-    cellMarks[this.target.row][this.target.col] = "availible";
+    this.captures
+      ? (cellMarks[this.target.row][this.target.col] = "capture")
+      : (cellMarks[this.target.row][this.target.col] = "availible");
   }
 }
 

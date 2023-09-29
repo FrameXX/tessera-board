@@ -38,7 +38,7 @@ const markIconId = computed(() => {
   let iconId: string;
   switch (props.mark) {
     case "capture":
-      iconId = "close";
+      iconId = "circle-outline";
       break;
     case "availible":
       iconId = "circle-small";
@@ -61,9 +61,6 @@ const markIconId = computed(() => {
     :aria-label="`${colText}${rowText}`"
     :title="`${colText}${rowText}`"
   >
-    <Transition name="scale">
-      <Icon icon-id="rhombus" class="highlighter" v-show="props.highlighted" />
-    </Transition>
     <!-- Show indexes only at borders of the board -->
     <span class="index-row-left" v-if="colText === 'A'">{{ rowText }}</span>
     <span class="index-row-right" v-if="colText === 'H'">{{ rowText }}</span>
@@ -71,6 +68,9 @@ const markIconId = computed(() => {
     <span class="index-col-bottom" v-if="rowText === 1">{{ colText }}</span>
     <Transition name="scale">
       <Icon class="mark" :icon-id="markIconId" v-show="props.mark" />
+    </Transition>
+    <Transition name="scale">
+      <Icon icon-id="rhombus" class="highlighter" v-show="props.highlighted" />
     </Transition>
   </td>
 </template>
@@ -85,22 +85,22 @@ const markIconId = computed(() => {
   width: 100%;
   position: relative;
 
-  .highlighter {
-    @include centered;
-    width: 85%;
-    height: 85%;
-    position: absolute;
-    filter: brightness(2);
-    color: var(--color-cell-white);
-    mix-blend-mode: overlay;
-  }
-
   &.white {
     background-color: var(--color-cell-white);
+
+    .mark,
+    .highlighter {
+      color: var(--color-cell-black);
+    }
   }
 
   &.black {
     background-color: var(--color-cell-black);
+
+    .mark,
+    .highlighter {
+      color: var(--color-cell-white);
+    }
   }
 
   &:hover {
@@ -109,14 +109,21 @@ const markIconId = computed(() => {
     }
   }
 
+  .highlighter,
   .mark {
     @include absolute-centered;
-    mix-blend-mode: overlay;
-    filter: brightness(2);
-    color: var(--color-cell-white);
+    opacity: 0.65;
+  }
+
+  .mark {
     z-index: var(--z-index-mark);
     width: 100%;
     height: 100%;
+  }
+
+  .highlighter {
+    width: 85%;
+    height: 85%;
   }
 
   &.bottom-left {
