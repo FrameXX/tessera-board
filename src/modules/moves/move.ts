@@ -1,5 +1,17 @@
-import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
+import type { Ref } from "vue";
+import type {
+  BoardPosition,
+  BooleanBoardState,
+  MarkBoardState,
+} from "../../components/Board.vue";
+import type Piece from "../pieces/piece";
+import type { PieceId } from "../pieces/piece";
+import { type RawPiece, getPieceFromRaw } from "../pieces/rawPiece";
 import type { BoardStateValue } from "../user_data/board_state";
+import {
+  getElementInstanceById,
+  waitForTransitionEnd,
+} from "../utils/elements";
 
 type MoveId = "shift" | "castling" | "transform";
 
@@ -15,6 +27,62 @@ abstract class Move {
     cellMarks: MarkBoardState,
     boardStateValue: BoardStateValue
   ): void;
+}
+
+export function addCapturedPiece(
+  piece: Piece,
+  blackCapturedPieces: Ref<PieceId[]>,
+  whiteCapturedPieces: Ref<PieceId[]>
+) {
+  if (piece.color === "white") {
+    blackCapturedPieces.value.push(piece.pieceId);
+  } else {
+    whiteCapturedPieces.value.push(piece.pieceId);
+  }
+}
+
+export function transformPositionValue(
+  position: BoardPosition,
+  piece: RawPiece,
+  boardStateValue: BoardStateValue
+) {
+  boardStateValue[position.row][position.col] = getPieceFromRaw(piece);
+}
+
+export async function movePositionValue(
+  origin: BoardPosition,
+  target: BoardPosition,
+  boardStateValue: BoardStateValue
+) {
+  const piece = boardStateValue[origin.row][origin.col];
+  if (!piece) {
+    return;
+  }
+  boardStateValue[target.row][target.col] = piece;
+  boardStateValue[origin.row][origin.col] = null;
+  const pieceElement = getElementInstanceById(`piece-${piece.id}`, SVGElement);
+  await waitForTransitionEnd(pieceElement);
+}
+
+export function capturePosition(
+  position: BoardPosition,
+  boardStateValue: BoardStateValue,
+  blackCapturedPieces: Ref<PieceId[]>,
+  whiteCapturedPieces: Ref<PieceId[]>
+) {
+  const piece = boardStateValue[position.row][position.col];
+  if (!piece) {
+    return;
+  }
+  boardStateValue[position.row][position.col] = null;
+  addCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
+}
+
+export function highlightBoardPosition(
+  position: BoardPosition,
+  higlightedCells: BooleanBoardState
+) {
+  higlightedCells[position.row][position.col] = true;
 }
 
 export default Move;

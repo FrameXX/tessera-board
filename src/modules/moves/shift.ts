@@ -6,9 +6,9 @@ import type {
 } from "../../components/Board.vue";
 import type { BoardPositionValue, PieceId } from "../pieces/piece";
 import type { BoardStateValue } from "../user_data/board_state";
-import Move from "./move";
+import Move, { highlightBoardPosition } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
-import { capturePosition, movePositionValue } from "../game_board_manager";
+import { capturePosition, movePositionValue } from "./move";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -19,29 +19,36 @@ class Shift extends Move {
     private readonly pieceId: PieceId,
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
-    private readonly captures?: BoardPositionValue,
+    public readonly captures?: BoardPositionValue,
     private readonly onPerform?: (move: Move) => void
   ) {
     super("shift");
   }
 
-  public perform(
+  public async perform(
     boardStateValue: BoardStateValue,
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
-    higlightedCells: BooleanBoardState
-  ): string {
-    if (this.captures)
+    higlightedCells: BooleanBoardState,
+    audioEffects: Ref<boolean>,
+    moveAudioEffect: Howl,
+    removeAudioEffect: Howl
+  ): Promise<string> {
+    if (this.captures) {
       capturePosition(
         this.captures,
         boardStateValue,
         blackCapturedPieces,
         whiteCapturedPieces
       );
-    movePositionValue(this.origin, this.target, boardStateValue);
+      if (audioEffects.value) removeAudioEffect.play();
+    }
+    await movePositionValue(this.origin, this.target, boardStateValue);
+    if (audioEffects.value) moveAudioEffect.play();
 
-    higlightedCells[this.origin.row][this.origin.col] = true;
-    higlightedCells[this.target.row][this.target.col] = true;
+    highlightBoardPosition(this.origin, higlightedCells);
+    highlightBoardPosition(this.target, higlightedCells);
+
     if (this.onPerform) this.onPerform(this);
 
     let notation: string;

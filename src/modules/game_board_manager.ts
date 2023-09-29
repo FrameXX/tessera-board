@@ -32,9 +32,11 @@ class GameBoardManager extends BoardManager {
     private readonly opponentHighlightedPieces: BooleanBoardState,
     private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
-    pieceMoveAudioEffect: Howl
+    private readonly audioEffects: Ref<boolean>,
+    private readonly pieceMoveAudioEffect: Howl,
+    private readonly pieceRemoveAudioEffect: Howl
   ) {
-    super(pieceMoveAudioEffect);
+    super();
   }
 
   private clearHihlightedCellsPositions() {
@@ -157,7 +159,10 @@ class GameBoardManager extends BoardManager {
         this.boardStateValue,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
-        this.higlightedCells
+        this.higlightedCells,
+        this.audioEffects,
+        this.pieceMoveAudioEffect,
+        this.pieceRemoveAudioEffect
       );
     } else if (isMoveTransform(move)) {
       move.perform(
@@ -165,7 +170,10 @@ class GameBoardManager extends BoardManager {
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
         this.higlightedCells,
-        this.selectPieceDialog
+        this.selectPieceDialog,
+        this.audioEffects,
+        this.pieceMoveAudioEffect,
+        this.pieceRemoveAudioEffect
       );
     }
     this.dispatchEvent(new Event("move"));
@@ -245,55 +253,6 @@ function getMatchingPositions(
 
 function positionsEqual(position1: BoardPosition, position2: BoardPosition) {
   return position1.row === position2.row && position1.col === position2.col;
-}
-
-export function addCapturedPiece(
-  piece: Piece,
-  blackCapturedPieces: Ref<PieceId[]>,
-  whiteCapturedPieces: Ref<PieceId[]>
-) {
-  if (piece.color === "white") {
-    blackCapturedPieces.value.push(piece.pieceId);
-  } else {
-    whiteCapturedPieces.value.push(piece.pieceId);
-  }
-}
-
-export async function transformPositionValue(
-  position: BoardPosition,
-  piece: RawPiece,
-  boardStateValue: BoardStateValue
-) {
-  boardStateValue[position.row][position.col] = getPieceFromRaw(piece);
-}
-
-export async function movePositionValue(
-  origin: BoardPosition,
-  target: BoardPosition,
-  boardStateValue: BoardStateValue
-) {
-  const piece = boardStateValue[origin.row][origin.col];
-  if (!piece) {
-    return;
-  }
-  boardStateValue[target.row][target.col] = piece;
-  boardStateValue[origin.row][origin.col] = null;
-  const pieceElement = getElementInstanceById(`piece-${piece.id}`, SVGElement);
-  await waitForTransitionEnd(pieceElement);
-}
-
-export function capturePosition(
-  position: BoardPosition,
-  boardStateValue: BoardStateValue,
-  blackCapturedPieces: Ref<PieceId[]>,
-  whiteCapturedPieces: Ref<PieceId[]>
-) {
-  const piece = boardStateValue[position.row][position.col];
-  if (!piece) {
-    return;
-  }
-  boardStateValue[position.row][position.col] = null;
-  addCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
 }
 
 export default GameBoardManager;

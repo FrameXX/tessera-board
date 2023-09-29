@@ -106,6 +106,7 @@ function updateScreenRotation(rotate: boolean): void {
 }
 
 const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
+const pieceRemoveAudioEffect = new Howl({ src: ["./assets/audio/remove.ogg"] });
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -411,7 +412,9 @@ const escapeManager = new EscapeManager(toggleActionsPanel);
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
   configPieceDialog,
-  pieceMoveAudioEffect
+  audioEffects,
+  pieceMoveAudioEffect,
+  pieceRemoveAudioEffect
 );
 
 const gameBoardManager = new GameBoardManager(
@@ -425,7 +428,9 @@ const gameBoardManager = new GameBoardManager(
   opponentHighlightedPieces,
   highlightedCells,
   selectPieceDialog,
-  pieceMoveAudioEffect
+  audioEffects,
+  pieceMoveAudioEffect,
+  pieceRemoveAudioEffect
 );
 
 // Game manager

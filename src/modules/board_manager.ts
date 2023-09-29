@@ -4,17 +4,13 @@ import type { PieceId } from "./pieces/piece";
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 abstract class BoardManager extends EventTarget {
-  constructor(private readonly pieceMoveAudioEffect: Howl) {
+  constructor() {
     super();
   }
 
   public abstract onPieceClick(boardPiece: BoardPieceProps): void;
 
   public abstract onCellClick(position: BoardPosition): void;
-
-  public onPieceMove() {
-    this.pieceMoveAudioEffect.play();
-  }
 }
 
 export function getPositionNotation(position: BoardPosition) {

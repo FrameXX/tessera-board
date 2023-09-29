@@ -120,9 +120,8 @@ export class Pawn extends Piece {
         value: piece,
       };
       if (
-        ((target.row === 7 && this.color === "white") ||
-          (target.row === 0 && this.color === "black")) &&
-        index === 0
+        (target.row === 7 && this.color === "white") ||
+        (target.row === 0 && this.color === "black")
       ) {
         moves.push(
           new Transform(

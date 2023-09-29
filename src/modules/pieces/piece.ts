@@ -31,6 +31,8 @@ export interface BoardPositionPath {
 }
 
 export abstract class Piece {
+  protected capturingPositionsCache?: BoardPosition[];
+  protected possibleMovesCache?: Move[];
   public readonly id: string;
 
   constructor(
@@ -49,15 +51,15 @@ export abstract class Piece {
     return getRawPiece(this);
   }
 
-  public abstract getPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue
-  ): Move[];
-
   public abstract getCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): BoardPosition[];
+
+  public abstract getPossibleMoves(
+    position: BoardPosition,
+    boardStateValue: BoardStateValue
+  ): Move[];
 }
 
 export function getTarget(

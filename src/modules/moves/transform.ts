@@ -7,13 +7,13 @@ import {
 import { BoardPositionValue, PieceId } from "../pieces/piece";
 import { RawPiece } from "../pieces/rawPiece";
 import { BoardStateValue } from "../user_data/board_state";
-import Move from "./move";
+import Move, { highlightBoardPosition } from "./move";
 import SelectPieceDialog from "../dialogs/select_piece";
 import {
   capturePosition,
   movePositionValue,
   transformPositionValue,
-} from "../game_board_manager";
+} from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
 
 export function isMoveTransform(move: Move): move is Transform {
@@ -36,25 +36,31 @@ class Transform extends Move {
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
     higlightedCells: BooleanBoardState,
-    selectPieceDialog: SelectPieceDialog
+    selectPieceDialog: SelectPieceDialog,
+    audioEffects: Ref<boolean>,
+    moveAudioEffect: Howl,
+    removeAudioEffect: Howl
   ): Promise<string> {
     let newPiece: RawPiece;
     this.transformOptions.length === 1
       ? (newPiece = this.transformOptions[0])
       : (newPiece = await selectPieceDialog.open(this.transformOptions));
 
-    if (this.captures)
+    if (this.captures) {
       capturePosition(
         this.captures,
         boardStateValue,
         blackCapturedPieces,
         whiteCapturedPieces
       );
+      if (audioEffects.value) removeAudioEffect.play();
+    }
     await movePositionValue(this.origin, this.target, boardStateValue);
+    if (audioEffects.value) moveAudioEffect.play();
     transformPositionValue(this.target, newPiece, boardStateValue);
 
-    higlightedCells[this.origin.row][this.origin.col] = true;
-    higlightedCells[this.target.row][this.target.col] = true;
+    highlightBoardPosition(this.origin, higlightedCells);
+    highlightBoardPosition(this.target, higlightedCells);
 
     let notation: string;
     this.captures

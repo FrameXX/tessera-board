@@ -164,7 +164,6 @@ function onCellClick(position: BoardPosition) {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
-          @move="props.manager.onPieceMove()"
           :highlighted="
             props.highlightedPiecesState[pieceProps.row][pieceProps.col]
           "
