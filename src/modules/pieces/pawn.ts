@@ -3,7 +3,7 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import Transform from "../moves/transform";
 import type { BoardStateValue } from "../user_data/board_state";
-import Piece, { BoardPositionValue } from "./piece";
+import Piece, { type BoardPositionValue } from "./piece";
 import { type PlayerColor, getTarget } from "./piece";
 import { RawPiece, getRawPiece } from "./rawPiece";
 
@@ -47,6 +47,19 @@ export class Pawn extends Piece {
     this.hasMoved = rawPiece.hasMoved;
   }
 
+  public getCapturingPositions(position: BoardPosition): BoardPosition[] {
+    const capturingPositions: BoardPosition[] = [];
+    for (const colDelta of [1, -1]) {
+      const target = getTarget(
+        position,
+        colDelta,
+        this.color === "white" ? 1 : -1
+      );
+      capturingPositions.push(target);
+    }
+    return capturingPositions;
+  }
+
   public getPossibleMoves(
     position: BoardPosition,
     boardStateData: BoardStateValue
@@ -82,12 +95,8 @@ export class Pawn extends Piece {
     }
 
     // Capture
-    for (const colDelta of [1, -1]) {
-      const target = getTarget(
-        position,
-        colDelta,
-        this.color === "white" ? 1 : -1
-      );
+    const capturingPositions = this.getCapturingPositions(position);
+    for (const [index, target] of capturingPositions.entries()) {
       const piece = boardStateData[target.row][target.col];
       if (piece) {
         const captures: BoardPositionValue = {
@@ -98,7 +107,7 @@ export class Pawn extends Piece {
           if (
             ((target.row === 7 && this.color === "white") ||
               (target.row === 0 && this.color === "black")) &&
-            Math.abs(colDelta) === 1
+            index === 0
           ) {
             moves.push(
               new Transform(

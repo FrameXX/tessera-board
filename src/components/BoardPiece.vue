@@ -6,6 +6,7 @@ import {
   ref,
   watch,
   type ComponentPublicInstance,
+  onBeforeUnmount,
 } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { waitForTransitionEnd } from "../modules/utils/elements";
@@ -21,7 +22,7 @@ const props = defineProps({
   rotated: { type: Boolean, default: false },
   highlighted: { type: Boolean, default: false },
 });
-const emit = defineEmits(["move"]);
+const emit = defineEmits(["move", "remove"]);
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
 const element = ref<null | ComponentPublicInstance>(null);
 
@@ -63,9 +64,13 @@ watch(piecePosition, async () => {
 
 async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   zIndex.value = "var(--z-index-piece-top)";
-  await waitForTransitionEnd(boardPieceElement);
+  await waitForTransitionEnd(boardPieceElement, "transform");
   zIndex.value = "";
 }
+
+onBeforeUnmount(() => {
+  emit("remove");
+});
 </script>
 
 <template>

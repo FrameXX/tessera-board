@@ -25,7 +25,7 @@ export interface BoardPositionValue extends BoardPosition {
   value: Piece | null;
 }
 
-interface BoardPositionPath {
+export interface BoardPositionPath {
   origin: BoardPosition;
   target: BoardPosition;
 }
@@ -54,7 +54,10 @@ export abstract class Piece {
     boardStateValue: BoardStateValue
   ): Move[];
 
-  public abstract getEndangeredPositions(): BoardPositionPath[];
+  public abstract getCapturingPositions(
+    position: BoardPosition,
+    boardStateValue: BoardStateValue
+  ): BoardPosition[];
 }
 
 export function getTarget(

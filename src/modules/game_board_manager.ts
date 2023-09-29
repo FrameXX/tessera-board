@@ -195,21 +195,23 @@ class GameBoardManager extends BoardManager {
 
   // Called by Board component
   public onCellClick(position: BoardPosition): void {
-    let moveInterpreted = false;
-
     // Check if cell is on any of the clickable position of any of the availible moves
     const matchingMove = this.getPositionMatchingMove(position);
 
     if (matchingMove) {
       this.interpretMove(matchingMove);
-      moveInterpreted = true;
+      return;
     }
 
     // Take the cell click as a piece click if no move was performed on that position. This is useful if the cells with pieces are selected using tabindex.
-    if (!moveInterpreted) {
-      const piece = this.boardStateValue[position.row][position.col];
-      if (piece) this.onPieceClick({ ...position, piece });
+    const piece = this.boardStateValue[position.row][position.col];
+    if (piece) {
+      this.onPieceClick({ ...position, piece });
+      return;
     }
+
+    // Unselect piece
+    this.selectedPieceProps = null;
   }
 }
 

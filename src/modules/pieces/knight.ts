@@ -15,12 +15,11 @@ export class Knight extends Piece {
     super(color, "knight");
   }
 
-  public getPossibleMoves(
+  public getCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
-  ): Move[] {
-    const moves: Move[] = [];
-
+  ): BoardPosition[] {
+    const capturingPositions: BoardPosition[] = [];
     for (const colDelta of [-2, -1, 1, 2]) {
       for (const rowDelta of [-2, -1, 1, 2]) {
         if (Math.abs(colDelta) === Math.abs(rowDelta)) {
@@ -30,18 +29,35 @@ export class Knight extends Piece {
         if (!isTargetOnBoard(target)) {
           continue;
         }
-        let captures: BoardPositionValue | undefined = undefined;
         const piece = boardStateValue[target.row][target.col];
         if (piece) {
-          if (piece.color !== this.color) {
-            captures = { ...target, value: piece };
-          } else {
+          if (piece.color === this.color) {
             continue;
           }
         }
-
-        moves.push(new Shift(this.pieceId, position, target, captures));
+        capturingPositions.push(target);
       }
+    }
+    return capturingPositions;
+  }
+
+  public getPossibleMoves(
+    position: BoardPosition,
+    boardStateValue: BoardStateValue
+  ): Move[] {
+    const moves: Move[] = [];
+    const capturingPositions = this.getCapturingPositions(
+      position,
+      boardStateValue
+    );
+
+    for (const target of capturingPositions) {
+      let captures: BoardPositionValue | undefined = undefined;
+      const piece = boardStateValue[target.row][target.col];
+      if (piece) {
+        captures = { ...target, value: piece };
+      }
+      moves.push(new Shift(this.pieceId, position, target, captures));
     }
 
     return moves;

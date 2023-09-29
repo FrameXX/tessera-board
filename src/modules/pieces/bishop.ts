@@ -15,13 +15,11 @@ export class Bishop extends Piece {
     super(color, "bishop");
   }
 
-  public getPossibleMoves(
+  public getCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
-  ): Move[] {
-    const moves: Move[] = [];
-
-    // Check row
+  ): BoardPosition[] {
+    const capturingPositions: BoardPosition[] = [];
     for (const colDelta of [-1, 1]) {
       for (const rowDelta of [-1, 1]) {
         let totalXDelta = 0;
@@ -33,23 +31,37 @@ export class Bishop extends Piece {
           if (!isTargetOnBoard(target)) {
             break;
           }
-
-          let captures: BoardPositionValue | undefined = undefined;
           const piece = boardStateValue[target.row][target.col];
           if (piece) {
             if (piece.color === this.color) {
               break;
             }
-            captures = { ...target, value: piece };
           }
-
-          moves.push(new Shift(this.pieceId, position, target, captures));
-
+          capturingPositions.push(target);
           if (piece) {
             break;
           }
         }
       }
+    }
+    return capturingPositions;
+  }
+
+  public getPossibleMoves(
+    position: BoardPosition,
+    boardStateValue: BoardStateValue
+  ): Move[] {
+    const moves: Move[] = [];
+    const capturingPositions = this.getCapturingPositions(
+      position,
+      boardStateValue
+    );
+
+    for (const target of capturingPositions) {
+      let captures: BoardPositionValue | undefined = undefined;
+      const piece = boardStateValue[target.row][target.col];
+      if (piece) captures = { ...target, value: piece };
+      moves.push(new Shift(this.pieceId, position, target, captures));
     }
 
     return moves;

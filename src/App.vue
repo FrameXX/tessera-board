@@ -450,13 +450,12 @@ userDataManager.updateReferences();
 onMounted(() => {
   console.log("App mounted");
 
-  // NOTE: Sets CSS Saturation variables from 0 to their appropriate user configured values
+  // Sets CSS Saturation variables from 0 to their appropriate user configured values
   activateColors();
 
+  // Escape using Escape manager
   addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      escapeManager.escape();
-    }
+    if (event.key === "Escape") escapeManager.escape();
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.
@@ -588,7 +587,7 @@ const configPieceSelectOptions = computed(() => {
       <!-- Time restrictions -->
       <span class="section-title">Time restrictions</span>
       <UserOption
-        name="Player seconds per move"
+        name="Player time per move"
         icon-id="timer-outline"
         option-id="input-player-seconds-per-move"
       >
@@ -596,11 +595,11 @@ const configPieceSelectOptions = computed(() => {
         <template #description
           >Limits player's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
-          <b>The limit is disabled when the value is set to 0.</b></template
+          <b>The limit is disabled when both values are set to 0.</b></template
         >
       </UserOption>
       <UserOption
-        name="Opponent seconds per move"
+        name="Opponent time per move"
         icon-id="timer-outline"
         option-id="input-opponent-seconds-per-move"
       >
@@ -608,11 +607,11 @@ const configPieceSelectOptions = computed(() => {
         <template #description
           >Limits opponent's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
-          <b>The limit is disabled when the value is set to 0.</b></template
+          <b>The limit is disabled when both values are set to 0.</b></template
         >
       </UserOption>
       <UserOption
-        name="Player seconds per match"
+        name="Player time per match"
         icon-id="clock-outline"
         option-id="input-player-seconds-per-match"
       >
@@ -620,11 +619,11 @@ const configPieceSelectOptions = computed(() => {
         <template #description
           >Limits player's time for whole match (game). If the time runs out the
           player looses and opponent wins.
-          <b>The limit is disabled when the value is set to 0.</b></template
+          <b>The limit is disabled when both values are set to 0.</b></template
         >
       </UserOption>
       <UserOption
-        name="Opponent seconds per match"
+        name="Opponent time per match"
         icon-id="clock-outline"
         option-id="minutes-input-opponent-seconds-per-match"
       >
@@ -632,11 +631,11 @@ const configPieceSelectOptions = computed(() => {
         <template #description
           >Limits opponent's time for whole match (game). If the time runs out
           the opponent looses and player wins.
-          <b>The limit is disabled when the value is set to 0.</b></template
+          <b>The limit is disabled when both values are set to 0.</b></template
         >
       </UserOption>
       <UserOption
-        name="Seconds per move expiration punishment"
+        name="Time per move expiration punishment"
         icon-id="timer-alert-outline"
         option-id="seconds-per-move-expiration-punishment"
       >
@@ -646,7 +645,7 @@ const configPieceSelectOptions = computed(() => {
         </select>
         <template #description
           >Defines how to punish the player or opponent when they run out of
-          seconds per move.
+          time per move.
         </template>
       </UserOption>
       <!-- Checkboard -->
