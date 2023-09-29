@@ -1,7 +1,7 @@
 import { type Ref } from "vue";
 import type { PlayerColor } from "./pieces/piece";
 import type BoardStateData from "./user_data/board_state";
-import type { PreferredPlayerColorValue } from "./user_data/preferred_player_color";
+import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
 import GameBoardManager from "./game_board_manager";
 
@@ -20,7 +20,7 @@ class Game {
     private readonly defaultBoardStateData: BoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
     private readonly playerPlaying: Ref<boolean>,
-    private readonly preferredPlayerColor: Ref<PreferredPlayerColorValue>
+    private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>
   ) {
     this.gameBoardManager.addEventListener("move", () => this.onMoveEnd());
   }

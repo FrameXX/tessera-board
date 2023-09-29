@@ -21,8 +21,8 @@ import PiecePaddingData from "./modules/user_data/piece_padding";
 import PieceBorderData from "./modules/user_data/piece_border";
 import TransitionDurationData from "./modules/user_data/transition_duration";
 import CellIndexOpacityData from "./modules/user_data/cell_index_opacity";
-import PreferredPlayerColorData, {
-  type PreferredPlayerColorValue,
+import PlayerColorOptionData, {
+  type PlayerColorOptionValue,
 } from "./modules/user_data/preferred_player_color";
 import OpponentOverLanData from "./modules/user_data/opponent_over_lan";
 import SecondCheckboardData from "./modules/user_data/second_checkboard";
@@ -161,8 +161,7 @@ const DEFAULT_OPPONENT_OVER_LAN_VALUE = false;
 const DEFAULT_PIECE_BORDER_VALUE = 1.1;
 const DEFAULT_PIECE_PADDING_VALUE = 6;
 const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "material_design";
-const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PreferredPlayerColorValue =
-  "random";
+const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PlayerColorOptionValue = "random";
 const DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE = false;
 const DEFAULT_ROTATE_SCREEN_VALUE = false;
 const DEFAULT_SECOND_CHECKBOARD_VALUE = false;
@@ -175,6 +174,7 @@ const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: PieceId[] = [];
 const DEFAULT_PLAYER_PLAYING_VALUE = true;
 const DEFAULT_GAME_PAUSED_VALUE = false;
 const DEFAULT_AUDIO_EFFECTS_VALUE = true;
+const DEFAULT_FIRST_MOVE_COLOR: PlayerColorOptionValue = "white";
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
@@ -229,6 +229,7 @@ const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
 const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
+const firstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 
 // Game specific
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
@@ -312,9 +313,16 @@ const userDataManager = new UserDataManager(
       cellIndexOpacity,
       toastManager
     ),
-    new PreferredPlayerColorData(
+    new PlayerColorOptionData(
+      "preferred_player_color",
       DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
       preferredPlayerColor,
+      toastManager
+    ),
+    new PlayerColorOptionData(
+      "first_move_color",
+      DEFAULT_FIRST_MOVE_COLOR,
+      firstMoveColor,
       toastManager
     ),
     new OpponentOverLanData(
@@ -646,6 +654,23 @@ const configPieceSelectOptions = computed(() => {
         <template #description
           >Defines how to punish the player or opponent when they run out of
           time per move.
+        </template>
+      </UserOption>
+      <!-- Other -->
+      <span class="section-title">Other</span>
+      <UserOption
+        name="First move color"
+        icon-id="numeric-1-box-outline"
+        option-id="first-move-color"
+      >
+        <select id="first-move-color" v-model="firstMoveColor">
+          <option value="random">Random</option>
+          <option value="white">White</option>
+          <option value="black">Black</option>
+        </select>
+        <template #description>
+          Defines which color makes the first move. According to official chess
+          rules white player should be the one to make the first move.
         </template>
       </UserOption>
       <!-- Checkboard -->
