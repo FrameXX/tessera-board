@@ -77,9 +77,20 @@ input[type="number"] {
   max-width: 80px;
 }
 
+input[type="search"] {
+  @include fill-availible;
+}
+
 select,
 button {
   @include clickable;
+}
+
+input,
+button {
+  &.single {
+    margin: var(--spacing-big) 0;
+  }
 }
 
 button {
@@ -92,10 +103,6 @@ button {
   background-color: var(--color-primary-surface-top);
   color: var(--color-primary-accent);
   padding: var(--spacing-tiny) var(--spacing-big);
-
-  &.single {
-    margin: var(--spacing-big) 0;
-  }
 
   &:hover:not(.checkbox),
   &:focus:not(.checkbox) {

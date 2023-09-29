@@ -187,6 +187,12 @@ watch(screenRotated, (newValue) => {
 updateScreenRotation(screenRotated.value);
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
+const configsNameFilter = ref("");
+const filteredConfigsPrints = computed(() => {
+  return configsDialog.props.configsPrints.filter((print) =>
+    print.name.toLowerCase().includes(configsNameFilter.value.toLowerCase())
+  );
+});
 const playerCellMarks: MarkBoardState = reactive(
   Array(8)
     .fill(null)
@@ -1045,6 +1051,15 @@ const configPieceSelectOptions = computed(() => {
     @close="escapeManager.removeLayer()"
     @backdrop-click="configsDialog.cancel()"
   >
+    <input
+      type="search"
+      class="single"
+      placeholder="Search configs names"
+      v-model="configsNameFilter"
+    />
+    <h3 v-show="!filteredConfigsPrints.length">
+      No config name includes the searched string.
+    </h3>
     <TransitionGroup name="opacity">
       <ConfigItem
         @delete="configsDialog.deleteConfig($event.id)"
@@ -1056,7 +1071,7 @@ const configPieceSelectOptions = computed(() => {
           )
         "
         @restore="configsDialog.restoreConfig($event.id, $event.predefined)"
-        v-for="print in configsDialog.props.configsPrints"
+        v-for="print in filteredConfigsPrints"
         :key="print.id"
         :id="print.id"
         :name="print.name"

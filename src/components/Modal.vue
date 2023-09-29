@@ -74,7 +74,6 @@ watch(
   @include shadow;
   @include round-border;
   z-index: var(--z-index-modal);
-  padding: var(--spacing-big);
   display: flex;
   flex-direction: column;
   background-color: var(--color-primary-surface);
@@ -83,6 +82,7 @@ watch(
   width: 450px;
 
   .content {
+    padding: var(--spacing-big);
     overflow-y: auto;
     overflow-x: hidden;
     width: 100%;
