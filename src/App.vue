@@ -1108,7 +1108,7 @@ const configPieceSelectOptions = computed(() => {
       id="input-config-name"
       ref="configNameInput"
       v-model="configPrintDialog.props.name"
-      placeholder="name"
+      placeholder="Name"
     />
     <label for="input-config-name"
       >Although the configuration name can be any string, even an already used
@@ -1116,7 +1116,7 @@ const configPieceSelectOptions = computed(() => {
       from another.</label
     >
     <textarea
-      placeholder="description"
+      placeholder="Description"
       id="input-config-description"
       v-model="configPrintDialog.props.description"
     />
