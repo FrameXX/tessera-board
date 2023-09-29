@@ -32,6 +32,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
   <div class="player-timers">
     <div id="player-timers-player">
       <SimpleInfo
+        content-role="timer"
         :class="`${props.playerSecsMove < 16 ? 'pulsing' : ''}`"
         name="move"
         v-show="props.playerSecsMove !== -1"
@@ -41,23 +42,38 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           getDigitStr(playerTimeMove.secs)
         }}</SimpleInfo
       >
-      <SimpleInfo name="match" v-show="props.playerSecsMatch !== -1">{{
-        getDigitStr(playerTimeMatch.mins) +
-        ":" +
-        getDigitStr(playerTimeMatch.secs)
-      }}</SimpleInfo>
+      <SimpleInfo
+        content-role="timer"
+        name="match"
+        v-show="props.playerSecsMatch !== -1"
+        >{{
+          getDigitStr(playerTimeMatch.mins) +
+          ":" +
+          getDigitStr(playerTimeMatch.secs)
+        }}</SimpleInfo
+      >
     </div>
     <div id="player-timers-opponent">
-      <SimpleInfo name="move" v-show="props.opponentSecsMatch !== -1">{{
-        getDigitStr(opponentTimeMove.mins) +
-        ":" +
-        getDigitStr(opponentTimeMove.secs)
-      }}</SimpleInfo>
-      <SimpleInfo name="match" v-show="props.opponentSecsMatch !== -1">{{
-        getDigitStr(opponentTimeMatch.mins) +
-        ":" +
-        getDigitStr(opponentTimeMatch.secs)
-      }}</SimpleInfo>
+      <SimpleInfo
+        content-role="timer"
+        name="move"
+        v-show="props.opponentSecsMatch !== -1"
+        >{{
+          getDigitStr(opponentTimeMove.mins) +
+          ":" +
+          getDigitStr(opponentTimeMove.secs)
+        }}</SimpleInfo
+      >
+      <SimpleInfo
+        content-role="timer"
+        name="match"
+        v-show="props.opponentSecsMatch !== -1"
+        >{{
+          getDigitStr(opponentTimeMatch.mins) +
+          ":" +
+          getDigitStr(opponentTimeMatch.secs)
+        }}</SimpleInfo
+      >
     </div>
   </div>
 </template>

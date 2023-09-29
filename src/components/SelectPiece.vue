@@ -39,14 +39,15 @@ function selectPiece(piece: RawPiece) {
 </script>
 
 <template>
-  <div role="radiogroup" class="select-piece-group">
+  <div role="select" class="select-piece-group">
     <div
       v-for="piece in props.pieces"
       @click="selectPiece(piece)"
       :class="{ selected: isSelected(piece) }"
+      :aria-selected="isSelected(piece)"
       tabindex="0"
       class="piece-option"
-      role="radio"
+      role="option"
     >
       <PieceIcon
         :piece-set="props.pieceSet"

@@ -1,13 +1,16 @@
 <script lang="ts" setup>
 import { capitalizeFirst } from "../modules/utils/misc";
 
-const props = defineProps({ name: { type: String, required: true } });
+const props = defineProps({
+  name: { type: String, required: true },
+  contentRole: { type: String },
+});
 </script>
 
 <template>
   <div class="simple-info">
     <div class="name">{{ capitalizeFirst(props.name) }}</div>
-    <div class="content">
+    <div class="content" :role="props.contentRole">
       <slot></slot>
     </div>
   </div>

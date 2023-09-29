@@ -597,9 +597,9 @@ const configPieceSelectOptions = computed(() => {
       <UserOption
         name="Player time per move"
         icon-id="timer-outline"
-        option-id="input-player-seconds-per-move"
+        option-id="minutes-input-player-seconds-per-move"
       >
-        <TimeDurationInput id="input-player-seconds-per-movee" />
+        <TimeDurationInput id="input-player-seconds-per-move" />
         <template #description
           >Limits player's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
@@ -609,7 +609,7 @@ const configPieceSelectOptions = computed(() => {
       <UserOption
         name="Opponent time per move"
         icon-id="timer-outline"
-        option-id="input-opponent-seconds-per-move"
+        option-id="minutes-input-opponent-seconds-per-move"
       >
         <TimeDurationInput id="input-opponent-seconds-per-move" />
         <template #description
@@ -621,7 +621,7 @@ const configPieceSelectOptions = computed(() => {
       <UserOption
         name="Player time per match"
         icon-id="clock-outline"
-        option-id="input-player-seconds-per-match"
+        option-id="minutes-input-player-seconds-per-match"
       >
         <TimeDurationInput id="input-player-seconds-per-match" />
         <template #description
