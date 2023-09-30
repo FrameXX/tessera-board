@@ -3,9 +3,9 @@ import BoardManager from "./board_manager";
 import type {
   BoardPieceProps,
   MarkBoardState,
-  BooleanBoardState,
   BoardPosition,
 } from "../components/Board.vue";
+import type { BooleanBoardState } from "./user_data/boolean_board_state";
 import type { Piece, PieceId } from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";

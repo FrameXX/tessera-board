@@ -101,6 +101,9 @@ export class SelectUserData<
     if (this.validate(dumped)) {
       this.value = dumped;
     } else {
+      console.error(
+        `An error occured while trying to parse select user data ${this.id}.`
+      );
       this.handleInvalidLoadValue(dumped);
     }
   }

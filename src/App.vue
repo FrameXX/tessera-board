@@ -29,6 +29,7 @@ import SecondCheckboardData from "./modules/user_data/second_checkboard";
 import RotateScreenData from "./modules/user_data/rotate_screen";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 import CapturedPiecesData from "./modules/user_data/captured_pieces";
+import BooleanBoardStateData from "./modules/user_data/boolean_board_state";
 
 // Import other classes and functions
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -48,7 +49,8 @@ import {
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { MarkBoardState, BooleanBoardState } from "./components/Board.vue";
+import type { MarkBoardState } from "./components/Board.vue";
+import type { BooleanBoardState } from "./modules/user_data/boolean_board_state";
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
@@ -387,6 +389,12 @@ const userDataManager = new UserDataManager(
       DEFAULT_BLACK_CAPTURED_PIECES_VALUE,
       blackCapturedPieces,
       "black",
+      toastManager
+    ),
+    new BooleanBoardStateData(
+      "highlighted_cells",
+      highlightedCells,
+      highlightedCells,
       toastManager
     ),
     defaultBoardStateData,

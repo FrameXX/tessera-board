@@ -8,9 +8,9 @@ import BoardPiece from "./BoardPiece.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
+import type { BooleanBoardState } from "../modules/user_data/boolean_board_state";
 
 export type MarkBoardState = (Mark | null)[][];
-export type BooleanBoardState = boolean[][];
 
 export interface BoardPosition {
   row: number;

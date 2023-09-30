@@ -33,22 +33,28 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
         error
       );
       this.handleInvalidLoadValue(dumped);
+      return;
+    }
+    if (!Array.isArray(value)) {
+      console.error("The parsed value of board state is not an array");
+      this.handleInvalidLoadValue(dumped);
     }
     for (const rowIndex in value) {
       for (const colIndex in value[rowIndex]) {
         const pieceObject = value[rowIndex][colIndex];
-        if (pieceObject) {
-          if (!isRawPiece(pieceObject)) {
-            console.error(
-              `Could not restore piece of ${this.id} on row ${rowIndex}, ${colIndex}. The piece does not match its type. Data are invalid or corrupted. Setting piece to null.`
-            );
-            value[rowIndex][colIndex] = null;
-            continue;
-          }
-          const piece = getPieceFromRaw(pieceObject);
-          if (!fromRaw) piece.loadCustomProps(pieceObject);
-          value[rowIndex][colIndex] = piece;
+        if (!pieceObject) {
+          continue;
         }
+        if (!isRawPiece(pieceObject)) {
+          console.error(
+            `Could not restore piece of ${this.id} on row ${rowIndex}, ${colIndex}. The piece does not match its type. Data are invalid or corrupted. Setting piece to null.`
+          );
+          value[rowIndex][colIndex] = null;
+          continue;
+        }
+        const piece = getPieceFromRaw(pieceObject);
+        if (!fromRaw) piece.loadCustomProps(pieceObject);
+        value[rowIndex][colIndex] = piece;
       }
     }
     this.value = value;

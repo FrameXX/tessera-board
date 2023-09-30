@@ -1,9 +1,6 @@
 import type { Ref } from "vue";
-import type {
-  BoardPosition,
-  BooleanBoardState,
-  MarkBoardState,
-} from "../../components/Board.vue";
+import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
+import type { BooleanBoardState } from "../user_data/boolean_board_state";
 import type { BoardPositionValue, PieceId } from "../pieces/piece";
 import type { BoardStateValue } from "../user_data/board_state";
 import Move, { highlightBoardPosition } from "./move";
