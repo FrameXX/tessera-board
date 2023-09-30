@@ -10,8 +10,8 @@ import Piece, {
 import { type PlayerColor } from "./piece";
 
 export class King extends Piece {
-  constructor(color: PlayerColor) {
-    super(color, "king");
+  constructor(color: PlayerColor, id?: string) {
+    super(color, "king", id);
   }
 
   public getCapturingPositions(

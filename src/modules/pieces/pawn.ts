@@ -22,8 +22,8 @@ function isRawPawn(rawPiece: RawPiece): rawPiece is RawPawn {
 export class Pawn extends Piece {
   private hasMoved: boolean = false;
 
-  constructor(color: PlayerColor) {
-    super(color, "pawn");
+  constructor(color: PlayerColor, id?: string) {
+    super(color, "pawn", id);
   }
 
   private get transformOptions(): [RawPiece, ...RawPiece[]] {

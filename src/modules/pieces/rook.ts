@@ -14,8 +14,8 @@ import {
 } from "./piece";
 
 export class Rook extends Piece {
-  constructor(color: PlayerColor) {
-    super(color, "rook");
+  constructor(color: PlayerColor, id?: string) {
+    super(color, "rook", id);
   }
 
   public getCapturingPositions(

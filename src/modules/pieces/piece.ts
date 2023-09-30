@@ -37,9 +37,10 @@ export abstract class Piece {
 
   constructor(
     public readonly color: PlayerColor,
-    public readonly pieceId: PieceId
+    public readonly pieceId: PieceId,
+    id?: string
   ) {
-    this.id = getRandomId();
+    id ? (this.id = id) : (this.id = getRandomId());
   }
 
   // Every piece can override this method and possibly load some custom properties from the restored raw piece object.

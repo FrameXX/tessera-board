@@ -17,6 +17,7 @@ export interface RawPiece {
   [extra: string]: any;
   pieceId: PieceId;
   color: PlayerColor;
+  id?: string;
 }
 
 export function isRawPiece(object: any): object is RawPiece {
@@ -36,29 +37,29 @@ export function isRawPiece(object: any): object is RawPiece {
 }
 
 export function getRawPiece(piece: Piece): RawPiece {
-  return { color: piece.color, pieceId: piece.pieceId };
+  return { color: piece.color, pieceId: piece.pieceId, id: piece.id };
 }
 
 export function getPieceFromRaw(genericPiece: RawPiece): Piece {
   let piece: Piece | null;
   switch (genericPiece.pieceId) {
     case "bishop":
-      piece = new Bishop(genericPiece.color);
+      piece = new Bishop(genericPiece.color, genericPiece.id);
       break;
     case "king":
-      piece = new King(genericPiece.color);
+      piece = new King(genericPiece.color, genericPiece.id);
       break;
     case "knight":
-      piece = new Knight(genericPiece.color);
+      piece = new Knight(genericPiece.color, genericPiece.id);
       break;
     case "pawn":
-      piece = new Pawn(genericPiece.color);
+      piece = new Pawn(genericPiece.color, genericPiece.id);
       break;
     case "queen":
-      piece = new Queen(genericPiece.color);
+      piece = new Queen(genericPiece.color, genericPiece.id);
       break;
     case "rook":
-      piece = new Rook(genericPiece.color);
+      piece = new Rook(genericPiece.color, genericPiece.id);
       break;
     default:
       throw new UserDataError(
