@@ -3,7 +3,7 @@ import type ToastManager from "../toast_manager";
 import type { BoardStateValue } from "./board_state";
 import { getRawPiece, isRawPiece, getPieceFromRaw } from "../pieces/rawPiece";
 
-class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
+class RawBoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     value: BoardStateValue,
     valueReactive: BoardStateValue,
@@ -52,4 +52,4 @@ class GenericBoardStateData extends ComplexUserData<BoardStateValue> {
   }
 }
 
-export default GenericBoardStateData;
+export default RawBoardStateData;

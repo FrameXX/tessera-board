@@ -55,7 +55,7 @@ import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
 import Game from "./modules/game";
-import GenericBoardStateData from "./modules/user_data/generic_board_state";
+import RawBoardStateData from "./modules/user_data/generic_board_state";
 import { PieceId } from "./modules/pieces/piece";
 import Bishop from "./modules/pieces/bishop";
 import King from "./modules/pieces/king";
@@ -282,7 +282,7 @@ const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 
 // Data
-const defaultBoardStateData = new GenericBoardStateData(
+const defaultBoardStateData = new RawBoardStateData(
   DEFAULT_DEFAULT_BOARD_STATE_VALUE,
   defaultBoardState,
   toastManager
