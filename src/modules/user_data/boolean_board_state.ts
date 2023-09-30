@@ -8,9 +8,10 @@ class BooleanBoardStateData extends ComplexUserData<BooleanBoardState> {
     id: string,
     value: BooleanBoardState,
     reactiveValue: BooleanBoardState,
-    toastManager: ToastManager
+    toastManager: ToastManager,
+    autoSave: boolean = true
   ) {
-    super(id, value, reactiveValue, toastManager);
+    super(id, value, reactiveValue, toastManager, autoSave);
   }
 
   get numberVersion() {

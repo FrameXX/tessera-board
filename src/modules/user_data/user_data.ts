@@ -165,13 +165,16 @@ export abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
     id: string,
     value: ValueType,
     protected reactiveValue: ValueType,
-    toastManager: ToastManager
+    toastManager: ToastManager,
+    autoSave: boolean = true
   ) {
     super(id, value, toastManager);
 
-    watch(reactiveValue!, (newValue) => {
-      this.onValueChange(newValue);
-    });
+    if (autoSave) {
+      watch(reactiveValue!, (newValue) => {
+        this.onValueChange(newValue);
+      });
+    }
   }
 
   // HACK: Value of reactive is a proxy. To get the original value toRaw built-in Vue function is used to extract the real value.

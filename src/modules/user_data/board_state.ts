@@ -9,9 +9,10 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     value: BoardStateValue,
     reactiveValue: BoardStateValue,
-    toastManager: ToastManager
+    toastManager: ToastManager,
+    autoSave: boolean = true
   ) {
-    super("game_board_state", value, reactiveValue, toastManager);
+    super("game_board_state", value, reactiveValue, toastManager, autoSave);
   }
 
   public dump(): string {
