@@ -57,12 +57,36 @@ export abstract class Piece {
     this.possibleMovesCache = undefined;
   }
 
-  public abstract getCapturingPositions(
+  public getCapturingPositions(
+    position: BoardPosition,
+    boardStateValue: BoardStateValue
+  ): BoardPosition[] {
+    if (!this.capturingPositionsCache)
+      this.capturingPositionsCache = this.getNewCapturingPositions(
+        position,
+        boardStateValue
+      );
+    return this.capturingPositionsCache;
+  }
+
+  public abstract getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): BoardPosition[];
 
-  public abstract getPossibleMoves(
+  public getPossibleMoves(
+    position: BoardPosition,
+    boardStateValue: BoardStateValue
+  ): Move[] {
+    if (!this.possibleMovesCache)
+      this.possibleMovesCache = this.getNewPossibleMoves(
+        position,
+        boardStateValue
+      );
+    return this.possibleMovesCache;
+  }
+
+  public abstract getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Move[];

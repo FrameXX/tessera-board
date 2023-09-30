@@ -51,7 +51,7 @@ export class Pawn extends Piece {
     this.hasMoved = rawPiece.hasMoved;
   }
 
-  public getCapturingPositions(
+  public getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): BoardPosition[] {
@@ -71,7 +71,7 @@ export class Pawn extends Piece {
     return capturingPositions;
   }
 
-  public getPossibleMoves(
+  public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Move[] {
@@ -106,7 +106,7 @@ export class Pawn extends Piece {
     }
 
     // Capture
-    const capturingPositions = this.getCapturingPositions(
+    const capturingPositions = this.getNewCapturingPositions(
       position,
       boardStateValue
     );

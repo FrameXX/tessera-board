@@ -12,7 +12,7 @@ export class Queen extends Piece {
     super(color, "queen", id);
   }
 
-  public getCapturingPositions(
+  public getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): BoardPosition[] {
@@ -20,18 +20,18 @@ export class Queen extends Piece {
     const rook = new Rook(this.color);
     const bishop = new Bishop(this.color);
     const capturingPositions: BoardPosition[] = [
-      ...rook.getCapturingPositions(position, boardStateValue),
-      ...bishop.getCapturingPositions(position, boardStateValue),
+      ...rook.getNewCapturingPositions(position, boardStateValue),
+      ...bishop.getNewCapturingPositions(position, boardStateValue),
     ];
     return capturingPositions;
   }
 
-  public getPossibleMoves(
+  public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Move[] {
     const moves: Move[] = [];
-    const capturingPositions = this.getCapturingPositions(
+    const capturingPositions = this.getNewCapturingPositions(
       position,
       boardStateValue
     );

@@ -6,14 +6,12 @@ import type {
   BoardPosition,
 } from "../components/Board.vue";
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
-import type { Piece, PieceId } from "./pieces/piece";
+import type { PieceId } from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
 import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
-import { getPieceFromRaw, type RawPiece } from "./pieces/rawPiece";
-import { getElementInstanceById, waitForTransitionEnd } from "./utils/elements";
 import { isMoveShift } from "./moves/shift";
 import { isMoveTransform } from "./moves/transform";
 
@@ -69,6 +67,17 @@ class GameBoardManager extends BoardManager {
       this.playerHighlightedPieces[this.selectedPieceProps.row][
         this.selectedPieceProps.col
       ] = false;
+    }
+  }
+
+  private invalidatePiecesCache() {
+    for (const rowIndex in this.boardStateValue) {
+      for (const colIndex in this.boardStateValue[rowIndex]) {
+        const piece = this.boardStateValue[rowIndex][colIndex];
+        if (piece) {
+          piece.invalidateCache();
+        }
+      }
     }
   }
 
@@ -177,6 +186,7 @@ class GameBoardManager extends BoardManager {
       );
     }
     this.dispatchEvent(new Event("move"));
+    this.invalidatePiecesCache();
   }
 
   public resetBoard() {

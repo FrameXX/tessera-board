@@ -14,7 +14,7 @@ export class King extends Piece {
     super(color, "king", id);
   }
 
-  public getCapturingPositions(
+  public getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): BoardPosition[] {
@@ -38,7 +38,7 @@ export class King extends Piece {
     return capturingPositions;
   }
 
-  public getPossibleMoves(
+  public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Move[] {

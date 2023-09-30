@@ -15,7 +15,7 @@ export class Bishop extends Piece {
     super(color, "bishop", id);
   }
 
-  public getCapturingPositions(
+  public getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): BoardPosition[] {
@@ -45,12 +45,12 @@ export class Bishop extends Piece {
     return capturingPositions;
   }
 
-  public getPossibleMoves(
+  public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Move[] {
     const moves: Move[] = [];
-    const capturingPositions = this.getCapturingPositions(
+    const capturingPositions = this.getNewCapturingPositions(
       position,
       boardStateValue
     );
