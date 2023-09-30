@@ -26,7 +26,7 @@ export interface BoardPositionValue extends BoardPosition {
   value: Piece | null;
 }
 
-export interface BoardPositionPath {
+export interface Path {
   origin: BoardPosition;
   target: BoardPosition;
 }
@@ -78,13 +78,13 @@ export abstract class Piece {
   public getPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    opponentCapturingPositionsPaths: BoardPositionPath[]
+    opponentCapturingPaths: Path[]
   ): Move[] {
     if (!this.possibleMovesCache)
       this.possibleMovesCache = this.getNewPossibleMoves(
         position,
         boardStateValue,
-        opponentCapturingPositionsPaths
+        opponentCapturingPaths
       );
     return this.possibleMovesCache;
   }
@@ -92,7 +92,7 @@ export abstract class Piece {
   public abstract getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    opponentCapturingPositionsPaths: BoardPositionPath[]
+    opponentCapturingPaths: Path[]
   ): Move[];
 }
 
@@ -127,13 +127,18 @@ export function isTargetOnBoard(target: BoardPosition) {
   );
 }
 
+export function getTargetMatchingPaths(
+  target: BoardPosition,
+  capturingPaths: Path[]
+) {
+  return capturingPaths.filter((path) => positionsEqual(path.target, target));
+}
+
 export function targetWillBeCaptured(
   target: BoardPosition,
-  capturingPositionsPaths: BoardPositionPath[]
+  capturingPaths: Path[]
 ): boolean {
-  const matchingPositions = capturingPositionsPaths.filter((path) =>
-    positionsEqual(path.target, target)
-  );
+  const matchingPositions = getTargetMatchingPaths(target, capturingPaths);
   return matchingPositions.length !== 0;
 }
 

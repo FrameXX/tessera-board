@@ -488,6 +488,7 @@ onMounted(() => {
 
   // Let the app wait another 600ms to make sure its fully loaded.
   setTimeout(() => {
+    gameBoardManager.updateCapturingPaths();
     splashscreenManager.hideSplashscreen();
   }, 600);
 });
@@ -527,7 +528,7 @@ const configPieceSelectOptions = computed(() => {
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         primary
-        id="primary-board"
+        id="player-board"
       />
       <Board
         v-if="secondCheckboard"
@@ -542,7 +543,7 @@ const configPieceSelectOptions = computed(() => {
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         primary
-        id="primary-board"
+        id="opponent-board"
       />
     </div>
     <div class="captured-pieces-placeholder"></div>

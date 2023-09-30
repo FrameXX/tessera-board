@@ -8,7 +8,7 @@ import Piece, {
   isFriendlyPiece,
   getTargetPiece,
   type BoardPositionValue,
-  type BoardPositionPath,
+  type Path,
   targetWillBeCaptured,
 } from "./piece";
 import { type PlayerColor } from "./piece";
@@ -38,13 +38,13 @@ export class King extends Piece {
   public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    opponentCapturingPositionsPaths: BoardPositionPath[]
+    opponentCapturingPaths: Path[]
   ): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getNewCapturingPositions(position);
 
     for (const target of capturingPositions) {
-      if (targetWillBeCaptured(target, opponentCapturingPositionsPaths)) {
+      if (targetWillBeCaptured(target, opponentCapturingPaths)) {
         continue;
       }
       let captures: BoardPositionValue | undefined = undefined;

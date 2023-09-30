@@ -2,11 +2,7 @@ import type { BoardPosition } from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
-import Piece, {
-  BoardPositionPath,
-  getTargetPiece,
-  isFriendlyPiece,
-} from "./piece";
+import Piece, { Path, getTargetPiece, isFriendlyPiece } from "./piece";
 import {
   type BoardPositionValue,
   type PlayerColor,
@@ -60,7 +56,7 @@ export class Bishop extends Piece {
       let captures: BoardPositionValue | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
-        break;
+        continue;
       }
       if (piece) captures = { ...target, value: piece };
       moves.push(new Shift(this.pieceId, position, target, captures));

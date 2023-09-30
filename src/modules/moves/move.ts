@@ -57,7 +57,12 @@ export async function movePositionValue(
   }
   boardStateValue[target.row][target.col] = piece;
   boardStateValue[origin.row][origin.col] = null;
-  const pieceElement = getElementInstanceById(`piece-${piece.id}`, SVGElement);
+  const board = getElementInstanceById("player-board");
+  const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);
+  if (!(pieceElement instanceof SVGElement)) {
+    console.error(`Could not find piece element of piece ${piece.id}`);
+    return;
+  }
   await waitForTransitionEnd(pieceElement);
 }
 

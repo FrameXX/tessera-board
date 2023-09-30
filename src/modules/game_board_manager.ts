@@ -6,7 +6,11 @@ import type {
   BoardPosition,
 } from "../components/Board.vue";
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
-import type { BoardPositionPath, PieceId } from "./pieces/piece";
+import {
+  getTargetMatchingPaths,
+  type Path,
+  type PieceId,
+} from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
@@ -14,12 +18,13 @@ import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
 import { isMoveTransform } from "./moves/transform";
+import { getElementInstanceById } from "./utils/elements";
 
 class GameBoardManager extends BoardManager {
   private _selectedPieceProps: BoardPieceProps | null = null;
   private availibleMoves: Move[] = [];
-  private whiteCapturingPositionsPaths?: BoardPositionPath[];
-  private blackCapturingPositionsPaths?: BoardPositionPath[];
+  private whiteCapturingPaths: Path[] = [];
+  private blackCapturingPaths: Path[] = [];
 
   constructor(
     private readonly boardStateData: BoardStateData,
@@ -37,7 +42,6 @@ class GameBoardManager extends BoardManager {
     private readonly pieceRemoveAudioEffect: Howl
   ) {
     super();
-    this.updateCapturingPositionsPaths();
   }
 
   private clearHihlightedCellsPositions() {
@@ -108,21 +112,13 @@ class GameBoardManager extends BoardManager {
     }
 
     if (pieceProps) {
-      if (
-        !this.whiteCapturingPositionsPaths ||
-        !this.blackCapturingPositionsPaths
-      ) {
-        throw new GameLogicError(
-          "White capturing pieces paths or black capturing pieces paths are not defined."
-        );
-      }
       this.playerHighlightedPieces[pieceProps.row][pieceProps.col] = true;
       const moves = pieceProps.piece.getPossibleMoves(
         pieceProps,
         this.boardStateValue,
         pieceProps.piece.color === "white"
-          ? this.blackCapturingPositionsPaths
-          : this.whiteCapturingPositionsPaths
+          ? this.blackCapturingPaths
+          : this.whiteCapturingPaths
       );
       moves.forEach((move) =>
         move.showCellMarks(this.playerCellMarks, this.boardStateValue)
@@ -201,17 +197,17 @@ class GameBoardManager extends BoardManager {
     }
     this.dispatchEvent(new Event("move"));
     this.invalidatePiecesCache();
-    this.updateCapturingPositionsPaths();
+    this.updateCapturingPaths();
   }
 
   private getCapturingPositionPath(
     position: BoardPosition,
     origin: BoardPosition
-  ): BoardPositionPath {
+  ): Path {
     return { origin: origin, target: position };
   }
 
-  private transformToPositionsPaths(
+  private transformToPaths(
     boardPositions: BoardPosition[],
     origin: BoardPosition
   ) {
@@ -220,9 +216,9 @@ class GameBoardManager extends BoardManager {
     );
   }
 
-  private updateCapturingPositionsPaths() {
-    let whiteCapturingPositionsPaths: BoardPositionPath[] = [];
-    let blackCapturingPositionsPaths: BoardPositionPath[] = [];
+  public updateCapturingPaths() {
+    let whiteCapturingPaths: Path[] = [];
+    let blackCapturingPaths: Path[] = [];
     for (const rowIndex in this.boardStateValue) {
       for (const colIndex in this.boardStateValue[rowIndex]) {
         const piece = this.boardStateValue[rowIndex][colIndex];
@@ -234,17 +230,17 @@ class GameBoardManager extends BoardManager {
           col: +colIndex,
         };
         if (piece.color === "white") {
-          whiteCapturingPositionsPaths = [
-            ...whiteCapturingPositionsPaths,
-            ...this.transformToPositionsPaths(
+          whiteCapturingPaths = [
+            ...whiteCapturingPaths,
+            ...this.transformToPaths(
               piece.getCapturingPositions(origin, this.boardStateValue),
               origin
             ),
           ];
         } else {
-          blackCapturingPositionsPaths = [
-            ...blackCapturingPositionsPaths,
-            ...this.transformToPositionsPaths(
+          blackCapturingPaths = [
+            ...blackCapturingPaths,
+            ...this.transformToPaths(
               piece.getCapturingPositions(origin, this.boardStateValue),
               origin
             ),
@@ -252,8 +248,8 @@ class GameBoardManager extends BoardManager {
         }
       }
     }
-    this.whiteCapturingPositionsPaths = whiteCapturingPositionsPaths;
-    this.blackCapturingPositionsPaths = blackCapturingPositionsPaths;
+    this.whiteCapturingPaths = whiteCapturingPaths;
+    this.blackCapturingPaths = blackCapturingPaths;
   }
 
   public resetBoard() {
@@ -261,7 +257,7 @@ class GameBoardManager extends BoardManager {
     this.clearHihlightedCellsPositions();
     this.clearCapturedPieces();
     this.invalidatePiecesCache();
-    this.updateCapturingPositionsPaths();
+    this.updateCapturingPaths();
   }
 
   // Called by Board component
@@ -278,6 +274,46 @@ class GameBoardManager extends BoardManager {
     }
 
     this.selectedPieceProps = boardPiece;
+  }
+
+  private showCapturingPieces(target: BoardPosition) {
+    const keyframes: Keyframe[] = [
+      { transform: "rotate(20deg)" },
+      { transform: "rotate(-20deg)" },
+      { transform: "rotate(20deg)" },
+      { transform: "rotate(-20deg)" },
+      { transform: "rotate(0deg)" },
+    ];
+    const board = getElementInstanceById("player-board");
+    const paths = getTargetMatchingPaths(target, [
+      ...this.whiteCapturingPaths,
+      ...this.blackCapturingPaths,
+    ]);
+    for (const path of paths) {
+      const origin = path.origin;
+      const piece = this.boardStateValue[origin.row][origin.col];
+      if (!piece) {
+        console.error(
+          `Path is defined from an origin that has no piece. Origin: ${origin}`
+        );
+        continue;
+      }
+      const element = board.querySelector(`[data-id="piece-${piece.id}"]`);
+      if (!element) {
+        console.error(
+          `Element of piece ${piece.id} could not be found in DOM.`
+        );
+        continue;
+      }
+      const parentElement = element.parentElement;
+      if (!parentElement) {
+        console.error(
+          `Parent element of piece ${piece.id} could not be found in DOM.`
+        );
+        continue;
+      }
+      parentElement.animate(keyframes, 400);
+    }
   }
 
   // Called by Board component
@@ -299,6 +335,7 @@ class GameBoardManager extends BoardManager {
 
     // Unselect piece
     this.selectedPieceProps = null;
+    this.showCapturingPieces(position);
   }
 }
 

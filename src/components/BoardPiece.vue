@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
     :style="`transform-origin: ${originX}px ${originY}px`"
   >
     <PieceIcon
-      :id="`piece-${props.piece.id}`"
+      :data-id="`piece-${props.piece.id}`"
       ref="element"
       class="piece"
       :class="[{ highlighted: props.highlighted }, props.piece.color]"

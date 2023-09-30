@@ -34,12 +34,22 @@ export function repaintElement(...elements: Element[]): void {
   }
 }
 
+export function areTransitionsDisabled(): boolean {
+  return (
+    DOMRoot.style.getPropertyValue("--transition-duration-multiplier") === "0"
+  );
+}
+
 export async function waitForTransitionEnd(
   element: HTMLElement | SVGElement,
   propertyName?: string,
   abortionTimoutMs: number = 1000
 ): Promise<void> {
   return new Promise((resolve) => {
+    if (areTransitionsDisabled()) {
+      resolve();
+      return;
+    }
     const abortionTimeout = setTimeout(() => {
       resolve();
       console.warn(

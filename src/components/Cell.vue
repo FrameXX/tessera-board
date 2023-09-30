@@ -53,8 +53,6 @@ const markIconId = computed(() => {
 
 <template>
   <td
-    :data-row="props.row"
-    :data-col="props.col"
     :class="`cell ${cornerClass} ${cellIsWhite ? 'white' : 'black'}`"
     tabindex="0"
     role="gridcell"
