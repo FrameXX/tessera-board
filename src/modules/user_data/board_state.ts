@@ -15,13 +15,14 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
     super("game_board_state", value, reactiveValue, toastManager, autoSave);
   }
 
-  public dump(): string {
-    // Save piece as GamePiece
-    return JSON.stringify(
-      this.value.map((row) =>
-        row.map((piece) => (piece ? piece.dumpObject() : null))
-      )
+  get rawVersion() {
+    return this.value.map((row) =>
+      row.map((piece) => (piece ? piece.dumpObject() : null))
     );
+  }
+
+  public dump(): string {
+    return JSON.stringify(this.rawVersion);
   }
 
   public load(dumped: string, fromRaw: boolean = false): void {

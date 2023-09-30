@@ -454,7 +454,8 @@ const game = new Game(
   defaultBoardStateData,
   playerColor,
   playerPlaying,
-  preferredPlayerColor
+  preferredPlayerColor,
+  toastManager
 );
 
 // Load data

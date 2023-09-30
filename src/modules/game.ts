@@ -4,6 +4,7 @@ import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
 import GameBoardManager from "./game_board_manager";
+import ToastManager from "./toast_manager";
 
 export class GameLogicError extends Error {
   constructor(message: string) {
@@ -20,7 +21,8 @@ class Game {
     private readonly defaultBoardStateData: BoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
     private readonly playerPlaying: Ref<boolean>,
-    private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>
+    private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,
+    private readonly toastManager: ToastManager
   ) {
     this.gameBoardManager.addEventListener("move", () => this.onMoveEnd());
   }
@@ -45,6 +47,7 @@ class Game {
     this.setupDefaultBoardState();
     this.choosePlayerColor();
     this.gameBoardManager.resetBoard();
+    this.toastManager.showToast("New match started.", "info", "flag-checkered");
   }
 
   public onMoveStart() {}

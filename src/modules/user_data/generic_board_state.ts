@@ -12,13 +12,14 @@ class RawBoardStateData extends ComplexUserData<BoardStateValue> {
     super("default_board_state", value, valueReactive, toastManager);
   }
 
-  public dump(): string {
-    // Save piece as GenericPiece
-    return JSON.stringify(
-      this.value.map((row) =>
-        row.map((piece) => (piece ? getRawPiece(piece) : null))
-      )
+  get rawVersion() {
+    return this.value.map((row) =>
+      row.map((piece) => (piece ? getRawPiece(piece) : null))
     );
+  }
+
+  public dump(): string {
+    return JSON.stringify(this.rawVersion);
   }
 
   public load(dumped: string): void {
