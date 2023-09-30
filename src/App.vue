@@ -504,6 +504,13 @@ const configPieceSelectOptions = computed(() => {
 <template>
   <!-- Relative -->
   <div id="game-area">
+    <a
+      tabindex="0"
+      href="#action-button"
+      id="skip-to-navigation"
+      title="Skip to navigation"
+      >Skip to navigation</a
+    >
     <Timers :player-secs-move="168" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
@@ -1176,6 +1183,26 @@ const configPieceSelectOptions = computed(() => {
 <style lang="scss">
 @import "./partials/mixins";
 @import "./partials/transitions";
+
+#skip-to-navigation {
+  box-shadow: var(--box-shadow);
+  position: fixed;
+  z-index: var(--z-index-splashscreen);
+  top: 0;
+  left: 0;
+  display: none;
+  border-radius: 0 0 var(--border-radius) 0;
+  padding: var(--spacing-small);
+  background-color: var(--color-primary-surface-top);
+  border: var(--color-primary-accent);
+  border-style: solid;
+  border-width: 0 var(--border-width) var(--border-width) 0;
+
+  &:focus,
+  &:active {
+    display: block;
+  }
+}
 
 #game-area {
   @include flex-center;

@@ -106,7 +106,7 @@ export class Pawn extends Piece {
     }
 
     // Capture
-    const capturingPositions = this.getNewCapturingPositions(
+    const capturingPositions = this.getCapturingPositions(
       position,
       boardStateValue
     );

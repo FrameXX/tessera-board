@@ -44,7 +44,7 @@ export class Knight extends Piece {
     boardStateValue: BoardStateValue
   ): Move[] {
     const moves: Move[] = [];
-    const capturingPositions = this.getNewCapturingPositions(
+    const capturingPositions = this.getCapturingPositions(
       position,
       boardStateValue
     );

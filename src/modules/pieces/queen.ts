@@ -20,8 +20,8 @@ export class Queen extends Piece {
     const rook = new Rook(this.color);
     const bishop = new Bishop(this.color);
     const capturingPositions: BoardPosition[] = [
-      ...rook.getNewCapturingPositions(position, boardStateValue),
-      ...bishop.getNewCapturingPositions(position, boardStateValue),
+      ...rook.getCapturingPositions(position, boardStateValue),
+      ...bishop.getCapturingPositions(position, boardStateValue),
     ];
     return capturingPositions;
   }

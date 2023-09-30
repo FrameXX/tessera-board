@@ -6,7 +6,7 @@ import type {
   BoardPosition,
 } from "../components/Board.vue";
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
-import type { PieceId } from "./pieces/piece";
+import type { BoardPositionPath, PieceId } from "./pieces/piece";
 import { GameLogicError } from "./game";
 import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
@@ -18,6 +18,8 @@ import { isMoveTransform } from "./moves/transform";
 class GameBoardManager extends BoardManager {
   private _selectedPieceProps: BoardPieceProps | null = null;
   private availibleMoves: Move[] = [];
+  private whiteCapturingPositionsPaths?: BoardPositionPath[];
+  private blackCapturingPositionsPaths?: BoardPositionPath[];
 
   constructor(
     private readonly boardStateData: BoardStateData,
@@ -187,12 +189,67 @@ class GameBoardManager extends BoardManager {
     }
     this.dispatchEvent(new Event("move"));
     this.invalidatePiecesCache();
+    this.updateCapturingPositionsPaths();
+  }
+
+  private getCapturingPositionPath(
+    position: BoardPosition,
+    origin: BoardPosition
+  ): BoardPositionPath {
+    return { origin: origin, target: position };
+  }
+
+  private transformToPositionsPaths(
+    boardPositions: BoardPosition[],
+    origin: BoardPosition
+  ) {
+    return boardPositions.map((position) =>
+      this.getCapturingPositionPath(position, origin)
+    );
+  }
+
+  private updateCapturingPositionsPaths() {
+    let whiteCapturingPositionsPaths: BoardPositionPath[] = [];
+    let blackCapturingPositionsPaths: BoardPositionPath[] = [];
+    for (const rowIndex in this.boardStateValue) {
+      for (const colIndex in this.boardStateValue[rowIndex]) {
+        const piece = this.boardStateValue[rowIndex][colIndex];
+        if (!piece) {
+          continue;
+        }
+        const origin: BoardPosition = {
+          row: +rowIndex,
+          col: +colIndex,
+        };
+        if (piece.color === "white") {
+          whiteCapturingPositionsPaths = [
+            ...whiteCapturingPositionsPaths,
+            ...this.transformToPositionsPaths(
+              piece.getCapturingPositions(origin, this.boardStateValue),
+              origin
+            ),
+          ];
+        } else {
+          blackCapturingPositionsPaths = [
+            ...blackCapturingPositionsPaths,
+            ...this.transformToPositionsPaths(
+              piece.getCapturingPositions(origin, this.boardStateValue),
+              origin
+            ),
+          ];
+        }
+      }
+    }
+    this.whiteCapturingPositionsPaths = whiteCapturingPositionsPaths;
+    this.blackCapturingPositionsPaths = blackCapturingPositionsPaths;
   }
 
   public resetBoard() {
     this.selectedPieceProps = null;
     this.clearHihlightedCellsPositions();
     this.clearCapturedPieces();
+    this.invalidatePiecesCache();
+    this.updateCapturingPositionsPaths();
   }
 
   // Called by Board component
