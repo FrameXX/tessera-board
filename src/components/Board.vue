@@ -177,7 +177,7 @@ function onCellClick(position: BoardPosition) {
         />
       </TransitionGroup>
 
-      <svg id="arrows">
+      <svg id="class">
         <line
           v-for="arrow in props.arrows"
           :x1="`${
@@ -249,7 +249,7 @@ function onCellClick(position: BoardPosition) {
   }
 }
 
-#arrows {
+.arrows {
   @include stretch;
   position: absolute;
   pointer-events: none;

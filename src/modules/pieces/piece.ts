@@ -1,4 +1,5 @@
 import type { BoardPosition } from "../../components/Board.vue";
+import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
@@ -76,19 +77,22 @@ export abstract class Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    opponentCapturingPositionsPaths: BoardPositionPath[]
   ): Move[] {
     if (!this.possibleMovesCache)
       this.possibleMovesCache = this.getNewPossibleMoves(
         position,
-        boardStateValue
+        boardStateValue,
+        opponentCapturingPositionsPaths
       );
     return this.possibleMovesCache;
   }
 
   public abstract getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    opponentCapturingPositionsPaths: BoardPositionPath[]
   ): Move[];
 }
 
@@ -121,6 +125,16 @@ export function isTargetOnBoard(target: BoardPosition) {
   return (
     target.row >= 0 && target.row <= 7 && target.col >= 0 && target.col <= 7
   );
+}
+
+export function targetWillBeCaptured(
+  target: BoardPosition,
+  capturingPositionsPaths: BoardPositionPath[]
+): boolean {
+  const matchingPositions = capturingPositionsPaths.filter((path) =>
+    positionsEqual(path.target, target)
+  );
+  return matchingPositions.length !== 0;
 }
 
 export const PIECE_IDS: PieceId[] = [

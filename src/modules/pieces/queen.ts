@@ -3,7 +3,7 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import { Bishop } from "./bishop";
-import Piece, { type BoardPositionValue } from "./piece";
+import Piece, { isFriendlyPiece, type BoardPositionValue } from "./piece";
 import { type PlayerColor } from "./piece";
 import Rook from "./rook";
 
@@ -39,6 +39,9 @@ export class Queen extends Piece {
     for (const target of capturingPositions) {
       let captures: BoardPositionValue | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
+      if (isFriendlyPiece(piece, this.color)) {
+        continue;
+      }
       if (piece) captures = { ...target, value: piece };
       moves.push(new Shift(this.pieceId, position, target, captures));
     }

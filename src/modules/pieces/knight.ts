@@ -15,10 +15,7 @@ export class Knight extends Piece {
     super(color, "knight", id);
   }
 
-  public getNewCapturingPositions(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue
-  ): BoardPosition[] {
+  public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
     for (const colDelta of [-2, -1, 1, 2]) {
       for (const rowDelta of [-2, -1, 1, 2]) {
@@ -27,10 +24,6 @@ export class Knight extends Piece {
         }
         const target = getTarget(position, colDelta, rowDelta);
         if (!isTargetOnBoard(target)) {
-          continue;
-        }
-        const piece = getTargetPiece(target, boardStateValue);
-        if (isFriendlyPiece(piece, this.color)) {
           continue;
         }
         capturingPositions.push(target);
@@ -52,6 +45,9 @@ export class Knight extends Piece {
     for (const target of capturingPositions) {
       let captures: BoardPositionValue | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
+      if (isFriendlyPiece(piece, this.color)) {
+        continue;
+      }
       if (piece) {
         captures = { ...target, value: piece };
       }

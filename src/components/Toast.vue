@@ -45,8 +45,9 @@ const props = defineProps({
   border-style: solid;
 
   &.info {
-    backdrop-filter: blur(5px) brightness(0.3);
     border-color: var(--color-primary-text);
+    background-color: var(--color-primary-surface-top);
+    color: var(--color-primary-text);
   }
 
   &.error {

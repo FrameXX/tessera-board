@@ -37,9 +37,6 @@ export class Rook extends Piece {
             break;
           }
           const piece = getTargetValue(target, boardStateValue);
-          if (isFriendlyPiece(piece, this.color)) {
-            break;
-          }
           capturingPositions.push(target);
           if (piece) {
             break;
@@ -64,6 +61,9 @@ export class Rook extends Piece {
     for (const target of capturingPositions) {
       let captures: BoardPositionValue | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
+      if (isFriendlyPiece(piece, this.color)) {
+        break;
+      }
       if (piece) captures = { ...target, value: piece };
       moves.push(new Shift(this.pieceId, position, target, captures));
     }

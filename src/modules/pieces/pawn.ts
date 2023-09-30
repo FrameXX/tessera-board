@@ -63,9 +63,6 @@ export class Pawn extends Piece {
         this.color === "white" ? 1 : -1
       );
       const piece = getTargetPiece(target, boardStateValue);
-      if (isFriendlyPiece(piece, this.color)) {
-        continue;
-      }
       capturingPositions.push(target);
     }
     return capturingPositions;
@@ -113,6 +110,9 @@ export class Pawn extends Piece {
     for (const target of capturingPositions) {
       const piece = getTargetPiece(target, boardStateValue);
       if (!piece) {
+        continue;
+      }
+      if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
       const captures: BoardPositionValue = {

@@ -502,15 +502,15 @@ const configPieceSelectOptions = computed(() => {
 </script>
 
 <template>
+  <a
+    tabindex="0"
+    href="#action-button"
+    id="skip-to-navigation"
+    title="Skip to navigation"
+    >Skip to navigation</a
+  >
   <!-- Relative -->
   <div id="game-area">
-    <a
-      tabindex="0"
-      href="#action-button"
-      id="skip-to-navigation"
-      title="Skip to navigation"
-      >Skip to navigation</a
-    >
     <Timers :player-secs-move="168" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">

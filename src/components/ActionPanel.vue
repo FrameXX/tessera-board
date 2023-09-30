@@ -24,17 +24,17 @@ watch(
   <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
   <Transition name="slide-up">
     <nav v-show="props.open">
-      <FastButton
-        @click="$emit('configureGame')"
-        icon-id="cog-outline"
-        title="Config game"
-      />
-      <FastButton icon-id="pause" title="Pause match" />
       <FastButton icon-id="flag" title="Resign" />
+      <FastButton icon-id="pause" title="Pause match" />
       <FastButton
         @click="$emit('restartGame')"
         icon-id="restart"
         title="New match"
+      />
+      <FastButton
+        @click="$emit('configureGame')"
+        icon-id="cog-outline"
+        title="Config game"
       />
       <div class="nav-placeholder"></div>
     </nav>

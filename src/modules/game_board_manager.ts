@@ -37,6 +37,7 @@ class GameBoardManager extends BoardManager {
     private readonly pieceRemoveAudioEffect: Howl
   ) {
     super();
+    this.updateCapturingPositionsPaths();
   }
 
   private clearHihlightedCellsPositions() {
@@ -107,10 +108,21 @@ class GameBoardManager extends BoardManager {
     }
 
     if (pieceProps) {
+      if (
+        !this.whiteCapturingPositionsPaths ||
+        !this.blackCapturingPositionsPaths
+      ) {
+        throw new GameLogicError(
+          "White capturing pieces paths or black capturing pieces paths are not defined."
+        );
+      }
       this.playerHighlightedPieces[pieceProps.row][pieceProps.col] = true;
       const moves = pieceProps.piece.getPossibleMoves(
         pieceProps,
-        this.boardStateValue
+        this.boardStateValue,
+        pieceProps.piece.color === "white"
+          ? this.blackCapturingPositionsPaths
+          : this.whiteCapturingPositionsPaths
       );
       moves.forEach((move) =>
         move.showCellMarks(this.playerCellMarks, this.boardStateValue)
@@ -318,7 +330,10 @@ function getMatchingPositions(
   );
 }
 
-function positionsEqual(position1: BoardPosition, position2: BoardPosition) {
+export function positionsEqual(
+  position1: BoardPosition,
+  position2: BoardPosition
+) {
   return position1.row === position2.row && position1.col === position2.col;
 }
 
