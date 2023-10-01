@@ -1,5 +1,5 @@
 import { Ref } from "vue";
-import { NumberUserData } from "./user_data";
+import NumberUserData from "./number_user_data";
 import { setCSSVariable } from "../utils/elements";
 import type ToastManager from "../toast_manager";
 

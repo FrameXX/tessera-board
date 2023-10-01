@@ -4,7 +4,8 @@ import { ref, reactive, onMounted, watch, computed } from "vue";
 import { Howl } from "howler";
 
 // Import user data
-import { BooleanUserData, SelectUserData } from "./modules/user_data/user_data";
+import SelectUserData from "./modules/user_data/select_user_data";
+import BooleanUserData from "./modules/user_data/boolean_user_data";
 import UserDataManager from "./modules/user_data_manager";
 import ThemeData, { type ThemeValue } from "./modules/user_data/theme";
 import TransitionsData, {
@@ -157,7 +158,7 @@ const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   ],
 ];
 const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(Array(8).fill(null));
-const DEFAULT_CELL_INDEX_OPACITY_VALUE = 80;
+const DEFAULT_CELL_INDEX_OPACITY_VALUE = 90;
 const DEFAULT_PLAYER_HUE_VALUE = 37;
 const DEFAULT_OPPONENT_HUE_VALUE = 212;
 const DEFAULT_OPPONENT_OVER_LAN_VALUE = false;

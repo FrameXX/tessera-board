@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";
-import { BooleanUserData } from "./user_data";
+import BooleanUserData from "./boolean_user_data";
 
 class RotateScreenData extends BooleanUserData {
   constructor(

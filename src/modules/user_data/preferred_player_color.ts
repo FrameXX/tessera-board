@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-import { SelectUserData } from "./user_data";
+import SelectUserData from "./select_user_data";
 import type ToastManager from "../toast_manager";
 
 export type PlayerColorOptionValue = "white" | "black" | "random";

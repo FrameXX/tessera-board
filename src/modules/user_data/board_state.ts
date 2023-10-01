@@ -1,4 +1,4 @@
-import { ComplexUserData } from "./user_data";
+import ComplexUserData from "./complex_user_data";
 import type Piece from "../pieces/piece";
 import type ToastManager from "../toast_manager";
 import { isRawPiece, getPieceFromRaw } from "../pieces/rawPiece";

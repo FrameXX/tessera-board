@@ -5,6 +5,7 @@ import type { PlayerColorOptionValue } from "./user_data/preferred_player_color"
 import { getRandomNumber } from "./utils/misc";
 import GameBoardManager from "./game_board_manager";
 import ToastManager from "./toast_manager";
+import type RawBoardStateData from "./user_data/raw_board_state";
 
 export class GameLogicError extends Error {
   constructor(message: string) {
@@ -18,7 +19,7 @@ class Game {
   constructor(
     private readonly gameBoardManager: GameBoardManager,
     private readonly gameBoardStateData: BoardStateData,
-    private readonly defaultBoardStateData: BoardStateData,
+    private readonly defaultBoardStateData: RawBoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
     private readonly playerPlaying: Ref<boolean>,
     private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,

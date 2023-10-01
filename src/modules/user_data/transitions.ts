@@ -1,4 +1,4 @@
-import { SelectUserData } from "./user_data";
+import SelectUserData from "./select_user_data";
 import type TransitionsManager from "../transitions_manager";
 import type { Ref } from "vue";
 import type ToastManager from "../toast_manager";

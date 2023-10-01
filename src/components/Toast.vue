@@ -38,6 +38,7 @@ const props = defineProps({
   @include clickable;
   @include no-overrender;
   @include no-overflow;
+  @include no-select;
   margin: var(--spacing-small);
   position: relative;
   padding: var(--spacing-medium);
