@@ -97,7 +97,6 @@ const markIconId = computed(() => {
     @include flex-center;
     position: absolute;
     font-weight: 600;
-    font-size: 5vw;
   }
 
   &.white {

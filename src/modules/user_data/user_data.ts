@@ -36,7 +36,7 @@ abstract class UserData<ValueType> {
     }
   }
 
-  protected save() {
+  public save() {
     if (navigator.cookieEnabled) {
       localStorage.setItem(`${UserData.STORAGE_KEY}-${this.id}`, this.dump());
     }

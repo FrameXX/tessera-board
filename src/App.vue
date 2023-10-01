@@ -55,7 +55,7 @@ import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
 import Game from "./modules/game";
-import RawBoardStateData from "./modules/user_data/generic_board_state";
+import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
 import Bishop from "./modules/pieces/bishop";
 import King from "./modules/pieces/king";
@@ -480,6 +480,7 @@ if (localStorage.length !== 0) {
         "cookie-alert"
       );
 } else {
+  defaultBoardStateData.save();
   game.restart();
 }
 
@@ -1282,4 +1283,4 @@ const configPieceSelectOptions = computed(() => {
 </style>
 ./modules/user_data/rotate_screen ./modules/dialogs/config_piece_dialog
 ./modules/dialogs/config_print_dialog ./modules/dialogs/configs_dialog
-./modules/dialogs/confirm_dialog
+./modules/dialogs/confirm_dialog ./modules/user_data/raw_board_state

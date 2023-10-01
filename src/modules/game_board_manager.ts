@@ -295,6 +295,7 @@ class GameBoardManager extends BoardManager {
 
   public resetBoard() {
     this.selectedPiece = null;
+    this.selectedCell = null;
     this.clearHihlightedCellsPositions();
     this.clearCapturedPieces();
     this.invalidatePiecesCache();
