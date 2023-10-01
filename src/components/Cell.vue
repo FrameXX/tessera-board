@@ -3,13 +3,14 @@ import { PropType, computed } from "vue";
 import Icon from "./Icon.vue";
 import { CHAR_INDEXES } from "../modules/board_manager";
 
-export type Mark = "availible" | "capture";
+export type Mark = "availible" | "capture" | "capturing";
 
 const props = defineProps({
   row: { type: Number, required: true },
   col: { type: Number, required: true },
   mark: { type: [String, null] as PropType<Mark | null>, required: true },
   highlighted: { type: Boolean, default: false },
+  selected: { type: Boolean, default: false },
 });
 
 const cellIsWhite = computed(() => (-1) ** (props.col + props.row) === 1);
@@ -43,6 +44,9 @@ const markIconId = computed(() => {
     case "availible":
       iconId = "circle-small";
       break;
+    case "capturing":
+      iconId = "rhombus-outline";
+      break;
     default:
       iconId = "";
       break;
@@ -65,6 +69,11 @@ const markIconId = computed(() => {
     <span class="index-col-top" v-if="rowText === 8">{{ colText }}</span>
     <span class="index-col-bottom" v-if="rowText === 1">{{ colText }}</span>
     <Transition name="scale">
+      <div class="title" v-show="props.selected">
+        {{ `${colText}${rowText}` }}
+      </div>
+    </Transition>
+    <Transition name="scale">
       <Icon class="mark" :icon-id="markIconId" v-show="props.mark" />
     </Transition>
     <Transition name="scale">
@@ -83,10 +92,19 @@ const markIconId = computed(() => {
   width: 100%;
   position: relative;
 
+  .title {
+    @include stretch;
+    @include flex-center;
+    position: absolute;
+    font-weight: 600;
+    font-size: 5vw;
+  }
+
   &.white {
     background-color: var(--color-cell-white);
 
     .mark,
+    .title,
     .highlighter {
       color: var(--color-cell-black);
     }
@@ -96,6 +114,7 @@ const markIconId = computed(() => {
     background-color: var(--color-cell-black);
 
     .mark,
+    .title,
     .highlighter {
       color: var(--color-cell-white);
     }

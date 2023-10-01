@@ -205,12 +205,22 @@ const OpponentCellMarks: MarkBoardState = reactive(
     .fill(null)
     .map(() => new Array(8).fill(null))
 );
-const playerHighlightedPieces: BooleanBoardState = reactive(
+const playerSelectedPieces: BooleanBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(false))
 );
-const opponentHighlightedPieces: BooleanBoardState = reactive(
+const opponentSelectedPieces: BooleanBoardState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(false))
+);
+const playerSelectedCells: BooleanBoardState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(false))
+);
+const opponentSelectedCells: BooleanBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(false))
@@ -438,8 +448,10 @@ const gameBoardManager = new GameBoardManager(
   blackCapturedPieces,
   playerCellMarks,
   OpponentCellMarks,
-  playerHighlightedPieces,
-  opponentHighlightedPieces,
+  playerSelectedPieces,
+  opponentSelectedPieces,
+  playerSelectedCells,
+  opponentSelectedCells,
   highlightedCells,
   selectPieceDialog,
   audioEffects,
@@ -516,7 +528,8 @@ const configPieceSelectOptions = computed(() => {
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
-        :highlighted-pieces-state="playerHighlightedPieces"
+        :selected-pieces-state="playerSelectedPieces"
+        :selected-cells-state="playerSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :marks-state="playerCellMarks"
         :rotated="screenRotated"
@@ -532,7 +545,8 @@ const configPieceSelectOptions = computed(() => {
       />
       <Board
         v-if="secondCheckboard"
-        :highlighted-pieces-state="opponentHighlightedPieces"
+        :selected-pieces-state="opponentSelectedPieces"
+        :selected-cells-state="opponentSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :rotated="screenRotated"
         :manager="gameBoardManager"

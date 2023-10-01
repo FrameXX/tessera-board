@@ -18,10 +18,10 @@ import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
 import { isMoveTransform } from "./moves/transform";
-import { getElementInstanceById } from "./utils/elements";
 
 class GameBoardManager extends BoardManager {
-  private _selectedPieceProps: BoardPieceProps | null = null;
+  private _selectedPiece: BoardPieceProps | null = null;
+  private _selectedCell: BoardPosition | null = null;
   private availibleMoves: Move[] = [];
   private whiteCapturingPaths: Path[] = [];
   private blackCapturingPaths: Path[] = [];
@@ -33,8 +33,10 @@ class GameBoardManager extends BoardManager {
     private readonly blackCapturedPieces: Ref<PieceId[]>,
     private readonly playerCellMarks: MarkBoardState,
     private readonly opponentBoardMarks: MarkBoardState,
-    private readonly playerHighlightedPieces: BooleanBoardState,
-    private readonly opponentHighlightedPieces: BooleanBoardState,
+    private readonly playerSelectedPieces: BooleanBoardState,
+    private readonly opponentSelectedPieces: BooleanBoardState,
+    private readonly playerSelectedCells: BooleanBoardState,
+    private readonly opponentSelectedCells: BooleanBoardState,
     private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
     private readonly audioEffects: Ref<boolean>,
@@ -69,11 +71,18 @@ class GameBoardManager extends BoardManager {
     this.availibleMoves = [];
   }
 
-  private clearHighlightedPiece() {
-    if (this.selectedPieceProps) {
-      this.playerHighlightedPieces[this.selectedPieceProps.row][
-        this.selectedPieceProps.col
+  private clearSelectedPiece() {
+    if (this.selectedPiece) {
+      this.playerSelectedPieces[this.selectedPiece.row][
+        this.selectedPiece.col
       ] = false;
+    }
+  }
+
+  private clearSelectedCell() {
+    if (this.selectedCell) {
+      this.playerSelectedCells[this.selectedCell.row][this.selectedCell.col] =
+        false;
     }
   }
 
@@ -88,48 +97,41 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  private set selectedPieceProps(pieceProps: BoardPieceProps | null) {
+  private set selectedPiece(pieceProps: BoardPieceProps | null) {
     // The selected position is the same as the current one
-    if (this.selectedPieceProps && pieceProps) {
-      if (positionsEqual(pieceProps, this.selectedPieceProps)) {
+    if (this.selectedPiece && pieceProps) {
+      if (positionsEqual(pieceProps, this.selectedPiece)) {
         return;
       }
     }
 
-    // The selected position has no piece and currently no piece is selected
-    if (!pieceProps && !this.selectedPieceProps) {
-      return;
-    }
-
     this.clearCellsMarks();
-    this.clearHighlightedPiece();
+    this.clearSelectedPiece();
     this.clearAvailibleMoves();
-    this._selectedPieceProps = null;
+    this._selectedPiece = null;
 
     // Player unselected
     if (!pieceProps) {
       return;
     }
 
-    if (pieceProps) {
-      this.playerHighlightedPieces[pieceProps.row][pieceProps.col] = true;
-      const moves = pieceProps.piece.getPossibleMoves(
-        pieceProps,
-        this.boardStateValue,
-        pieceProps.piece.color === "white"
-          ? this.blackCapturingPaths
-          : this.whiteCapturingPaths
-      );
-      moves.forEach((move) =>
-        move.showCellMarks(this.playerCellMarks, this.boardStateValue)
-      );
-      this.availibleMoves = moves;
-      this._selectedPieceProps = pieceProps;
-    }
+    this.playerSelectedPieces[pieceProps.row][pieceProps.col] = true;
+    const moves = pieceProps.piece.getPossibleMoves(
+      pieceProps,
+      this.boardStateValue,
+      pieceProps.piece.color === "white"
+        ? this.blackCapturingPaths
+        : this.whiteCapturingPaths
+    );
+    moves.forEach((move) =>
+      move.showCellMarks(this.playerCellMarks, this.boardStateValue)
+    );
+    this.availibleMoves = moves;
+    this._selectedPiece = pieceProps;
   }
 
-  private get selectedPieceProps(): BoardPieceProps | null {
-    return this._selectedPieceProps;
+  private get selectedPiece(): BoardPieceProps | null {
+    return this._selectedPiece;
   }
 
   private getPositionMatchingMove(position: BoardPosition): Move | null {
@@ -171,7 +173,7 @@ class GameBoardManager extends BoardManager {
   }
 
   private interpretMove(move: Move) {
-    this.selectedPieceProps = null;
+    this.selectedPiece = null;
     this.clearHihlightedCellsPositions();
     if (isMoveShift(move)) {
       move.perform(
@@ -216,6 +218,45 @@ class GameBoardManager extends BoardManager {
     );
   }
 
+  private get selectedCell(): BoardPosition | null {
+    return this._selectedCell;
+  }
+
+  private set selectedCell(position: BoardPosition | null) {
+    // Same cell is already selected
+    if (this.selectedCell && position) {
+      if (positionsEqual(this.selectedCell, position)) {
+        return;
+      }
+    }
+
+    this.clearSelectedCell();
+    this.clearCellsMarks();
+    this._selectedCell = null;
+
+    if (!position) {
+      return;
+    }
+
+    this.playerSelectedCells[position.row][position.col] = true;
+    const paths = getTargetMatchingPaths(position, [
+      ...this.whiteCapturingPaths,
+      ...this.blackCapturingPaths,
+    ]);
+    for (const path of paths) {
+      const origin = path.origin;
+      const piece = this.boardStateValue[origin.row][origin.col];
+      if (!piece) {
+        throw new GameLogicError(
+          `Path is defined from an origin that has no piece. Origin: ${origin}`
+        );
+      }
+      this.playerCellMarks[origin.row][origin.col] = "capturing";
+    }
+
+    this._selectedCell = position;
+  }
+
   public updateCapturingPaths() {
     let whiteCapturingPaths: Path[] = [];
     let blackCapturingPaths: Path[] = [];
@@ -253,7 +294,7 @@ class GameBoardManager extends BoardManager {
   }
 
   public resetBoard() {
-    this.selectedPieceProps = null;
+    this.selectedPiece = null;
     this.clearHihlightedCellsPositions();
     this.clearCapturedPieces();
     this.invalidatePiecesCache();
@@ -273,47 +314,8 @@ class GameBoardManager extends BoardManager {
       }
     }
 
-    this.selectedPieceProps = boardPiece;
-  }
-
-  private showCapturingPieces(target: BoardPosition) {
-    const keyframes: Keyframe[] = [
-      { transform: "rotate(20deg)" },
-      { transform: "rotate(-20deg)" },
-      { transform: "rotate(20deg)" },
-      { transform: "rotate(-20deg)" },
-      { transform: "rotate(0deg)" },
-    ];
-    const board = getElementInstanceById("player-board");
-    const paths = getTargetMatchingPaths(target, [
-      ...this.whiteCapturingPaths,
-      ...this.blackCapturingPaths,
-    ]);
-    for (const path of paths) {
-      const origin = path.origin;
-      const piece = this.boardStateValue[origin.row][origin.col];
-      if (!piece) {
-        console.error(
-          `Path is defined from an origin that has no piece. Origin: ${origin}`
-        );
-        continue;
-      }
-      const element = board.querySelector(`[data-id="piece-${piece.id}"]`);
-      if (!element) {
-        console.error(
-          `Element of piece ${piece.id} could not be found in DOM.`
-        );
-        continue;
-      }
-      const parentElement = element.parentElement;
-      if (!parentElement) {
-        console.error(
-          `Parent element of piece ${piece.id} could not be found in DOM.`
-        );
-        continue;
-      }
-      parentElement.animate(keyframes, 400);
-    }
+    this.selectedCell = null;
+    this.selectedPiece = boardPiece;
   }
 
   // Called by Board component
@@ -334,8 +336,10 @@ class GameBoardManager extends BoardManager {
     }
 
     // Unselect piece
-    this.selectedPieceProps = null;
-    this.showCapturingPieces(position);
+    if (this.selectedPiece) {
+      this.selectedPiece = null;
+    }
+    this.selectedCell = position;
   }
 }
 

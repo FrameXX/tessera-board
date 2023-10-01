@@ -20,7 +20,7 @@ const props = defineProps({
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
   rotated: { type: Boolean, default: false },
-  highlighted: { type: Boolean, default: false },
+  selected: { type: Boolean, default: false },
 });
 const emit = defineEmits(["move", "remove"]);
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
@@ -82,10 +82,10 @@ onBeforeUnmount(() => {
       :data-id="`piece-${props.piece.id}`"
       ref="element"
       class="piece"
-      :class="[{ highlighted: props.highlighted }, props.piece.color]"
+      :class="[{ highlighted: props.selected }, props.piece.color]"
       :style="{
         transform: `translate(${translateX}px, ${translateY}px)
-            ${props.highlighted ? 'scale(1.05)' : ''} ${
+            ${props.selected ? 'scale(1.05)' : ''} ${
           props.rotated ? 'rotate(-0.5turn)' : ''
         }`,
         width: `${size}px`,

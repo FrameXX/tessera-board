@@ -36,7 +36,11 @@ const props = defineProps({
     type: Array as PropType<MarkBoardState>,
     default: Array(8).fill(Array(8).fill(null)),
   },
-  highlightedPiecesState: {
+  selectedPiecesState: {
+    type: Array as PropType<BooleanBoardState>,
+    default: Array(8).fill(Array(8).fill(false)),
+  },
+  selectedCellsState: {
     type: Array as PropType<BooleanBoardState>,
     default: Array(8).fill(Array(8).fill(false)),
   },
@@ -156,6 +160,7 @@ function onCellClick(position: BoardPosition) {
           :col="col"
           :mark="props.marksState[8 - row][col - 1]"
           :highlighted="props.highlightedCellsState[8 - row][col - 1]"
+          :selected="props.selectedCellsState[8 - row][col - 1]"
         />
       </tr>
 
@@ -164,9 +169,7 @@ function onCellClick(position: BoardPosition) {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
-          :highlighted="
-            props.highlightedPiecesState[pieceProps.row][pieceProps.col]
-          "
+          :selected="props.selectedPiecesState[pieceProps.row][pieceProps.col]"
           :row="pieceProps.row"
           :col="pieceProps.col"
           :piece="pieceProps.piece"
