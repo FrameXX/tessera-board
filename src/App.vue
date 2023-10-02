@@ -159,8 +159,8 @@ const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
 ];
 const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(Array(8).fill(null));
 const DEFAULT_CELL_INDEX_OPACITY_VALUE = 90;
-const DEFAULT_PLAYER_HUE_VALUE = 37;
-const DEFAULT_OPPONENT_HUE_VALUE = 212;
+const DEFAULT_PLAYER_HUE_VALUE = 30;
+const DEFAULT_OPPONENT_HUE_VALUE = 198;
 const DEFAULT_OPPONENT_OVER_LAN_VALUE = false;
 const DEFAULT_PIECE_BORDER_VALUE = 1.1;
 const DEFAULT_PIECE_PADDING_VALUE = 6;
@@ -179,6 +179,7 @@ const DEFAULT_PLAYER_PLAYING_VALUE = true;
 const DEFAULT_GAME_PAUSED_VALUE = false;
 const DEFAULT_AUDIO_EFFECTS_VALUE = true;
 const DEFAULT_FIRST_MOVE_COLOR: PlayerColorOptionValue = "white";
+const DEFAULT_SHOW_CAPTURING_PIECES_VALUE = true;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
@@ -250,6 +251,7 @@ const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
 const firstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
+const showCapturingPieces = ref(DEFAULT_SHOW_CAPTURING_PIECES_VALUE);
 
 // Game specific
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
@@ -344,6 +346,12 @@ const userDataManager = new UserDataManager(
       DEFAULT_FIRST_MOVE_COLOR,
       firstMoveColor,
       toastManager
+    ),
+    new BooleanUserData(
+      "show_capturing_pieces",
+      DEFAULT_SHOW_CAPTURING_PIECES_VALUE,
+      toastManager,
+      showCapturingPieces
     ),
     new OpponentOverLanData(
       DEFAULT_OPPONENT_OVER_LAN_VALUE,
@@ -457,7 +465,8 @@ const gameBoardManager = new GameBoardManager(
   selectPieceDialog,
   audioEffects,
   pieceMoveAudioEffect,
-  pieceRemoveAudioEffect
+  pieceRemoveAudioEffect,
+  showCapturingPieces
 );
 
 // Game manager
@@ -698,6 +707,24 @@ const configPieceSelectOptions = computed(() => {
         <template #description
           >Defines how to punish the player or opponent when they run out of
           time per move.
+        </template>
+      </UserOption>
+      <!-- Assistance -->
+      <span class="section-title">Assistance</span>
+      <UserOption
+        name="show pieces checking selected cell"
+        icon-id="rhombus-outline"
+        option-id="check-show-capturing-pieces"
+      >
+        <Checkbox
+          id="check-show-capturing-pieces"
+          v-model="showCapturingPieces"
+        />
+        <template #description>
+          If a cell on the board is selected, the game will highlight the pieces
+          that are checking that position. This feature helps the player
+          recognize which pieces are endangering the cell, but it is considered
+          a game rule, because it can give the player an advantage.
         </template>
       </UserOption>
       <!-- Other -->

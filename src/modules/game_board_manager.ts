@@ -41,7 +41,8 @@ class GameBoardManager extends BoardManager {
     private readonly selectPieceDialog: SelectPieceDialog,
     private readonly audioEffects: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
-    private readonly pieceRemoveAudioEffect: Howl
+    private readonly pieceRemoveAudioEffect: Howl,
+    private readonly showCapturingPieces: Ref<boolean>
   ) {
     super();
   }
@@ -222,6 +223,23 @@ class GameBoardManager extends BoardManager {
     return this._selectedCell;
   }
 
+  private showCellCapturingPieces(position: BoardPosition) {
+    const paths = getTargetMatchingPaths(position, [
+      ...this.whiteCapturingPaths,
+      ...this.blackCapturingPaths,
+    ]);
+    for (const path of paths) {
+      const origin = path.origin;
+      const piece = this.boardStateValue[origin.row][origin.col];
+      if (!piece) {
+        throw new GameLogicError(
+          `Path is defined from an origin that has no piece. Origin: ${origin}`
+        );
+      }
+      this.playerCellMarks[origin.row][origin.col] = "capturing";
+    }
+  }
+
   private set selectedCell(position: BoardPosition | null) {
     // Same cell is already selected
     if (this.selectedCell && position) {
@@ -239,20 +257,7 @@ class GameBoardManager extends BoardManager {
     }
 
     this.playerSelectedCells[position.row][position.col] = true;
-    const paths = getTargetMatchingPaths(position, [
-      ...this.whiteCapturingPaths,
-      ...this.blackCapturingPaths,
-    ]);
-    for (const path of paths) {
-      const origin = path.origin;
-      const piece = this.boardStateValue[origin.row][origin.col];
-      if (!piece) {
-        throw new GameLogicError(
-          `Path is defined from an origin that has no piece. Origin: ${origin}`
-        );
-      }
-      this.playerCellMarks[origin.row][origin.col] = "capturing";
-    }
+    if (this.showCapturingPieces.value) this.showCellCapturingPieces(position);
 
     this._selectedCell = position;
   }
