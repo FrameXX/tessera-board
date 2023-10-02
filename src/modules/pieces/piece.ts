@@ -96,7 +96,7 @@ export abstract class Piece {
   ): Move[];
 }
 
-export function getTarget(
+export function getDeltaPosition(
   position: BoardPosition,
   colDelta: number,
   rowDelta: number
@@ -104,11 +104,11 @@ export function getTarget(
   return sumPositions(position, { row: rowDelta, col: colDelta });
 }
 
-export function getTargetPiece(
-  target: BoardPosition,
+export function getBoardPositionPiece(
+  position: BoardPosition,
   boardStateValue: BoardStateValue
 ) {
-  return boardStateValue[target.row][target.col];
+  return boardStateValue[position.row][position.col];
 }
 
 export function isFriendlyPiece(

@@ -740,7 +740,7 @@ const configPieceSelectOptions = computed(() => {
           class="single"
           @click="configsDialog.open(defaultBoardConfigManager)"
         >
-          <Icon icon-id="tune" side />Configurations
+          <Icon icon-id="tune" side />Checkboard configurations
         </button>
         <div class="board-box">
           <Board

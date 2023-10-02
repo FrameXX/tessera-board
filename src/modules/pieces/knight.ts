@@ -2,11 +2,11 @@ import { BoardPosition } from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
-import Piece, { getTargetPiece, isFriendlyPiece } from "./piece";
+import Piece, { isFriendlyPiece } from "./piece";
 import {
   BoardPositionValue,
   PlayerColor,
-  getTarget,
+  getDeltaPosition,
   isTargetOnBoard,
 } from "./piece";
 
@@ -22,7 +22,7 @@ export class Knight extends Piece {
         if (Math.abs(colDelta) === Math.abs(rowDelta)) {
           continue;
         }
-        const target = getTarget(position, colDelta, rowDelta);
+        const target = getDeltaPosition(position, colDelta, rowDelta);
         if (!isTargetOnBoard(target)) {
           continue;
         }

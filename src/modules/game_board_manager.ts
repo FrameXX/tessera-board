@@ -18,6 +18,7 @@ import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
 import { isMoveTransform } from "./moves/transform";
+import { isMoveCastling } from "./moves/castling";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
@@ -193,6 +194,13 @@ class GameBoardManager extends BoardManager {
         this.audioEffects,
         this.pieceMoveAudioEffect,
         this.pieceRemoveAudioEffect
+      );
+    } else if (isMoveCastling(move)) {
+      move.perform(
+        this.boardStateValue,
+        this.higlightedCells,
+        this.audioEffects,
+        this.pieceMoveAudioEffect
       );
     }
     this.dispatchEvent(new Event("move"));

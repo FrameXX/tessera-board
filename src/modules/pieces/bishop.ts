@@ -2,11 +2,11 @@ import type { BoardPosition } from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
-import Piece, { Path, getTargetPiece, isFriendlyPiece } from "./piece";
+import Piece, { Path, getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import {
   type BoardPositionValue,
   type PlayerColor,
-  getTarget,
+  getDeltaPosition,
   isTargetOnBoard,
 } from "./piece";
 
@@ -22,16 +22,20 @@ export class Bishop extends Piece {
     const capturingPositions: BoardPosition[] = [];
     for (const colDelta of [-1, 1]) {
       for (const rowDelta of [-1, 1]) {
-        let totalXDelta = 0;
-        let totalYDelta = 0;
+        let totalColDelta = 0;
+        let totalRowDelta = 0;
         while (true) {
-          totalXDelta += colDelta;
-          totalYDelta += rowDelta;
-          const target = getTarget(position, totalXDelta, totalYDelta);
+          totalColDelta += colDelta;
+          totalRowDelta += rowDelta;
+          const target = getDeltaPosition(
+            position,
+            totalColDelta,
+            totalRowDelta
+          );
           if (!isTargetOnBoard(target)) {
             break;
           }
-          const piece = getTargetPiece(target, boardStateValue);
+          const piece = getBoardPositionPiece(target, boardStateValue);
           capturingPositions.push(target);
           if (piece) {
             break;

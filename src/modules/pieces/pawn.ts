@@ -4,11 +4,11 @@ import Shift from "../moves/shift";
 import Transform from "../moves/transform";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece, {
-  getTargetPiece,
+  getBoardPositionPiece,
   type BoardPositionValue,
   isFriendlyPiece,
 } from "./piece";
-import { type PlayerColor, getTarget } from "./piece";
+import { type PlayerColor, getDeltaPosition } from "./piece";
 import { RawPiece, getRawPiece } from "./rawPiece";
 
 interface RawPawn extends RawPiece {
@@ -16,7 +16,7 @@ interface RawPawn extends RawPiece {
 }
 
 function isRawPawn(rawPiece: RawPiece): rawPiece is RawPawn {
-  return typeof rawPiece.hasPiece !== "boolean";
+  return typeof rawPiece.hasMoved === "boolean";
 }
 
 export class Pawn extends Piece {
@@ -35,10 +35,6 @@ export class Pawn extends Piece {
     ];
   }
 
-  public onPerformMove(): void {
-    this.hasMoved = true;
-  }
-
   public dumpObject(): object {
     return { ...getRawPiece(this), hasMoved: this.hasMoved };
   }
@@ -51,18 +47,14 @@ export class Pawn extends Piece {
     this.hasMoved = rawPiece.hasMoved;
   }
 
-  public getNewCapturingPositions(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue
-  ): BoardPosition[] {
+  public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
     for (const colDelta of [1, -1]) {
-      const target = getTarget(
+      const target = getDeltaPosition(
         position,
         colDelta,
         this.color === "white" ? 1 : -1
       );
-      const piece = getTargetPiece(target, boardStateValue);
       capturingPositions.push(target);
     }
     return capturingPositions;
@@ -80,8 +72,8 @@ export class Pawn extends Piece {
         break;
       }
       if (this.color === "black") rowDelta = rowDelta * -1;
-      const target = getTarget(position, 0, rowDelta);
-      if (getTargetPiece(target, boardStateValue)) {
+      const target = getDeltaPosition(position, 0, rowDelta);
+      if (getBoardPositionPiece(target, boardStateValue)) {
         break;
       }
       if (
@@ -96,7 +88,7 @@ export class Pawn extends Piece {
       } else {
         moves.push(
           new Shift(this.pieceId, position, target, undefined, () => {
-            this.onPerformMove();
+            this.hasMoved = true;
           })
         );
       }
@@ -108,7 +100,7 @@ export class Pawn extends Piece {
       boardStateValue
     );
     for (const target of capturingPositions) {
-      const piece = getTargetPiece(target, boardStateValue);
+      const piece = getBoardPositionPiece(target, boardStateValue);
       if (!piece) {
         continue;
       }
@@ -135,7 +127,7 @@ export class Pawn extends Piece {
       } else {
         moves.push(
           new Shift(this.pieceId, position, target, captures, () => {
-            this.onPerformMove();
+            this.hasMoved = true;
           })
         );
       }
