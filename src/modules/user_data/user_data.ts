@@ -36,6 +36,21 @@ abstract class UserData<ValueType> {
     }
   }
 
+  protected safelyParse(dumped: string): any | void {
+    let value;
+    try {
+      value = JSON.parse(dumped);
+    } catch (error) {
+      console.error(
+        `An error occured while trying to parse ${this.id}.`,
+        error
+      );
+      this.handleInvalidLoadValue(dumped);
+      return;
+    }
+    return value;
+  }
+
   public save() {
     if (navigator.cookieEnabled) {
       localStorage.setItem(`${UserData.STORAGE_KEY}-${this.id}`, this.dump());

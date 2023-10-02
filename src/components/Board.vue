@@ -9,6 +9,7 @@ import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
 import type { BooleanBoardState } from "../modules/user_data/boolean_board_state";
+import { positionsEqual } from "../modules/game_board_manager";
 
 export type MarkBoardState = (Mark | null)[][];
 
@@ -36,12 +37,12 @@ const props = defineProps({
     type: Array as PropType<MarkBoardState>,
     default: Array(8).fill(Array(8).fill(null)),
   },
-  selectedPiecesState: {
-    type: Array as PropType<BooleanBoardState>,
+  selectedPieces: {
+    type: Array as PropType<BoardPosition[]>,
     default: Array(8).fill(Array(8).fill(false)),
   },
-  selectedCellsState: {
-    type: Array as PropType<BooleanBoardState>,
+  selectedCells: {
+    type: Array as PropType<BoardPosition[]>,
     default: Array(8).fill(Array(8).fill(false)),
   },
   highlightedCellsState: {
@@ -123,6 +124,22 @@ function getContainerMinSize() {
 function onCellClick(position: BoardPosition) {
   props.manager.onCellClick({ row: 8 - position.row, col: position.col - 1 });
 }
+
+function isPieceSelected(position: BoardPosition) {
+  return (
+    props.selectedPieces.filter((selectedPosition) =>
+      positionsEqual(selectedPosition, position)
+    ).length > 0
+  );
+}
+
+function isCellSelected(position: BoardPosition) {
+  return (
+    props.selectedCells.filter((selectedPosition) =>
+      positionsEqual(selectedPosition, position)
+    ).length > 0
+  );
+}
 </script>
 
 <template>
@@ -160,7 +177,7 @@ function onCellClick(position: BoardPosition) {
           :col="col"
           :mark="props.marksState[8 - row][col - 1]"
           :highlighted="props.highlightedCellsState[8 - row][col - 1]"
-          :selected="props.selectedCellsState[8 - row][col - 1]"
+          :selected="isCellSelected({ row: 8 - row, col: col - 1 })"
         />
       </tr>
 
@@ -169,7 +186,12 @@ function onCellClick(position: BoardPosition) {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
-          :selected="props.selectedPiecesState[pieceProps.row][pieceProps.col]"
+          :selected="
+            isPieceSelected({
+              row: pieceProps.row,
+              col: pieceProps.col,
+            })
+          "
           :row="pieceProps.row"
           :col="pieceProps.col"
           :piece="pieceProps.piece"

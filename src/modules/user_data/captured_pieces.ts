@@ -19,15 +19,10 @@ class CapturedPiecesData extends UserData<PieceId[]> {
 
   public load(dumped: string): void {
     const value: PieceId[] = [];
-    let pieceIds;
-    try {
-      pieceIds = JSON.parse(dumped);
-    } catch (error) {
-      console.error(
-        `An error occured while parsing ${this.id}. Data are invalid or corrupted`
-      );
-      this.handleInvalidLoadValue(dumped);
+    if (!value) {
+      return;
     }
+    const pieceIds = this.safelyParse(dumped);
     if (!Array.isArray(pieceIds)) {
       console.error(`Captured pieces didn't parse into an array.`);
       this.handleInvalidLoadValue(dumped);

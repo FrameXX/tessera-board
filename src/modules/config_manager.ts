@@ -80,7 +80,6 @@ class ConfigManager {
     this.inventory.renameConfig(id, newName, newDescription);
   }
 
-  // If id equal to some of the already defiend config ids is passed, the method can also be used to overwrite values of already saved configs
   public async saveConfig(name: string, description: string) {
     const id = getRandomId();
 

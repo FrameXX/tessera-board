@@ -50,7 +50,7 @@ import {
 import { activateColors, setCSSVariable } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { MarkBoardState } from "./components/Board.vue";
+import type { BoardPosition, MarkBoardState } from "./components/Board.vue";
 import type { BooleanBoardState } from "./modules/user_data/boolean_board_state";
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
@@ -207,26 +207,10 @@ const OpponentCellMarks: MarkBoardState = reactive(
     .fill(null)
     .map(() => new Array(8).fill(null))
 );
-const playerSelectedPieces: BooleanBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(false))
-);
-const opponentSelectedPieces: BooleanBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(false))
-);
-const playerSelectedCells: BooleanBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(false))
-);
-const opponentSelectedCells: BooleanBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(false))
-);
+const playerSelectedPieces = ref<BoardPosition[]>([]);
+const opponentSelectedPieces = ref<BoardPosition[]>([]);
+const playerSelectedCells = ref<BoardPosition[]>([]);
+const opponentSelectedCells = ref<BoardPosition[]>([]);
 const highlightedCells: BooleanBoardState = reactive(
   Array(8)
     .fill(null)
@@ -539,8 +523,8 @@ const configPieceSelectOptions = computed(() => {
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
-        :selected-pieces-state="playerSelectedPieces"
-        :selected-cells-state="playerSelectedCells"
+        :selected-pieces="playerSelectedPieces"
+        :selected-cells="playerSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :marks-state="playerCellMarks"
         :rotated="screenRotated"
@@ -556,8 +540,8 @@ const configPieceSelectOptions = computed(() => {
       />
       <Board
         v-if="secondCheckboard"
-        :selected-pieces-state="opponentSelectedPieces"
-        :selected-cells-state="opponentSelectedCells"
+        :selected-pieces="opponentSelectedPieces"
+        :selected-cells="opponentSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :rotated="screenRotated"
         :manager="gameBoardManager"

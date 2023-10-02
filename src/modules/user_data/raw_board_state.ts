@@ -23,15 +23,14 @@ class RawBoardStateData extends ComplexUserData<BoardStateValue> {
   }
 
   public load(dumped: string): void {
-    let value;
-    try {
-      value = JSON.parse(dumped);
-    } catch (error) {
-      console.error(
-        "An error occured while trying to parse generic board state.",
-        error
-      );
+    let value = this.safelyParse(dumped);
+    if (!value) {
+      return;
+    }
+    if (!Array.isArray(value)) {
+      console.error("The parsed value of raw board state is not an array");
       this.handleInvalidLoadValue(dumped);
+      return;
     }
     for (const rowIndex in value) {
       for (const colIndex in value[rowIndex]) {

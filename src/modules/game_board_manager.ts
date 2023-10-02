@@ -33,10 +33,10 @@ class GameBoardManager extends BoardManager {
     private readonly blackCapturedPieces: Ref<PieceId[]>,
     private readonly playerCellMarks: MarkBoardState,
     private readonly opponentBoardMarks: MarkBoardState,
-    private readonly playerSelectedPieces: BooleanBoardState,
-    private readonly opponentSelectedPieces: BooleanBoardState,
-    private readonly playerSelectedCells: BooleanBoardState,
-    private readonly opponentSelectedCells: BooleanBoardState,
+    private readonly playerSelectedPieces: Ref<BoardPosition[]>,
+    private readonly opponentSelectedPieces: Ref<BoardPosition[]>,
+    private readonly playerSelectedCells: Ref<BoardPosition[]>,
+    private readonly opponentSelectedCells: Ref<BoardPosition[]>,
     private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
     private readonly audioEffects: Ref<boolean>,
@@ -74,16 +74,13 @@ class GameBoardManager extends BoardManager {
 
   private clearSelectedPiece() {
     if (this.selectedPiece) {
-      this.playerSelectedPieces[this.selectedPiece.row][
-        this.selectedPiece.col
-      ] = false;
+      this.playerSelectedPieces.value = [];
     }
   }
 
   private clearSelectedCell() {
     if (this.selectedCell) {
-      this.playerSelectedCells[this.selectedCell.row][this.selectedCell.col] =
-        false;
+      this.playerSelectedCells.value = [];
     }
   }
 
@@ -116,7 +113,7 @@ class GameBoardManager extends BoardManager {
       return;
     }
 
-    this.playerSelectedPieces[pieceProps.row][pieceProps.col] = true;
+    this.playerSelectedPieces.value.push(pieceProps);
     const moves = pieceProps.piece.getPossibleMoves(
       pieceProps,
       this.boardStateValue,
@@ -256,7 +253,7 @@ class GameBoardManager extends BoardManager {
       return;
     }
 
-    this.playerSelectedCells[position.row][position.col] = true;
+    this.playerSelectedCells.value.push(position);
     if (this.showCapturingPieces.value) this.showCellCapturingPieces(position);
 
     this._selectedCell = position;
@@ -320,7 +317,8 @@ class GameBoardManager extends BoardManager {
       }
     }
 
-    this.selectedCell = null;
+    // Unselect cell
+    if (this.selectedCell) this.selectedCell = null;
     this.selectedPiece = boardPiece;
   }
 
@@ -342,9 +340,7 @@ class GameBoardManager extends BoardManager {
     }
 
     // Unselect piece
-    if (this.selectedPiece) {
-      this.selectedPiece = null;
-    }
+    if (this.selectedPiece) this.selectedPiece = null;
     this.selectedCell = position;
   }
 }
