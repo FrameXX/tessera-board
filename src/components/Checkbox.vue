@@ -40,8 +40,9 @@ function toggle() {
 
 .checkbox {
   border: var(--border-width) solid var(--color-primary-accent);
-  width: 36px;
-  height: 36px;
+  width: 22px;
+  height: 22px;
+  padding: var(--spacing-tiny);
 
   .icon {
     width: 24px;

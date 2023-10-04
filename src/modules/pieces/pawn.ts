@@ -82,7 +82,13 @@ export class Pawn extends Piece {
         Math.abs(rowDelta) === 1
       ) {
         moves.push(
-          new Transform(this.pieceId, position, target, this.transformOptions)
+          new Transform(
+            this.pieceId,
+            this.color,
+            position,
+            target,
+            this.transformOptions
+          )
         );
         break;
       } else {
@@ -118,6 +124,7 @@ export class Pawn extends Piece {
         moves.push(
           new Transform(
             this.pieceId,
+            this.color,
             position,
             target,
             this.transformOptions,

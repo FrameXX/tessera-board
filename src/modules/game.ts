@@ -62,6 +62,7 @@ class Game {
     this.chooseFirstMoveColor();
     this.gameBoardManager.resetBoard();
     this.toastManager.showToast("New match started.", "info", "flag-checkered");
+    this.moveIndex.value = 0;
   }
 
   public onMove() {

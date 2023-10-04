@@ -45,6 +45,7 @@ class GameBoardManager extends BoardManager {
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly showCapturingPieces: Ref<boolean>,
+    private readonly banPromotionToUncapturedPieces: Ref<boolean>,
     private readonly toastManager: ToastManager
   ) {
     super();
@@ -193,6 +194,7 @@ class GameBoardManager extends BoardManager {
         this.whiteCapturedPieces,
         this.higlightedCells,
         this.selectPieceDialog,
+        this.banPromotionToUncapturedPieces,
         this.audioEffects,
         this.pieceMoveAudioEffect,
         this.pieceRemoveAudioEffect
@@ -315,29 +317,25 @@ class GameBoardManager extends BoardManager {
   }
 
   private moveToIfPossible(position: BoardPosition): boolean {
-    if (!this.selectedPiece) return false;
+    if (!this.availibleMoves || !this.selectedPiece) return false;
 
     if (this.selectedPiece.piece.color !== this.playingColor.value)
       return false;
 
     const matchingMove = this.getPositionMatchingMove(position);
-    if (matchingMove) {
-      this.interpretMove(matchingMove);
-      return true;
+    if (!matchingMove) {
+      return false;
     }
+    this.interpretMove(matchingMove);
+    return true;
   }
 
   // Called by Board component
   public onPieceClick(boardPiece: BoardPieceProps): void {
-    if (this.availibleMoves) {
-      const position = this.getPiecePosition(boardPiece.piece.id);
-      if (position) {
-        const matchingMove = this.getPositionMatchingMove(position);
-        if (matchingMove) {
-          this.interpretMove(matchingMove);
-          return;
-        }
-      }
+    const position = this.getPiecePosition(boardPiece.piece.id);
+    if (position) {
+      const moved = this.moveToIfPossible(position);
+      if (moved) return;
     }
 
     // Unselect cell

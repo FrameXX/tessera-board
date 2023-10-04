@@ -1,7 +1,7 @@
 import { Ref } from "vue";
 import { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type { BooleanBoardState } from "../user_data/boolean_board_state";
-import { BoardPositionValue, PieceId } from "../pieces/piece";
+import { BoardPositionValue, PieceId, PlayerColor } from "../pieces/piece";
 import { RawPiece } from "../pieces/rawPiece";
 import { BoardStateValue } from "../user_data/board_state";
 import Move, { highlightBoardPosition } from "./move";
@@ -20,6 +20,7 @@ export function isMoveTransform(move: Move): move is Transform {
 class Transform extends Move {
   constructor(
     private readonly pieceId: PieceId,
+    private readonly pieceColor: PlayerColor,
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
     private readonly transformOptions: [RawPiece, ...RawPiece[]],
@@ -28,21 +29,30 @@ class Transform extends Move {
     super("transform");
   }
 
+  private getLimitedTransformOptions(
+    blackCapturedPieces: Ref<PieceId[]>,
+    whiteCapturedPieces: Ref<PieceId[]>
+  ) {
+    return this.transformOptions.filter((option) => {
+      let captured: boolean;
+      this.pieceColor === "white"
+        ? (captured = whiteCapturedPieces.value.includes(option.pieceId))
+        : (captured = blackCapturedPieces.value.includes(option.pieceId));
+      return captured;
+    });
+  }
+
   public async perform(
     boardStateValue: BoardStateValue,
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
     higlightedCells: BooleanBoardState,
     selectPieceDialog: SelectPieceDialog,
+    banPromotionToUncapturedPieces: Ref<boolean>,
     audioEffects: Ref<boolean>,
     moveAudioEffect: Howl,
     removeAudioEffect: Howl
   ): Promise<string> {
-    let newPiece: RawPiece;
-    this.transformOptions.length === 1
-      ? (newPiece = this.transformOptions[0])
-      : (newPiece = await selectPieceDialog.open(this.transformOptions));
-
     if (this.captures) {
       capturePosition(
         this.captures,
@@ -54,6 +64,25 @@ class Transform extends Move {
     }
     await movePositionValue(this.origin, this.target, boardStateValue);
     if (audioEffects.value) moveAudioEffect.play();
+
+    let transformOptions: RawPiece[];
+    if (banPromotionToUncapturedPieces) {
+      transformOptions = this.getLimitedTransformOptions(
+        blackCapturedPieces,
+        whiteCapturedPieces
+      );
+    } else {
+      transformOptions = this.transformOptions;
+    }
+    if (transformOptions.length !== 0) {
+      transformOptions = this.transformOptions;
+    }
+
+    let newPiece: RawPiece | null = null;
+    transformOptions.length === 1
+      ? (newPiece = transformOptions[0])
+      : (newPiece = await selectPieceDialog.open(transformOptions));
+
     transformPositionValue(this.target, newPiece, boardStateValue);
 
     highlightBoardPosition(this.origin, higlightedCells);

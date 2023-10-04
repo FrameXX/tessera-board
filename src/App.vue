@@ -182,6 +182,7 @@ const DEFAULT_GAME_PAUSED_VALUE = false;
 const DEFAULT_AUDIO_EFFECTS_VALUE = true;
 const DEFAULT_FIRST_MOVE_COLOR: PlayerColorOptionValue = "white";
 const DEFAULT_SHOW_CAPTURING_PIECES_VALUE = true;
+const DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE = false;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
@@ -232,17 +233,12 @@ const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
 const showCapturingPieces = ref(DEFAULT_SHOW_CAPTURING_PIECES_VALUE);
-const moveIndex = ref(0);
+const banPromotionToUncapturedPieces = ref(
+  DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE
+);
 
 // Game specific
-const playingColor = computed(() => {
-  let color: PlayerColor;
-  (isEven(moveIndex.value) && firstMoveColor.value === "white") ||
-  (!isEven(moveIndex.value) && firstMoveColor.value === "black")
-    ? (color = "white")
-    : (color = "black");
-  return color;
-});
+const moveIndex = ref(0);
 const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
@@ -255,6 +251,14 @@ const highlightedCells: BooleanBoardState = reactive(
     .fill(null)
     .map(() => new Array(8).fill(false))
 );
+const playingColor = computed(() => {
+  let color: PlayerColor;
+  (isEven(moveIndex.value) && firstMoveColor.value === "white") ||
+  (!isEven(moveIndex.value) && firstMoveColor.value === "black")
+    ? (color = "white")
+    : (color = "black");
+  return color;
+});
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(
@@ -389,6 +393,12 @@ const userDataManager = new UserDataManager(
       gamePaused
     ),
     new BooleanUserData(
+      "ban_promotion_to_uncaptured_pieces",
+      DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE,
+      toastManager,
+      banPromotionToUncapturedPieces
+    ),
+    new BooleanUserData(
       "audio_effects",
       DEFAULT_AUDIO_EFFECTS_VALUE,
       toastManager,
@@ -464,6 +474,7 @@ const gameBoardManager = new GameBoardManager(
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
   showCapturingPieces,
+  banPromotionToUncapturedPieces,
   toastManager
 );
 
@@ -705,8 +716,8 @@ const configPieceSelectOptions = computed(() => {
           <option value="light">Lose game</option>
         </select>
         <template #description
-          >Defines how to punish the player or opponent when they run out of
-          time per move.
+          >Defines how to punish the player when he/she run out of time per
+          move.
         </template>
       </UserOption>
       <!-- Assistance -->
@@ -742,6 +753,22 @@ const configPieceSelectOptions = computed(() => {
         <template #description>
           Defines which color makes the first move. According to official chess
           rules white player should be the one to make the first move.
+        </template>
+      </UserOption>
+      <UserOption
+        name="Ban promotion to uncaptured pieces"
+        icon-id="plus-lock"
+        option-id="promotion-to-uncaptured-pieces"
+      >
+        <Checkbox
+          id="promotion-to-uncaptured-pieces"
+          v-model="banPromotionToUncapturedPieces"
+        />
+        <template #description>
+          When a piece promotes (in chess it is a pawn) it is only allowed to
+          promote to pieces that were that the player already lost. In the very
+          rare case when the player lost no pieces and pawn it to be promoted he
+          will be again able to choose any piece as a fallback.
         </template>
       </UserOption>
       <!-- Checkboard -->
@@ -816,10 +843,9 @@ const configPieceSelectOptions = computed(() => {
           v-model="requireMoveConfirm"
         />
         <template #description>
-          Requires player or opponent (if also playing on this device) to
-          confirm move using buttons that appear next to the action button. This
-          can be useful when you are playing on a touchscreen and you often
-          click accidentally in wrong positions.
+          Requires player to confirm move using buttons that appear next to the
+          action button. This can be useful when you are playing on a
+          touchscreen and you often click accidentally in wrong positions.
         </template>
       </UserOption>
       <!-- Colors -->
