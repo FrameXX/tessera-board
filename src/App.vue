@@ -31,6 +31,7 @@ import RotateScreenData from "./modules/user_data/rotate_screen";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 import CapturedPiecesData from "./modules/user_data/captured_pieces";
 import BooleanBoardStateData from "./modules/user_data/boolean_board_state";
+import NumberUserData from "./modules/user_data/number_user_data";
 
 // Import other classes and functions
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -65,6 +66,7 @@ import Pawn from "./modules/pieces/pawn";
 import Queen from "./modules/pieces/queen";
 import Rook from "./modules/pieces/rook";
 import { RawPiece } from "./modules/pieces/rawPiece";
+import { isEven } from "./modules/utils/misc";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -211,13 +213,8 @@ const playerSelectedPieces = ref<BoardPosition[]>([]);
 const opponentSelectedPieces = ref<BoardPosition[]>([]);
 const playerSelectedCells = ref<BoardPosition[]>([]);
 const opponentSelectedCells = ref<BoardPosition[]>([]);
-const highlightedCells: BooleanBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(false))
-);
 
-// Other options refs
+// User data refs
 // Simple values (ref)
 const theme = ref(DEFAULT_THEME_VALUE);
 const transitions = ref(DEFAULT_TRANSITIONS_VALUE);
@@ -234,15 +231,30 @@ const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
 const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
-const firstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 const showCapturingPieces = ref(DEFAULT_SHOW_CAPTURING_PIECES_VALUE);
+const moveIndex = ref(0);
 
 // Game specific
+const playingColor = computed(() => {
+  let color: PlayerColor;
+  (isEven(moveIndex.value) && firstMoveColor.value === "white") ||
+  (!isEven(moveIndex.value) && firstMoveColor.value === "black")
+    ? (color = "white")
+    : (color = "black");
+  return color;
+});
+const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
+const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerPlaying = ref(DEFAULT_PLAYER_PLAYING_VALUE);
 const gamePaused = ref(DEFAULT_GAME_PAUSED_VALUE);
 const whiteCapturedPieces = ref<PieceId[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
 const blackCapturedPieces = ref<PieceId[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
+const highlightedCells: BooleanBoardState = reactive(
+  Array(8)
+    .fill(null)
+    .map(() => new Array(8).fill(false))
+);
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(
@@ -326,9 +338,9 @@ const userDataManager = new UserDataManager(
       toastManager
     ),
     new PlayerColorOptionData(
-      "first_move_color",
+      "preferred_first_move_color",
       DEFAULT_FIRST_MOVE_COLOR,
-      firstMoveColor,
+      prefferedFirstMoveColor,
       toastManager
     ),
     new BooleanUserData(
@@ -394,6 +406,7 @@ const userDataManager = new UserDataManager(
       "black",
       toastManager
     ),
+    new NumberUserData("move_index", 0, toastManager, moveIndex),
     new BooleanBoardStateData(
       "highlighted_cells",
       highlightedCells,
@@ -435,7 +448,7 @@ const defaultBoardManager = new DefaultBoardManager(
 );
 
 const gameBoardManager = new GameBoardManager(
-  gameBoardStateData,
+  playingColor,
   gameBoardState,
   whiteCapturedPieces,
   blackCapturedPieces,
@@ -450,7 +463,8 @@ const gameBoardManager = new GameBoardManager(
   audioEffects,
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
-  showCapturingPieces
+  showCapturingPieces,
+  toastManager
 );
 
 // Game manager
@@ -459,7 +473,9 @@ const game = new Game(
   gameBoardStateData,
   defaultBoardStateData,
   playerColor,
-  playerPlaying,
+  firstMoveColor,
+  prefferedFirstMoveColor,
+  moveIndex,
   preferredPlayerColor,
   toastManager
 );
@@ -718,7 +734,7 @@ const configPieceSelectOptions = computed(() => {
         icon-id="numeric-1-box-outline"
         option-id="first-move-color"
       >
-        <select id="first-move-color" v-model="firstMoveColor">
+        <select id="first-move-color" v-model="prefferedFirstMoveColor">
           <option value="random">Random</option>
           <option value="white">White</option>
           <option value="black">Black</option>

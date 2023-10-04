@@ -71,3 +71,7 @@ export function sumPositions(
 ): BoardPosition {
   return { row: pos1.row + pos2.row, col: pos1.col + pos2.col };
 }
+
+export function isEven(number: number) {
+  return number % 2 === 0;
+}

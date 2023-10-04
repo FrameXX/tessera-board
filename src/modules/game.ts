@@ -21,11 +21,13 @@ class Game {
     private readonly gameBoardStateData: BoardStateData,
     private readonly defaultBoardStateData: RawBoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
-    private readonly playerPlaying: Ref<boolean>,
+    private readonly firstMoveColor: Ref<PlayerColor>,
+    private readonly preferredFirstMoveColor: Ref<PlayerColorOptionValue>,
+    private readonly moveIndex: Ref<number>,
     private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,
     private readonly toastManager: ToastManager
   ) {
-    this.gameBoardManager.addEventListener("move", () => this.onMoveEnd());
+    this.gameBoardManager.addEventListener("move", () => this.onMove());
   }
 
   private setupDefaultBoardState() {
@@ -44,16 +46,27 @@ class Game {
     }
   }
 
+  private chooseFirstMoveColor() {
+    if (this.preferredFirstMoveColor.value === "random") {
+      getRandomNumber(0, 1)
+        ? (this.firstMoveColor.value = "white")
+        : (this.firstMoveColor.value = "black");
+    } else {
+      this.firstMoveColor.value = this.preferredFirstMoveColor.value;
+    }
+  }
+
   public restart() {
     this.setupDefaultBoardState();
     this.choosePlayerColor();
+    this.chooseFirstMoveColor();
     this.gameBoardManager.resetBoard();
     this.toastManager.showToast("New match started.", "info", "flag-checkered");
   }
 
-  public onMoveStart() {}
-
-  public onMoveEnd() {}
+  public onMove() {
+    this.moveIndex.value++;
+  }
 }
 
 export default Game;

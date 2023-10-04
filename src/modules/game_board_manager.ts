@@ -8,17 +8,18 @@ import type {
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
 import {
   getTargetMatchingPaths,
+  PlayerColor,
   type Path,
   type PieceId,
 } from "./pieces/piece";
 import { GameLogicError } from "./game";
-import type BoardStateData from "./user_data/board_state";
 import type { BoardStateValue } from "./user_data/board_state";
 import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
 import { isMoveTransform } from "./moves/transform";
 import { isMoveCastling } from "./moves/castling";
+import type ToastManager from "./toast_manager";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
@@ -28,7 +29,7 @@ class GameBoardManager extends BoardManager {
   private blackCapturingPaths: Path[] = [];
 
   constructor(
-    private readonly boardStateData: BoardStateData,
+    private readonly playingColor: Ref<PlayerColor>,
     private readonly boardStateValue: BoardStateValue,
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
@@ -43,7 +44,8 @@ class GameBoardManager extends BoardManager {
     private readonly audioEffects: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
-    private readonly showCapturingPieces: Ref<boolean>
+    private readonly showCapturingPieces: Ref<boolean>,
+    private readonly toastManager: ToastManager
   ) {
     super();
   }
@@ -312,6 +314,19 @@ class GameBoardManager extends BoardManager {
     this.updateCapturingPaths();
   }
 
+  private moveToIfPossible(position: BoardPosition): boolean {
+    if (!this.selectedPiece) return false;
+
+    if (this.selectedPiece.piece.color !== this.playingColor.value)
+      return false;
+
+    const matchingMove = this.getPositionMatchingMove(position);
+    if (matchingMove) {
+      this.interpretMove(matchingMove);
+      return true;
+    }
+  }
+
   // Called by Board component
   public onPieceClick(boardPiece: BoardPieceProps): void {
     if (this.availibleMoves) {
@@ -333,12 +348,8 @@ class GameBoardManager extends BoardManager {
   // Called by Board component
   public onCellClick(position: BoardPosition): void {
     // Check if cell is on any of the clickable position of any of the availible moves
-    const matchingMove = this.getPositionMatchingMove(position);
-
-    if (matchingMove) {
-      this.interpretMove(matchingMove);
-      return;
-    }
+    const moved = this.moveToIfPossible(position);
+    if (moved) return;
 
     // Take the cell click as a piece click if no move was performed on that position. This is useful if the cells with pieces are selected using tabindex.
     const piece = this.boardStateValue[position.row][position.col];
