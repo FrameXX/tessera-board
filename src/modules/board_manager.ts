@@ -14,7 +14,7 @@ abstract class BoardManager extends EventTarget {
 }
 
 export function getPositionNotation(position: BoardPosition) {
-  return `${CHAR_INDEXES[position.col - 1]}${position.row}`;
+  return `${CHAR_INDEXES[position.col]}${position.row + 1}`;
 }
 
 export function getPieceNotation(pieceId: PieceId) {

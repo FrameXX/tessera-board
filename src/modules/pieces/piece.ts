@@ -134,7 +134,7 @@ export function getTargetMatchingPaths(
   return capturingPaths.filter((path) => positionsEqual(path.target, target));
 }
 
-export function targetWillBeCaptured(
+export function positionWillBeCaptured(
   target: BoardPosition,
   capturingPaths: Path[]
 ): boolean {

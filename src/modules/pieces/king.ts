@@ -9,7 +9,7 @@ import Piece, {
   isFriendlyPiece,
   type BoardPositionValue,
   type Path,
-  targetWillBeCaptured,
+  positionWillBeCaptured,
   getBoardPositionPiece,
 } from "./piece";
 import { type PlayerColor } from "./piece";
@@ -78,7 +78,7 @@ export class King extends Piece {
     const capturingPositions = this.getNewCapturingPositions(position);
 
     for (const target of capturingPositions) {
-      if (targetWillBeCaptured(target, opponentCapturingPaths)) {
+      if (positionWillBeCaptured(target, opponentCapturingPaths)) {
         continue;
       }
       let captures: BoardPositionValue | undefined = undefined;
@@ -98,6 +98,7 @@ export class King extends Piece {
       );
     }
 
+    // https://en.wikipedia.org/wiki/Castling
     if (!this.hasMoved && !this.hasCastled) {
       // Castling
       for (const colDelta of [-1, 1]) {
@@ -111,47 +112,45 @@ export class King extends Piece {
             totalColDelta,
             position.row
           );
-          if (!isTargetOnBoard(searchRookPosition)) {
-            break;
-          }
-          if (Math.abs(totalColDelta) <= 2) {
-            if (
-              targetWillBeCaptured(searchRookPosition, opponentCapturingPaths)
-            ) {
-              break;
-            }
-          }
+          if (!isTargetOnBoard(searchRookPosition)) break;
           // Rook moves on the other side of the moved king
           if (Math.abs(totalColDelta) === 1) {
             rookTarget = searchRookPosition;
+            if (positionWillBeCaptured(rookTarget, opponentCapturingPaths))
+              break;
           }
           // King moves 2 cells in rook direction
           if (Math.abs(totalColDelta) === 2) {
             kingTarget = searchRookPosition;
+            if (positionWillBeCaptured(kingTarget, opponentCapturingPaths))
+              break;
           }
           const piece = getBoardPositionPiece(
             searchRookPosition,
             boardStateValue
           );
-          if (piece) {
-            if (piece.pieceId === "rook" && rookTarget && kingTarget) {
-              moves.push(
-                new Castling(
-                  true,
-                  colDelta === 1,
-                  position,
-                  kingTarget,
-                  searchRookPosition,
-                  rookTarget,
-                  () => {
-                    this.hasCastled = true;
-                  }
-                )
-              );
-            } else {
-              break;
-            }
-          }
+          if (!piece) continue;
+          // There is wrong piece in way. Castling cannot be performed.
+          if (
+            piece.pieceId !== "rook" ||
+            piece.color !== this.color ||
+            !rookTarget ||
+            !kingTarget
+          )
+            break;
+          moves.push(
+            new Castling(
+              true,
+              colDelta === 1,
+              position,
+              kingTarget,
+              searchRookPosition,
+              rookTarget,
+              () => {
+                this.hasCastled = true;
+              }
+            )
+          );
         }
       }
     }

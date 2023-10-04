@@ -1,4 +1,5 @@
 import { BoardPosition } from "../../components/Board.vue";
+import { getPositionNotation } from "../board_manager";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
@@ -7,7 +8,7 @@ import Piece, {
   type Path,
   getBoardPositionPiece,
   isFriendlyPiece,
-  targetWillBeCaptured,
+  positionWillBeCaptured,
 } from "./piece";
 import {
   BoardPositionValue,
@@ -106,6 +107,55 @@ export class Rook extends Piece {
           this.hasMoved = true;
         })
       );
+    }
+
+    // https://en.wikipedia.org/wiki/Castling
+    if (!this.hasMoved && !this.hasCastled) {
+      for (const colDelta of [-1, 1]) {
+        let totalColDelta = 0;
+        while (true) {
+          totalColDelta += colDelta;
+          const searchKingPosition = getDeltaPosition(
+            position,
+            totalColDelta,
+            position.row
+          );
+          if (!isTargetOnBoard(searchKingPosition)) break;
+          const piece = getBoardPositionPiece(
+            searchKingPosition,
+            boardStateValue
+          );
+          if (!piece) continue;
+          // There is wrong piece in way. Castling cannot be performed.
+          if (piece.pieceId !== "king" || piece.color !== this.color) break;
+          const kingTarget = {
+            row: searchKingPosition.row,
+            col: searchKingPosition.col + colDelta * -2,
+          };
+          const rookTarget = {
+            row: kingTarget.row,
+            col: kingTarget.col + colDelta,
+          };
+          if (
+            positionWillBeCaptured(kingTarget, opponentCapturingPaths) ||
+            positionWillBeCaptured(rookTarget, opponentCapturingPaths)
+          )
+            break;
+          moves.push(
+            new Castling(
+              false,
+              colDelta === -1,
+              searchKingPosition,
+              kingTarget,
+              position,
+              rookTarget,
+              () => {
+                this.hasCastled = true;
+              }
+            )
+          );
+        }
+      }
     }
 
     return moves;
