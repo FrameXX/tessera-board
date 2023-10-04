@@ -35,6 +35,9 @@ defineEmits(["click"]);
 
   > button {
     @include no-shrink;
+    width: 38px;
+    height: 38px;
+    box-sizing: content-box;
     padding: var(--spacing-small);
   }
 

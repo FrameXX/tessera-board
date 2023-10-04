@@ -1002,6 +1002,11 @@ const configPieceSelectOptions = computed(() => {
   <!-- Relative -->
   <!-- Primary buttons -->
   <div class="primary-buttons">
+    <Transition name="counter">
+      <button aria-label="Previous move" title="Previous move">
+        <Icon icon-id="arrow-left"></Icon>
+      </button>
+    </Transition>
     <Transition name="slide-up">
       <button aria-label="Cancel move" title="Cancel move" v-show="false">
         <Icon icon-id="close"></Icon>
@@ -1021,6 +1026,11 @@ const configPieceSelectOptions = computed(() => {
       />
       Actions
     </button>
+    <Transition name="counter">
+      <button aria-label="Next move" title="Next move">
+        <Icon icon-id="arrow-right"></Icon>
+      </button>
+    </Transition>
     <Transition name="slide-up">
       <button aria-label="Confirm move" title="Confirm move" v-show="false">
         <Icon icon-id="check"></Icon>

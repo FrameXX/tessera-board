@@ -97,12 +97,14 @@ button {
   @include no-overrender;
   @include round-border;
   @include flex-center(inline-flex);
+  box-sizing: content-box;
   margin: var(--spacing-small);
   font-weight: bold;
   text-transform: uppercase;
   background-color: var(--color-primary-surface-top);
   color: var(--color-primary-accent);
   padding: var(--spacing-tiny) var(--spacing-big);
+  height: 40px;
 
   &:hover:not(.checkbox),
   &:focus:not(.checkbox) {

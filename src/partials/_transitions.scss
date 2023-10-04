@@ -34,6 +34,22 @@
   transform: translateY(-5px);
 }
 
+// Counter
+.counter-enter-active,
+.counter-leave-active {
+  transition: transform var(--transition-duration-medium)
+      var(--transition-timing-jump),
+    opacity var(--transition-duration-medium) var(--transition-timing-jump);
+}
+
+.counter-enter-from {
+  transform: translateY(100%);
+}
+
+.counter-leave-to {
+  transform: translateY(-100%);
+}
+
 // Slide up
 .slide-up-enter-active,
 .slide-up-leave-active {
