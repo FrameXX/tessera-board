@@ -27,7 +27,6 @@ import PlayerColorOptionData, {
 } from "./modules/user_data/preferred_player_color";
 import OpponentOverLanData from "./modules/user_data/opponent_over_lan";
 import SecondCheckboardData from "./modules/user_data/second_checkboard";
-import RotateScreenData from "./modules/user_data/rotate_screen";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 import CapturedPiecesData from "./modules/user_data/captured_pieces";
 import BooleanBoardStateData from "./modules/user_data/boolean_board_state";
@@ -110,9 +109,6 @@ function updateScreenRotation(rotate: boolean): void {
     : setCSSVariable("app-transform", "");
 }
 
-const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
-const pieceRemoveAudioEffect = new Howl({ src: ["./assets/audio/remove.ogg"] });
-
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
     new Rook("white"),
@@ -177,12 +173,18 @@ const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
 const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
 const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: PieceId[] = [];
 const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: PieceId[] = [];
-const DEFAULT_PLAYER_PLAYING_VALUE = true;
 const DEFAULT_GAME_PAUSED_VALUE = false;
 const DEFAULT_AUDIO_EFFECTS_VALUE = true;
 const DEFAULT_FIRST_MOVE_COLOR: PlayerColorOptionValue = "white";
 const DEFAULT_SHOW_CAPTURING_PIECES_VALUE = true;
 const DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE = false;
+const DEFAULT_PLAYER_SECONDS_PER_MOVE = 0;
+const DEFAULT_OPPONENT_SECONDS_PER_MOVE = 0;
+const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
+const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
+
+const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
+const pieceRemoveAudioEffect = new Howl({ src: ["./assets/audio/remove.ogg"] });
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
@@ -216,7 +218,7 @@ const playerSelectedCells = ref<BoardPosition[]>([]);
 const opponentSelectedCells = ref<BoardPosition[]>([]);
 
 // User data refs
-// Simple values (ref)
+// Simple values
 const theme = ref(DEFAULT_THEME_VALUE);
 const transitions = ref(DEFAULT_TRANSITIONS_VALUE);
 const playerHue = ref(DEFAULT_PLAYER_HUE_VALUE);
@@ -236,13 +238,16 @@ const showCapturingPieces = ref(DEFAULT_SHOW_CAPTURING_PIECES_VALUE);
 const banPromotionToUncapturedPieces = ref(
   DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE
 );
+const playerSecondsPerMove = ref(DEFAULT_PLAYER_SECONDS_PER_MOVE);
+const opponentSecondsPerMove = ref(DEFAULT_OPPONENT_SECONDS_PER_MOVE);
+const playerSecondsPerMatch = ref(DEFAULT_PLAYER_SECONDS_PER_MATCH);
+const opponentSecondsPerMatch = ref(DEFAULT_OPPONENT_SECONDS_PER_MATCH);
 
 // Game specific
 const moveIndex = ref(0);
 const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
-const playerPlaying = ref(DEFAULT_PLAYER_PLAYING_VALUE);
 const gamePaused = ref(DEFAULT_GAME_PAUSED_VALUE);
 const whiteCapturedPieces = ref<PieceId[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
 const blackCapturedPieces = ref<PieceId[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
@@ -258,6 +263,33 @@ const playingColor = computed(() => {
     ? (color = "white")
     : (color = "black");
   return color;
+});
+const playerPlaying = computed(() => {
+  return playerColor.value === playingColor.value;
+});
+const timersSet = computed(() => {
+  return (
+    playerSecondsPerMove.value !== 0 ||
+    opponentSecondsPerMove.value !== 0 ||
+    playerMatchSeconds.value !== 0 ||
+    opponentMatchSeconds.value !== 0
+  );
+});
+const playerMoveSeconds = ref(0);
+const opponentMoveSeconds = ref(0);
+const playerMatchSeconds = ref(0);
+const opponentMatchSeconds = ref(0);
+const playerRemainingMoveSeconds = computed(() => {
+  return playerSecondsPerMove.value - playerMoveSeconds.value;
+});
+const opponentRemainingMoveSeconds = computed(() => {
+  return opponentSecondsPerMove.value - opponentMoveSeconds.value;
+});
+const playerRemainingMatchSeconds = computed(() => {
+  return playerSecondsPerMatch.value - playerMatchSeconds.value;
+});
+const opponentRemainingMatchSeconds = computed(() => {
+  return opponentSecondsPerMatch.value - opponentMatchSeconds.value;
 });
 
 // Complex values (reactive)
@@ -363,10 +395,11 @@ const userDataManager = new UserDataManager(
       secondCheckboard,
       toastManager
     ),
-    new RotateScreenData(
+    new BooleanUserData(
+      "rotate_screen",
       DEFAULT_ROTATE_SCREEN_VALUE,
-      rotateScreen,
-      toastManager
+      toastManager,
+      rotateScreen
     ),
     new RequireMoveConfirmData(
       DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
@@ -379,12 +412,6 @@ const userDataManager = new UserDataManager(
       isPlayerColor,
       toastManager,
       playerColor
-    ),
-    new BooleanUserData(
-      "player_playing",
-      DEFAULT_PLAYER_PLAYING_VALUE,
-      toastManager,
-      playerPlaying
     ),
     new BooleanUserData(
       "game_paused",
@@ -422,6 +449,54 @@ const userDataManager = new UserDataManager(
       highlightedCells,
       highlightedCells,
       toastManager
+    ),
+    new NumberUserData(
+      "player_seconds_per_move",
+      DEFAULT_PLAYER_SECONDS_PER_MOVE,
+      toastManager,
+      playerSecondsPerMove
+    ),
+    new NumberUserData(
+      "opponent_seconds_per_move",
+      DEFAULT_OPPONENT_SECONDS_PER_MOVE,
+      toastManager,
+      opponentSecondsPerMove
+    ),
+    new NumberUserData(
+      "player_seconds_per_match",
+      DEFAULT_PLAYER_SECONDS_PER_MATCH,
+      toastManager,
+      playerSecondsPerMatch
+    ),
+    new NumberUserData(
+      "opponent_seconds_per_match",
+      DEFAULT_OPPONENT_SECONDS_PER_MATCH,
+      toastManager,
+      opponentSecondsPerMatch
+    ),
+    new NumberUserData(
+      "player_move_seconds",
+      0,
+      toastManager,
+      playerMoveSeconds
+    ),
+    new NumberUserData(
+      "opponent_move_seconds",
+      0,
+      toastManager,
+      opponentMoveSeconds
+    ),
+    new NumberUserData(
+      "player_match_seconds",
+      0,
+      toastManager,
+      playerMatchSeconds
+    ),
+    new NumberUserData(
+      "opponent_match_seconds",
+      0,
+      toastManager,
+      opponentMatchSeconds
     ),
     defaultBoardStateData,
     gameBoardStateData,
@@ -486,8 +561,13 @@ const game = new Game(
   playerColor,
   firstMoveColor,
   prefferedFirstMoveColor,
+  playerPlaying,
   moveIndex,
   preferredPlayerColor,
+  playerMoveSeconds,
+  opponentMoveSeconds,
+  playerMatchSeconds,
+  opponentMatchSeconds,
   toastManager
 );
 
@@ -501,7 +581,6 @@ if (localStorage.length !== 0) {
         "cookie-alert"
       );
 } else {
-  defaultBoardStateData.save();
   game.restart();
 }
 
@@ -523,6 +602,7 @@ onMounted(() => {
   // Let the app wait another 600ms to make sure its fully loaded.
   setTimeout(() => {
     gameBoardManager.updateCapturingPaths();
+    game.resume();
     splashscreenManager.hideSplashscreen();
   }, 600);
 });
@@ -546,7 +626,13 @@ const configPieceSelectOptions = computed(() => {
   >
   <!-- Relative -->
   <div id="game-area">
-    <Timers :player-secs-move="168" />
+    <Timers
+      v-show="timersSet"
+      :player-secs-move="playerRemainingMoveSeconds"
+      :opponent-secs-move="opponentRemainingMoveSeconds"
+      :player-secs-match="playerRemainingMatchSeconds"
+      :opponent-secs-match="opponentRemainingMatchSeconds"
+    />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
@@ -663,7 +749,10 @@ const configPieceSelectOptions = computed(() => {
         icon-id="timer-outline"
         option-id="minutes-input-player-seconds-per-move"
       >
-        <TimeDurationInput id="input-player-seconds-per-move" />
+        <TimeDurationInput
+          id="input-player-seconds-per-move"
+          v-model="playerSecondsPerMove"
+        />
         <template #description
           >Limits player's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
@@ -675,7 +764,10 @@ const configPieceSelectOptions = computed(() => {
         icon-id="timer-outline"
         option-id="minutes-input-opponent-seconds-per-move"
       >
-        <TimeDurationInput id="input-opponent-seconds-per-move" />
+        <TimeDurationInput
+          id="input-opponent-seconds-per-move"
+          v-model="opponentSecondsPerMove"
+        />
         <template #description
           >Limits opponent's time per move. If the time runs out (expires) an
           action specified in the option below will be performed.
@@ -687,7 +779,10 @@ const configPieceSelectOptions = computed(() => {
         icon-id="clock-outline"
         option-id="minutes-input-player-seconds-per-match"
       >
-        <TimeDurationInput id="input-player-seconds-per-match" />
+        <TimeDurationInput
+          id="input-player-seconds-per-match"
+          v-model="playerSecondsPerMatch"
+        />
         <template #description
           >Limits player's time for whole match (game). If the time runs out the
           player looses and opponent wins.
@@ -699,7 +794,10 @@ const configPieceSelectOptions = computed(() => {
         icon-id="clock-outline"
         option-id="minutes-input-opponent-seconds-per-match"
       >
-        <TimeDurationInput id="input-opponent-seconds-per-match" />
+        <TimeDurationInput
+          id="input-opponent-seconds-per-match"
+          v-model="opponentSecondsPerMatch"
+        />
         <template #description
           >Limits opponent's time for whole match (game). If the time runs out
           the opponent looses and player wins.

@@ -14,8 +14,9 @@ export class UserDataError extends Error {
 
 // UserData class manages recovering, applying and saving data types from and to localStorage.
 abstract class UserData<ValueType> {
-  public static readonly STORAGE_KEY = "tessera_board";
+  public static readonly BASE_STORAGE_KEY = "tessera_board";
   private valueRef?: Ref<ValueType>;
+  protected storageKey = `${UserData.BASE_STORAGE_KEY}-${this.id}`;
 
   constructor(
     public readonly id: string,
@@ -36,6 +37,10 @@ abstract class UserData<ValueType> {
     }
   }
 
+  protected get isSavedOnce() {
+    return localStorage.getItem(this.storageKey) !== null;
+  }
+
   protected safelyParse(dumped: string): any | void {
     let value;
     try {
@@ -53,7 +58,7 @@ abstract class UserData<ValueType> {
 
   public save() {
     if (navigator.cookieEnabled) {
-      localStorage.setItem(`${UserData.STORAGE_KEY}-${this.id}`, this.dump());
+      localStorage.setItem(this.storageKey, this.dump());
     }
   }
 
@@ -79,7 +84,9 @@ abstract class UserData<ValueType> {
   }
 
   public recover() {
-    const dumped = localStorage.getItem(`${UserData.STORAGE_KEY}-${this.id}`);
+    const dumped = localStorage.getItem(
+      `${UserData.BASE_STORAGE_KEY}-${this.id}`
+    );
     if (dumped) {
       this.load(dumped);
     }

@@ -1,4 +1,4 @@
-import { type Ref } from "vue";
+import type { ComputedRef, Ref } from "vue";
 import type { PlayerColor } from "./pieces/piece";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
@@ -6,6 +6,7 @@ import { getRandomNumber } from "./utils/misc";
 import GameBoardManager from "./game_board_manager";
 import ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
+import Timer from "./timer";
 
 export class GameLogicError extends Error {
   constructor(message: string) {
@@ -16,6 +17,11 @@ export class GameLogicError extends Error {
 }
 
 class Game {
+  private readonly playerMoveSecondsTimer: Timer;
+  private readonly opponentMoveSecondsTimer: Timer;
+  private readonly playerMatchSecondsTimer: Timer;
+  private readonly opponentMatchSecondsTimer: Timer;
+
   constructor(
     private readonly gameBoardManager: GameBoardManager,
     private readonly gameBoardStateData: BoardStateData,
@@ -23,10 +29,19 @@ class Game {
     private readonly playerColor: Ref<PlayerColor>,
     private readonly firstMoveColor: Ref<PlayerColor>,
     private readonly preferredFirstMoveColor: Ref<PlayerColorOptionValue>,
+    private readonly playerPlaying: ComputedRef<boolean>,
     private readonly moveIndex: Ref<number>,
     private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,
+    playerMoveSeconds: Ref<number>,
+    opponentMoveSeconds: Ref<number>,
+    playerMatchSeconds: Ref<number>,
+    opponentMatchSeconds: Ref<number>,
     private readonly toastManager: ToastManager
   ) {
+    this.playerMoveSecondsTimer = new Timer(playerMoveSeconds);
+    this.opponentMoveSecondsTimer = new Timer(opponentMoveSeconds);
+    this.playerMatchSecondsTimer = new Timer(playerMatchSeconds);
+    this.opponentMatchSecondsTimer = new Timer(opponentMatchSeconds);
     this.gameBoardManager.addEventListener("move", () => this.onMove());
   }
 
@@ -56,17 +71,51 @@ class Game {
     }
   }
 
+  private restartMoveTimers() {
+    this.playerMoveSecondsTimer.restart();
+    this.opponentMoveSecondsTimer.restart();
+  }
+
+  private restartTimers() {
+    this.restartMoveTimers();
+    this.playerMatchSecondsTimer.restart();
+    this.opponentMatchSecondsTimer.restart();
+  }
+
+  private updateTimerState() {
+    console.log(this.playerPlaying.value);
+    if (this.playerPlaying.value) {
+      this.opponentMoveSecondsTimer.pause();
+      this.opponentMatchSecondsTimer.pause();
+      this.playerMoveSecondsTimer.resume();
+      this.playerMatchSecondsTimer.resume();
+    } else {
+      this.playerMoveSecondsTimer.pause();
+      this.playerMatchSecondsTimer.pause();
+      this.opponentMoveSecondsTimer.resume();
+      this.opponentMatchSecondsTimer.resume();
+    }
+  }
+
   public restart() {
+    this.restartTimers();
     this.setupDefaultBoardState();
     this.choosePlayerColor();
     this.chooseFirstMoveColor();
     this.gameBoardManager.resetBoard();
     this.toastManager.showToast("New match started.", "info", "flag-checkered");
     this.moveIndex.value = 0;
+    this.updateTimerState();
+  }
+
+  public resume() {
+    this.updateTimerState();
   }
 
   public onMove() {
     this.moveIndex.value++;
+    this.restartMoveTimers();
+    this.updateTimerState();
   }
 }
 

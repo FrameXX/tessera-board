@@ -19,10 +19,10 @@ class NumberUserData extends UserData<number> {
   }
 
   public load(dumped: string): void {
-    this.value = Math.max(
-      Math.min(+dumped, this.maxValue ?? Number.MAX_VALUE),
-      this.minValue ?? Number.MIN_VALUE
-    );
+    let value = +dumped;
+    if (this.minValue) value = Math.max(value, this.minValue);
+    if (this.maxValue) value = Math.min(value, this.maxValue);
+    this.value = value;
   }
 
   public apply(): void {}

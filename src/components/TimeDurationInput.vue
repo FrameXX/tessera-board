@@ -45,7 +45,7 @@ function updateMinutes(event: Event) {
       :id="`minutes-${props.id}`"
       :value="minutes"
       @input="updateMinutes($event)"
-    />m<input
+    />:<input
       ref="seconds"
       min="0"
       max="59"
@@ -53,7 +53,7 @@ function updateMinutes(event: Event) {
       :id="`seconds-${props.id}`"
       :value="seconds"
       @input="updateSeconds($event)"
-    />s
+    />
   </div>
 </template>
 

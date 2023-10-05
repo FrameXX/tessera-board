@@ -9,7 +9,14 @@ class RawBoardStateData extends ComplexUserData<BoardStateValue> {
     valueReactive: BoardStateValue,
     toastManager: ToastManager
   ) {
-    super("default_board_state", value, valueReactive, toastManager);
+    super(
+      "default_board_state",
+      value,
+      valueReactive,
+      toastManager,
+      true,
+      true
+    );
   }
 
   get rawVersion() {

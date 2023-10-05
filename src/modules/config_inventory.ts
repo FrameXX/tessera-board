@@ -95,7 +95,7 @@ class ConfigInventory {
 
   public loadConfigValues(id: string) {
     const configValuesStr = localStorage.getItem(
-      `${UserData.STORAGE_KEY}-configs-${this.id}-values-${id}`
+      `${UserData.BASE_STORAGE_KEY}-configs-${this.id}-values-${id}`
     );
     if (!configValuesStr) {
       console.error(
@@ -129,7 +129,7 @@ class ConfigInventory {
 
   private loadUserConfigPrints() {
     const configPrintsStr = localStorage.getItem(
-      `${UserData.STORAGE_KEY}-configs-${this.id}`
+      `${UserData.BASE_STORAGE_KEY}-configs-${this.id}`
     );
     if (!configPrintsStr) {
       return;
@@ -178,7 +178,7 @@ class ConfigInventory {
 
   private saveConfigPrints() {
     localStorage.setItem(
-      `${UserData.STORAGE_KEY}-configs-${this.id}`,
+      `${UserData.BASE_STORAGE_KEY}-configs-${this.id}`,
       JSON.stringify(this.userConfigPrints)
     );
   }
@@ -212,14 +212,14 @@ class ConfigInventory {
     this.configPrints = this.configPrints.filter((print) => print.id !== id);
     this.saveConfigPrints();
     localStorage.removeItem(
-      `${UserData.STORAGE_KEY}-configs-${this.id}-values-${id}`
+      `${UserData.BASE_STORAGE_KEY}-configs-${this.id}-values-${id}`
     );
   }
 
   public saveConfig(config: PredefinedConfig) {
     this.addConfigPrint(config.id, config.name, config.description);
     localStorage.setItem(
-      `${UserData.STORAGE_KEY}-configs-${this.id}-values-${config.id}`,
+      `${UserData.BASE_STORAGE_KEY}-configs-${this.id}-values-${config.id}`,
       JSON.stringify(config.values)
     );
   }

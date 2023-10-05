@@ -9,7 +9,8 @@ abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
     value: ValueType,
     protected reactiveValue: ValueType,
     toastManager: ToastManager,
-    autoSave: boolean = true
+    autoSave: boolean = true,
+    saveImmidiately = false
   ) {
     super(id, value, toastManager);
 
@@ -18,6 +19,7 @@ abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
         this.onValueChange(newValue);
       });
     }
+    if (saveImmidiately && !this.isSavedOnce) this.save();
   }
 
   // HACK: Value of reactive is a proxy. To get the original value toRaw built-in Vue function is used to extract the real value.
