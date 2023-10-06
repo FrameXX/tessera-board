@@ -34,7 +34,6 @@ import NumberUserData from "./modules/user_data/number_user_data";
 
 // Import other classes and functions
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
-import SplashscreenManager from "./modules/splashscreen_manager";
 import ThemeManager from "./modules/theme_manager";
 import TransitionsManager from "./modules/transitions_manager";
 import ConfirmDialog from "./modules/dialogs/confirm";
@@ -47,7 +46,11 @@ import {
   isPlayerColor,
   PIECE_IDS,
 } from "./modules/pieces/piece";
-import { activateColors, setCSSVariable } from "./modules/utils/elements";
+import {
+  activateColors,
+  hideSplashscreen,
+  setCSSVariable,
+} from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
 import type { BoardPosition, MarkBoardState } from "./components/Board.vue";
@@ -183,10 +186,9 @@ const DEFAULT_OPPONENT_SECONDS_PER_MOVE = 0;
 const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
 
+// UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
 const pieceRemoveAudioEffect = new Howl({ src: ["./assets/audio/remove.ogg"] });
-
-// UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
 const screenRotated = ref(false);
@@ -517,13 +519,7 @@ const defaultBoardConfigManager = new ConfigManager(
   toastManager
 );
 
-// Splashscreen manager
-const splashscreenManager = new SplashscreenManager(transitionsManager);
-
-// Escape manager
 const escapeManager = new EscapeManager(toggleActionsPanel);
-
-// Board managers
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
   configPieceDialog,
@@ -531,7 +527,6 @@ const defaultBoardManager = new DefaultBoardManager(
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect
 );
-
 const gameBoardManager = new GameBoardManager(
   playingColor,
   gameBoardState,
@@ -552,8 +547,6 @@ const gameBoardManager = new GameBoardManager(
   banPromotionToUncapturedPieces,
   toastManager
 );
-
-// Game manager
 const game = new Game(
   gameBoardManager,
   gameBoardStateData,
@@ -603,7 +596,7 @@ onMounted(() => {
   setTimeout(() => {
     gameBoardManager.updateCapturingPaths();
     game.resume();
-    splashscreenManager.hideSplashscreen();
+    hideSplashscreen(transitionsManager.preferredTransitions);
   }, 600);
 });
 

@@ -115,3 +115,35 @@ export function activateColors(): void {
   setCSSVariable("S-piece-stroke", "var(--S-piece-stroke-active)");
   setCSSVariable("S-dim", "var(--S-dim-active)");
 }
+
+export async function hideSplashscreen(preferredTransitions: boolean) {
+  const splashscreen = getElementInstanceById("splashscreen", HTMLElement);
+  const cell1 = getElementInstanceById("cell1");
+  const cell2 = getElementInstanceById("cell2");
+
+  // Both animations end and start at the same time thus it's not required to listen to both elements.
+  if (preferredTransitions) {
+    await awaitElementAnimationIteration(cell1);
+  }
+
+  cell1.classList.remove("animated");
+  cell2.classList.remove("animated");
+  repaintElement(cell1);
+  repaintElement(cell2);
+  cell1.classList.add("away");
+  cell2.classList.add("away");
+
+  splashscreen.classList.add("faded");
+  if (preferredTransitions) {
+    await waitForTransitionEnd(splashscreen, "opacity", 3000);
+  }
+  splashscreen.hidden = true;
+}
+
+export function awaitElementAnimationIteration(
+  element: Element
+): Promise<void> {
+  return new Promise((resolve) => {
+    element.addEventListener("animationiteration", () => resolve());
+  });
+}
