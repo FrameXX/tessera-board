@@ -838,6 +838,17 @@ onMounted(() => {
           a game rule, because it can give the player an advantage.
         </template>
       </UserOption>
+      <UserOption
+        name="show availible moves of pieces of other player"
+        icon-id="circle-small"
+        option-id="show-other-availible-moves"
+      >
+        <Checkbox id="show-other-availible-moves" />
+        <template #description>
+          The player will be able to display the possible moves and board marks
+          of pieces of the other player and not only his/her own pieces.
+        </template>
+      </UserOption>
       <!-- Other -->
       <span class="section-title">Other</span>
       <UserOption
@@ -1408,9 +1419,12 @@ onMounted(() => {
 .primary-buttons {
   @include no-shrink;
   @include flex-center;
-  z-index: var(--z-index-top-fragment);
   margin: var(--spacing-medium);
   width: 100%;
+
+  #action-button {
+    z-index: var(--z-index-top-fragment);
+  }
 }
 
 #action-icon {
