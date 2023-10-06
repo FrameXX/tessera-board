@@ -112,6 +112,22 @@ function updateScreenRotation(rotate: boolean): void {
     : setCSSVariable("app-transform", "");
 }
 
+function recoverData() {
+  if (!navigator.cookieEnabled) {
+    toastManager.showToast(
+      "Cookies are disabled. -> No changes will be restored in next session.",
+      "error",
+      "cookie-alert"
+    );
+    return false;
+  }
+  if (localStorage.length === 0) {
+    return false;
+  }
+  userDataManager.recoverData();
+  return true;
+}
+
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
     new Rook("white"),
@@ -214,6 +230,32 @@ const OpponentCellMarks: MarkBoardState = reactive(
     .fill(null)
     .map(() => new Array(8).fill(null))
 );
+const configPieceSelectOptions = computed(() => {
+  const pieces: RawPiece[] = [];
+  for (const pieceId of PIECE_IDS) {
+    pieces.push({ pieceId, color: configPieceDialog.props.color });
+  }
+  return pieces;
+});
+const playingColor = computed(() => {
+  let color: PlayerColor;
+  (isEven(moveIndex.value) && firstMoveColor.value === "white") ||
+  (!isEven(moveIndex.value) && firstMoveColor.value === "black")
+    ? (color = "white")
+    : (color = "black");
+  return color;
+});
+const playerPlaying = computed(() => {
+  return playerColor.value === playingColor.value;
+});
+const timersSet = computed(() => {
+  return (
+    playerSecondsPerMove.value !== 0 ||
+    opponentSecondsPerMove.value !== 0 ||
+    playerMatchSeconds.value !== 0 ||
+    opponentMatchSeconds.value !== 0
+  );
+});
 const playerSelectedPieces = ref<BoardPosition[]>([]);
 const opponentSelectedPieces = ref<BoardPosition[]>([]);
 const playerSelectedCells = ref<BoardPosition[]>([]);
@@ -258,25 +300,6 @@ const highlightedCells: BooleanBoardState = reactive(
     .fill(null)
     .map(() => new Array(8).fill(false))
 );
-const playingColor = computed(() => {
-  let color: PlayerColor;
-  (isEven(moveIndex.value) && firstMoveColor.value === "white") ||
-  (!isEven(moveIndex.value) && firstMoveColor.value === "black")
-    ? (color = "white")
-    : (color = "black");
-  return color;
-});
-const playerPlaying = computed(() => {
-  return playerColor.value === playingColor.value;
-});
-const timersSet = computed(() => {
-  return (
-    playerSecondsPerMove.value !== 0 ||
-    opponentSecondsPerMove.value !== 0 ||
-    playerMatchSeconds.value !== 0 ||
-    opponentMatchSeconds.value !== 0
-  );
-});
 const playerMoveSeconds = ref(0);
 const opponentMoveSeconds = ref(0);
 const playerMatchSeconds = ref(0);
@@ -302,30 +325,17 @@ const gameBoardState: BoardStateValue = reactive(
   DEFAULT_GAME_BOARD_STATE_VALUE
 );
 
-// Confirm dialog
 const confirmDialog = new ConfirmDialog();
-
-// Config piece dialog
 const configPieceDialog = new ConfigPieceDialog();
-
-// Toast manager
 const toastManager = new ToastManager(toasts);
-
-// Select piece dialog
 const selectPieceDialog = new SelectPieceDilog(toastManager);
-
-// Configs dialog
 const configPrintDialog = new ConfigPrintDialog(toastManager);
 const configsDialog = new ConfigsDialog(
   confirmDialog,
   configPrintDialog,
   toastManager
 );
-
-// Theme manager
 const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
-
-// Transition manager
 const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
 
 // Data
@@ -340,7 +350,7 @@ const gameBoardStateData = new BoardStateData(
   toastManager
 );
 
-// NOTE: Most of the UserData instances use Ref but some of them may use Reactive if their value is more complex. These classes are extending ComplexUserData class.
+// NOTE: Most of the UserData instances use Ref but some of them may use reactive if their value is more complex. These classes are extending ComplexUserData class.
 const userDataManager = new UserDataManager(
   [
     new ThemeData(DEFAULT_THEME_VALUE, theme, themeManger, toastManager),
@@ -506,8 +516,6 @@ const userDataManager = new UserDataManager(
   confirmDialog,
   toastManager
 );
-
-// Default board configurations
 const defaultBoardConfigInventory = new ConfigInventory(
   "default-board",
   PREDEFINED_DEFAULT_BOARD_CONFIGS,
@@ -564,30 +572,15 @@ const game = new Game(
   toastManager
 );
 
-// Load data
-if (localStorage.length !== 0) {
-  navigator.cookieEnabled
-    ? userDataManager.recoverData()
-    : toastManager.showToast(
-        "Cookies are disabled. -> No changes will be restored in next session.",
-        "error",
-        "cookie-alert"
-      );
-} else {
-  game.restart();
-}
-
+const dataRecovered = recoverData();
+if (!dataRecovered) game.restart();
 userDataManager.applyData();
 userDataManager.updateReferences();
 
-// On first mount
 onMounted(() => {
-  console.log("App mounted");
-
   // Sets CSS Saturation variables from 0 to their appropriate user configured values
   activateColors();
 
-  // Escape using Escape manager
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") escapeManager.escape();
   });
@@ -598,14 +591,6 @@ onMounted(() => {
     game.resume();
     hideSplashscreen(transitionsManager.preferredTransitions);
   }, 600);
-});
-
-const configPieceSelectOptions = computed(() => {
-  const pieces: RawPiece[] = [];
-  for (const pieceId of PIECE_IDS) {
-    pieces.push({ pieceId, color: configPieceDialog.props.color });
-  }
-  return pieces;
 });
 </script>
 
