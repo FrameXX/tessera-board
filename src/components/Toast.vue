@@ -46,7 +46,7 @@ const props = defineProps({
   border-style: solid;
 
   &.info {
-    border-color: var(--color-primary-text);
+    border-color: var(--color-primary-accent);
     background-color: var(--color-primary-surface-top);
     color: var(--color-primary-text);
   }
@@ -54,7 +54,7 @@ const props = defineProps({
   &.error {
     background-color: var(--color-error-surface-top);
     color: var(--color-error-text);
-    border-color: var(--color-error-text);
+    border-color: var(--color-error-accent);
   }
 
   > .close-overlay {

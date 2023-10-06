@@ -50,6 +50,8 @@ import {
   activateColors,
   hideSplashscreen,
   setCSSVariable,
+  updatePrimaryHue,
+  updatePieceColors,
 } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
@@ -126,6 +128,13 @@ function recoverData() {
   }
   userDataManager.recoverData();
   return true;
+}
+
+async function onGameRestart() {
+  const confirmed = await confirmDialog.show(
+    "Currently played game will be lost. Are you sure?"
+  );
+  if (confirmed) game.restart();
 }
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
@@ -207,11 +216,6 @@ const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
 const pieceRemoveAudioEffect = new Howl({ src: ["./assets/audio/remove.ogg"] });
 const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
-const screenRotated = ref(false);
-watch(screenRotated, (newValue) => {
-  updateScreenRotation(newValue);
-});
-updateScreenRotation(screenRotated.value);
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
 const configsNameFilter = ref("");
@@ -516,6 +520,25 @@ const userDataManager = new UserDataManager(
   confirmDialog,
   toastManager
 );
+
+const screenRotated = computed(() => {
+  let rotated: boolean;
+  if (!rotateScreen.value) {
+    return false;
+  }
+  rotated = playingColor.value === "black";
+  return rotated;
+});
+watch(screenRotated, (newValue) => {
+  updateScreenRotation(newValue);
+});
+watch(playerPlaying, (newValue) => {
+  updatePrimaryHue(newValue);
+});
+watch(playerColor, (newValue) => {
+  updatePieceColors(newValue);
+});
+
 const defaultBoardConfigInventory = new ConfigInventory(
   "default-board",
   PREDEFINED_DEFAULT_BOARD_CONFIGS,
@@ -654,7 +677,7 @@ onMounted(() => {
   <ActionPanel
     @backdrop-click="toggleActionsPanel"
     @configure-game="toggleConfigDrawer"
-    @restart-game="game.restart()"
+    @restart-game="onGameRestart()"
     :open="actionPanelOpen"
   />
 

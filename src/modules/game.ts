@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref } from "vue";
+import { ComputedRef, Ref, watch } from "vue";
 import type { PlayerColor } from "./pieces/piece";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
@@ -43,6 +43,9 @@ class Game {
     this.playerMatchSecondsTimer = new Timer(playerMatchSeconds);
     this.opponentMatchSecondsTimer = new Timer(opponentMatchSeconds);
     this.gameBoardManager.addEventListener("move", () => this.onMove());
+    watch(this.playerPlaying, (newValue) => {
+      this.updateTimerState(newValue);
+    });
   }
 
   private setupDefaultBoardState() {
@@ -82,8 +85,8 @@ class Game {
     this.opponentMatchSecondsTimer.restart();
   }
 
-  private updateTimerState() {
-    if (this.playerPlaying.value) {
+  private updateTimerState(playerPlaying: boolean) {
+    if (playerPlaying) {
       this.opponentMoveSecondsTimer.pause();
       this.opponentMatchSecondsTimer.pause();
       this.playerMoveSecondsTimer.resume();
@@ -104,17 +107,16 @@ class Game {
     this.gameBoardManager.resetBoard();
     this.toastManager.showToast("New match started.", "info", "flag-checkered");
     this.moveIndex.value = 0;
-    this.updateTimerState();
+    this.updateTimerState(this.playerPlaying.value);
   }
 
   public resume() {
-    this.updateTimerState();
+    this.updateTimerState(this.playerPlaying.value);
   }
 
   public onMove() {
     this.moveIndex.value++;
-    this.restartMoveTimers();
-    this.updateTimerState();
+    this.updateTimerState(this.playerPlaying.value);
   }
 }
 

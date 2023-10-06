@@ -1,3 +1,5 @@
+import type { PlayerColor } from "../pieces/piece";
+
 export class ElementNotFoundError extends Error {
   constructor(message: string) {
     super(message);
@@ -114,6 +116,22 @@ export function activateColors(): void {
   setCSSVariable("S-piece-fill", "var(--S-piece-fill-active)");
   setCSSVariable("S-piece-stroke", "var(--S-piece-stroke-active)");
   setCSSVariable("S-dim", "var(--S-dim-active)");
+}
+
+export function updatePrimaryHue(playerPlaying: boolean) {
+  playerPlaying
+    ? setCSSVariable("H-primary", "var(--H-player)")
+    : setCSSVariable("H-primary", "var(--H-opponent)");
+}
+
+export function updatePieceColors(playerColor: PlayerColor) {
+  if (playerColor === "white") {
+    setCSSVariable("H-piece-white", "var(--H-player)");
+    setCSSVariable("H-piece-black", "var(--H-opponent)");
+  } else {
+    setCSSVariable("H-piece-white", "var(--H-opponent)");
+    setCSSVariable("H-piece-black", "var(--H-player)");
+  }
 }
 
 export async function hideSplashscreen(preferredTransitions: boolean) {

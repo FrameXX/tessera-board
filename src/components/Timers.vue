@@ -65,7 +65,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         content-role="timer"
         :class="{ pulsing: props.opponentSecsMove < 16 }"
         name="move"
-        v-show="props.opponentSecsMatch > 0"
+        v-show="props.opponentSecsMove > 0"
         >{{
           getDigitStr(opponentTimeMove.mins) +
           ":" +

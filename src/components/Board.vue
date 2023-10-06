@@ -152,18 +152,14 @@ function isCellSelected(position: BoardPosition) {
       <div v-if="primary" class="black captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
-          :piece-ids="
-            props.rotated ? props.whiteCapturedPieces : blackCapturedPieces
-          "
+          :piece-ids="blackCapturedPieces"
           color="white"
         />
       </div>
       <div v-if="primary" class="white captured-pieces">
         <CapturedPieces
           :piece-set="props.pieceSet"
-          :piece-ids="
-            props.rotated ? props.blackCapturedPieces : whiteCapturedPieces
-          "
+          :piece-ids="whiteCapturedPieces"
           color="black"
         />
       </div>
