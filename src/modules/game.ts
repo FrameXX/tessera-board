@@ -83,7 +83,6 @@ class Game {
   }
 
   private updateTimerState() {
-    console.log(this.playerPlaying.value);
     if (this.playerPlaying.value) {
       this.opponentMoveSecondsTimer.pause();
       this.opponentMatchSecondsTimer.pause();

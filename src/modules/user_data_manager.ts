@@ -37,6 +37,12 @@ class UserDataManager {
     }
   }
 
+  public onRecoverCheck() {
+    for (const entry of this.entries) {
+      entry.onRecoverCheck();
+    }
+  }
+
   public applyData() {
     for (const entry of this.entries) {
       entry.apply();

@@ -16,7 +16,7 @@ export class UserDataError extends Error {
 abstract class UserData<ValueType> {
   public static readonly BASE_STORAGE_KEY = "tessera_board";
   private valueRef?: Ref<ValueType>;
-  protected storageKey = `${UserData.BASE_STORAGE_KEY}-${this.id}`;
+  protected storageKey: string;
 
   constructor(
     public readonly id: string,
@@ -24,6 +24,8 @@ abstract class UserData<ValueType> {
     private readonly toastManager: ToastManager,
     valueRef?: Ref<ValueType>
   ) {
+    this.storageKey = `${UserData.BASE_STORAGE_KEY}-${this.id}`;
+
     // Watch ref for changes, update the original value and save changes.
     if (valueRef) {
       this.valueRef = valueRef;
@@ -38,7 +40,11 @@ abstract class UserData<ValueType> {
   }
 
   protected get isSavedOnce() {
-    return localStorage.getItem(this.storageKey) !== null;
+    let isSavedOnce: boolean;
+    navigator.cookieEnabled
+      ? (isSavedOnce = localStorage.getItem(this.storageKey) !== null)
+      : (isSavedOnce = false);
+    return isSavedOnce;
   }
 
   protected safelyParse(dumped: string): any | void {
@@ -56,10 +62,11 @@ abstract class UserData<ValueType> {
     return value;
   }
 
+  public onRecoverCheck() {}
+
   public save() {
-    if (navigator.cookieEnabled) {
+    if (navigator.cookieEnabled)
       localStorage.setItem(this.storageKey, this.dump());
-    }
   }
 
   protected onValueChange(newValue: ValueType) {
@@ -84,9 +91,7 @@ abstract class UserData<ValueType> {
   }
 
   public recover() {
-    const dumped = localStorage.getItem(
-      `${UserData.BASE_STORAGE_KEY}-${this.id}`
-    );
+    const dumped = localStorage.getItem(this.storageKey);
     if (dumped) {
       this.load(dumped);
     }

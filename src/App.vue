@@ -573,6 +573,7 @@ const game = new Game(
 );
 
 const dataRecovered = recoverData();
+userDataManager.onRecoverCheck();
 if (!dataRecovered) game.restart();
 userDataManager.applyData();
 userDataManager.updateReferences();
