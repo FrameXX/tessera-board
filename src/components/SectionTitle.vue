@@ -1,0 +1,27 @@
+<script lang="ts" setup>
+const props = defineProps({ title: { type: String, required: true } });
+</script>
+
+<template>
+  <div
+    class="section-title"
+    :aria-label="props.title"
+    :title="props.title"
+    v-text="props.title"
+  ></div>
+</template>
+
+<style lang="scss">
+@import "../partials/mixins";
+
+.section-title {
+  @include shadow;
+  @include round-border;
+  @include inverted-accent;
+  width: fit-content;
+  margin: var(--spacing-big) 0;
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  padding: var(--spacing-small);
+}
+</style>

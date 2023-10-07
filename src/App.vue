@@ -88,6 +88,7 @@ import Timers from "./components/Timers.vue";
 import SelectPiece from "./components/SelectPiece.vue";
 import TimeDurationInput from "./components/TimeDurationInput.vue";
 import Status from "./components/Status.vue";
+import SectionTitle from "./components/SectionTitle.vue";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;
@@ -772,7 +773,7 @@ onMounted(() => {
     <!-- Game rules -->
     <Category name="Game rules" icon-id="rule">
       <!-- Time restrictions -->
-      <div class="section-title">Time restrictions</div>
+      <SectionTitle title="Time restrictions" />
       <UserOption
         name="Player time per move"
         icon-id="timer-outline"
@@ -848,7 +849,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Assistance -->
-      <div class="section-title">Assistance</div>
+      <SectionTitle title="Assistance" />
       <UserOption
         name="show pieces checking selected cell"
         icon-id="rhombus-outline"
@@ -881,7 +882,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Other -->
-      <div class="section-title">Other</div>
+      <SectionTitle title="Other" />
       <UserOption
         name="First move color"
         icon-id="numeric-1-box-outline"
@@ -914,7 +915,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Checkboard -->
-      <div class="section-title">Checkboard</div>
+      <SectionTitle title="Checkboard" />
       <UserOption
         :simple="false"
         name="default piece positions"
@@ -946,7 +947,7 @@ onMounted(() => {
     <!-- Look and feel -->
     <Category name="look and feel" icon-id="palette-advanced">
       <!-- Behavior and elements -->
-      <div class="section-title">Behavior and elements</div>
+      <SectionTitle title="Behavior and elements" />
       <UserOption
         name="second checkboard"
         icon-id="checkerboard-plus"
@@ -1002,7 +1003,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Colors -->
-      <div class="section-title">Colors</div>
+      <SectionTitle title="Colors" />
       <UserOption
         name="UI mode"
         icon-id="brightness-6"
@@ -1055,7 +1056,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Checkboard -->
-      <div class="section-title">Checkboard</div>
+      <SectionTitle title="Checkboard" />
       <UserOption
         name="piece set"
         icon-id="chess-pawn"
@@ -1123,7 +1124,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Effects -->
-      <div class="section-title">Effects</div>
+      <SectionTitle title="Effects" />
       <UserOption
         name="audio effects"
         icon-id="surround-sound"
@@ -1478,28 +1479,10 @@ onMounted(() => {
   }
 }
 
-#game-status {
-  @include round-border;
-  margin: var(--spacing-medium) 0;
-  padding: var(--spacing-medium);
-  background-color: var(--color-primary-surface-accent);
-}
-
 .action-buttons-drawer {
   button {
     margin: var(--spacing-medium) var(--spacing-medium) var(--spacing-medium) 0;
   }
-}
-
-.section-title {
-  @include shadow;
-  @include round-border;
-  @include inverted-accent;
-  width: fit-content;
-  margin: var(--spacing-big) 0;
-  font-size: var(--font-size-small);
-  font-weight: bold;
-  padding: var(--spacing-small);
 }
 </style>
 ./modules/user_data/rotate_screen ./modules/dialogs/config_piece_dialog
