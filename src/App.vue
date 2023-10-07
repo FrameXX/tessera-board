@@ -214,7 +214,7 @@ const DEFAULT_OPPONENT_SECONDS_PER_MOVE = 0;
 const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
 const DEFAULT_SHOW_SATUS_TEXT = true;
-const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = false;
+const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = true;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });

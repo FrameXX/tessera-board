@@ -91,6 +91,7 @@ const markIconId = computed(() => {
   aspect-ratio: 1;
   width: 100%;
   position: relative;
+  transition: background-color var(--transition-duration-medium) linear;
 
   .title {
     @include stretch;
