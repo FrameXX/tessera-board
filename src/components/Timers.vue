@@ -7,6 +7,9 @@ import {
   getDigitStr,
 } from "../modules/utils/misc";
 
+const TOO_FEW_MOVE_SECONDS = 11;
+const TOO_FEW_MATCH_SECONDS = 31;
+
 const props = defineProps({
   playerSecsMove: { type: Number, required: true },
   playerSecsMatch: { type: Number, required: true },
@@ -36,7 +39,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
     >
       <SimpleInfo
         content-role="timer"
-        :class="{ pulsing: props.playerSecsMove < 16 }"
+        :class="{ pulsing: props.playerSecsMove < TOO_FEW_MOVE_SECONDS }"
         name="move"
         v-show="props.playerSecsMove > 0"
         >{{
@@ -47,7 +50,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
       >
       <SimpleInfo
         content-role="timer"
-        :class="{ pulsing: props.playerSecsMatch < 31 }"
+        :class="{ pulsing: props.playerSecsMatch < TOO_FEW_MATCH_SECONDS }"
         name="match"
         v-show="props.playerSecsMatch > 0"
         >{{
@@ -63,7 +66,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
     >
       <SimpleInfo
         content-role="timer"
-        :class="{ pulsing: props.opponentSecsMove < 16 }"
+        :class="{ pulsing: props.opponentSecsMove < TOO_FEW_MOVE_SECONDS }"
         name="move"
         v-show="props.opponentSecsMove > 0"
         >{{
@@ -74,7 +77,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
       >
       <SimpleInfo
         content-role="timer"
-        :class="{ pulsing: props.opponentSecsMatch < 31 }"
+        :class="{ pulsing: props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS }"
         name="match"
         v-show="props.opponentSecsMatch > 0"
         >{{
@@ -92,10 +95,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
 
 .player-timers {
   @include shadow;
-  @include no-overrender;
-  margin: 0 var(--spacing-small);
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
-  display: flex;
+  @include flex-center;
+  width: 100%;
   align-items: baseline;
 
   .simple-info {
@@ -106,7 +107,9 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
 #player-timers-player,
 #player-timers-opponent {
   display: inline-block;
-  padding: var(--spacing-tiny);
+  padding: 0 var(--spacing-tiny);
+  text-align: center;
+  width: 100%;
 }
 
 #player-timers-player {

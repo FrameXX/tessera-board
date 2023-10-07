@@ -43,9 +43,6 @@ class Game {
     this.playerMatchSecondsTimer = new Timer(playerMatchSeconds);
     this.opponentMatchSecondsTimer = new Timer(opponentMatchSeconds);
     this.gameBoardManager.addEventListener("move", () => this.onMove());
-    watch(this.playerPlaying, (newValue) => {
-      this.updateTimerState(newValue);
-    });
   }
 
   private setupDefaultBoardState() {
@@ -74,13 +71,14 @@ class Game {
     }
   }
 
-  private restartMoveTimers() {
-    this.playerMoveSecondsTimer.restart();
-    this.opponentMoveSecondsTimer.restart();
+  private resetMoveTimers() {
+    this.playerMoveSecondsTimer.reset();
+    this.opponentMoveSecondsTimer.reset();
   }
 
   private restartTimers() {
-    this.restartMoveTimers();
+    this.playerMoveSecondsTimer.restart();
+    this.opponentMoveSecondsTimer.restart();
     this.playerMatchSecondsTimer.restart();
     this.opponentMatchSecondsTimer.restart();
   }
@@ -117,6 +115,7 @@ class Game {
   public onMove() {
     this.moveIndex.value++;
     this.updateTimerState(this.playerPlaying.value);
+    this.resetMoveTimers();
   }
 }
 

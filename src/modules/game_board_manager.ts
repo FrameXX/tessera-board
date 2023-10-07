@@ -46,6 +46,7 @@ class GameBoardManager extends BoardManager {
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly banPromotionToUncapturedPieces: Ref<boolean>,
+    private readonly showOtherAvailibleMoves: Ref<boolean>,
     private readonly toastManager: ToastManager
   ) {
     super();
@@ -102,9 +103,7 @@ class GameBoardManager extends BoardManager {
   private set selectedPiece(pieceProps: BoardPieceProps | null) {
     // The selected position is the same as the current one
     if (this.selectedPiece && pieceProps) {
-      if (positionsEqual(pieceProps, this.selectedPiece)) {
-        return;
-      }
+      if (positionsEqual(pieceProps, this.selectedPiece)) return;
     }
 
     this.clearCellsMarks();
@@ -113,11 +112,17 @@ class GameBoardManager extends BoardManager {
     this._selectedPiece = null;
 
     // Player unselected
-    if (!pieceProps) {
-      return;
-    }
+    if (!pieceProps) return;
 
+    this._selectedPiece = pieceProps;
     this.playerSelectedPieces.value.push(pieceProps);
+
+    if (
+      !this.showOtherAvailibleMoves.value &&
+      pieceProps.piece.color !== this.playingColor.value
+    )
+      return;
+
     const moves = pieceProps.piece.getPossibleMoves(
       pieceProps,
       this.boardStateValue,
@@ -129,7 +134,6 @@ class GameBoardManager extends BoardManager {
       move.showCellMarks(this.playerCellMarks, this.boardStateValue)
     );
     this.availibleMoves = moves;
-    this._selectedPiece = pieceProps;
   }
 
   private get selectedPiece(): BoardPieceProps | null {

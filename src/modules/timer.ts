@@ -11,6 +11,10 @@ class Timer {
     }, 1000);
   }
 
+  public reset() {
+    this.seconds.value = 0;
+  }
+
   public restart() {
     this.seconds.value = 0;
     if (this.interval === null) this.setInterval();

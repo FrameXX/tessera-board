@@ -87,6 +87,7 @@ import ActionPanel from "./components/ActionPanel.vue";
 import Timers from "./components/Timers.vue";
 import SelectPiece from "./components/SelectPiece.vue";
 import TimeDurationInput from "./components/TimeDurationInput.vue";
+import Status from "./components/Status.vue";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;
@@ -134,6 +135,7 @@ async function onGameRestart() {
   const confirmed = await confirmDialog.show(
     "Currently played game will be lost. Are you sure?"
   );
+  actionPanelOpen.value = false;
   if (confirmed) game.restart();
 }
 
@@ -210,6 +212,8 @@ const DEFAULT_PLAYER_SECONDS_PER_MOVE = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MOVE = 0;
 const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
+const DEFAULT_SHOW_SATUS_TEXT = true;
+const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = false;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
@@ -260,6 +264,13 @@ const timersSet = computed(() => {
     opponentMatchSeconds.value !== 0
   );
 });
+const statusText = computed(() => {
+  let text: string;
+  playingColor.value === "white"
+    ? (text = "white plays")
+    : (text = "black plays");
+  return text;
+});
 const playerSelectedPieces = ref<BoardPosition[]>([]);
 const opponentSelectedPieces = ref<BoardPosition[]>([]);
 const playerSelectedCells = ref<BoardPosition[]>([]);
@@ -290,6 +301,8 @@ const playerSecondsPerMove = ref(DEFAULT_PLAYER_SECONDS_PER_MOVE);
 const opponentSecondsPerMove = ref(DEFAULT_OPPONENT_SECONDS_PER_MOVE);
 const playerSecondsPerMatch = ref(DEFAULT_PLAYER_SECONDS_PER_MATCH);
 const opponentSecondsPerMatch = ref(DEFAULT_OPPONENT_SECONDS_PER_MATCH);
+const showStatusText = ref(DEFAULT_SHOW_SATUS_TEXT);
+const showOtherAvailibleMoves = ref(DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES);
 
 // Game specific
 const moveIndex = ref(0);
@@ -514,6 +527,18 @@ const userDataManager = new UserDataManager(
       toastManager,
       opponentMatchSeconds
     ),
+    new BooleanUserData(
+      "show_status_text",
+      DEFAULT_SHOW_SATUS_TEXT,
+      toastManager,
+      showStatusText
+    ),
+    new BooleanUserData(
+      "show_other_availible_moves",
+      DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES,
+      toastManager,
+      showOtherAvailibleMoves
+    ),
     defaultBoardStateData,
     gameBoardStateData,
   ],
@@ -576,6 +601,7 @@ const gameBoardManager = new GameBoardManager(
   pieceRemoveAudioEffect,
   showCapturingPieces,
   banPromotionToUncapturedPieces,
+  showOtherAvailibleMoves,
   toastManager
 );
 const game = new Game(
@@ -635,6 +661,7 @@ onMounted(() => {
       :player-secs-match="playerRemainingMatchSeconds"
       :opponent-secs-match="opponentRemainingMatchSeconds"
     />
+    <Status v-show="showStatusText" :text="statusText" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
@@ -745,7 +772,7 @@ onMounted(() => {
     <!-- Game rules -->
     <Category name="Game rules" icon-id="rule">
       <!-- Time restrictions -->
-      <span class="section-title">Time restrictions</span>
+      <div class="section-title">Time restrictions</div>
       <UserOption
         name="Player time per move"
         icon-id="timer-outline"
@@ -821,7 +848,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Assistance -->
-      <span class="section-title">Assistance</span>
+      <div class="section-title">Assistance</div>
       <UserOption
         name="show pieces checking selected cell"
         icon-id="rhombus-outline"
@@ -843,14 +870,18 @@ onMounted(() => {
         icon-id="circle-small"
         option-id="show-other-availible-moves"
       >
-        <Checkbox id="show-other-availible-moves" />
+        <Checkbox
+          id="show-other-availible-moves"
+          v-model="showOtherAvailibleMoves"
+        />
         <template #description>
           The player will be able to display the possible moves and board marks
-          of pieces of the other player and not only his/her own pieces.
+          of pieces of the other player after clicking on them and not only
+          his/her own pieces.
         </template>
       </UserOption>
       <!-- Other -->
-      <span class="section-title">Other</span>
+      <div class="section-title">Other</div>
       <UserOption
         name="First move color"
         icon-id="numeric-1-box-outline"
@@ -883,7 +914,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Checkboard -->
-      <span class="section-title">Checkboard</span>
+      <div class="section-title">Checkboard</div>
       <UserOption
         :simple="false"
         name="default piece positions"
@@ -914,8 +945,8 @@ onMounted(() => {
     </Category>
     <!-- Look and feel -->
     <Category name="look and feel" icon-id="palette-advanced">
-      <!-- Elements and behavior -->
-      <span class="section-title">Elements and behavior</span>
+      <!-- Behavior and elements -->
+      <div class="section-title">Behavior and elements</div>
       <UserOption
         name="second checkboard"
         icon-id="checkerboard-plus"
@@ -959,8 +990,19 @@ onMounted(() => {
           touchscreen and you often click accidentally in wrong positions.
         </template>
       </UserOption>
+      <UserOption
+        name="show status text"
+        icon-id="dock-top"
+        option-id="check-show-status-text"
+      >
+        <Checkbox id="check-show-status-text" v-model="showStatusText" />
+        <template #description>
+          A simple permanent status text informing about the current state of
+          the game appears at the top of the screen
+        </template>
+      </UserOption>
       <!-- Colors -->
-      <span class="section-title">Colors</span>
+      <div class="section-title">Colors</div>
       <UserOption
         name="UI mode"
         icon-id="brightness-6"
@@ -1013,7 +1055,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Checkboard -->
-      <span class="section-title">Checkboard</span>
+      <div class="section-title">Checkboard</div>
       <UserOption
         name="piece set"
         icon-id="chess-pawn"
@@ -1081,7 +1123,7 @@ onMounted(() => {
         </template>
       </UserOption>
       <!-- Effects -->
-      <span class="section-title">Effects</span>
+      <div class="section-title">Effects</div>
       <UserOption
         name="audio effects"
         icon-id="surround-sound"
@@ -1453,6 +1495,7 @@ onMounted(() => {
   @include shadow;
   @include round-border;
   @include inverted-accent;
+  width: fit-content;
   margin: var(--spacing-big) 0;
   font-size: var(--font-size-small);
   font-weight: bold;
