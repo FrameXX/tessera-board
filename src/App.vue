@@ -128,9 +128,6 @@ function recoverData() {
     );
     return false;
   }
-  if (localStorage.length === 0) {
-    return false;
-  }
   userDataManager.recoverData();
   return true;
 }
@@ -630,9 +627,14 @@ const game = new Game(
   toastManager
 );
 
-const dataRecovered = recoverData();
+const visited = localStorage.getItem("tessera_board-visited");
+if (visited === null) {
+  localStorage.setItem("tessera_board-visited", "1");
+  game.restart();
+} else {
+  recoverData();
+}
 userDataManager.onRecoverCheck();
-if (!dataRecovered) game.restart();
 userDataManager.applyData();
 userDataManager.updateReferences();
 
