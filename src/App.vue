@@ -92,7 +92,6 @@ import SelectPiece from "./components/SelectPiece.vue";
 import TimeDurationInput from "./components/TimeDurationInput.vue";
 import Status from "./components/Status.vue";
 import SectionTitle from "./components/SectionTitle.vue";
-import { version } from "vue/compiler-sfc";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;

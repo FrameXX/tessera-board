@@ -1,8 +1,23 @@
+<div align="center">
+
+<img width="" src="src/assets/img/favicon.svg"  width=160 height=160>
+
 # Tessera Board (unreleased)
 
-This is a Single Page Application for playing chess with the aim of creating a functional and customisable game that is visually appealing and usable on both mobile and desktop screens.
+### Single page app/game for playing Chess and possibly other board games with the aim of being functional, customisable, visually appealing and usable on both mobile and desktop devices and screens.
 
-## IDE setup
+<a href="https://www.gnu.org/licenses/gpl-3.0" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"></a>
+<a href="https://github.com/FrameXX/tessera-board/releases" alt="Version: 0.0.0"><img src="https://img.shields.io/badge/Version-0.0.0-brown.svg"></a>
+
+</div>
+
+## Play
+
+You can try the latest distributed version at https://tessera-board.web.app.
+
+## Developement
+
+### IDE setup
 
 <sup>\*</sup> **I am aware** that this is very basic, but I will include it nevertheless.
 
@@ -29,6 +44,6 @@ Open whatever projects folder you want the project to be in. In console execute:
 - `npm install` to install all dependencies
 - `npm run dev` to start a localhost server
 
-### Note on `landev` script
+#### Note on `landev` script
 
 The `landev` script in package.json is configured to start a server on the local network. It can be executed by executing `npm run landev` in project root. Starting a "lan server" is useful for debugging on a mobile phone or other devices connected to the same network, but the IP address in the command is hardcoded. Therefore, you must modify the command to utilise the IP address of your device on your network, which varies on each network or you will come across an error.
