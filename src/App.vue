@@ -92,6 +92,7 @@ import SelectPiece from "./components/SelectPiece.vue";
 import TimeDurationInput from "./components/TimeDurationInput.vue";
 import Status from "./components/Status.vue";
 import SectionTitle from "./components/SectionTitle.vue";
+import { version } from "vue/compiler-sfc";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;
@@ -142,6 +143,9 @@ async function onGameRestart() {
   actionPanelOpen.value = false;
   if (confirmed) game.restart();
 }
+
+const VERSION = "0.0.0";
+const BUILD = "1";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -715,7 +719,7 @@ onMounted(() => {
   <ConfigDrawer :open="configDrawerOpen">
     <header>
       <h1>Tessera board</h1>
-      <small class="version">v0.0.0 (0)</small>
+      <small class="version">v{{ VERSION }} ({{ BUILD }})</small>
     </header>
     <!-- Player -->
     <Category name="Player (you)" icon-id="account">
