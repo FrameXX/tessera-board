@@ -644,6 +644,9 @@ onMounted(() => {
 
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") escapeManager.escape();
+    if (event.key === "R" && event.shiftKey) game.restart();
+    if (event.key === "C" && event.shiftKey)
+      configDrawerOpen.value = !configDrawerOpen.value;
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.

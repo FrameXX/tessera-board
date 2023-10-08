@@ -29,12 +29,12 @@ watch(
       <FastButton
         @click="$emit('restartGame')"
         icon-id="restart"
-        title="New match"
+        title="New match (Shift + R)"
       />
       <FastButton
         @click="$emit('configureGame')"
         icon-id="cog-outline"
-        title="Config game"
+        title="Config game (Shift + C)"
       />
       <div class="nav-placeholder"></div>
     </nav>
