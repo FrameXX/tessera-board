@@ -139,8 +139,9 @@ async function onGameRestart() {
   const confirmed = await confirmDialog.show(
     "Currently played game will be lost. Are you sure?"
   );
+  if (!confirmed) return;
   actionPanelOpen.value = false;
-  if (confirmed) game.restart();
+  game.restart();
 }
 
 const VERSION = "0.0.0";
