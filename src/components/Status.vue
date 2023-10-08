@@ -11,7 +11,7 @@ const props = defineProps({ text: { type: String, required: true } });
 
 .status {
   @include shadow;
-  width: 100%;
+  @include fill-availible;
   text-align: center;
   font-size: var(--font-size-small);
   background-color: var(--color-primary-surface-accent);

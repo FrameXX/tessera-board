@@ -2,8 +2,13 @@
 import { watch } from "vue";
 import Backdrop from "./Backdrop.vue";
 import FastButton from "./FastButton.vue";
+import Status from "./Status.vue";
 
-const props = defineProps({ open: { type: Boolean, default: false } });
+const props = defineProps({
+  open: { type: Boolean, default: false },
+  statusText: { type: String, required: true },
+  showStatusText: { type: Boolean, required: true },
+});
 const emit = defineEmits([
   "open",
   "close",
@@ -24,18 +29,21 @@ watch(
   <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
   <Transition name="slide-up">
     <nav v-show="props.open">
-      <FastButton icon-id="flag" title="Resign" />
-      <FastButton icon-id="pause" title="Pause match" />
-      <FastButton
-        @click="$emit('restartGame')"
-        icon-id="restart"
-        title="New match (Shift + R)"
-      />
-      <FastButton
-        @click="$emit('configureGame')"
-        icon-id="cog-outline"
-        title="Config game (Shift + C)"
-      />
+      <Status v-show="!props.showStatusText" :text="props.statusText" />
+      <div class="actions">
+        <FastButton icon-id="flag" title="Resign" />
+        <FastButton icon-id="pause" title="Pause match" />
+        <FastButton
+          @click="$emit('restartGame')"
+          icon-id="restart"
+          title="New match (Shift + R)"
+        />
+        <FastButton
+          @click="$emit('configureGame')"
+          icon-id="cog-outline"
+          title="Config game (Shift + C)"
+        />
+      </div>
       <div class="nav-placeholder"></div>
     </nav>
   </Transition>
@@ -46,6 +54,7 @@ watch(
 
 nav {
   @include shadow;
+  @include no-overrender;
   width: fit-content;
   text-align: center;
   z-index: var(--z-index-modal);
@@ -56,7 +65,10 @@ nav {
   position: fixed;
   border-radius: var(--border-radius) var(--border-radius) 0 0;
   background-color: var(--color-primary-surface);
-  padding: var(--spacing-small);
+
+  .actions {
+    padding: var(--spacing-small);
+  }
 
   .nav-placeholder {
     height: 80px;

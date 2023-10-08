@@ -142,7 +142,7 @@ async function onGameRestart() {
 }
 
 const VERSION = "0.0.0";
-const BUILD = "1";
+const BUILD = "2";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -720,6 +720,8 @@ onMounted(() => {
     @configure-game="toggleConfigDrawer"
     @restart-game="onGameRestart()"
     :open="actionPanelOpen"
+    :status-text="statusText"
+    :show-status-text="showStatusText"
   />
 
   <ConfigDrawer :open="configDrawerOpen">
@@ -1005,14 +1007,15 @@ onMounted(() => {
         </template>
       </UserOption>
       <UserOption
-        name="show status text"
+        name="show top status text"
         icon-id="dock-top"
         option-id="check-show-status-text"
       >
         <Checkbox id="check-show-status-text" v-model="showStatusText" />
         <template #description>
           A simple permanent status text informing about the current state of
-          the game appears at the top of the screen
+          the game appears at the top of the main screen. If disabled the status
+          text will show in the menu, because there's enough space for that.
         </template>
       </UserOption>
       <!-- Colors -->
@@ -1224,8 +1227,8 @@ onMounted(() => {
     <button
       id="action-button"
       @click="toggleActionsPanel"
-      aria-label="Quick actions"
-      title="Quick actions"
+      aria-label="Menu"
+      title="Menu"
     >
       <Icon
         icon-id="plus"
@@ -1233,7 +1236,7 @@ onMounted(() => {
         :class="{ close: actionPanelOpen }"
         side
       />
-      Actions
+      Menu
     </button>
     <Transition name="counter">
       <button aria-label="Next move" title="Next move">
