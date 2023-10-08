@@ -66,15 +66,15 @@ class Transform extends Move {
     if (audioEffects.value) moveAudioEffect.play();
 
     let transformOptions: RawPiece[];
-    if (banPromotionToUncapturedPieces) {
+    if (banPromotionToUncapturedPieces.value) {
       transformOptions = this.getLimitedTransformOptions(
         blackCapturedPieces,
         whiteCapturedPieces
       );
+      if (transformOptions.length !== 0) {
+        transformOptions = this.transformOptions;
+      }
     } else {
-      transformOptions = this.transformOptions;
-    }
-    if (transformOptions.length !== 0) {
       transformOptions = this.transformOptions;
     }
 
