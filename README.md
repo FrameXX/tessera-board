@@ -4,7 +4,7 @@
 
 # Tessera Board (unreleased)
 
-### Single page app/game for playing Chess and possibly other board games with the aim of being functional, customisable, visually appealing and usable on both mobile and desktop devices and screens.
+**Single page app/game for playing Chess and possibly other board games with the aim of being functional, customisable, visually appealing and usable on both mobile and desktop devices and screens.**
 
 <a href="https://www.gnu.org/licenses/gpl-3.0" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"></a>
 <a href="https://github.com/FrameXX/tessera-board/releases" alt="Version: 0.0.0"><img src="https://img.shields.io/badge/Version-0.0.0-brown.svg"></a>
@@ -47,3 +47,7 @@ Open whatever projects folder you want the project to be in. In console execute:
 #### Note on `landev` script
 
 The `landev` script in package.json is configured to start a server on the local network. It can be executed by executing `npm run landev` in project root. Starting a "lan server" is useful for debugging on a mobile phone or other devices connected to the same network, but the IP address in the command is hardcoded. Therefore, you must modify the command to utilise the IP address of your device on your network, which varies on each network or you will come across an error.
+
+### Build
+
+Execute `npm run build` to run Vue and Vite build process.
