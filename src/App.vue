@@ -371,7 +371,8 @@ const defaultBoardStateData = new RawBoardStateData(
 const gameBoardStateData = new BoardStateData(
   DEFAULT_GAME_BOARD_STATE_VALUE,
   gameBoardState,
-  toastManager
+  toastManager,
+  false
 );
 
 // NOTE: Most of the UserData instances use Ref but some of them may use reactive if their value is more complex. These classes are extending ComplexUserData class.

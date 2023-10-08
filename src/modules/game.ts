@@ -106,6 +106,7 @@ class Game {
     this.toastManager.showToast("New match started.", "info", "flag-checkered");
     this.moveIndex.value = 0;
     this.updateTimerState(this.playerPlaying.value);
+    this.gameBoardStateData.save();
   }
 
   public resume() {
@@ -116,6 +117,7 @@ class Game {
     this.moveIndex.value++;
     this.updateTimerState(this.playerPlaying.value);
     this.resetMoveTimers();
+    this.gameBoardStateData.save();
   }
 }
 

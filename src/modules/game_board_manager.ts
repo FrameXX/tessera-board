@@ -182,11 +182,11 @@ class GameBoardManager extends BoardManager {
     return null;
   }
 
-  private interpretMove(move: Move) {
+  private async interpretMove(move: Move) {
     this.selectedPiece = null;
     this.clearHihlightedCellsPositions();
     if (isMoveShift(move)) {
-      move.perform(
+      await move.perform(
         this.boardStateValue,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
@@ -196,7 +196,7 @@ class GameBoardManager extends BoardManager {
         this.pieceRemoveAudioEffect
       );
     } else if (isMoveTransform(move)) {
-      move.perform(
+      await move.perform(
         this.boardStateValue,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
@@ -208,7 +208,7 @@ class GameBoardManager extends BoardManager {
         this.pieceRemoveAudioEffect
       );
     } else if (isMoveCastling(move)) {
-      move.perform(
+      await move.perform(
         this.boardStateValue,
         this.higlightedCells,
         this.audioEffects,
