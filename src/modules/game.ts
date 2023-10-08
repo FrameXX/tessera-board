@@ -1,4 +1,4 @@
-import { ComputedRef, Ref, watch } from "vue";
+import { ComputedRef, Ref } from "vue";
 import type { PlayerColor } from "./pieces/piece";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";

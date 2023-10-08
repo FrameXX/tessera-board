@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import moveAudioEffectUrl from "./assets/audio/move.ogg";
+import removeAudioEffectUrl from "./assets/audio/remove.ogg";
+
 // Import from packages
 import { ref, reactive, onMounted, watch, computed } from "vue";
 import { Howl } from "howler";
@@ -217,8 +220,8 @@ const DEFAULT_SHOW_SATUS_TEXT = true;
 const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = true;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
-const pieceMoveAudioEffect = new Howl({ src: ["./assets/audio/move.ogg"] });
-const pieceRemoveAudioEffect = new Howl({ src: ["./assets/audio/remove.ogg"] });
+const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
+const pieceRemoveAudioEffect = new Howl({ src: [removeAudioEffectUrl] });
 const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
@@ -261,8 +264,8 @@ const timersSet = computed(() => {
   return (
     playerSecondsPerMove.value !== 0 ||
     opponentSecondsPerMove.value !== 0 ||
-    playerMatchSeconds.value !== 0 ||
-    opponentMatchSeconds.value !== 0
+    playerSecondsPerMatch.value !== 0 ||
+    opponentSecondsPerMatch.value !== 0
   );
 });
 const statusText = computed(() => {

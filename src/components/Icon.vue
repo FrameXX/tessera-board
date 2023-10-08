@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-const ICONS_SPRITE_PATH = "assets/img/icons.svg";
+import iconsUrl from "../assets/img/icons.svg";
 const props = defineProps({
   iconId: { type: String, required: true },
   side: { type: Boolean, default: false },
-  sourceFile: { type: String, default: ICONS_SPRITE_PATH },
+  sourceFile: { type: String, default: iconsUrl },
   title: { type: String, required: false },
 });
 </script>

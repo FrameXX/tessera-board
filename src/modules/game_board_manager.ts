@@ -34,10 +34,13 @@ class GameBoardManager extends BoardManager {
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
     private readonly playerCellMarks: MarkBoardState,
+    // @ts-ignore
     private readonly opponentBoardMarks: MarkBoardState,
     private readonly playerSelectedPieces: Ref<BoardPosition[]>,
+    // @ts-ignore
     private readonly opponentSelectedPieces: Ref<BoardPosition[]>,
     private readonly playerSelectedCells: Ref<BoardPosition[]>,
+    // @ts-ignore
     private readonly opponentSelectedCells: Ref<BoardPosition[]>,
     private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
@@ -47,6 +50,7 @@ class GameBoardManager extends BoardManager {
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly banPromotionToUncapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
+    // @ts-ignore
     private readonly toastManager: ToastManager
   ) {
     super();

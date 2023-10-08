@@ -1,5 +1,4 @@
 import { BoardPosition } from "../../components/Board.vue";
-import { getPositionNotation } from "../board_manager";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";

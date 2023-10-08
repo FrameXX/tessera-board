@@ -1,11 +1,10 @@
 <script lang="ts" setup>
+import pieceUrl from "../assets/img/pieces.svg";
 import Icon from "./Icon.vue";
 import { PropType, computed } from "vue";
 import { type PieceSetValue } from "../modules/user_data/piece_set";
 import { PieceId, PlayerColor } from "../modules/pieces/piece";
 import { capitalizeFirst } from "../modules/utils/misc";
-
-const PIECE_SETS_DIR = "assets/img/";
 
 const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
@@ -22,7 +21,7 @@ const label = computed(() => {
   <Icon
     :aria-label="label"
     :title="label"
-    :source-file="`${PIECE_SETS_DIR}pieces_${props.pieceSet}.svg`"
-    :icon-id="`${props.pieceId}-${props.color}`"
+    :source-file="pieceUrl"
+    :icon-id="`${props.pieceSet}-${props.pieceId}-${props.color}`"
   />
 </template>

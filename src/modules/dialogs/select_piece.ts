@@ -1,4 +1,4 @@
-import { Raw, reactive } from "vue";
+import { reactive } from "vue";
 import type { RawPiece } from "../pieces/rawPiece";
 import type ToastManager from "../toast_manager";
 
