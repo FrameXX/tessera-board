@@ -1,7 +1,7 @@
 import type { Ref } from "vue";
 
 class Timer {
-  private interval: number | null = null;
+  private interval: number | null | NodeJS.Timer = null;
 
   constructor(private readonly seconds: Ref<number>) {}
 
