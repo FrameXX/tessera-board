@@ -63,7 +63,7 @@ import type { BooleanBoardState } from "./modules/user_data/boolean_board_state"
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
-import Game from "./modules/game";
+import Game, { isWinner, type Winner } from "./modules/game";
 import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
 import Bishop from "./modules/pieces/bishop";
@@ -92,6 +92,7 @@ import SelectPiece from "./components/SelectPiece.vue";
 import TimeDurationInput from "./components/TimeDurationInput.vue";
 import Status from "./components/Status.vue";
 import SectionTitle from "./components/SectionTitle.vue";
+import { UserDataError } from "./modules/user_data/user_data";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;
@@ -271,9 +272,25 @@ const timersSet = computed(() => {
 });
 const statusText = computed(() => {
   let state: string;
-  playingColor.value === "white"
-    ? (state = "white plays")
-    : (state = "black plays");
+  switch (winner.value) {
+    case "none":
+      state =
+        playingColor.value === "white" ? "whites to play" : "blacks to play";
+      break;
+    case "draw":
+      state = "draw";
+      break;
+    case "opponent":
+      state = playerColor.value === "white" ? "black won" : "white won";
+      break;
+    case "player":
+      state = playerColor.value === "white" ? "white won" : "black won";
+      break;
+    default:
+      throw new UserDataError(
+        `Winner value is of an invalid type. value: ${winner.value}`
+      );
+  }
   const text = `${moveIndex.value + 1}. Move - ${state}`;
   return text;
 });
@@ -311,6 +328,7 @@ const showStatusText = ref(DEFAULT_SHOW_SATUS_TEXT);
 const showOtherAvailibleMoves = ref(DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES);
 
 // Game specific
+const winner = ref<Winner>("none");
 const moveIndex = ref(0);
 const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
@@ -449,6 +467,7 @@ const userDataManager = new UserDataManager(
       toastManager,
       playerColor
     ),
+    new SelectUserData("winner", "none", isWinner, toastManager, winner),
     new BooleanUserData(
       "game_paused",
       DEFAULT_GAME_PAUSED_VALUE,

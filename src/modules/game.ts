@@ -8,6 +8,16 @@ import ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 
+export type Winner = "player" | "opponent" | "draw" | "none";
+export function isWinner(string: string): string is Winner {
+  return (
+    string === "player" ||
+    string === "opponent" ||
+    string === "draw" ||
+    string === "none"
+  );
+}
+
 export class GameLogicError extends Error {
   constructor(message: string) {
     super(message);
