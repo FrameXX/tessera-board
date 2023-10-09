@@ -270,10 +270,11 @@ const timersSet = computed(() => {
   );
 });
 const statusText = computed(() => {
-  let text: string;
+  let state: string;
   playingColor.value === "white"
-    ? (text = "white plays")
-    : (text = "black plays");
+    ? (state = "white plays")
+    : (state = "black plays");
+  const text = `${moveIndex.value + 1}. Move - ${state}`;
   return text;
 });
 const playerSelectedPieces = ref<BoardPosition[]>([]);
