@@ -13,9 +13,9 @@
 
 ## Play
 
-You can try the latest distributed version at https://tessera-board.web.app.
+You can play the latest distributed version at https://tessera-board.web.app.
 
-## Developement
+## Development
 
 ### IDE setup
 
