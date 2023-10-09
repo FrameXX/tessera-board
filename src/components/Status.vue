@@ -18,6 +18,5 @@ const props = defineProps({ text: { type: String, required: true } });
   text-transform: uppercase;
   padding: var(--spacing-small);
   border-bottom: var(--border-width) solid var(--color-primary-accent);
-  transition: background-color var(--transition-duration-medium) linear;
 }
 </style>
