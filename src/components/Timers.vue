@@ -15,6 +15,10 @@ const props = defineProps({
   playerSecsMatch: { type: Number, required: true },
   opponentSecsMove: { type: Number, required: true },
   opponentSecsMatch: { type: Number, required: true },
+  playerSecondsPerMoveSet: { type: Boolean, required: true },
+  opponentSecondsPerMoveSet: { type: Boolean, required: true },
+  playerSecondsPerMatchSet: { type: Boolean, required: true },
+  opponentSecondsPerMatchSet: { type: Boolean, required: true },
 });
 
 const playerTimeMove = computed<MinSecTime>(() => {
@@ -33,10 +37,18 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
 
 <template>
   <div class="player-timers">
-    <div id="player-timers-player">
+    <div
+      id="player-timers-player"
+      v-show="props.playerSecondsPerMoveSet || props.playerSecondsPerMatchSet"
+    >
       <SimpleInfo
+        v-show="props.playerSecondsPerMoveSet"
         content-role="timer"
-        :class="{ pulsing: props.playerSecsMove < TOO_FEW_MOVE_SECONDS }"
+        :class="{
+          pulsing:
+            props.playerSecsMove < TOO_FEW_MOVE_SECONDS &&
+            props.playerSecsMove !== 0,
+        }"
         name="move"
         >{{
           getDigitStr(playerTimeMove.mins) +
@@ -45,8 +57,13 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         }}</SimpleInfo
       >
       <SimpleInfo
+        v-show="props.playerSecondsPerMatchSet"
         content-role="timer"
-        :class="{ pulsing: props.playerSecsMatch < TOO_FEW_MATCH_SECONDS }"
+        :class="{
+          pulsing:
+            props.playerSecsMatch < TOO_FEW_MATCH_SECONDS &&
+            props.playerSecsMatch !== 0,
+        }"
         name="match"
         >{{
           getDigitStr(playerTimeMatch.mins) +
@@ -55,10 +72,20 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         }}</SimpleInfo
       >
     </div>
-    <div id="player-timers-opponent">
+    <div
+      id="player-timers-opponent"
+      v-show="
+        props.opponentSecondsPerMoveSet || props.opponentSecondsPerMatchSet
+      "
+    >
       <SimpleInfo
+        v-show="props.opponentSecondsPerMoveSet"
         content-role="timer"
-        :class="{ pulsing: props.opponentSecsMove < TOO_FEW_MOVE_SECONDS }"
+        :class="{
+          pulsing:
+            props.opponentSecsMove < TOO_FEW_MOVE_SECONDS &&
+            props.opponentSecsMove !== 0,
+        }"
         name="move"
         >{{
           getDigitStr(opponentTimeMove.mins) +
@@ -67,8 +94,13 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         }}</SimpleInfo
       >
       <SimpleInfo
+        v-show="props.opponentSecondsPerMatchSet"
         content-role="timer"
-        :class="{ pulsing: props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS }"
+        :class="{
+          pulsing:
+            props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS &&
+            props.opponentSecsMatch !== 0,
+        }"
         name="match"
         >{{
           getDigitStr(opponentTimeMatch.mins) +

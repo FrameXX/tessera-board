@@ -1,14 +1,10 @@
 import type { BoardPosition } from "../../components/Board.vue";
+import type { PlayerColor } from "../game";
 import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
 import { RawPiece, getRawPiece } from "./rawPiece";
-
-export type PlayerColor = "white" | "black";
-export function isPlayerColor(string: string): string is PlayerColor {
-  return string === "white" || string === "black";
-}
 
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 export function isPieceId(string: string): string is PieceId {

@@ -1,21 +1,66 @@
-import { ComputedRef, Ref } from "vue";
-import type { PlayerColor } from "./pieces/piece";
+import { ComputedRef, Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
-import { getRandomNumber } from "./utils/misc";
+import { capitalizeFirst, getRandomNumber } from "./utils/misc";
 import GameBoardManager from "./game_board_manager";
 import ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 
-export type Winner = "player" | "opponent" | "draw" | "none";
+export type Player = "player" | "opponent";
+export function isPlayer(string: string): string is Player {
+  return string === "player" || string === "opponent";
+}
+
+export type PlayerColor = "white" | "black";
+export function isPlayerColor(string: string): string is PlayerColor {
+  return string === "white" || string === "black";
+}
+
+export type TeamName = "White" | "Black";
+export function isTeamName(string: string): string is TeamName {
+  return string === "White" || string === "black";
+}
+
+export function getOpossiteTeamName(teamName: TeamName): TeamName {
+  return teamName === "White" ? "Black" : "White";
+}
+
+export function getOpossitePlayerColor(playerColor: PlayerColor) {
+  return playerColor === "white" ? "black" : "white";
+}
+
+export function getColorTeamName(playerColor: PlayerColor): TeamName {
+  return playerColor === "white" ? "White" : "Black";
+}
+
+export function getPlayerTeamName(
+  player: Player,
+  playerColor: PlayerColor
+): TeamName {
+  let teamName: TeamName;
+  teamName =
+    player === "player"
+      ? getColorTeamName(playerColor)
+      : getColorTeamName(getOpossitePlayerColor(playerColor));
+  return teamName;
+}
+
+type UndecidedWinner = "draw" | "none";
+export function isUndecidedWinner(string: string): string is UndecidedWinner {
+  return string === "draw" || string === "none";
+}
+
+export type Winner = UndecidedWinner | Player;
 export function isWinner(string: string): string is Winner {
-  return (
-    string === "player" ||
-    string === "opponent" ||
-    string === "draw" ||
-    string === "none"
-  );
+  return isPlayer(string) || isUndecidedWinner(string);
+}
+
+export type SecondsPerMoveRunOutPunishment = "game_loss" | "random_move";
+export function isSecondsPerMoveRunOutPunishment(
+  string: string
+): string is SecondsPerMoveRunOutPunishment {
+  return string === "game_loss" || string === "random_move";
 }
 
 export class GameLogicError extends Error {
@@ -42,17 +87,123 @@ class Game {
     private readonly playerPlaying: ComputedRef<boolean>,
     private readonly moveIndex: Ref<number>,
     private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,
+    playerSecondsPerMove: Ref<number>,
+    opponentSecondsPerMove: Ref<number>,
+    playerSecondsPerMatch: Ref<number>,
+    opponentSecondsPerMatch: Ref<number>,
     playerMoveSeconds: Ref<number>,
     opponentMoveSeconds: Ref<number>,
     playerMatchSeconds: Ref<number>,
     opponentMatchSeconds: Ref<number>,
+    private readonly secondsPerMoveRunOutPunishment: Ref<SecondsPerMoveRunOutPunishment>,
+    private readonly winner: Ref<Winner>,
     private readonly toastManager: ToastManager
   ) {
-    this.playerMoveSecondsTimer = new Timer(playerMoveSeconds);
-    this.opponentMoveSecondsTimer = new Timer(opponentMoveSeconds);
-    this.playerMatchSecondsTimer = new Timer(playerMatchSeconds);
-    this.opponentMatchSecondsTimer = new Timer(opponentMatchSeconds);
+    this.playerMoveSecondsTimer = new Timer(
+      playerMoveSeconds,
+      playerSecondsPerMove
+    );
+
+    this.opponentMoveSecondsTimer = new Timer(
+      opponentMoveSeconds,
+      opponentSecondsPerMove
+    );
+
+    this.playerMatchSecondsTimer = new Timer(
+      playerMatchSeconds,
+      playerSecondsPerMatch
+    );
+
+    this.opponentMatchSecondsTimer = new Timer(
+      opponentMatchSeconds,
+      opponentSecondsPerMatch
+    );
+
+    this.addTimerEventListeners();
     this.gameBoardManager.addEventListener("move", () => this.onMove());
+  }
+
+  private addTimerEventListeners() {
+    this.playerMoveSecondsTimer.addEventListener("runout", () =>
+      this.onPlayerMoveSecondsRunOut()
+    );
+    this.playerMoveSecondsTimer.addEventListener("runback", () =>
+      this.onSecondsRunBack()
+    );
+
+    this.opponentMoveSecondsTimer.addEventListener("runout", () =>
+      this.onOpponentMoveSecondsRunOut()
+    );
+    this.opponentMoveSecondsTimer.addEventListener("runback", () =>
+      this.onSecondsRunBack()
+    );
+
+    this.playerMatchSecondsTimer.addEventListener("runout", () =>
+      this.onPlayerMatchSecondsRunOut()
+    );
+    this.playerMatchSecondsTimer.addEventListener("runback", () =>
+      this.onSecondsRunBack()
+    );
+
+    this.opponentMatchSecondsTimer.addEventListener("runout", () =>
+      this.onOpponentMatchSecondsRunOut()
+    );
+    this.opponentMatchSecondsTimer.addEventListener("runback", () =>
+      this.onSecondsRunBack()
+    );
+  }
+
+  private playerWin() {
+    const winner: Winner = "player";
+    this.puaseTimers();
+    this.winner.value = winner;
+    this.toastManager.showToast(
+      `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
+      "info",
+      "crown-outline"
+    );
+  }
+
+  private opponentWin() {
+    const winner: Winner = "opponent";
+    this.puaseTimers();
+    this.winner.value = winner;
+    this.toastManager.showToast(
+      `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
+      "info",
+      "crown-outline"
+    );
+  }
+
+  public onPlayerMoveSecondsRunOut() {
+    if (this.secondsPerMoveRunOutPunishment.value === "game_loss") {
+      this.opponentWin();
+    }
+  }
+
+  public onOpponentMoveSecondsRunOut() {
+    if (this.secondsPerMoveRunOutPunishment.value === "game_loss") {
+      this.playerWin();
+    }
+  }
+
+  public onPlayerMatchSecondsRunOut() {
+    this.opponentWin();
+  }
+
+  public onOpponentMatchSecondsRunOut() {
+    this.playerWin();
+  }
+
+  public onSecondsRunBack() {
+    if (!isTeamName(this.winner.value)) {
+      return;
+    }
+    this.toastManager.showToast(
+      `${getOpossiteTeamName(this.winner.value)} is back in the game.`
+    );
+    this.winner.value = "none";
+    this.updateTimerState(this.playerPlaying.value);
   }
 
   private setupDefaultBoardState() {
@@ -93,6 +244,13 @@ class Game {
     this.opponentMatchSecondsTimer.restart();
   }
 
+  private puaseTimers() {
+    this.playerMoveSecondsTimer.pause();
+    this.opponentMoveSecondsTimer.pause();
+    this.playerMatchSecondsTimer.pause();
+    this.opponentMatchSecondsTimer.pause();
+  }
+
   private updateTimerState(playerPlaying: boolean) {
     if (playerPlaying) {
       this.opponentMoveSecondsTimer.pause();
@@ -117,6 +275,7 @@ class Game {
     this.moveIndex.value = 0;
     this.updateTimerState(this.playerPlaying.value);
     this.gameBoardStateData.save();
+    this.winner.value = "none";
   }
 
   public resume() {

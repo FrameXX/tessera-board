@@ -11,7 +11,7 @@ const minutes = ref(Math.trunc(props.modelValue / 60));
 const seconds = ref(props.modelValue % 60);
 
 function updateModelValue() {
-  emit("update:modelValue", minutes.value * 60 + seconds.value);
+  emit("update:modelValue", +minutes.value * 60 + +seconds.value);
 }
 
 watch(minutes, updateModelValue);

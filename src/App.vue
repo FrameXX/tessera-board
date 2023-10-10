@@ -44,11 +44,7 @@ import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/dialogs/config_piece";
 import SelectPieceDilog from "./modules/dialogs/select_piece";
-import {
-  type PlayerColor,
-  isPlayerColor,
-  PIECE_IDS,
-} from "./modules/pieces/piece";
+import { PIECE_IDS } from "./modules/pieces/piece";
 import {
   activateColors,
   hideSplashscreen,
@@ -63,7 +59,14 @@ import type { BooleanBoardState } from "./modules/user_data/boolean_board_state"
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
-import Game, { isWinner, type Winner } from "./modules/game";
+import Game, {
+  isPlayerColor,
+  isSecondsPerMoveRunOutPunishment,
+  isWinner,
+  type PlayerColor,
+  type SecondsPerMoveRunOutPunishment,
+  type Winner,
+} from "./modules/game";
 import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
 import Bishop from "./modules/pieces/bishop";
@@ -220,6 +223,8 @@ const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
 const DEFAULT_SHOW_SATUS_TEXT = true;
 const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = true;
+const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: SecondsPerMoveRunOutPunishment =
+  "random_move";
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
@@ -262,20 +267,31 @@ const playingColor = computed(() => {
 const playerPlaying = computed(() => {
   return playerColor.value === playingColor.value;
 });
+const playerSecondsPerMoveSet = computed(() => {
+  return playerSecondsPerMove.value !== 0;
+});
+const opponentSecondsPerMoveSet = computed(() => {
+  return opponentSecondsPerMove.value !== 0;
+});
+const playerSecondsPerMatchSet = computed(() => {
+  return playerSecondsPerMatch.value !== 0;
+});
+const opponentSecondsPerMatchSet = computed(() => {
+  return opponentSecondsPerMatch.value !== 0;
+});
 const timersSet = computed(() => {
   return (
-    playerSecondsPerMove.value !== 0 ||
-    opponentSecondsPerMove.value !== 0 ||
-    playerSecondsPerMatch.value !== 0 ||
-    opponentSecondsPerMatch.value !== 0
+    playerSecondsPerMoveSet.value ||
+    opponentSecondsPerMoveSet.value ||
+    playerSecondsPerMatchSet.value ||
+    opponentSecondsPerMatchSet.value
   );
 });
 const statusText = computed(() => {
   let state: string;
   switch (winner.value) {
     case "none":
-      state =
-        playingColor.value === "white" ? "whites to play" : "blacks to play";
+      state = playingColor.value === "white" ? "white plays" : "black plays";
       break;
     case "draw":
       state = "draw";
@@ -326,6 +342,9 @@ const playerSecondsPerMatch = ref(DEFAULT_PLAYER_SECONDS_PER_MATCH);
 const opponentSecondsPerMatch = ref(DEFAULT_OPPONENT_SECONDS_PER_MATCH);
 const showStatusText = ref(DEFAULT_SHOW_SATUS_TEXT);
 const showOtherAvailibleMoves = ref(DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES);
+const secondsPerMoveRunOutPunishment = ref(
+  DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT
+);
 
 // Game specific
 const winner = ref<Winner>("none");
@@ -468,6 +487,13 @@ const userDataManager = new UserDataManager(
       playerColor
     ),
     new SelectUserData("winner", "none", isWinner, toastManager, winner),
+    new SelectUserData(
+      "seconds_per_move_runout_punishment",
+      "random_move",
+      isSecondsPerMoveRunOutPunishment,
+      toastManager,
+      secondsPerMoveRunOutPunishment
+    ),
     new BooleanUserData(
       "game_paused",
       DEFAULT_GAME_PAUSED_VALUE,
@@ -630,6 +656,17 @@ const gameBoardManager = new GameBoardManager(
   showOtherAvailibleMoves,
   toastManager
 );
+
+const visited = localStorage.getItem("tessera_board-visited");
+if (visited === null) {
+  localStorage.setItem("tessera_board-visited", "1");
+} else {
+  recoverData();
+}
+userDataManager.onRecoverCheck();
+userDataManager.applyData();
+userDataManager.updateReferences();
+
 const game = new Game(
   gameBoardManager,
   gameBoardStateData,
@@ -640,23 +677,18 @@ const game = new Game(
   playerPlaying,
   moveIndex,
   preferredPlayerColor,
+  playerSecondsPerMove,
+  opponentSecondsPerMove,
+  playerSecondsPerMatch,
+  opponentSecondsPerMatch,
   playerMoveSeconds,
   opponentMoveSeconds,
   playerMatchSeconds,
   opponentMatchSeconds,
+  secondsPerMoveRunOutPunishment,
+  winner,
   toastManager
 );
-
-const visited = localStorage.getItem("tessera_board-visited");
-if (visited === null) {
-  localStorage.setItem("tessera_board-visited", "1");
-  game.restart();
-} else {
-  recoverData();
-}
-userDataManager.onRecoverCheck();
-userDataManager.applyData();
-userDataManager.updateReferences();
 
 onMounted(() => {
   // Sets CSS Saturation variables from 0 to their appropriate user configured values
@@ -672,7 +704,11 @@ onMounted(() => {
   // Let the app wait another 600ms to make sure its fully loaded.
   setTimeout(() => {
     gameBoardManager.updateCapturingPaths();
-    game.resume();
+    if (visited === null) {
+      game.restart();
+    } else {
+      game.resume();
+    }
     hideSplashscreen(transitionsManager.preferredTransitions);
   }, 600);
 });
@@ -694,6 +730,10 @@ onMounted(() => {
       :opponent-secs-move="opponentRemainingMoveSeconds"
       :player-secs-match="playerRemainingMatchSeconds"
       :opponent-secs-match="opponentRemainingMatchSeconds"
+      :player-seconds-per-move-set="playerSecondsPerMoveSet"
+      :player-seconds-per-match-set="playerSecondsPerMatchSet"
+      :opponent-seconds-per-move-set="opponentSecondsPerMoveSet"
+      :opponent-seconds-per-match-set="opponentSecondsPerMatchSet"
     />
     <Status v-show="showStatusText" :text="statusText" />
     <div class="captured-pieces-placeholder"></div>
@@ -872,11 +912,14 @@ onMounted(() => {
       <UserOption
         name="Time per move expiration punishment"
         icon-id="timer-alert-outline"
-        option-id="seconds-per-move-expiration-punishment"
+        option-id="seconds-per-move-runout-punishment"
       >
-        <select id="seconds-per-move-expiration-punishment">
-          <option value="lose_game">Random move</option>
-          <option value="light">Lose game</option>
+        <select
+          id="seconds-per-move-runout-punishment"
+          v-model="secondsPerMoveRunOutPunishment"
+        >
+          <option value="random_move">Random move</option>
+          <option value="game_loss">Game loss</option>
         </select>
         <template #description
           >Defines how to punish the player when he/she run out of time per
