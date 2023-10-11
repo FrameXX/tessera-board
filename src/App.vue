@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import moveAudioEffectUrl from "./assets/audio/move.ogg";
 import removeAudioEffectUrl from "./assets/audio/remove.ogg";
 
@@ -61,11 +61,13 @@ import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import EscapeManager from "./modules/escape_manager";
 import Game, {
   isPlayerColor,
-  isSecondsPerMoveRunOutPunishment,
+  isMoveSecondsLimitRunOutPunishment,
   isWinner,
   type PlayerColor,
-  type SecondsPerMoveRunOutPunishment,
+  type MoveSecondsLimitRunOutPunishment,
   type Winner,
+  type WinReason,
+  isWinReason,
 } from "./modules/game";
 import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
@@ -123,7 +125,7 @@ function updateScreenRotation(rotate: boolean): void {
     : setCSSVariable("app-transform", "");
 }
 
-function recoverData() {
+function tryRecoverData() {
   if (!navigator.cookieEnabled) {
     toastManager.showToast(
       "Cookies are disabled. -> No changes will be restored in next session.",
@@ -223,8 +225,9 @@ const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
 const DEFAULT_SHOW_SATUS_TEXT = true;
 const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = true;
-const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: SecondsPerMoveRunOutPunishment =
+const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishment =
   "random_move";
+const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
@@ -267,24 +270,24 @@ const playingColor = computed(() => {
 const playerPlaying = computed(() => {
   return playerColor.value === playingColor.value;
 });
-const playerSecondsPerMoveSet = computed(() => {
-  return playerSecondsPerMove.value !== 0;
+const playerMoveSecondsLimitSet = computed(() => {
+  return playerMoveSecondsLimit.value !== 0;
 });
-const opponentSecondsPerMoveSet = computed(() => {
-  return opponentSecondsPerMove.value !== 0;
+const opponentMoveSecondsLimitSet = computed(() => {
+  return opponentMoveSecondsLimit.value !== 0;
 });
-const playerSecondsPerMatchSet = computed(() => {
-  return playerSecondsPerMatch.value !== 0;
+const playerMatchSecondsLimitSet = computed(() => {
+  return playerMatchSecondsLimit.value !== 0;
 });
-const opponentSecondsPerMatchSet = computed(() => {
-  return opponentSecondsPerMatch.value !== 0;
+const opponentMatchSecondsLimitSet = computed(() => {
+  return opponentMatchSecondsLimit.value !== 0;
 });
 const timersSet = computed(() => {
   return (
-    playerSecondsPerMoveSet.value ||
-    opponentSecondsPerMoveSet.value ||
-    playerSecondsPerMatchSet.value ||
-    opponentSecondsPerMatchSet.value
+    playerMoveSecondsLimitSet.value ||
+    opponentMoveSecondsLimitSet.value ||
+    playerMatchSecondsLimitSet.value ||
+    opponentMatchSecondsLimitSet.value
   );
 });
 const statusText = computed(() => {
@@ -336,18 +339,19 @@ const showCapturingPieces = ref(DEFAULT_SHOW_CAPTURING_PIECES_VALUE);
 const banPromotionToUncapturedPieces = ref(
   DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE
 );
-const playerSecondsPerMove = ref(DEFAULT_PLAYER_SECONDS_PER_MOVE);
-const opponentSecondsPerMove = ref(DEFAULT_OPPONENT_SECONDS_PER_MOVE);
-const playerSecondsPerMatch = ref(DEFAULT_PLAYER_SECONDS_PER_MATCH);
-const opponentSecondsPerMatch = ref(DEFAULT_OPPONENT_SECONDS_PER_MATCH);
+const playerMoveSecondsLimit = ref(DEFAULT_PLAYER_SECONDS_PER_MOVE);
+const opponentMoveSecondsLimit = ref(DEFAULT_OPPONENT_SECONDS_PER_MOVE);
+const playerMatchSecondsLimit = ref(DEFAULT_PLAYER_SECONDS_PER_MATCH);
+const opponentMatchSecondsLimit = ref(DEFAULT_OPPONENT_SECONDS_PER_MATCH);
 const showStatusText = ref(DEFAULT_SHOW_SATUS_TEXT);
 const showOtherAvailibleMoves = ref(DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES);
-const secondsPerMoveRunOutPunishment = ref(
+const secondsMoveLimitRunOutPunishment = ref(
   DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT
 );
 
 // Game specific
 const winner = ref<Winner>("none");
+const winReason = ref<WinReason>(DEFAULT_WIN_REASON_VALUE);
 const moveIndex = ref(0);
 const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
@@ -365,16 +369,16 @@ const opponentMoveSeconds = ref(0);
 const playerMatchSeconds = ref(0);
 const opponentMatchSeconds = ref(0);
 const playerRemainingMoveSeconds = computed(() => {
-  return playerSecondsPerMove.value - playerMoveSeconds.value;
+  return playerMoveSecondsLimit.value - playerMoveSeconds.value;
 });
 const opponentRemainingMoveSeconds = computed(() => {
-  return opponentSecondsPerMove.value - opponentMoveSeconds.value;
+  return opponentMoveSecondsLimit.value - opponentMoveSeconds.value;
 });
 const playerRemainingMatchSeconds = computed(() => {
-  return playerSecondsPerMatch.value - playerMatchSeconds.value;
+  return playerMatchSecondsLimit.value - playerMatchSeconds.value;
 });
 const opponentRemainingMatchSeconds = computed(() => {
-  return opponentSecondsPerMatch.value - opponentMatchSeconds.value;
+  return opponentMatchSecondsLimit.value - opponentMatchSeconds.value;
 });
 
 // Complex values (reactive)
@@ -486,13 +490,20 @@ const userDataManager = new UserDataManager(
       toastManager,
       playerColor
     ),
+    new SelectUserData(
+      "win_reason",
+      DEFAULT_WIN_REASON_VALUE,
+      isWinReason,
+      toastManager,
+      winReason
+    ),
     new SelectUserData("winner", "none", isWinner, toastManager, winner),
     new SelectUserData(
       "seconds_per_move_runout_punishment",
       "random_move",
-      isSecondsPerMoveRunOutPunishment,
+      isMoveSecondsLimitRunOutPunishment,
       toastManager,
-      secondsPerMoveRunOutPunishment
+      secondsMoveLimitRunOutPunishment
     ),
     new BooleanUserData(
       "game_paused",
@@ -535,25 +546,25 @@ const userDataManager = new UserDataManager(
       "player_seconds_per_move",
       DEFAULT_PLAYER_SECONDS_PER_MOVE,
       toastManager,
-      playerSecondsPerMove
+      playerMoveSecondsLimit
     ),
     new NumberUserData(
       "opponent_seconds_per_move",
       DEFAULT_OPPONENT_SECONDS_PER_MOVE,
       toastManager,
-      opponentSecondsPerMove
+      opponentMoveSecondsLimit
     ),
     new NumberUserData(
       "player_seconds_per_match",
       DEFAULT_PLAYER_SECONDS_PER_MATCH,
       toastManager,
-      playerSecondsPerMatch
+      playerMatchSecondsLimit
     ),
     new NumberUserData(
       "opponent_seconds_per_match",
       DEFAULT_OPPONENT_SECONDS_PER_MATCH,
       toastManager,
-      opponentSecondsPerMatch
+      opponentMatchSecondsLimit
     ),
     new NumberUserData(
       "player_move_seconds",
@@ -654,6 +665,7 @@ const gameBoardManager = new GameBoardManager(
   showCapturingPieces,
   banPromotionToUncapturedPieces,
   showOtherAvailibleMoves,
+  moveIndex,
   toastManager
 );
 
@@ -661,7 +673,7 @@ const visited = localStorage.getItem("tessera_board-visited");
 if (visited === null) {
   localStorage.setItem("tessera_board-visited", "1");
 } else {
-  recoverData();
+  tryRecoverData();
 }
 userDataManager.onRecoverCheck();
 userDataManager.applyData();
@@ -677,16 +689,17 @@ const game = new Game(
   playerPlaying,
   moveIndex,
   preferredPlayerColor,
-  playerSecondsPerMove,
-  opponentSecondsPerMove,
-  playerSecondsPerMatch,
-  opponentSecondsPerMatch,
+  playerMoveSecondsLimit,
+  opponentMoveSecondsLimit,
+  playerMatchSecondsLimit,
+  opponentMatchSecondsLimit,
   playerMoveSeconds,
   opponentMoveSeconds,
   playerMatchSeconds,
   opponentMatchSeconds,
-  secondsPerMoveRunOutPunishment,
+  secondsMoveLimitRunOutPunishment,
   winner,
+  winReason,
   toastManager
 );
 
@@ -730,10 +743,10 @@ onMounted(() => {
       :opponent-secs-move="opponentRemainingMoveSeconds"
       :player-secs-match="playerRemainingMatchSeconds"
       :opponent-secs-match="opponentRemainingMatchSeconds"
-      :player-seconds-per-move-set="playerSecondsPerMoveSet"
-      :player-seconds-per-match-set="playerSecondsPerMatchSet"
-      :opponent-seconds-per-move-set="opponentSecondsPerMoveSet"
-      :opponent-seconds-per-match-set="opponentSecondsPerMatchSet"
+      :player-move-seconds-limit-set="playerMoveSecondsLimitSet"
+      :player-match-seconds-limit-set="playerMatchSecondsLimitSet"
+      :opponent-move-seconds-limit-set="opponentMoveSecondsLimitSet"
+      :opponent-match-seconds-limit-set="opponentMatchSecondsLimitSet"
     />
     <Status v-show="showStatusText" :text="statusText" />
     <div class="captured-pieces-placeholder"></div>
@@ -856,7 +869,7 @@ onMounted(() => {
       >
         <TimeDurationInput
           id="input-player-seconds-per-move"
-          v-model="playerSecondsPerMove"
+          v-model="playerMoveSecondsLimit"
         />
         <template #description
           >Limits player's time per move. If the time runs out (expires) an
@@ -871,7 +884,7 @@ onMounted(() => {
       >
         <TimeDurationInput
           id="input-opponent-seconds-per-move"
-          v-model="opponentSecondsPerMove"
+          v-model="opponentMoveSecondsLimit"
         />
         <template #description
           >Limits opponent's time per move. If the time runs out (expires) an
@@ -886,7 +899,7 @@ onMounted(() => {
       >
         <TimeDurationInput
           id="input-player-seconds-per-match"
-          v-model="playerSecondsPerMatch"
+          v-model="playerMatchSecondsLimit"
         />
         <template #description
           >Limits player's time for whole match (game). If the time runs out the
@@ -901,7 +914,7 @@ onMounted(() => {
       >
         <TimeDurationInput
           id="input-opponent-seconds-per-match"
-          v-model="opponentSecondsPerMatch"
+          v-model="opponentMatchSecondsLimit"
         />
         <template #description
           >Limits opponent's time for whole match (game). If the time runs out
@@ -916,7 +929,7 @@ onMounted(() => {
       >
         <select
           id="seconds-per-move-runout-punishment"
-          v-model="secondsPerMoveRunOutPunishment"
+          v-model="secondsMoveLimitRunOutPunishment"
         >
           <option value="random_move">Random move</option>
           <option value="game_loss">Game loss</option>
@@ -1564,6 +1577,3 @@ onMounted(() => {
   }
 }
 </style>
-./modules/user_data/rotate_screen ./modules/dialogs/config_piece_dialog
-./modules/dialogs/config_print_dialog ./modules/dialogs/configs_dialog
-./modules/dialogs/confirm_dialog ./modules/user_data/raw_board_state

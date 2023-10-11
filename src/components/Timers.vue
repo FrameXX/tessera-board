@@ -15,10 +15,10 @@ const props = defineProps({
   playerSecsMatch: { type: Number, required: true },
   opponentSecsMove: { type: Number, required: true },
   opponentSecsMatch: { type: Number, required: true },
-  playerSecondsPerMoveSet: { type: Boolean, required: true },
-  opponentSecondsPerMoveSet: { type: Boolean, required: true },
-  playerSecondsPerMatchSet: { type: Boolean, required: true },
-  opponentSecondsPerMatchSet: { type: Boolean, required: true },
+  playerMoveSecondsLimitSet: { type: Boolean, required: true },
+  opponentMoveSecondsLimitSet: { type: Boolean, required: true },
+  playerMatchSecondsLimitSet: { type: Boolean, required: true },
+  opponentMatchSecondsLimitSet: { type: Boolean, required: true },
 });
 
 const playerTimeMove = computed<MinSecTime>(() => {
@@ -39,15 +39,17 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
   <div class="player-timers">
     <div
       id="player-timers-player"
-      v-show="props.playerSecondsPerMoveSet || props.playerSecondsPerMatchSet"
+      v-show="
+        props.playerMoveSecondsLimitSet || props.playerMatchSecondsLimitSet
+      "
     >
       <SimpleInfo
-        v-show="props.playerSecondsPerMoveSet"
+        v-show="props.playerMoveSecondsLimitSet"
         content-role="timer"
         :class="{
           pulsing:
             props.playerSecsMove < TOO_FEW_MOVE_SECONDS &&
-            props.playerSecsMove !== 0,
+            props.playerSecsMove > 0,
         }"
         name="move"
         >{{
@@ -57,12 +59,12 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         }}</SimpleInfo
       >
       <SimpleInfo
-        v-show="props.playerSecondsPerMatchSet"
+        v-show="props.playerMatchSecondsLimitSet"
         content-role="timer"
         :class="{
           pulsing:
             props.playerSecsMatch < TOO_FEW_MATCH_SECONDS &&
-            props.playerSecsMatch !== 0,
+            props.playerSecsMatch > 0,
         }"
         name="match"
         >{{
@@ -75,16 +77,16 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
     <div
       id="player-timers-opponent"
       v-show="
-        props.opponentSecondsPerMoveSet || props.opponentSecondsPerMatchSet
+        props.opponentMoveSecondsLimitSet || props.opponentMatchSecondsLimitSet
       "
     >
       <SimpleInfo
-        v-show="props.opponentSecondsPerMoveSet"
+        v-show="props.opponentMoveSecondsLimitSet"
         content-role="timer"
         :class="{
           pulsing:
             props.opponentSecsMove < TOO_FEW_MOVE_SECONDS &&
-            props.opponentSecsMove !== 0,
+            props.opponentSecsMove > 0,
         }"
         name="move"
         >{{
@@ -94,12 +96,12 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         }}</SimpleInfo
       >
       <SimpleInfo
-        v-show="props.opponentSecondsPerMatchSet"
+        v-show="props.opponentMatchSecondsLimitSet"
         content-role="timer"
         :class="{
           pulsing:
             props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS &&
-            props.opponentSecsMatch !== 0,
+            props.opponentSecsMatch > 0,
         }"
         name="match"
         >{{

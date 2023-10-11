@@ -1,7 +1,7 @@
 import { ComputedRef, Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
-import { capitalizeFirst, getRandomNumber } from "./utils/misc";
+import { getRandomNumber } from "./utils/misc";
 import GameBoardManager from "./game_board_manager";
 import ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
@@ -18,9 +18,6 @@ export function isPlayerColor(string: string): string is PlayerColor {
 }
 
 export type TeamName = "White" | "Black";
-export function isTeamName(string: string): string is TeamName {
-  return string === "White" || string === "black";
-}
 
 export function getOpossiteTeamName(teamName: TeamName): TeamName {
   return teamName === "White" ? "Black" : "White";
@@ -56,10 +53,17 @@ export function isWinner(string: string): string is Winner {
   return isPlayer(string) || isUndecidedWinner(string);
 }
 
-export type SecondsPerMoveRunOutPunishment = "game_loss" | "random_move";
-export function isSecondsPerMoveRunOutPunishment(
+export type WinReason = "none" | "move_timeout" | "match_timeout";
+export function isWinReason(string: string): string is WinReason {
+  return (
+    string === "none" || string === "move_timout" || string === "match_timeout"
+  );
+}
+
+export type MoveSecondsLimitRunOutPunishment = "game_loss" | "random_move";
+export function isMoveSecondsLimitRunOutPunishment(
   string: string
-): string is SecondsPerMoveRunOutPunishment {
+): string is MoveSecondsLimitRunOutPunishment {
   return string === "game_loss" || string === "random_move";
 }
 
@@ -87,127 +91,142 @@ class Game {
     private readonly playerPlaying: ComputedRef<boolean>,
     private readonly moveIndex: Ref<number>,
     private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,
-    playerSecondsPerMove: Ref<number>,
-    opponentSecondsPerMove: Ref<number>,
-    playerSecondsPerMatch: Ref<number>,
-    opponentSecondsPerMatch: Ref<number>,
+    playerMoveSecondsLimit: Ref<number>,
+    opponentMoveSecondsLimit: Ref<number>,
+    playerMatchSecondsLimit: Ref<number>,
+    opponentMatchSecondsLimit: Ref<number>,
     playerMoveSeconds: Ref<number>,
     opponentMoveSeconds: Ref<number>,
     playerMatchSeconds: Ref<number>,
     opponentMatchSeconds: Ref<number>,
-    private readonly secondsPerMoveRunOutPunishment: Ref<SecondsPerMoveRunOutPunishment>,
+    private readonly secondsMoveLimitRunOutPunishment: Ref<MoveSecondsLimitRunOutPunishment>,
     private readonly winner: Ref<Winner>,
+    private readonly winReason: Ref<WinReason>,
     private readonly toastManager: ToastManager
   ) {
     this.playerMoveSecondsTimer = new Timer(
       playerMoveSeconds,
-      playerSecondsPerMove
+      playerMoveSecondsLimit
     );
+    watch(this.playerMoveSecondsTimer.beyondLimit, (newValue) => {
+      if (newValue) {
+        this.onPlayerMoveSecondsBeyondLimit();
+      } else if (
+        this.winReason.value === "move_timeout" &&
+        this.winner.value === "opponent"
+      )
+        this.cancelWin();
+    });
 
     this.opponentMoveSecondsTimer = new Timer(
       opponentMoveSeconds,
-      opponentSecondsPerMove
+      opponentMoveSecondsLimit
     );
+    watch(this.opponentMoveSecondsTimer.beyondLimit, (newValue) => {
+      if (newValue) {
+        this.onOpponentMoveSecondsBeyondLimit();
+      } else if (
+        this.winReason.value === "move_timeout" &&
+        this.winner.value === "player"
+      )
+        this.cancelWin();
+    });
 
     this.playerMatchSecondsTimer = new Timer(
       playerMatchSeconds,
-      playerSecondsPerMatch
+      playerMatchSecondsLimit
     );
+    watch(this.playerMatchSecondsTimer.beyondLimit, (newValue) => {
+      if (newValue) {
+        this.onPlayerMatchSecondsBeyondLimit();
+      } else if (
+        this.winReason.value === "match_timeout" &&
+        this.winner.value === "opponent"
+      )
+        this.cancelWin();
+    });
 
     this.opponentMatchSecondsTimer = new Timer(
       opponentMatchSeconds,
-      opponentSecondsPerMatch
+      opponentMatchSecondsLimit
     );
+    watch(this.opponentMatchSecondsTimer.beyondLimit, (newValue) => {
+      if (newValue) {
+        this.onOpponentMatchSecondsBeyondLimit();
+      } else if (
+        this.winReason.value === "match_timeout" &&
+        this.winner.value === "player"
+      )
+        this.cancelWin();
+    });
 
-    this.addTimerEventListeners();
-    this.gameBoardManager.addEventListener("move", () => this.onMove());
+    watch(moveIndex, (newValue) => {
+      this.onMove();
+    });
   }
 
-  private addTimerEventListeners() {
-    this.playerMoveSecondsTimer.addEventListener("runout", () =>
-      this.onPlayerMoveSecondsRunOut()
-    );
-    this.playerMoveSecondsTimer.addEventListener("runback", () =>
-      this.onSecondsRunBack()
-    );
-
-    this.opponentMoveSecondsTimer.addEventListener("runout", () =>
-      this.onOpponentMoveSecondsRunOut()
-    );
-    this.opponentMoveSecondsTimer.addEventListener("runback", () =>
-      this.onSecondsRunBack()
-    );
-
-    this.playerMatchSecondsTimer.addEventListener("runout", () =>
-      this.onPlayerMatchSecondsRunOut()
-    );
-    this.playerMatchSecondsTimer.addEventListener("runback", () =>
-      this.onSecondsRunBack()
-    );
-
-    this.opponentMatchSecondsTimer.addEventListener("runout", () =>
-      this.onOpponentMatchSecondsRunOut()
-    );
-    this.opponentMatchSecondsTimer.addEventListener("runback", () =>
-      this.onSecondsRunBack()
-    );
-  }
-
-  private playerWin() {
+  private playerWin(reason: WinReason) {
     const winner: Winner = "player";
-    this.puaseTimers();
-    this.winner.value = winner;
     this.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
       "info",
       "crown-outline"
     );
+    this.winner.value = winner;
+    this.winReason.value = reason;
+    this.updateTimerState();
   }
 
-  private opponentWin() {
+  private opponentWin(reason: WinReason) {
     const winner: Winner = "opponent";
-    this.puaseTimers();
-    this.winner.value = winner;
     this.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
       "info",
       "crown-outline"
     );
+    this.winner.value = winner;
+    this.winReason.value = reason;
+    this.updateTimerState();
   }
 
-  public onPlayerMoveSecondsRunOut() {
-    if (this.secondsPerMoveRunOutPunishment.value === "game_loss") {
-      this.opponentWin();
+  private onPlayerMoveSecondsBeyondLimit() {
+    if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
+      this.opponentWin("move_timeout");
     }
   }
 
-  public onOpponentMoveSecondsRunOut() {
-    if (this.secondsPerMoveRunOutPunishment.value === "game_loss") {
-      this.playerWin();
+  private onOpponentMoveSecondsBeyondLimit() {
+    if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
+      this.playerWin("move_timeout");
     }
   }
 
-  public onPlayerMatchSecondsRunOut() {
-    this.opponentWin();
+  private onPlayerMatchSecondsBeyondLimit() {
+    this.opponentWin("match_timeout");
   }
 
-  public onOpponentMatchSecondsRunOut() {
-    this.playerWin();
+  private onOpponentMatchSecondsBeyondLimit() {
+    this.playerWin("match_timeout");
   }
 
-  public onSecondsRunBack() {
-    if (!isTeamName(this.winner.value)) {
+  private cancelWin() {
+    if (!isPlayer(this.winner.value)) {
+      console.error("Winner value is not of Player type.");
       return;
     }
     this.toastManager.showToast(
-      `${getOpossiteTeamName(this.winner.value)} is back in the game.`
+      `${getOpossiteTeamName(
+        getPlayerTeamName(this.winner.value, this.playerColor.value)
+      )} is back in the game.`,
+      "info",
+      "keyboard-return"
     );
+    this.winReason.value = "none";
     this.winner.value = "none";
-    this.updateTimerState(this.playerPlaying.value);
+    this.updateTimerState();
   }
 
   private setupDefaultBoardState() {
-    // Copy default checkboard
     this.gameBoardStateData.load(this.defaultBoardStateData.dump(), true);
     this.gameBoardStateData.updateReference();
   }
@@ -237,54 +256,49 @@ class Game {
     this.opponentMoveSecondsTimer.reset();
   }
 
-  private restartTimers() {
-    this.playerMoveSecondsTimer.restart();
-    this.opponentMoveSecondsTimer.restart();
-    this.playerMatchSecondsTimer.restart();
-    this.opponentMatchSecondsTimer.restart();
+  private resetTimers() {
+    this.resetMoveTimers();
+    this.playerMatchSecondsTimer.reset();
+    this.opponentMatchSecondsTimer.reset();
   }
 
-  private puaseTimers() {
-    this.playerMoveSecondsTimer.pause();
-    this.opponentMoveSecondsTimer.pause();
-    this.playerMatchSecondsTimer.pause();
-    this.opponentMatchSecondsTimer.pause();
-  }
-
-  private updateTimerState(playerPlaying: boolean) {
-    if (playerPlaying) {
+  private updateTimerState() {
+    if (this.winner.value !== "none" || this.playerPlaying.value) {
       this.opponentMoveSecondsTimer.pause();
       this.opponentMatchSecondsTimer.pause();
+    }
+    if (this.winner.value !== "none" || !this.playerPlaying.value) {
+      this.playerMoveSecondsTimer.pause();
+      this.playerMatchSecondsTimer.pause();
+    }
+    if (this.winner.value === "none" && this.playerPlaying.value) {
       this.playerMoveSecondsTimer.resume();
       this.playerMatchSecondsTimer.resume();
     } else {
-      this.playerMoveSecondsTimer.pause();
-      this.playerMatchSecondsTimer.pause();
       this.opponentMoveSecondsTimer.resume();
       this.opponentMatchSecondsTimer.resume();
     }
   }
 
   public restart() {
-    this.restartTimers();
+    this.winner.value = "none";
     this.setupDefaultBoardState();
     this.choosePlayerColor();
     this.chooseFirstMoveColor();
     this.gameBoardManager.resetBoard();
     this.toastManager.showToast("New match started.", "info", "flag-checkered");
     this.moveIndex.value = 0;
-    this.updateTimerState(this.playerPlaying.value);
+    this.resetTimers();
+    this.updateTimerState();
     this.gameBoardStateData.save();
-    this.winner.value = "none";
   }
 
   public resume() {
-    this.updateTimerState(this.playerPlaying.value);
+    this.updateTimerState();
   }
 
   public onMove() {
-    this.moveIndex.value++;
-    this.updateTimerState(this.playerPlaying.value);
+    this.updateTimerState();
     this.resetMoveTimers();
     this.gameBoardStateData.save();
   }

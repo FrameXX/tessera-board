@@ -8,11 +8,10 @@ import type {
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
 import {
   getTargetMatchingPaths,
-  PlayerColor,
   type Path,
   type PieceId,
 } from "./pieces/piece";
-import { GameLogicError } from "./game";
+import { GameLogicError, type PlayerColor } from "./game";
 import type { BoardStateValue } from "./user_data/board_state";
 import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
@@ -50,6 +49,7 @@ class GameBoardManager extends BoardManager {
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly banPromotionToUncapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
+    private readonly moveIndex: Ref<number>,
     // @ts-ignore
     private readonly toastManager: ToastManager
   ) {
@@ -215,7 +215,7 @@ class GameBoardManager extends BoardManager {
         this.pieceMoveAudioEffect
       );
     }
-    this.dispatchEvent(new Event("move"));
+    this.moveIndex.value++;
     this.invalidatePiecesCache();
     this.updateCapturingPaths();
   }
