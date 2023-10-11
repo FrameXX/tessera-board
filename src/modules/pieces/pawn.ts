@@ -1,7 +1,7 @@
 import type { BoardPosition } from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import Promote from "../moves/promote";
+import Promotion from "../moves/promotion";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece, {
   getBoardPositionPiece,
@@ -83,7 +83,7 @@ export class Pawn extends Piece {
         Math.abs(rowDelta) === 1
       ) {
         moves.push(
-          new Promote(
+          new Promotion(
             this.pieceId,
             this.color,
             position,
@@ -123,7 +123,7 @@ export class Pawn extends Piece {
         (target.row === 0 && this.color === "black")
       ) {
         moves.push(
-          new Promote(
+          new Promotion(
             this.pieceId,
             this.color,
             position,

@@ -16,7 +16,7 @@ import type { BoardStateValue } from "./user_data/board_state";
 import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
-import { isMoveTransform } from "./moves/promote";
+import { isMoveTransform } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
 import type ToastManager from "./toast_manager";
 

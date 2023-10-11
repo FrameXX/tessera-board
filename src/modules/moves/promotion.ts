@@ -14,11 +14,11 @@ import {
 import { getPieceNotation, getPositionNotation } from "../board_manager";
 import type { PlayerColor } from "../game";
 
-export function isMoveTransform(move: Move): move is Promote {
-  return move.moveId === "promote";
+export function isMoveTransform(move: Move): move is Promotion {
+  return move.moveId === "promotion";
 }
 
-class Promote extends Move {
+class Promotion extends Move {
   constructor(
     private readonly pieceId: PieceId,
     private readonly pieceColor: PlayerColor,
@@ -27,7 +27,7 @@ class Promote extends Move {
     private readonly transformOptions: [RawPiece, ...RawPiece[]],
     private readonly captures?: BoardPositionValue
   ) {
-    super("promote");
+    super("promotion");
   }
 
   private getLimitedTransformOptions(
@@ -111,4 +111,4 @@ class Promote extends Move {
   }
 }
 
-export default Promote;
+export default Promotion;

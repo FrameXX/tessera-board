@@ -10,7 +10,7 @@ import {
   waitForTransitionEnd,
 } from "../utils/elements";
 
-type MoveId = "shift" | "castling" | "promote";
+type MoveId = "shift" | "castling" | "promotion";
 
 abstract class Move {
   public notation?: string;
