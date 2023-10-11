@@ -36,6 +36,8 @@ const props = defineProps({
   display: flex;
   margin: var(--spacing-huge) 0;
   flex-direction: column;
+  text-align: left;
+  break-inside: avoid;
 
   label {
     @include flex-center;
@@ -43,7 +45,6 @@ const props = defineProps({
 
   .title {
     flex-grow: 1;
-    text-align: left;
   }
 
   .description {

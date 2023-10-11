@@ -147,7 +147,7 @@ async function onGameRestart() {
 }
 
 const VERSION = "0.0.0";
-const BUILD = "2";
+const BUILD = "3";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -1236,14 +1236,14 @@ onMounted(() => {
       </UserOption>
     </Category>
     <Category name="about game" icon-id="information-outline">
-      <p>Made with ❤️ by Jiří Král.</p>
-      <p>
+      <p id="about">
+        Made with ❤️ by Jiří Král.
+        <br />
         Source code is availible at
         <a href="https://github.com/FrameXX/tessera-board" target="_blank"
           >Github repository</a
         >.
-      </p>
-      <p>
+        <br />
         This work is licensed under
         <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
           >General Public License v3</a
@@ -1547,5 +1547,13 @@ onMounted(() => {
   button {
     margin: var(--spacing-medium) var(--spacing-medium) var(--spacing-medium) 0;
   }
+}
+
+#about {
+  break-inside: avoid;
+  text-align: left;
+  column-span: all;
+  line-height: 30px;
+  margin: 0;
 }
 </style>

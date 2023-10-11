@@ -32,11 +32,11 @@ header {
   background-color: var(--color-primary-surface);
 
   > .content {
-    padding: var(--spacing-medium);
+    padding: var(--spacing-big);
     left: 0;
     right: 0;
     margin: auto;
-    max-width: 450px;
+    max-width: 900px;
   }
 
   .nav-placeholder {

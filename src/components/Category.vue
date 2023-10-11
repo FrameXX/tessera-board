@@ -36,10 +36,17 @@ const open = ref<Boolean>(false);
 <style lang="scss">
 @import "../partials/mixins";
 
+@media only screen and (min-width: 600px) {
+  .category .content {
+    column-count: 2;
+  }
+}
+
 .category {
   display: flex;
   flex-direction: column;
   margin: var(--spacing-big) 0;
+  column-gap: var(--spacing-small);
 
   > button {
     height: auto;
@@ -73,8 +80,8 @@ const open = ref<Boolean>(false);
     }
   }
 
-  > .content {
-    padding-top: var(--spacing-big);
+  .content {
+    padding: var(--spacing-huge) 0;
   }
 }
 </style>

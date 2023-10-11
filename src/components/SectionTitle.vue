@@ -19,7 +19,6 @@ const props = defineProps({ title: { type: String, required: true } });
   @include round-border;
   @include inverted-accent;
   width: fit-content;
-  margin: var(--spacing-big) 0;
   font-size: var(--font-size-small);
   font-weight: bold;
   padding: var(--spacing-small);
