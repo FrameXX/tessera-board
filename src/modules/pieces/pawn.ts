@@ -1,15 +1,16 @@
 import type { BoardPosition } from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import Transform from "../moves/transform";
+import Promote from "../moves/promote";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece, {
   getBoardPositionPiece,
   type BoardPositionValue,
   isFriendlyPiece,
 } from "./piece";
-import { type PlayerColor, getDeltaPosition } from "./piece";
+import { getDeltaPosition } from "./piece";
 import { RawPiece, getRawPiece } from "./rawPiece";
+import type { PlayerColor } from "../game";
 
 interface RawPawn extends RawPiece {
   hasMoved: boolean;
@@ -82,7 +83,7 @@ export class Pawn extends Piece {
         Math.abs(rowDelta) === 1
       ) {
         moves.push(
-          new Transform(
+          new Promote(
             this.pieceId,
             this.color,
             position,
@@ -122,7 +123,7 @@ export class Pawn extends Piece {
         (target.row === 0 && this.color === "black")
       ) {
         moves.push(
-          new Transform(
+          new Promote(
             this.pieceId,
             this.color,
             position,

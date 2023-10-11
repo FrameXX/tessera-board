@@ -747,6 +747,7 @@ onMounted(() => {
       :player-match-seconds-limit-set="playerMatchSecondsLimitSet"
       :opponent-move-seconds-limit-set="opponentMoveSecondsLimitSet"
       :opponent-match-seconds-limit-set="opponentMatchSecondsLimitSet"
+      :player-playing="playerPlaying"
     />
     <Status v-show="showStatusText" :text="statusText" />
     <div class="captured-pieces-placeholder"></div>

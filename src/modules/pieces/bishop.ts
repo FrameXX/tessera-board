@@ -1,11 +1,11 @@
 import type { BoardPosition } from "../../components/Board.vue";
+import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import {
   type BoardPositionValue,
-  type PlayerColor,
   getDeltaPosition,
   isTargetOnBoard,
 } from "./piece";

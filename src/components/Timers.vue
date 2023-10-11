@@ -19,6 +19,7 @@ const props = defineProps({
   opponentMoveSecondsLimitSet: { type: Boolean, required: true },
   playerMatchSecondsLimitSet: { type: Boolean, required: true },
   opponentMatchSecondsLimitSet: { type: Boolean, required: true },
+  playerPlaying: { type: Boolean, required: true },
 });
 
 const playerTimeMove = computed<MinSecTime>(() => {
@@ -49,7 +50,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         :class="{
           pulsing:
             props.playerSecsMove < TOO_FEW_MOVE_SECONDS &&
-            props.playerSecsMove > 0,
+            props.playerSecsMove > 0 &&
+            props.playerPlaying,
         }"
         name="move"
         >{{
@@ -64,7 +66,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         :class="{
           pulsing:
             props.playerSecsMatch < TOO_FEW_MATCH_SECONDS &&
-            props.playerSecsMatch > 0,
+            props.playerSecsMatch > 0 &&
+            props.playerPlaying,
         }"
         name="match"
         >{{
@@ -86,7 +89,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         :class="{
           pulsing:
             props.opponentSecsMove < TOO_FEW_MOVE_SECONDS &&
-            props.opponentSecsMove > 0,
+            props.opponentSecsMove > 0 &&
+            !props.playerPlaying,
         }"
         name="move"
         >{{
@@ -101,7 +105,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         :class="{
           pulsing:
             props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS &&
-            props.opponentSecsMatch > 0,
+            props.opponentSecsMatch > 0 &&
+            !props.playerPlaying,
         }"
         name="match"
         >{{

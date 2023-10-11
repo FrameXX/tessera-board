@@ -1,4 +1,5 @@
 import { BoardPosition } from "../../components/Board.vue";
+import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
@@ -9,12 +10,7 @@ import Piece, {
   isFriendlyPiece,
   positionWillBeCaptured,
 } from "./piece";
-import {
-  BoardPositionValue,
-  PlayerColor,
-  getDeltaPosition,
-  isTargetOnBoard,
-} from "./piece";
+import { BoardPositionValue, getDeltaPosition, isTargetOnBoard } from "./piece";
 import { getRawPiece, type RawPiece } from "./rawPiece";
 
 interface RawRook extends RawPiece {

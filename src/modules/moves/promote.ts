@@ -1,7 +1,7 @@
 import { Ref } from "vue";
 import { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type { BooleanBoardState } from "../user_data/boolean_board_state";
-import { BoardPositionValue, PieceId, PlayerColor } from "../pieces/piece";
+import { BoardPositionValue, PieceId } from "../pieces/piece";
 import { RawPiece } from "../pieces/rawPiece";
 import { BoardStateValue } from "../user_data/board_state";
 import Move, { highlightBoardPosition } from "./move";
@@ -12,12 +12,13 @@ import {
   transformPositionValue,
 } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
+import type { PlayerColor } from "../game";
 
-export function isMoveTransform(move: Move): move is Transform {
-  return move.moveId === "transform";
+export function isMoveTransform(move: Move): move is Promote {
+  return move.moveId === "promote";
 }
 
-class Transform extends Move {
+class Promote extends Move {
   constructor(
     private readonly pieceId: PieceId,
     private readonly pieceColor: PlayerColor,
@@ -26,7 +27,7 @@ class Transform extends Move {
     private readonly transformOptions: [RawPiece, ...RawPiece[]],
     private readonly captures?: BoardPositionValue
   ) {
-    super("transform");
+    super("promote");
   }
 
   private getLimitedTransformOptions(
@@ -110,4 +111,4 @@ class Transform extends Move {
   }
 }
 
-export default Transform;
+export default Promote;

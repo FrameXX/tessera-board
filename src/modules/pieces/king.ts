@@ -1,4 +1,5 @@
 import type { BoardPosition } from "../../components/Board.vue";
+import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
@@ -12,7 +13,6 @@ import Piece, {
   positionWillBeCaptured,
   getBoardPositionPiece,
 } from "./piece";
-import { type PlayerColor } from "./piece";
 import { type RawPiece, getRawPiece } from "./rawPiece";
 
 interface RawKing extends RawPiece {
