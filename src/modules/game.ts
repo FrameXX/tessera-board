@@ -271,7 +271,10 @@ class Game {
       this.playerMoveSecondsTimer.pause();
       this.playerMatchSecondsTimer.pause();
     }
-    if (this.winner.value === "none" && this.playerPlaying.value) {
+    if (this.winner.value !== "none") {
+      return;
+    }
+    if (this.playerPlaying.value) {
       this.playerMoveSecondsTimer.resume();
       this.playerMatchSecondsTimer.resume();
     } else {
