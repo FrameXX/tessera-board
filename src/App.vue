@@ -44,7 +44,7 @@ import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/dialogs/config_piece";
 import SelectPieceDilog from "./modules/dialogs/select_piece";
-import { PIECE_IDS } from "./modules/pieces/piece";
+import { PIECE_IDS, type Path } from "./modules/pieces/piece";
 import {
   activateColors,
   hideSplashscreen,
@@ -240,12 +240,12 @@ const filteredConfigsPrints = computed(() => {
     print.name.toLowerCase().includes(configsNameFilter.value.toLowerCase())
   );
 });
-const playerCellMarks: MarkBoardState = reactive(
+const playerCellsMarks: MarkBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(null))
 );
-const OpponentCellMarks: MarkBoardState = reactive(
+const opponentCellsMarks: MarkBoardState = reactive(
   Array(8)
     .fill(null)
     .map(() => new Array(8).fill(null))
@@ -628,16 +628,47 @@ const defaultBoardManager = new DefaultBoardManager(
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect
 );
-const gameBoardManager = new GameBoardManager(
+
+const whiteCapturingPaths = ref<Path[]>([]);
+const blackCapturingPaths = ref<Path[]>([]);
+const playerBoardManager = new GameBoardManager(
+  whiteCapturingPaths,
+  blackCapturingPaths,
+  playerColor,
+  winner,
+  secondCheckboard,
+  true,
   playingColor,
   gameBoardState,
   whiteCapturedPieces,
   blackCapturedPieces,
-  playerCellMarks,
-  OpponentCellMarks,
+  playerCellsMarks,
   playerSelectedPieces,
-  opponentSelectedPieces,
   playerSelectedCells,
+  highlightedCells,
+  selectPieceDialog,
+  audioEffects,
+  pieceMoveAudioEffect,
+  pieceRemoveAudioEffect,
+  showCapturingPieces,
+  banPromotionToUncapturedPieces,
+  showOtherAvailibleMoves,
+  moveIndex,
+  toastManager
+);
+const opponentBoardManager = new GameBoardManager(
+  whiteCapturingPaths,
+  blackCapturingPaths,
+  playerColor,
+  winner,
+  secondCheckboard,
+  false,
+  playingColor,
+  gameBoardState,
+  whiteCapturedPieces,
+  blackCapturedPieces,
+  opponentCellsMarks,
+  opponentSelectedPieces,
   opponentSelectedCells,
   highlightedCells,
   selectPieceDialog,
@@ -662,7 +693,7 @@ userDataManager.applyData();
 userDataManager.updateReferences();
 
 const game = new Game(
-  gameBoardManager,
+  playerBoardManager,
   gameBoardStateData,
   defaultBoardStateData,
   playerColor,
@@ -700,7 +731,7 @@ onMounted(() => {
 
   // Let the app wait another 600ms to make sure its fully loaded.
   setTimeout(() => {
-    gameBoardManager.updateCapturingPaths();
+    playerBoardManager.updateCapturingPaths();
     if (visited === null) {
       game.restart();
     } else {
@@ -740,9 +771,9 @@ onMounted(() => {
         :selected-pieces="playerSelectedPieces"
         :selected-cells="playerSelectedCells"
         :highlighted-cells-state="highlightedCells"
-        :marks-state="playerCellMarks"
+        :marks-state="playerCellsMarks"
         :rotated="screenRotated"
-        :manager="gameBoardManager"
+        :manager="playerBoardManager"
         :state="gameBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"
@@ -757,8 +788,9 @@ onMounted(() => {
         :selected-pieces="opponentSelectedPieces"
         :selected-cells="opponentSelectedCells"
         :highlighted-cells-state="highlightedCells"
+        :marks-state="opponentCellsMarks"
         :rotated="screenRotated"
-        :manager="gameBoardManager"
+        :manager="opponentBoardManager"
         :state="gameBoardState"
         :piece-set="pieceSet"
         :piece-padding="piecePadding"

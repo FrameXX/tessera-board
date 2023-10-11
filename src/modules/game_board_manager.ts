@@ -11,7 +11,7 @@ import {
   type Path,
   type PieceId,
 } from "./pieces/piece";
-import { GameLogicError, type PlayerColor } from "./game";
+import { GameLogicError, type Winner, type PlayerColor } from "./game";
 import type { BoardStateValue } from "./user_data/board_state";
 import Move from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
@@ -24,23 +24,21 @@ class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
   private _selectedCell: BoardPosition | null = null;
   private availibleMoves: Move[] = [];
-  private whiteCapturingPaths: Path[] = [];
-  private blackCapturingPaths: Path[] = [];
 
   constructor(
+    private whiteCapturingPaths: Ref<Path[]>,
+    private blackCapturingPaths: Ref<Path[]>,
+    private readonly playerColor: Ref<PlayerColor>,
+    private readonly winner: Ref<Winner>,
+    private readonly secondCheckboard: Ref<boolean>,
+    private readonly playerBoard: boolean,
     private readonly playingColor: Ref<PlayerColor>,
     private readonly boardStateValue: BoardStateValue,
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
-    private readonly playerCellMarks: MarkBoardState,
-    // @ts-ignore
-    private readonly opponentBoardMarks: MarkBoardState,
-    private readonly playerSelectedPieces: Ref<BoardPosition[]>,
-    // @ts-ignore
-    private readonly opponentSelectedPieces: Ref<BoardPosition[]>,
-    private readonly playerSelectedCells: Ref<BoardPosition[]>,
-    // @ts-ignore
-    private readonly opponentSelectedCells: Ref<BoardPosition[]>,
+    private readonly cellsMarks: MarkBoardState,
+    private readonly selectedPieces: Ref<BoardPosition[]>,
+    private readonly selectedCells: Ref<BoardPosition[]>,
     private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
     private readonly audioEffects: Ref<boolean>,
@@ -65,9 +63,9 @@ class GameBoardManager extends BoardManager {
   }
 
   private clearCellsMarks() {
-    for (const rowIndex in this.playerCellMarks) {
-      for (const colIndex in this.playerCellMarks[rowIndex]) {
-        this.playerCellMarks[rowIndex][colIndex] = null;
+    for (const rowIndex in this.cellsMarks) {
+      for (const colIndex in this.cellsMarks[rowIndex]) {
+        this.cellsMarks[rowIndex][colIndex] = null;
       }
     }
   }
@@ -83,13 +81,13 @@ class GameBoardManager extends BoardManager {
 
   private clearSelectedPiece() {
     if (this.selectedPiece) {
-      this.playerSelectedPieces.value = [];
+      this.selectedPieces.value = [];
     }
   }
 
-  private clearSelectedCell() {
+  private clearSelectedCells() {
     if (this.selectedCell) {
-      this.playerSelectedCells.value = [];
+      this.selectedCells.value = [];
     }
   }
 
@@ -119,7 +117,7 @@ class GameBoardManager extends BoardManager {
     if (!pieceProps) return;
 
     this._selectedPiece = pieceProps;
-    this.playerSelectedPieces.value.push(pieceProps);
+    this.selectedPieces.value.push(pieceProps);
 
     if (
       !this.showOtherAvailibleMoves.value &&
@@ -131,11 +129,11 @@ class GameBoardManager extends BoardManager {
       pieceProps,
       this.boardStateValue,
       pieceProps.piece.color === "white"
-        ? this.blackCapturingPaths
-        : this.whiteCapturingPaths
+        ? this.blackCapturingPaths.value
+        : this.whiteCapturingPaths.value
     );
     moves.forEach((move) =>
-      move.showCellMarks(this.playerCellMarks, this.boardStateValue)
+      move.showCellMarks(this.cellsMarks, this.boardStateValue)
     );
     this.availibleMoves = moves;
   }
@@ -166,8 +164,8 @@ class GameBoardManager extends BoardManager {
   }
 
   private getPiecePosition(id: string): BoardPosition | null {
-    for (const rowIndex in this.playerCellMarks) {
-      for (const colIndex in this.playerCellMarks[rowIndex]) {
+    for (const rowIndex in this.cellsMarks) {
+      for (const colIndex in this.cellsMarks[rowIndex]) {
         const piece = this.boardStateValue[rowIndex][colIndex];
         if (!piece) {
           continue;
@@ -242,18 +240,20 @@ class GameBoardManager extends BoardManager {
 
   private showCellCapturingPieces(position: BoardPosition) {
     const paths = getTargetMatchingPaths(position, [
-      ...this.whiteCapturingPaths,
-      ...this.blackCapturingPaths,
+      ...this.whiteCapturingPaths.value,
+      ...this.blackCapturingPaths.value,
     ]);
     for (const path of paths) {
       const origin = path.origin;
       const piece = this.boardStateValue[origin.row][origin.col];
       if (!piece) {
         throw new GameLogicError(
-          `Path is defined from an origin that has no piece. Origin: ${origin}`
+          `Path is defined from an origin that has no piece. Origin: ${JSON.stringify(
+            origin
+          )}`
         );
       }
-      this.playerCellMarks[origin.row][origin.col] = "capturing";
+      this.cellsMarks[origin.row][origin.col] = "capturing";
     }
   }
 
@@ -265,7 +265,7 @@ class GameBoardManager extends BoardManager {
       }
     }
 
-    this.clearSelectedCell();
+    this.clearSelectedCells();
     this.clearCellsMarks();
     this._selectedCell = null;
 
@@ -273,7 +273,7 @@ class GameBoardManager extends BoardManager {
       return;
     }
 
-    this.playerSelectedCells.value.push(position);
+    this.selectedCells.value.push(position);
     if (this.showCapturingPieces.value) this.showCellCapturingPieces(position);
 
     this._selectedCell = position;
@@ -311,8 +311,8 @@ class GameBoardManager extends BoardManager {
         }
       }
     }
-    this.whiteCapturingPaths = whiteCapturingPaths;
-    this.blackCapturingPaths = blackCapturingPaths;
+    this.whiteCapturingPaths.value = whiteCapturingPaths;
+    this.blackCapturingPaths.value = blackCapturingPaths;
   }
 
   public resetBoard() {
@@ -325,15 +325,27 @@ class GameBoardManager extends BoardManager {
   }
 
   private moveToIfPossible(position: BoardPosition): boolean {
+    if (this.winner.value !== "none") return false;
     if (!this.availibleMoves || !this.selectedPiece) return false;
-
+    if (this.secondCheckboard.value) {
+      if (
+        this.selectedPiece.piece.color !== this.playerColor.value &&
+        this.playerBoard
+      )
+        return false;
+      if (
+        this.selectedPiece.piece.color === this.playerColor.value &&
+        !this.playerBoard
+      )
+        return false;
+    }
     if (this.selectedPiece.piece.color !== this.playingColor.value)
       return false;
-
     const matchingMove = this.getPositionMatchingMove(position);
     if (!matchingMove) {
       return false;
     }
+
     this.interpretMove(matchingMove);
     return true;
   }
@@ -366,7 +378,7 @@ class GameBoardManager extends BoardManager {
 
     // Unselect piece
     if (this.selectedPiece) this.selectedPiece = null;
-    this.selectedCell = position;
+    if (this.selectedCell !== position) this.selectedCell = position;
   }
 }
 
