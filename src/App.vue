@@ -92,10 +92,9 @@ import ToastStack from "./components/ToastStack.vue";
 import ConfigItem from "./components/ConfigItem.vue";
 import ConfigsDialog from "./modules/dialogs/configs";
 import ActionPanel from "./components/ActionPanel.vue";
-import Timers from "./components/Timers.vue";
+import Status from "./components/Status.vue";
 import SelectPiece from "./components/SelectPiece.vue";
 import TimeDurationInput from "./components/TimeDurationInput.vue";
-import Status from "./components/Status.vue";
 import SectionTitle from "./components/SectionTitle.vue";
 import { UserDataError } from "./modules/user_data/user_data";
 
@@ -223,7 +222,6 @@ const DEFAULT_PLAYER_SECONDS_PER_MOVE = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MOVE = 0;
 const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
-const DEFAULT_SHOW_SATUS_TEXT = true;
 const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = true;
 const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishment =
   "random_move";
@@ -282,35 +280,26 @@ const playerMatchSecondsLimitSet = computed(() => {
 const opponentMatchSecondsLimitSet = computed(() => {
   return opponentMatchSecondsLimit.value !== 0;
 });
-const timersSet = computed(() => {
-  return (
-    playerMoveSecondsLimitSet.value ||
-    opponentMoveSecondsLimitSet.value ||
-    playerMatchSecondsLimitSet.value ||
-    opponentMatchSecondsLimitSet.value
-  );
-});
 const statusText = computed(() => {
-  let state: string;
+  let text: string;
   switch (winner.value) {
     case "none":
-      state = playingColor.value === "white" ? "white plays" : "black plays";
+      text = playingColor.value === "white" ? "White plays" : "Black plays";
       break;
     case "draw":
-      state = "draw";
+      text = "draw";
       break;
     case "opponent":
-      state = playerColor.value === "white" ? "black won" : "white won";
+      text = playerColor.value === "white" ? "Black won" : "White won";
       break;
     case "player":
-      state = playerColor.value === "white" ? "white won" : "black won";
+      text = playerColor.value === "white" ? "White won" : "Black won";
       break;
     default:
       throw new UserDataError(
         `Winner value is of an invalid type. value: ${winner.value}`
       );
   }
-  const text = `${moveIndex.value + 1}. Move - ${state}`;
   return text;
 });
 const playerSelectedPieces = ref<BoardPosition[]>([]);
@@ -343,7 +332,6 @@ const playerMoveSecondsLimit = ref(DEFAULT_PLAYER_SECONDS_PER_MOVE);
 const opponentMoveSecondsLimit = ref(DEFAULT_OPPONENT_SECONDS_PER_MOVE);
 const playerMatchSecondsLimit = ref(DEFAULT_PLAYER_SECONDS_PER_MATCH);
 const opponentMatchSecondsLimit = ref(DEFAULT_OPPONENT_SECONDS_PER_MATCH);
-const showStatusText = ref(DEFAULT_SHOW_SATUS_TEXT);
 const showOtherAvailibleMoves = ref(DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES);
 const secondsMoveLimitRunOutPunishment = ref(
   DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT
@@ -591,12 +579,6 @@ const userDataManager = new UserDataManager(
       opponentMatchSeconds
     ),
     new BooleanUserData(
-      "show_status_text",
-      DEFAULT_SHOW_SATUS_TEXT,
-      toastManager,
-      showStatusText
-    ),
-    new BooleanUserData(
       "show_other_availible_moves",
       DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES,
       toastManager,
@@ -710,8 +692,10 @@ onMounted(() => {
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") escapeManager.escape();
     if (event.key === "R" && event.shiftKey) game.restart();
-    if (event.key === "C" && event.shiftKey)
-      configDrawerOpen.value = !configDrawerOpen.value;
+    if (event.key === "C" && event.shiftKey) {
+      toggleActionsPanel();
+      toggleConfigDrawer();
+    }
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.
@@ -737,8 +721,7 @@ onMounted(() => {
   >
   <!-- Relative -->
   <div id="game-area">
-    <Timers
-      v-show="timersSet"
+    <Status
       :player-secs-move="playerRemainingMoveSeconds"
       :opponent-secs-move="opponentRemainingMoveSeconds"
       :player-secs-match="playerRemainingMatchSeconds"
@@ -748,8 +731,9 @@ onMounted(() => {
       :opponent-move-seconds-limit-set="opponentMoveSecondsLimitSet"
       :opponent-match-seconds-limit-set="opponentMatchSecondsLimitSet"
       :player-playing="playerPlaying"
+      :move-index="moveIndex"
+      :status-text="statusText"
     />
-    <Status v-show="showStatusText" :text="statusText" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area">
       <Board
@@ -795,7 +779,6 @@ onMounted(() => {
     @restart-game="onGameRestart()"
     :open="actionPanelOpen"
     :status-text="statusText"
-    :show-status-text="showStatusText"
   />
 
   <ConfigDrawer :open="configDrawerOpen">
@@ -1081,18 +1064,6 @@ onMounted(() => {
           Requires player to confirm move using buttons that appear next to the
           action button. This can be useful when you are playing on a
           touchscreen and you often click accidentally in wrong positions.
-        </template>
-      </UserOption>
-      <UserOption
-        name="show top status text"
-        icon-id="dock-top"
-        option-id="check-show-status-text"
-      >
-        <Checkbox id="check-show-status-text" v-model="showStatusText" />
-        <template #description>
-          A simple permanent status text informing about the current state of
-          the game appears at the top of the main screen. If disabled the status
-          text will show in the menu, because there's enough space for that.
         </template>
       </UserOption>
       <!-- Colors -->

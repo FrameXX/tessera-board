@@ -2,12 +2,10 @@
 import { watch } from "vue";
 import Backdrop from "./Backdrop.vue";
 import FastButton from "./FastButton.vue";
-import Status from "./Status.vue";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
   statusText: { type: String, required: true },
-  showStatusText: { type: Boolean, required: true },
 });
 const emit = defineEmits([
   "open",
@@ -29,7 +27,6 @@ watch(
   <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
   <Transition name="slide-up">
     <nav v-show="props.open">
-      <Status v-show="!props.showStatusText" :text="props.statusText" />
       <div class="actions">
         <FastButton icon-id="flag" title="Resign" />
         <FastButton icon-id="pause" title="Pause match" />
