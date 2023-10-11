@@ -160,7 +160,7 @@ class Game {
         this.cancelWin();
     });
 
-    watch(moveIndex, (newValue) => {
+    watch(moveIndex, () => {
       this.onMove();
     });
   }

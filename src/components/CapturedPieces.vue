@@ -2,8 +2,9 @@
 import { PropType } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
-import type { PieceId, PlayerColor } from "../modules/pieces/piece";
+import type { PieceId } from "../modules/pieces/piece";
 import { getRandomId } from "../modules/utils/misc";
+import type { PlayerColor } from "../modules/game";
 
 const props = defineProps({
   pieceIds: { type: Array as PropType<PieceId[]> },

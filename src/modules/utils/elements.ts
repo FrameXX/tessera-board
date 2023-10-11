@@ -1,4 +1,4 @@
-import type { PlayerColor } from "../pieces/piece";
+import type { PlayerColor } from "../game";
 
 export class ElementNotFoundError extends Error {
   constructor(message: string) {

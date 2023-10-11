@@ -1010,6 +1010,7 @@ onMounted(() => {
             :piece-set="pieceSet"
             :piece-padding="piecePadding"
             :piece-border="pieceBorder"
+            board-id="default"
             id="default-board"
           />
         </div>
@@ -1275,8 +1276,8 @@ onMounted(() => {
     <button
       id="action-button"
       @click="toggleActionsPanel"
-      aria-label="Menu"
-      title="Menu"
+      aria-label="Actions"
+      title="Actions"
     >
       <Icon
         icon-id="plus"
@@ -1284,7 +1285,7 @@ onMounted(() => {
         :class="{ close: actionPanelOpen }"
         side
       />
-      Menu
+      Actions
     </button>
     <Transition name="counter">
       <button aria-label="Next move" title="Next move">

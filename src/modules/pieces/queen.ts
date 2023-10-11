@@ -1,10 +1,10 @@
 import type { BoardPosition } from "../../components/Board.vue";
+import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import { Bishop } from "./bishop";
 import Piece, { isFriendlyPiece, type BoardPositionValue } from "./piece";
-import { type PlayerColor } from "./piece";
 import Rook from "./rook";
 
 export class Queen extends Piece {

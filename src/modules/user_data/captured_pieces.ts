@@ -1,7 +1,8 @@
 import type { Ref } from "vue";
-import { isPieceId, type PieceId, type PlayerColor } from "../pieces/piece";
+import { isPieceId, type PieceId } from "../pieces/piece";
 import UserData from "./user_data";
 import type ToastManager from "../toast_manager";
+import type { PlayerColor } from "../game";
 
 class CapturedPiecesData extends UserData<PieceId[]> {
   constructor(

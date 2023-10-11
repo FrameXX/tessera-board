@@ -1,7 +1,7 @@
 import { reactive, watch } from "vue";
-import type { PlayerColor } from "../pieces/piece";
 import type Piece from "../pieces/piece";
 import { RawPiece, getPieceFromRaw } from "../pieces/rawPiece";
+import type { PlayerColor } from "../game";
 
 interface ConfigPieceDialogProps {
   open: boolean;

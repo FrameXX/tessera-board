@@ -3,8 +3,9 @@ import pieceUrl from "../assets/img/pieces.svg";
 import Icon from "./Icon.vue";
 import { PropType, computed } from "vue";
 import { type PieceSetValue } from "../modules/user_data/piece_set";
-import { PieceId, PlayerColor } from "../modules/pieces/piece";
+import { PieceId } from "../modules/pieces/piece";
 import { capitalizeFirst } from "../modules/utils/misc";
+import type { PlayerColor } from "../modules/game";
 
 const props = defineProps({
   pieceSet: { type: String as PropType<PieceSetValue>, required: true },
