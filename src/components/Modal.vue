@@ -82,17 +82,21 @@ watch(
   width: 450px;
 
   .content {
-    padding: var(--spacing-big);
+    @include fill-availible;
+    padding: var(--spacing-small);
     overflow-y: auto;
     overflow-x: hidden;
-    width: 100%;
   }
 
   > .action-buttons {
     @include no-shrink;
+    @include fill-availible;
     margin-top: var(--spacing-medium);
-    width: 100%;
     text-align: end;
+  }
+
+  h2 {
+    margin-top: 0;
   }
 }
 
@@ -164,6 +168,23 @@ watch(
 
   button {
     display: flex;
+  }
+}
+
+#duration-input-dialog {
+  .duration-inputs {
+    font-size: var(--font-size-big);
+  }
+
+  input {
+    font-size: inherit;
+    width: 80px;
+    display: inline-block;
+    padding: var(--spacing-small);
+
+    &.minutes {
+      margin-left: 0;
+    }
   }
 }
 </style>

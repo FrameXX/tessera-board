@@ -24,6 +24,7 @@ function toggle() {
 
 <template>
   <button
+    title="Check checkbox"
     @click="toggle()"
     class="checkbox"
     role="checkbox"

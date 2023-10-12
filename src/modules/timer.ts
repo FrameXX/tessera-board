@@ -10,6 +10,9 @@ class Timer {
     private readonly secondsLimit: Ref<number>
   ) {
     this.beyondLimit = computed(() => {
+      if (this.secondsLimit.value === 0) {
+        return false;
+      }
       return seconds.value >= secondsLimit.value;
     });
   }

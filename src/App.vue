@@ -79,6 +79,7 @@ import Queen from "./modules/pieces/queen";
 import Rook from "./modules/pieces/rook";
 import { RawPiece } from "./modules/pieces/rawPiece";
 import { isEven } from "./modules/utils/misc";
+import DurationDialog from "./modules/dialogs/duration";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -147,7 +148,7 @@ async function onGameRestart() {
 }
 
 const VERSION = "0.0.0";
-const BUILD = "3";
+const BUILD = "4";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -234,6 +235,7 @@ const configDrawerOpen = ref(false);
 const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
+const minutesDurationInput = ref<null | HTMLInputElement>(null);
 const configsNameFilter = ref("");
 const filteredConfigsPrints = computed(() => {
   return configsDialog.props.configsPrints.filter((print) =>
@@ -377,6 +379,7 @@ const gameBoardState: BoardStateValue = reactive(
   DEFAULT_GAME_BOARD_STATE_VALUE
 );
 
+const durationDialog = new DurationDialog();
 const confirmDialog = new ConfirmDialog();
 const configPieceDialog = new ConfigPieceDialog();
 const toastManager = new ToastManager(toasts);
@@ -725,7 +728,9 @@ onMounted(() => {
     if (event.key === "R" && event.shiftKey) game.restart();
     if (event.key === "C" && event.shiftKey) {
       toggleActionsPanel();
-      toggleConfigDrawer();
+      if (actionPanelOpen.value) {
+        toggleConfigDrawer();
+      }
     }
   });
 
@@ -881,11 +886,12 @@ onMounted(() => {
       <UserOption
         name="Player time per move"
         icon-id="timer-outline"
-        option-id="minutes-input-player-seconds-per-move"
+        option-id="input-player-seconds-per-move"
       >
         <TimeDurationInput
           id="input-player-seconds-per-move"
           v-model="playerMoveSecondsLimit"
+          :duration-dialog="durationDialog"
         />
         <template #description
           >Limits player's time per move. If the time runs out (expires) an
@@ -896,11 +902,12 @@ onMounted(() => {
       <UserOption
         name="Opponent time per move"
         icon-id="timer-outline"
-        option-id="minutes-input-opponent-seconds-per-move"
+        option-id="input-opponent-seconds-per-move"
       >
         <TimeDurationInput
           id="input-opponent-seconds-per-move"
           v-model="opponentMoveSecondsLimit"
+          :duration-dialog="durationDialog"
         />
         <template #description
           >Limits opponent's time per move. If the time runs out (expires) an
@@ -911,11 +918,12 @@ onMounted(() => {
       <UserOption
         name="Player time per match"
         icon-id="clock-outline"
-        option-id="minutes-input-player-seconds-per-match"
+        option-id="input-player-seconds-per-match"
       >
         <TimeDurationInput
           id="input-player-seconds-per-match"
           v-model="playerMatchSecondsLimit"
+          :duration-dialog="durationDialog"
         />
         <template #description
           >Limits player's time for whole match (game). If the time runs out the
@@ -926,11 +934,12 @@ onMounted(() => {
       <UserOption
         name="Opponent time per match"
         icon-id="clock-outline"
-        option-id="minutes-input-opponent-seconds-per-match"
+        option-id="input-opponent-seconds-per-match"
       >
         <TimeDurationInput
           id="input-opponent-seconds-per-match"
           v-model="opponentMatchSecondsLimit"
+          :duration-dialog="durationDialog"
         />
         <template #description
           >Limits opponent's time for whole match (game). If the time runs out
@@ -1477,6 +1486,45 @@ onMounted(() => {
         @click="configPrintDialog.confirm()"
       >
         <Icon side icon-id="content-save-outline" />Save
+      </button>
+    </template>
+  </Modal>
+
+  <!-- Duration input -->
+  <Modal
+    id="duration-input"
+    title="Enter time duration"
+    :open="durationDialog.props.open"
+    :focus-on-open="minutesDurationInput"
+    @open="escapeManager.addLayer(durationDialog.cancel)"
+    @close="escapeManager.removeLayer()"
+    @backdrop-click="durationDialog.cancel"
+  >
+    <div class="duration-inputs">
+      <input
+        placeholder="min"
+        class="minutes"
+        title="Enter duration minutes"
+        min="0"
+        type="number"
+        ref="minutesDurationInput"
+        v-model="durationDialog.props.minutes"
+      />:<input
+        placeholder="sec"
+        class="seconds"
+        title="Enter duration seconds"
+        min="0"
+        max="59"
+        type="number"
+        v-model="durationDialog.props.seconds"
+      />
+    </div>
+    <template #action-buttons>
+      <button @click="durationDialog.cancel()" title="Cancel">
+        <Icon side icon-id="close-circle-outline" />Cancel
+      </button>
+      <button @click="durationDialog.confirm()" title="Confirm">
+        <Icon side icon-id="check-circle-outline" />Confirm
       </button>
     </template>
   </Modal>

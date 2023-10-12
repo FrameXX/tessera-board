@@ -1,45 +1,54 @@
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { type PropType, ref, watch, computed } from "vue";
+import { getDigitStr, getMinsAndSecsTime } from "../modules/utils/misc";
+import DurationDialog from "../modules/dialogs/duration";
 
 const props = defineProps({
   modelValue: { type: Number, default: 0 },
   id: { type: String },
+  durationDialog: { type: Object as PropType<DurationDialog>, required: true },
 });
 const emit = defineEmits(["update:modelValue"]);
 
-const minutes = ref(Math.trunc(props.modelValue / 60));
-const seconds = ref(props.modelValue % 60);
+const seconds = ref(props.modelValue);
+const duration = computed(() => {
+  return getMinsAndSecsTime(seconds.value);
+});
 
-function updateModelValue() {
-  emit("update:modelValue", +minutes.value * 60 + +seconds.value);
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    seconds.value = newValue;
+  }
+);
+
+async function set() {
+  const newValue = await props.durationDialog.show(
+    duration.value.mins,
+    duration.value.secs
+  );
+  console.log(newValue);
+  if (newValue === null) {
+    return;
+  }
+  seconds.value = newValue;
+  emit("update:modelValue", seconds.value);
 }
-
-watch(minutes, updateModelValue);
-watch(seconds, updateModelValue);
 </script>
 
 <template>
-  <div class="time-duration-input">
-    <input
-      min="0"
-      type="number"
-      :id="`minutes-${props.id}`"
-      v-model="minutes"
-    />:<input
-      min="0"
-      max="59"
-      type="number"
-      :id="`seconds-${props.id}`"
-      v-model="seconds"
-    />
-  </div>
+  <button
+    title="Set time duration"
+    class="set-time-duration"
+    :id="props.id"
+    @click="set"
+  >
+    {{ getDigitStr(duration.mins) }}:{{ getDigitStr(duration.secs) }}
+  </button>
 </template>
 
 <style lang="scss">
-.time-duration-input {
-  input {
-    max-width: 60px;
-    display: inline-block;
-  }
+.set-time-duration {
+  height: 28px;
 }
 </style>

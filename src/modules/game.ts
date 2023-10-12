@@ -138,6 +138,7 @@ class Game {
     );
     watch(this.playerMatchSecondsTimer.beyondLimit, (newValue) => {
       if (newValue) {
+        console.log("byeond");
         this.onPlayerMatchSecondsBeyondLimit();
       } else if (
         this.winReason.value === "match_timeout" &&
