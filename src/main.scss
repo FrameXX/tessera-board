@@ -105,8 +105,8 @@ button {
   color: var(--color-primary-accent);
   padding: var(--spacing-tiny) var(--spacing-big);
 
-  &:hover:not(.checkbox),
-  &:focus:not(.checkbox) {
+  &:hover:not(.checkbox, .set-time-duration),
+  &:focus:not(.checkbox, .set-time-duration) {
     outline: var(--border-width) solid var(--color-primary-accent);
   }
 }

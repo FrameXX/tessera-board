@@ -138,7 +138,6 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
   @include shadow;
   @include flex-center;
   width: 100%;
-  align-items: center;
 
   .simple-info {
     display: inline-flex;
@@ -167,6 +166,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
 
 #status-text {
   @include flex-center;
+  flex-shrink: 0.9;
   background-color: var(--color-primary-surface-accent);
   height: 100%;
   border-width: 0 var(--border-width) 0 var(--border-width);

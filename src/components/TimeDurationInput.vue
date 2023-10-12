@@ -27,7 +27,6 @@ async function set() {
     duration.value.mins,
     duration.value.secs
   );
-  console.log(newValue);
   if (newValue === null) {
     return;
   }
@@ -49,6 +48,9 @@ async function set() {
 
 <style lang="scss">
 .set-time-duration {
-  height: 28px;
+  height: 25px;
+  width: 40px;
+  color: var(--color-primary-text);
+  border: var(--border-width) solid var(--color-primary-accent);
 }
 </style>

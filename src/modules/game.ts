@@ -56,7 +56,7 @@ export function isWinner(string: string): string is Winner {
 export type WinReason = "none" | "move_timeout" | "match_timeout";
 export function isWinReason(string: string): string is WinReason {
   return (
-    string === "none" || string === "move_timout" || string === "match_timeout"
+    string === "none" || string === "move_timeout" || string === "match_timeout"
   );
 }
 
@@ -191,22 +191,46 @@ class Game {
   }
 
   private onPlayerMoveSecondsBeyondLimit() {
+    this.toastManager.showToast(
+      `${getColorTeamName(this.playerColor.value)} run out of move time!`,
+      "info",
+      "timer-alert-outline"
+    );
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.opponentWin("move_timeout");
     }
   }
 
   private onOpponentMoveSecondsBeyondLimit() {
+    this.toastManager.showToast(
+      `${getColorTeamName(
+        getOpossitePlayerColor(this.playerColor.value)
+      )} run out of move time!`,
+      "info",
+      "timer-alert-outline"
+    );
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.playerWin("move_timeout");
     }
   }
 
   private onPlayerMatchSecondsBeyondLimit() {
+    this.toastManager.showToast(
+      `${getColorTeamName(this.playerColor.value)} run out of match time!`,
+      "info",
+      "timer-alert-outline"
+    );
     this.opponentWin("match_timeout");
   }
 
   private onOpponentMatchSecondsBeyondLimit() {
+    this.toastManager.showToast(
+      `${getColorTeamName(
+        getOpossitePlayerColor(this.playerColor.value)
+      )} run out of match time!`,
+      "info",
+      "timer-alert-outline"
+    );
     this.playerWin("match_timeout");
   }
 
