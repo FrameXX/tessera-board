@@ -4,6 +4,7 @@ import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
+import { isPieceKing } from "./king";
 import Piece, {
   type Path,
   getBoardPositionPiece,
@@ -25,9 +26,13 @@ function isRawRook(rawPiece: RawPiece): rawPiece is RawRook {
   );
 }
 
+export function isPieceRook(piece: Piece): piece is Rook {
+  return piece.pieceId === "rook";
+}
+
 export class Rook extends Piece {
-  private hasMoved: boolean = false;
-  private hasCastled: boolean = false;
+  public hasMoved: boolean = false;
+  public hasCastled: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
     super(color, "rook", id);
@@ -122,7 +127,8 @@ export class Rook extends Piece {
           );
           if (!piece) continue;
           // There is wrong piece in way. Castling cannot be performed.
-          if (piece.pieceId !== "king" || piece.color !== this.color) break;
+          if (!isPieceKing(piece) || piece.color !== this.color) break;
+          if (piece.hasCastled || piece.hasMoved) break;
           const kingTarget = {
             row: searchKingPosition.row,
             col: searchKingPosition.col + colDelta * -2,

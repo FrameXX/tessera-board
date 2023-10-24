@@ -14,6 +14,7 @@ import Piece, {
   getBoardPositionPiece,
 } from "./piece";
 import { type RawPiece, getRawPiece } from "./rawPiece";
+import { isPieceRook } from "./rook";
 
 interface RawKing extends RawPiece {
   hasMoved: boolean;
@@ -27,9 +28,13 @@ function isRawKing(rawPiece: RawPiece): rawPiece is RawKing {
   );
 }
 
+export function isPieceKing(piece: Piece): piece is King {
+  return piece.pieceId === "king";
+}
+
 export class King extends Piece {
-  private hasMoved: boolean = false;
-  private hasCastled: boolean = false;
+  public hasMoved: boolean = false;
+  public hasCastled: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
     super(color, "king", id);
@@ -100,7 +105,6 @@ export class King extends Piece {
 
     // https://en.wikipedia.org/wiki/Castling
     if (!this.hasMoved && !this.hasCastled) {
-      // Castling
       for (const colDelta of [-1, 1]) {
         let kingTarget: BoardPosition | null = null;
         let rookTarget: BoardPosition | null = null;
@@ -132,12 +136,13 @@ export class King extends Piece {
           if (!piece) continue;
           // There is wrong piece in way. Castling cannot be performed.
           if (
-            piece.pieceId !== "rook" ||
+            !isPieceRook(piece) ||
             piece.color !== this.color ||
             !rookTarget ||
             !kingTarget
           )
             break;
+          if (piece.hasCastled || piece.hasMoved) break;
           moves.push(
             new Castling(
               true,
