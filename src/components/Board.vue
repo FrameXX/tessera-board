@@ -251,10 +251,6 @@ function isCellSelected(position: BoardPosition) {
   display: flex;
   flex-direction: column;
 
-  &.rotated {
-    transform: rotate(-0.5turn);
-  }
-
   .row {
     height: 100%;
     padding: 0;

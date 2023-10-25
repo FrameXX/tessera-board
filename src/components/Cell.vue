@@ -182,8 +182,9 @@ const markIconId = computed(() => {
   .index-row-left,
   .index-row-right,
   .index-col-bottom,
-  .index-col-top {
-    transform: rotate(-0.5turn);
+  .index-col-top,
+  .title {
+    rotate: -0.5turn;
   }
 }
 

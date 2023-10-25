@@ -641,7 +641,7 @@ const userDataManager = new UserDataManager(
 
 const screenRotated = computed(() => {
   let rotated: boolean;
-  if (!tableMode.value) {
+  if (!tableMode.value || secondCheckboard.value) {
     return false;
   }
   rotated = playingColor.value === "black";
@@ -733,6 +733,26 @@ const opponentBoardManager = new GameBoardManager(
   toastManager
 );
 
+const playerBoardRotated = computed(() => {
+  if (!secondCheckboard.value) {
+    return screenRotated.value;
+  }
+  if (!tableMode.value) {
+    return playerColor.value === "white";
+  }
+  return playerColor.value === "black";
+});
+
+const opponentBoardRotated = computed(() => {
+  if (!secondCheckboard.value) {
+    return !screenRotated.value;
+  }
+  if (!tableMode.value) {
+    return playerColor.value === "white";
+  }
+  return playerColor.value === "white";
+});
+
 const visited = localStorage.getItem("tessera_board-visited");
 if (visited === null) {
   localStorage.setItem("tessera_board-visited", "1");
@@ -819,13 +839,13 @@ onMounted(() => {
       :status-text="statusText"
     />
     <div class="captured-pieces-placeholder"></div>
-    <div id="boards-area">
+    <div id="boards-area" :class="{ rotated: screenRotated }">
       <Board
         :selected-pieces="playerSelectedPieces"
         :selected-cells="playerSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :marks-state="playerCellsMarks"
-        :rotated="screenRotated"
+        :rotated="playerBoardRotated"
         :manager="playerBoardManager"
         :state="gameBoardState"
         :piece-set="pieceSet"
@@ -842,7 +862,7 @@ onMounted(() => {
         :selected-cells="opponentSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :marks-state="opponentCellsMarks"
-        :rotated="screenRotated"
+        :rotated="opponentBoardRotated"
         :manager="opponentBoardManager"
         :state="gameBoardState"
         :piece-set="pieceSet"
@@ -1169,6 +1189,10 @@ onMounted(() => {
   width: 100%;
   flex-grow: 1;
   padding: var(--spacing-small) 0;
+
+  &.rotated {
+    rotate: -0.5turn;
+  }
 
   .board-container {
     padding: 0 var(--spacing-small);

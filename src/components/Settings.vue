@@ -8,6 +8,7 @@ import TimeDurationInput from "./TimeDurationInput.vue";
 import Board from "./Board.vue";
 import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
+import FragmentTitle from "./FragmentTitle.vue";
 
 import type { ThemeValue } from "../modules/user_data/theme";
 import type { TransitionsValue } from "../modules/user_data/transitions";
@@ -86,7 +87,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
   <Transition name="slide-up">
     <div id="settings" v-show="props.open">
       <div class="content">
-        <h2>Configure game</h2>
+        <FragmentTitle icon-id="cog-outline">Configure game</FragmentTitle>
         <!-- Player -->
         <Category name="Player (you)" icon-id="account">
           <UserOption
@@ -340,20 +341,6 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           <!-- Behavior and elements -->
           <SectionTitle title="Behavior and elements" />
           <UserOption
-            name="second checkboard"
-            icon-id="checkerboard-plus"
-            option-id="check-second-checkboard"
-          >
-            <Checkbox id="check-second-checkboard" v-model="secondCheckboard" />
-            <template #description>
-              Shows second checkboard on the screen rotated for the second
-              player. This option is great for separating player zone for each
-              player especially if you are playing on a larger screen, but it's
-              not recommended on a smaller screen. The second checkboard won't
-              show if you are playing with your opponent over a local network.
-            </template>
-          </UserOption>
-          <UserOption
             name="table mode"
             icon-id="table-furniture"
             option-id="check-table-mode"
@@ -363,6 +350,19 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               The game will behave as if the screen was a table and both players
               were sitting opossite of each other. If only 1 board is enabled
               the pieces will get rotated to the currently playing player.
+            </template>
+          </UserOption>
+          <UserOption
+            name="second checkboard"
+            icon-id="checkerboard-plus"
+            option-id="check-second-checkboard"
+          >
+            <Checkbox id="check-second-checkboard" v-model="secondCheckboard" />
+            <template #description>
+              Shows second checkboard on the screen rotated for the second
+              player. This option is great for separating player zone for each
+              player especially if you are playing on a larger screen, but it's
+              not recommended on a smaller screen.
             </template>
           </UserOption>
           <UserOption
