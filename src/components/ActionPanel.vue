@@ -13,6 +13,7 @@ const emit = defineEmits([
   "backdropClick",
   "configureGame",
   "restartGame",
+  "aboutGame",
 ]);
 
 watch(
@@ -28,17 +29,22 @@ watch(
   <Transition name="slide-up">
     <nav v-show="props.open">
       <div class="actions">
+        <FastButton
+          @click="$emit('aboutGame')"
+          icon-id="information-outline"
+          title="About game"
+        />
         <FastButton icon-id="flag" title="Resign" />
         <FastButton icon-id="pause" title="Pause match" />
         <FastButton
           @click="$emit('restartGame')"
           icon-id="restart"
-          title="New match (Shift + R)"
+          title="New match"
         />
         <FastButton
           @click="$emit('configureGame')"
           icon-id="cog-outline"
-          title="Config game (Shift + C)"
+          title="Config game"
         />
       </div>
       <div class="nav-placeholder"></div>

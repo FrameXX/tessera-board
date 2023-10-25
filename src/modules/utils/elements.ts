@@ -140,7 +140,10 @@ export async function hideSplashscreen(preferredTransitions: boolean) {
   const cell2 = getElementInstanceById("cell2");
 
   // Both animations end and start at the same time thus it's not required to listen to both elements.
-  if (preferredTransitions) {
+  if (
+    preferredTransitions &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
     await awaitElementAnimationIteration(cell1);
   }
 

@@ -5,7 +5,6 @@ import type { PieceId } from "../modules/pieces/piece";
 import type Piece from "../modules/pieces/piece";
 import Cell, { type Mark } from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
-import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
 import type { BooleanBoardState } from "../modules/user_data/boolean_board_state";
@@ -50,7 +49,6 @@ const props = defineProps({
     type: Array as PropType<BooleanBoardState>,
     default: Array(8).fill(Array(8).fill(false)),
   },
-  pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   piecePadding: { type: Number, required: true },
   pieceBorder: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
@@ -151,18 +149,10 @@ function isCellSelected(position: BoardPosition) {
       :style="`--board-size: ${containerSize}px;`"
     >
       <div v-if="primary" class="black captured-pieces">
-        <CapturedPieces
-          :piece-set="props.pieceSet"
-          :piece-ids="blackCapturedPieces"
-          color="white"
-        />
+        <CapturedPieces :piece-ids="blackCapturedPieces" color="white" />
       </div>
       <div v-if="primary" class="white captured-pieces">
-        <CapturedPieces
-          :piece-set="props.pieceSet"
-          :piece-ids="whiteCapturedPieces"
-          color="black"
-        />
+        <CapturedPieces :piece-ids="whiteCapturedPieces" color="black" />
       </div>
       <tr class="row" v-for="row in 8" :key="`row-${row}`">
         <Cell
@@ -192,7 +182,6 @@ function isCellSelected(position: BoardPosition) {
           :row="pieceProps.row"
           :col="pieceProps.col"
           :piece="pieceProps.piece"
-          :piece-set="props.pieceSet"
           :cell-size="cellSize"
           :piece-padding="piecePadding"
           :rotated="props.rotated"

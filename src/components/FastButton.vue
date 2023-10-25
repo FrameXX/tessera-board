@@ -31,7 +31,7 @@ defineEmits(["click"]);
   flex-direction: column;
   width: 60px;
   height: 100px;
-  padding: var(--spacing-medium);
+  padding: var(--spacing-small) var(--spacing-medium);
 
   > button {
     @include no-shrink;

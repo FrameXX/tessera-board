@@ -19,7 +19,7 @@ const open = ref<Boolean>(false);
       :aria-controls="`category-content-${props.name}`"
     >
       <Icon :icon-id="props.iconId" side />
-      <h2>{{ capitalizeFirst(props.name) }}</h2>
+      <h3>{{ capitalizeFirst(props.name) }}</h3>
       <Icon
         :class="`caret ${open ? 'open' : ''}`"
         icon-id="chevron-down"
@@ -63,12 +63,6 @@ const open = ref<Boolean>(false);
     .icon {
       @include no-shrink;
     }
-  }
-
-  h2 {
-    text-transform: none;
-    text-align: left;
-    flex-grow: 1;
   }
 
   .caret {

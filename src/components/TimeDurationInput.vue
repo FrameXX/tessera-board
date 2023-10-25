@@ -48,6 +48,7 @@ async function set() {
 
 <style lang="scss">
 .set-time-duration {
+  font-weight: 400;
   height: 25px;
   width: 40px;
   color: var(--color-primary-text);

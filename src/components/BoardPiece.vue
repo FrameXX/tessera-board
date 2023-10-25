@@ -7,6 +7,7 @@ import {
   watch,
   type ComponentPublicInstance,
   onBeforeUnmount,
+  inject,
 } from "vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { waitForTransitionEnd } from "../modules/utils/elements";
@@ -16,12 +17,14 @@ const props = defineProps({
   piece: { type: Object as PropType<Piece>, required: true },
   row: { type: Number, required: true },
   col: { type: Number, required: true },
-  pieceSet: { type: String as PropType<PieceSetValue>, required: true },
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
   rotated: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
 });
+
+const pieceSet = inject<PieceSetValue>("pieceSet");
+
 const emit = defineEmits(["move", "remove"]);
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
 const element = ref<null | ComponentPublicInstance>(null);
@@ -92,7 +95,7 @@ onBeforeUnmount(() => {
         height: `${size}px`,
         zIndex: zIndex,
       }"
-      :piece-set="props.pieceSet"
+      :piece-set="pieceSet"
       :piece-id="props.piece.pieceId"
       :color="props.piece.color"
     />
