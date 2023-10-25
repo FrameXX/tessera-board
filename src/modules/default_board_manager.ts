@@ -10,7 +10,8 @@ class DefaultBoardManager extends BoardManager {
     private readonly configPieceDialog: ConfigPieceDialog,
     private readonly audioEffects: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
-    private readonly pieceRemoveAudioEffect: Howl
+    private readonly pieceRemoveAudioEffect: Howl,
+    private readonly useVibratons: Ref<boolean>
   ) {
     super();
   }
@@ -18,12 +19,14 @@ class DefaultBoardManager extends BoardManager {
   public onPieceClick(boardPiece: BoardPieceProps): void {
     this.board[boardPiece.row][boardPiece.col] = null;
     if (this.audioEffects.value) this.pieceRemoveAudioEffect.play();
+    if (this.useVibratons.value) navigator.vibrate(30);
   }
 
   public async onCellClick(position: BoardPosition) {
     const piece = await this.configPieceDialog.open();
     this.board[position.row][position.col] = piece;
     if (this.audioEffects.value) this.pieceMoveAudioEffect.play();
+    if (this.useVibratons.value) navigator.vibrate(30);
   }
 }
 

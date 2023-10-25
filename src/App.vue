@@ -231,6 +231,7 @@ const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = true;
 const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishment =
   "random_move";
 const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
+const DEFAULT_USE_VIBRATIONS_VALUE: boolean = true;
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
@@ -368,6 +369,8 @@ const secondsMoveLimitRunOutPunishment = ref(
 provide("secondsMoveLimitRunOutPunishment", secondsMoveLimitRunOutPunishment);
 const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 provide("prefferedFirstMoveColor", prefferedFirstMoveColor);
+const useVibrations = ref(DEFAULT_USE_VIBRATIONS_VALUE);
+provide("useVibrations", useVibrations);
 
 // Game specific
 const winner = ref<Winner>("none");
@@ -451,6 +454,12 @@ const userDataManager = new UserDataManager(
       transitions,
       transitionsManager,
       toastManager
+    ),
+    new BooleanUserData(
+      "use_vibrations",
+      DEFAULT_USE_VIBRATIONS_VALUE,
+      toastManager,
+      useVibrations
     ),
     new HueData(DEFAULT_PLAYER_HUE_VALUE, playerHue, false, toastManager),
     new HueData(DEFAULT_OPPONENT_HUE_VALUE, opponentHue, true, toastManager),
@@ -665,7 +674,8 @@ const defaultBoardManager = new DefaultBoardManager(
   configPieceDialog,
   audioEffects,
   pieceMoveAudioEffect,
-  pieceRemoveAudioEffect
+  pieceRemoveAudioEffect,
+  useVibrations
 );
 
 const whiteCapturingPaths = ref<Path[]>([]);
@@ -689,6 +699,7 @@ const playerBoardManager = new GameBoardManager(
   audioEffects,
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
+  useVibrations,
   showCapturingPieces,
   banPromotionToUncapturedPieces,
   showOtherAvailibleMoves,
@@ -714,6 +725,7 @@ const opponentBoardManager = new GameBoardManager(
   audioEffects,
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
+  useVibrations,
   showCapturingPieces,
   banPromotionToUncapturedPieces,
   showOtherAvailibleMoves,

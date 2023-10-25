@@ -27,9 +27,10 @@ class Shift extends Move {
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
     higlightedCells: BooleanBoardState,
-    audioEffects: Ref<boolean>,
+    audioEffects: boolean,
     moveAudioEffect: Howl,
-    removeAudioEffect: Howl
+    removeAudioEffect: Howl,
+    useVibrations: boolean
   ): Promise<string> {
     if (this.captures) {
       capturePosition(
@@ -38,10 +39,11 @@ class Shift extends Move {
         blackCapturedPieces,
         whiteCapturedPieces
       );
-      if (audioEffects.value) removeAudioEffect.play();
+      if (audioEffects) removeAudioEffect.play();
+      if (useVibrations) navigator.vibrate(30);
     }
     await movePositionValue(this.origin, this.target, boardStateValue);
-    if (audioEffects.value) moveAudioEffect.play();
+    if (audioEffects) moveAudioEffect.play();
 
     highlightBoardPosition(this.origin, higlightedCells);
     highlightBoardPosition(this.target, higlightedCells);

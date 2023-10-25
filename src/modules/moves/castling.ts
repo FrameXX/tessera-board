@@ -1,4 +1,3 @@
-import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type { BoardStateValue } from "../user_data/board_state";
 import type { BooleanBoardState } from "../user_data/boolean_board_state";
@@ -24,12 +23,12 @@ class Castling extends Move {
   public async perform(
     boardStateValue: BoardStateValue,
     higlightedCells: BooleanBoardState,
-    audioEffects: Ref<boolean>,
+    audioEffects: boolean,
     moveAudioEffect: Howl
   ): Promise<string> {
     movePositionValue(this.kingOrigin, this.kingTarget, boardStateValue);
     await movePositionValue(this.rookOrigin, this.rookTarget, boardStateValue);
-    if (audioEffects.value) moveAudioEffect.play();
+    if (audioEffects) moveAudioEffect.play();
 
     highlightBoardPosition(this.kingOrigin, higlightedCells);
     highlightBoardPosition(this.kingTarget, higlightedCells);

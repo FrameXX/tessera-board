@@ -73,6 +73,7 @@ const secondsMoveLimitRunOutPunishment = inject(
 const prefferedFirstMoveColor = inject(
   "prefferedFirstMoveColor"
 ) as PlayerColor;
+const useVibrations = inject("useVibrations") as boolean;
 
 const durationDialog = inject<DurationDialog>(
   "durationDialog"
@@ -547,6 +548,17 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <template #description
               >Changes duration of all the transitions and animations (except
               for the splashscreen animation) in the same ratio.
+            </template>
+          </UserOption>
+          <UserOption
+            name="haptic feedback"
+            icon-id="vibrate"
+            option-id="check-use-vibrations"
+          >
+            <Checkbox id="check-use-vibrations" v-model="useVibrations" />
+            <template #description>
+              Vibrations will be performed on devices that have a vibration
+              motor when pieces is captured, removed, long-pressed etc...
             </template>
           </UserOption>
         </Category>

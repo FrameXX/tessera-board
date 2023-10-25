@@ -44,6 +44,7 @@ class GameBoardManager extends BoardManager {
     private readonly audioEffects: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
+    private readonly useVibrations: Ref<boolean>,
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly banPromotionToUncapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
@@ -189,9 +190,10 @@ class GameBoardManager extends BoardManager {
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
         this.higlightedCells,
-        this.audioEffects,
+        this.audioEffects.value,
         this.pieceMoveAudioEffect,
-        this.pieceRemoveAudioEffect
+        this.pieceRemoveAudioEffect,
+        this.useVibrations.value
       );
     } else if (isMoveTransform(move)) {
       await move.perform(
@@ -201,15 +203,16 @@ class GameBoardManager extends BoardManager {
         this.higlightedCells,
         this.selectPieceDialog,
         this.banPromotionToUncapturedPieces,
-        this.audioEffects,
+        this.audioEffects.value,
         this.pieceMoveAudioEffect,
-        this.pieceRemoveAudioEffect
+        this.pieceRemoveAudioEffect,
+        this.useVibrations.value
       );
     } else if (isMoveCastling(move)) {
       await move.perform(
         this.boardStateValue,
         this.higlightedCells,
-        this.audioEffects,
+        this.audioEffects.value,
         this.pieceMoveAudioEffect
       );
     }

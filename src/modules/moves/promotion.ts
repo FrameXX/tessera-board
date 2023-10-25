@@ -50,9 +50,10 @@ class Promotion extends Move {
     higlightedCells: BooleanBoardState,
     selectPieceDialog: SelectPieceDialog,
     banPromotionToUncapturedPieces: Ref<boolean>,
-    audioEffects: Ref<boolean>,
+    audioEffects: boolean,
     moveAudioEffect: Howl,
-    removeAudioEffect: Howl
+    removeAudioEffect: Howl,
+    useVibrations: boolean
   ): Promise<string> {
     if (this.captures) {
       capturePosition(
@@ -61,10 +62,11 @@ class Promotion extends Move {
         blackCapturedPieces,
         whiteCapturedPieces
       );
-      if (audioEffects.value) removeAudioEffect.play();
+      if (audioEffects) removeAudioEffect.play();
+      if (useVibrations) navigator.vibrate(30);
     }
     await movePositionValue(this.origin, this.target, boardStateValue);
-    if (audioEffects.value) moveAudioEffect.play();
+    if (audioEffects) moveAudioEffect.play();
 
     let transformOptions: RawPiece[];
     if (banPromotionToUncapturedPieces.value) {
@@ -85,6 +87,7 @@ class Promotion extends Move {
       : (newPiece = await selectPieceDialog.open(transformOptions));
 
     transformPositionValue(this.target, newPiece, boardStateValue);
+    if (useVibrations) navigator.vibrate([40, 60, 20]);
 
     highlightBoardPosition(this.origin, higlightedCells);
     highlightBoardPosition(this.target, higlightedCells);
