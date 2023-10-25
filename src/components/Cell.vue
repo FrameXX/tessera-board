@@ -97,6 +97,7 @@ const markIconId = computed(() => {
     @include flex-center;
     position: absolute;
     font-weight: 600;
+    font-size: calc(var(--board-size) * 0.04);
   }
 
   &.white {
@@ -170,10 +171,10 @@ const markIconId = computed(() => {
   mix-blend-mode: exclusion;
   transition: transform var(--transition-duration-short)
     var(--transition-timing-bounce);
-  width: 0.7rem;
-  height: 0.7rem;
-  font-size: var(--font-size-tiny);
-  padding: calc(var(--spacing-tiny) / 2);
+  width: 15%;
+  height: 15%;
+  font-size: calc(var(--board-size) * 0.02);
+  padding: calc(var(--board-size) * 0.006);
   opacity: var(--cell-index-opacity);
 }
 

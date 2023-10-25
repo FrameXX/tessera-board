@@ -148,7 +148,7 @@ function isCellSelected(position: BoardPosition) {
     <table
       role="grid"
       :class="`board ${props.rotated ? 'rotated' : ''}`"
-      :style="`width: ${containerSize}px; height: ${containerSize}px;`"
+      :style="`--board-size: ${containerSize}px;`"
     >
       <div v-if="primary" class="black captured-pieces">
         <CapturedPieces
@@ -255,6 +255,8 @@ function isCellSelected(position: BoardPosition) {
 .board {
   @include round-border;
   @include shadow;
+  width: var(--board-size);
+  height: var(--board-size);
   position: absolute;
   background-color: var(--color-cell-black);
   display: flex;
