@@ -55,7 +55,7 @@ const cellIndexOpacity = inject("cellIndexOpacity") as number;
 const preferredPlayerColor = inject("preferredPlayerColor") as PlayerColor;
 const opponentOverLan = inject("opponentOverLan") as boolean;
 const secondCheckboard = inject("secondCheckboard") as boolean;
-const rotateScreen = inject("rotateScreen") as boolean;
+const tableMode = inject("tableMode") as boolean;
 const requireMoveConfirm = inject("requireMoveConfirm") as boolean;
 const audioEffects = inject("audioEffects") as boolean;
 const showCapturingPieces = inject("showCapturingPieces") as boolean;
@@ -255,7 +255,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </template>
           </UserOption>
           <UserOption
-            name="show availible moves of pieces of other player"
+            name="show availible piece moves of not playing player"
             icon-id="circle-small"
             option-id="show-other-availible-moves"
           >
@@ -353,17 +353,15 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </template>
           </UserOption>
           <UserOption
-            name="rotate screen"
-            icon-id="screen-rotation"
-            option-id="check-rotate-screen"
+            name="table mode"
+            icon-id="table-furniture"
+            option-id="check-table-mode"
           >
-            <Checkbox id="check-rotate-screen" v-model="rotateScreen" />
+            <Checkbox id="check-table-mode" v-model="tableMode" />
             <template #description>
-              The whole user interface will get rotated (excluding the
-              checkboard) when the black player plays. This can be useful when
-              you are playing on a mobile phone sitting opposite to each other
-              and the screen rotates automatically instead of you having to
-              rotate it every time the other player plays.
+              The game will behave as if the screen was a table and both players
+              were sitting opossite of each other. If only 1 board is enabled
+              the pieces will get rotated to the currently playing player.
             </template>
           </UserOption>
           <UserOption

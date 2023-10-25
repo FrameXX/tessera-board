@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import Backdrop from "./Backdrop.vue";
+
 const props = defineProps({ open: { type: Boolean, default: false } });
 </script>
 
@@ -44,8 +46,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
   background-color: var(--color-primary-surface);
 
   #logo {
-    margin: var(--spacing-huge) 0 var(--spacing-small) 0;
-    width: 120px;
+    width: 150px;
   }
 
   > .content {

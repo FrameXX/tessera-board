@@ -340,8 +340,8 @@ const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
 provide("opponentOverLan", opponentOverLan);
 const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
 provide("secondCheckboard", secondCheckboard);
-const rotateScreen = ref(DEFAULT_ROTATE_SCREEN_VALUE);
-provide("rotateScreen", rotateScreen);
+const tableMode = ref(DEFAULT_ROTATE_SCREEN_VALUE);
+provide("tableMode", tableMode);
 const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
 provide("requireMoveConfirm", requireMoveConfirm);
 const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
@@ -503,7 +503,7 @@ const userDataManager = new UserDataManager(
       "rotate_screen",
       DEFAULT_ROTATE_SCREEN_VALUE,
       toastManager,
-      rotateScreen
+      tableMode
     ),
     new RequireMoveConfirmData(
       DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
@@ -632,7 +632,7 @@ const userDataManager = new UserDataManager(
 
 const screenRotated = computed(() => {
   let rotated: boolean;
-  if (!rotateScreen.value) {
+  if (!tableMode.value) {
     return false;
   }
   rotated = playingColor.value === "black";
