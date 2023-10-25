@@ -1,7 +1,7 @@
 import { type Ref, type ComputedRef, computed } from "vue";
 
 class Timer {
-  private interval: number | null | NodeJS.Timer = null;
+  private interval: number | null = null;
   public beyondLimit: ComputedRef<boolean>;
 
   constructor(
