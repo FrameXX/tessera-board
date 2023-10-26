@@ -55,9 +55,11 @@ const pieceSet = inject<PieceSetValue>("pieceSet");
   }
 }
 
-.board.rotated {
+.board.contentRotated {
   .captured-pieces {
-    transform: rotate(-0.25turn);
+    .icon {
+      rotate: -0.5turn;
+    }
   }
 }
 </style>

@@ -178,7 +178,7 @@ const markIconId = computed(() => {
   opacity: var(--cell-index-opacity);
 }
 
-.board.rotated {
+.board.contentRotated {
   .index-row-left,
   .index-row-right,
   .index-col-bottom,

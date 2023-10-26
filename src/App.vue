@@ -641,12 +641,47 @@ const userDataManager = new UserDataManager(
 
 const screenRotated = computed(() => {
   let rotated: boolean;
-  if (!tableMode.value || secondCheckboard.value) {
+  if (!tableMode.value) {
     return false;
   }
   rotated = playingColor.value === "black";
   return rotated;
 });
+
+const playerBoardContentRotated = computed(() => {
+  if (!secondCheckboard.value) {
+    return screenRotated.value;
+  }
+  if (!tableMode.value) {
+    return playerColor.value === "black";
+  }
+  return playerColor.value === "black";
+});
+
+const opponentBoardContentRotated = computed(() => {
+  if (!secondCheckboard.value) {
+    return !screenRotated.value;
+  }
+  if (!tableMode.value) {
+    return playerColor.value === "white";
+  }
+  return playerColor.value === "white";
+});
+
+const playerBoardRotated = computed(() => {
+  if (tableMode.value || !secondCheckboard.value) {
+    return false;
+  }
+  return playerColor.value === "black";
+});
+
+const opponentBoardRotated = computed(() => {
+  if (tableMode.value) {
+    return false;
+  }
+  return playerColor.value === "white";
+});
+
 watch(screenRotated, (newValue) => {
   updateScreenRotation(newValue);
 });
@@ -732,26 +767,6 @@ const opponentBoardManager = new GameBoardManager(
   moveIndex,
   toastManager
 );
-
-const playerBoardRotated = computed(() => {
-  if (!secondCheckboard.value) {
-    return screenRotated.value;
-  }
-  if (!tableMode.value) {
-    return playerColor.value === "white";
-  }
-  return playerColor.value === "black";
-});
-
-const opponentBoardRotated = computed(() => {
-  if (!secondCheckboard.value) {
-    return !screenRotated.value;
-  }
-  if (!tableMode.value) {
-    return playerColor.value === "white";
-  }
-  return playerColor.value === "white";
-});
 
 const visited = localStorage.getItem("tessera_board-visited");
 if (visited === null) {
@@ -845,6 +860,7 @@ onMounted(() => {
         :selected-cells="playerSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :marks-state="playerCellsMarks"
+        :content-rotated="playerBoardContentRotated"
         :rotated="playerBoardRotated"
         :manager="playerBoardManager"
         :state="gameBoardState"
@@ -862,6 +878,7 @@ onMounted(() => {
         :selected-cells="opponentSelectedCells"
         :highlighted-cells-state="highlightedCells"
         :marks-state="opponentCellsMarks"
+        :content-rotated="opponentBoardContentRotated"
         :rotated="opponentBoardRotated"
         :manager="opponentBoardManager"
         :state="gameBoardState"

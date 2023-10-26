@@ -54,6 +54,7 @@ const props = defineProps({
   manager: { type: Object as PropType<BoardManager>, required: true },
   whiteCapturedPieces: { type: Array as PropType<PieceId[]> },
   blackCapturedPieces: { type: Array as PropType<PieceId[]> },
+  contentRotated: { type: Boolean, default: false },
   rotated: { type: Boolean, default: false },
   arrows: {
     type: Array as PropType<Arrow[]>,
@@ -145,7 +146,8 @@ function isCellSelected(position: BoardPosition) {
   <div class="board-container" ref="container">
     <table
       role="grid"
-      :class="`board ${props.rotated ? 'rotated' : ''}`"
+      class="board"
+      :class="{ rotated: props.rotated, contentRotated: props.contentRotated }"
       :style="`--board-size: ${containerSize}px;`"
     >
       <div v-if="primary" class="black captured-pieces">
@@ -184,7 +186,7 @@ function isCellSelected(position: BoardPosition) {
           :piece="pieceProps.piece"
           :cell-size="cellSize"
           :piece-padding="piecePadding"
-          :rotated="props.rotated"
+          :rotated="props.contentRotated"
         />
       </TransitionGroup>
 
@@ -250,6 +252,10 @@ function isCellSelected(position: BoardPosition) {
   background-color: var(--color-cell-black);
   display: flex;
   flex-direction: column;
+
+  &.rotated {
+    rotate: -0.5turn;
+  }
 
   .row {
     height: 100%;
