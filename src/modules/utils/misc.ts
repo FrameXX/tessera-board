@@ -75,3 +75,14 @@ export function sumPositions(
 export function isEven(number: number) {
   return number % 2 === 0;
 }
+
+export function getPixelsPerCm() {
+  const el = document.createElement("div");
+  el.style.width = "1cm";
+  el.style.height = "1cm";
+  const body = document.getElementsByTagName("body")[0];
+  body.append(el);
+  const pixelsPerCm = el.offsetWidth;
+  el.remove();
+  return pixelsPerCm;
+}

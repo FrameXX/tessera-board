@@ -78,7 +78,7 @@ import Pawn from "./modules/pieces/pawn";
 import Queen from "./modules/pieces/queen";
 import Rook from "./modules/pieces/rook";
 import { RawPiece } from "./modules/pieces/rawPiece";
-import { isEven } from "./modules/utils/misc";
+import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
 
@@ -232,6 +232,10 @@ const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishme
   "random_move";
 const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
 const DEFAULT_USE_VIBRATIONS_VALUE: boolean = true;
+const DEFAULT_LONG_PRESS_TIMEOUT: number = 200;
+
+const pixelsPerCm = getPixelsPerCm();
+provide("pixelsPerCm", pixelsPerCm);
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
@@ -314,6 +318,8 @@ const playerSelectedPieces = ref<BoardPosition[]>([]);
 const opponentSelectedPieces = ref<BoardPosition[]>([]);
 const playerSelectedCells = ref<BoardPosition[]>([]);
 const opponentSelectedCells = ref<BoardPosition[]>([]);
+const playerDraggingOverCells = ref<BoardPosition[]>([]);
+const opponentDraggingOverCells = ref<BoardPosition[]>([]);
 
 // User data refs
 // Simple values
@@ -371,6 +377,8 @@ const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
 provide("prefferedFirstMoveColor", prefferedFirstMoveColor);
 const useVibrations = ref(DEFAULT_USE_VIBRATIONS_VALUE);
 provide("useVibrations", useVibrations);
+const longPressTimeout = ref(DEFAULT_LONG_PRESS_TIMEOUT);
+provide("longPressTimeout", longPressTimeout);
 
 // Game specific
 const winner = ref<Winner>("none");
@@ -507,6 +515,14 @@ const userDataManager = new UserDataManager(
       DEFAULT_SECOND_CHECKBOARD_VALUE,
       secondCheckboard,
       toastManager
+    ),
+    new NumberUserData(
+      "long_press_timeout",
+      DEFAULT_LONG_PRESS_TIMEOUT,
+      toastManager,
+      longPressTimeout,
+      0,
+      600
     ),
     new BooleanUserData(
       "rotate_screen",
@@ -729,6 +745,7 @@ const playerBoardManager = new GameBoardManager(
   playerCellsMarks,
   playerSelectedPieces,
   playerSelectedCells,
+  playerDraggingOverCells,
   highlightedCells,
   selectPieceDialog,
   audioEffects,
@@ -755,6 +772,7 @@ const opponentBoardManager = new GameBoardManager(
   opponentCellsMarks,
   opponentSelectedPieces,
   opponentSelectedCells,
+  opponentDraggingOverCells,
   highlightedCells,
   selectPieceDialog,
   audioEffects,

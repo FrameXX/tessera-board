@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type PropType, inject } from "vue";
+import { type PropType, inject, type Ref } from "vue";
 import Backdrop from "./Backdrop.vue";
 import UserOption from "./UserOption.vue";
 import Category from "./Category.vue";
@@ -44,37 +44,46 @@ const props = defineProps({
   },
 });
 
-const theme = inject("theme") as ThemeValue;
-const transitions = inject("transitions") as TransitionsValue;
-const playerHue = inject("playerHue") as number;
-const opponentHue = inject("opponentHue") as number;
-const pieceSet = inject("pieceSet") as PieceSetValue;
-const piecePadding = inject("piecePadding") as number;
-const pieceBorder = inject("pieceBorder") as number;
-const transitionDuration = inject("transitionDuration") as number;
-const cellIndexOpacity = inject("cellIndexOpacity") as number;
-const preferredPlayerColor = inject("preferredPlayerColor") as PlayerColor;
-const opponentOverLan = inject("opponentOverLan") as boolean;
-const secondCheckboard = inject("secondCheckboard") as boolean;
-const tableMode = inject("tableMode") as boolean;
-const requireMoveConfirm = inject("requireMoveConfirm") as boolean;
-const audioEffects = inject("audioEffects") as boolean;
-const showCapturingPieces = inject("showCapturingPieces") as boolean;
+const theme = inject("theme") as Ref<ThemeValue>;
+const transitions = inject("transitions") as Ref<TransitionsValue>;
+const playerHue = inject("playerHue") as Ref<number>;
+const opponentHue = inject("opponentHue") as Ref<number>;
+const pieceSet = inject("pieceSet") as Ref<PieceSetValue>;
+const piecePadding = inject("piecePadding") as Ref<number>;
+const pieceBorder = inject("pieceBorder") as Ref<number>;
+const transitionDuration = inject("transitionDuration") as Ref<number>;
+const cellIndexOpacity = inject("cellIndexOpacity") as Ref<number>;
+const preferredPlayerColor = inject("preferredPlayerColor") as Ref<PlayerColor>;
+const opponentOverLan = inject("opponentOverLan") as Ref<boolean>;
+const secondCheckboard = inject("secondCheckboard") as Ref<boolean>;
+const tableMode = inject("tableMode") as Ref<boolean>;
+const requireMoveConfirm = inject("requireMoveConfirm") as Ref<boolean>;
+const audioEffects = inject("audioEffects") as Ref<boolean>;
+const showCapturingPieces = inject("showCapturingPieces") as Ref<boolean>;
 const banPromotionToUncapturedPieces = inject<boolean>(
   "banPromotionToUncapturedPieces"
 );
-const playerMoveSecondsLimit = inject("playerMoveSecondsLimit") as number;
-const opponentMoveSecondsLimit = inject("opponentMoveSecondsLimit") as number;
-const playerMatchSecondsLimit = inject("playerMatchSecondsLimit") as number;
-const opponentMatchSecondsLimit = inject("opponentMatchSecondsLimit") as number;
-const showOtherAvailibleMoves = inject("showOtherAvailibleMoves") as boolean;
+const playerMoveSecondsLimit = inject("playerMoveSecondsLimit") as Ref<number>;
+const opponentMoveSecondsLimit = inject(
+  "opponentMoveSecondsLimit"
+) as Ref<number>;
+const playerMatchSecondsLimit = inject(
+  "playerMatchSecondsLimit"
+) as Ref<number>;
+const opponentMatchSecondsLimit = inject(
+  "opponentMatchSecondsLimit"
+) as Ref<number>;
+const showOtherAvailibleMoves = inject(
+  "showOtherAvailibleMoves"
+) as Ref<boolean>;
 const secondsMoveLimitRunOutPunishment = inject(
   "secondsMoveLimitRunOutPunishment"
-) as MoveSecondsLimitRunOutPunishment;
+) as Ref<MoveSecondsLimitRunOutPunishment>;
 const prefferedFirstMoveColor = inject(
   "prefferedFirstMoveColor"
-) as PlayerColor;
-const useVibrations = inject("useVibrations") as boolean;
+) as Ref<PlayerColor>;
+const useVibrations = inject("useVibrations") as Ref<boolean>;
+const longPressTimeout = inject("longPressTimeout") as Ref<number>;
 
 const durationDialog = inject<DurationDialog>(
   "durationDialog"
@@ -336,10 +345,27 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </template>
           </UserOption>
         </Category>
-        <!-- Look and feel -->
-        <Category name="look and feel" icon-id="palette-advanced">
+        <!-- Look, feel and behavior -->
+        <Category name="look, feel and behavior" icon-id="palette-advanced">
           <!-- Behavior and elements -->
           <SectionTitle title="Behavior and elements" />
+          <UserOption
+            name="long press timeout (ms)"
+            icon-id="gesture-tap-hold"
+            option-id="input-long-press-timeout"
+          >
+            <input
+              type="number"
+              min="000"
+              max="600"
+              id="input-long-press-timeout"
+              v-model="longPressTimeout"
+            />
+            <template #description
+              >Changes duration of press/hold on a piece to be recognized as
+              long press and start a piece dragging.
+            </template>
+          </UserOption>
           <UserOption
             name="table mode"
             icon-id="table-furniture"

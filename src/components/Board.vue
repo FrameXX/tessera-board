@@ -45,6 +45,10 @@ const props = defineProps({
     type: Array as PropType<BoardPosition[]>,
     default: Array(8).fill(Array(8).fill(false)),
   },
+  draggingOverCells: {
+    type: Array as PropType<BoardPosition[]>,
+    default: Array(8).fill(Array(8).fill(false)),
+  },
   highlightedCellsState: {
     type: Array as PropType<BooleanBoardState>,
     default: Array(8).fill(Array(8).fill(false)),
@@ -140,6 +144,14 @@ function isCellSelected(position: BoardPosition) {
     ).length > 0
   );
 }
+
+function isCellDraggedOver(position: BoardPosition) {
+  return (
+    props.draggingOverCells.filter((draggedOverPosition) =>
+      positionsEqual(draggedOverPosition, position)
+    ).length > 0
+  );
+}
 </script>
 
 <template>
@@ -167,6 +179,7 @@ function isCellSelected(position: BoardPosition) {
           :mark="props.marksState[8 - row][col - 1]"
           :highlighted="props.highlightedCellsState[8 - row][col - 1]"
           :selected="isCellSelected({ row: 8 - row, col: col - 1 })"
+          :drag-over="isCellDraggedOver({ row: 8 - row, col: col - 1 })"
         />
       </tr>
 

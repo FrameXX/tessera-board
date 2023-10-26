@@ -11,6 +11,7 @@ const props = defineProps({
   mark: { type: [String, null] as PropType<Mark | null>, required: true },
   highlighted: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
+  dragOver: { type: Boolean, default: false },
 });
 
 const cellIsWhite = computed(() => (-1) ** (props.col + props.row) === 1);
@@ -77,7 +78,14 @@ const markIconId = computed(() => {
       <Icon class="mark" :icon-id="markIconId" v-show="props.mark" />
     </Transition>
     <Transition name="scale">
-      <Icon icon-id="rhombus" class="highlighter" v-show="props.highlighted" />
+      <Icon icon-id="rhombus" class="selected" v-show="props.highlighted" />
+    </Transition>
+    <Transition name="scale">
+      <Icon
+        icon-id="square-outline"
+        class="drag-over"
+        v-show="props.dragOver"
+      />
     </Transition>
   </td>
 </template>
@@ -95,6 +103,7 @@ const markIconId = computed(() => {
   .title {
     @include stretch;
     @include flex-center;
+    @include no-select;
     position: absolute;
     font-weight: 600;
     font-size: calc(var(--board-size) * 0.04);
@@ -105,7 +114,8 @@ const markIconId = computed(() => {
 
     .mark,
     .title,
-    .highlighter {
+    .selected,
+    .drag-over {
       color: var(--color-cell-black);
     }
   }
@@ -115,7 +125,8 @@ const markIconId = computed(() => {
 
     .mark,
     .title,
-    .highlighter {
+    .selected,
+    .drag-over {
       color: var(--color-cell-white);
     }
   }
@@ -126,9 +137,11 @@ const markIconId = computed(() => {
     }
   }
 
-  .highlighter,
+  .selected,
+  .drag-over,
   .mark {
     @include absolute-centered;
+    pointer-events: none;
     opacity: 0.65;
   }
 
@@ -138,9 +151,13 @@ const markIconId = computed(() => {
     height: 100%;
   }
 
-  .highlighter {
+  .selected {
     width: 85%;
     height: 85%;
+  }
+
+  .drag-over {
+    @include stretch;
   }
 
   &.bottom-left {

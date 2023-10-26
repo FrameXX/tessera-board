@@ -20,6 +20,7 @@ import { isMoveTransform } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
 import type ToastManager from "./toast_manager";
 
+// @ts-ignore
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
   private _selectedCell: BoardPosition | null = null;
@@ -39,6 +40,8 @@ class GameBoardManager extends BoardManager {
     private readonly cellsMarks: MarkBoardState,
     private readonly selectedPieces: Ref<BoardPosition[]>,
     private readonly selectedCells: Ref<BoardPosition[]>,
+    // @ts-ignore
+    private readonly draggingOverCells: Ref<BoardPosition[]>,
     private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
     private readonly audioEffects: Ref<boolean>,
@@ -104,11 +107,6 @@ class GameBoardManager extends BoardManager {
   }
 
   private set selectedPiece(pieceProps: BoardPieceProps | null) {
-    // The selected position is the same as the current one
-    if (this.selectedPiece && pieceProps) {
-      if (positionsEqual(pieceProps, this.selectedPiece)) return;
-    }
-
     this.clearCellsMarks();
     this.clearSelectedPiece();
     this.clearAvailibleMoves();
@@ -261,13 +259,6 @@ class GameBoardManager extends BoardManager {
   }
 
   private set selectedCell(position: BoardPosition | null) {
-    // Same cell is already selected
-    if (this.selectedCell && position) {
-      if (positionsEqual(this.selectedCell, position)) {
-        return;
-      }
-    }
-
     this.clearSelectedCells();
     this.clearCellsMarks();
     this._selectedCell = null;
@@ -363,7 +354,15 @@ class GameBoardManager extends BoardManager {
 
     // Unselect cell
     if (this.selectedCell) this.selectedCell = null;
-    this.selectedPiece = boardPiece;
+    if (this.selectedPiece === null) {
+      this.selectedPiece = boardPiece;
+      return;
+    }
+    if (!positionsEqual(this.selectedPiece, boardPiece)) {
+      this.selectedPiece = boardPiece;
+      return;
+    }
+    this.selectedPiece = null;
   }
 
   // Called by Board component
@@ -381,7 +380,15 @@ class GameBoardManager extends BoardManager {
 
     // Unselect piece
     if (this.selectedPiece) this.selectedPiece = null;
-    if (this.selectedCell !== position) this.selectedCell = position;
+    if (this.selectedCell === null) {
+      this.selectedCell = position;
+      return;
+    }
+    if (!positionsEqual(this.selectedCell, position)) {
+      this.selectedCell = position;
+      return;
+    }
+    this.selectedCell = null;
   }
 }
 

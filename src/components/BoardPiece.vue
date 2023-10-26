@@ -8,10 +8,13 @@ import {
   type ComponentPublicInstance,
   onBeforeUnmount,
   inject,
+  onMounted,
+  type Ref,
 } from "vue";
-import type { PieceSetValue } from "../modules/user_data/piece_set";
 import { waitForTransitionEnd } from "../modules/utils/elements";
 import type Piece from "../modules/pieces/piece";
+
+const INCH_OFFSET = 1.8;
 
 const props = defineProps({
   piece: { type: Object as PropType<Piece>, required: true },
@@ -23,18 +26,34 @@ const props = defineProps({
   selected: { type: Boolean, default: false },
 });
 
-const pieceSet = inject<PieceSetValue>("pieceSet");
+const longPressTimeout = inject("longPressTimeout") as Ref<number>;
+const useVibrations = inject("useVibrations") as Ref<boolean>;
+const pixelsPerCm = inject("pixelsPerCm") as number;
 
-const emit = defineEmits(["move", "remove"]);
+const emit = defineEmits({
+  dragStart: (event: { row: number; col: number }) => {
+    return typeof event.row === "number" && typeof event.col === "number";
+  },
+  dragEnd: (event: { row: number; col: number }) => {
+    return typeof event.row === "number" && typeof event.col === "number";
+  },
+  dragDeltaChange: (event: { row: number; col: number }) => {
+    return typeof event.row === "number" && typeof event.col === "number";
+  },
+  move: null,
+  remove: null,
+});
+
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
 const element = ref<null | ComponentPublicInstance>(null);
+const dragging = ref(false);
 
 // Values for translating pieces to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
-  return props.col * props.cellSize;
+  return props.col * props.cellSize + dragXDelta.value;
 });
 const translateY = computed(() => {
-  return (7 - props.row) * props.cellSize;
+  return (7 - props.row) * props.cellSize + dragYDelta.value;
 });
 const size = computed(() => {
   return props.cellSize - props.piecePadding * 2;
@@ -46,6 +65,23 @@ const originX = computed(() => {
 });
 const originY = computed(() => {
   return translateY.value + props.cellSize / 2;
+});
+
+const translate = computed(() => {
+  if (!dragging.value) {
+    return `translate(${translateX.value}px, ${translateY.value}px)`;
+  }
+  return `translate(${translateX.value}px, calc(${translateY.value}px + ${
+    props.rotated ? INCH_OFFSET + "cm" : -INCH_OFFSET + "cm"
+  }))`;
+});
+
+const scale = computed(() => {
+  if (!dragging.value) {
+    return props.selected ? "scale(1.05)" : " ";
+  } else {
+    return "scale(1.1)";
+  }
 });
 
 const piecePosition = computed(() => {
@@ -65,11 +101,126 @@ watch(piecePosition, async () => {
   emit("move");
 });
 
+watch(dragging, (newValue) => {
+  newValue ? (zIndex.value = "var(--z-index-piece-top)") : (zIndex.value = "");
+});
+
 async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   zIndex.value = "var(--z-index-piece-top)";
   await waitForTransitionEnd(boardPieceElement, "transform");
   zIndex.value = "";
 }
+
+const inchPxOffset = INCH_OFFSET * pixelsPerCm;
+let pressTimeout: number = 0;
+let lastDragX: number = 0;
+let lastDragY: number = 0;
+const dragXDelta = ref(0);
+const dragYDelta = ref(0);
+
+const dragRowDelta = computed(() => {
+  let totalDelta;
+  props.rotated
+    ? (totalDelta = inchPxOffset + dragYDelta.value)
+    : (totalDelta = dragYDelta.value - inchPxOffset);
+  let delta = Math.round(totalDelta / props.cellSize);
+  if (delta === -0) {
+    delta = 0;
+  }
+  return delta;
+});
+const dragColDelta = computed(() => {
+  let delta = Math.round(dragXDelta.value / props.cellSize);
+  if (delta === -0) {
+    delta = 0;
+  }
+  return delta;
+});
+watch(dragRowDelta, () => {
+  console.log(dragRowDelta.value, dragColDelta.value);
+});
+watch(dragColDelta, () => {
+  console.log(dragRowDelta.value, dragColDelta.value);
+});
+
+// function onDragDeltaChange() {}
+
+function resetDragDelta() {
+  dragXDelta.value = 0;
+  dragYDelta.value = 0;
+}
+
+function onMouseDown(event: MouseEvent) {
+  onPressStart(event.clientX, event.clientY);
+}
+
+function onTouchStart(event: TouchEvent) {
+  const touch = event.touches[0];
+  onPressStart(touch.clientX, touch.clientY);
+}
+
+function onPressStart(x: number, y: number) {
+  pressTimeout = setTimeout(() => {
+    dragging.value = true;
+    lastDragX = x;
+    lastDragY = y;
+    if (useVibrations.value) navigator.vibrate(30);
+  }, longPressTimeout.value);
+}
+
+function onPressEnd() {
+  if (!dragging.value) {
+    clearTimeout(pressTimeout);
+  }
+  dragging.value = false;
+  resetDragDelta();
+}
+
+function onMouseMove(event: MouseEvent) {
+  if (!dragging.value) {
+    return;
+  }
+  onMove(event.clientX, event.clientY);
+}
+
+function onTouchMove(event: TouchEvent) {
+  if (!dragging.value) {
+    return;
+  }
+  const touch = event.touches[0];
+  onMove(touch.clientX, touch.clientY);
+}
+
+function onMove(x: number, y: number) {
+  const xDelta = x - lastDragX;
+  const yDelta = y - lastDragY;
+  lastDragX = x;
+  lastDragY = y;
+  dragXDelta.value = dragXDelta.value + xDelta;
+  dragYDelta.value = dragYDelta.value + yDelta;
+}
+
+onMounted(() => {
+  const pieceIconElement = element.value?.$el;
+  if (!(pieceIconElement instanceof SVGElement)) {
+    console.error(
+      "Element of Piece Icon is not accessible, so its z-index cannot be altered."
+    );
+    return;
+  }
+  pieceIconElement.addEventListener("mousedown", onMouseDown);
+  pieceIconElement.addEventListener("touchstart", onTouchStart, {
+    passive: true,
+  });
+  addEventListener("mouseup", onPressEnd);
+  addEventListener("touchend", onPressEnd, {
+    passive: true,
+  });
+  addEventListener("mousemove", onMouseMove);
+  addEventListener("touchmove", onTouchMove, {
+    passive: true,
+  });
+});
 
 onBeforeUnmount(() => {
   emit("remove");
@@ -85,17 +236,19 @@ onBeforeUnmount(() => {
       :data-id="`piece-${props.piece.id}`"
       ref="element"
       class="piece"
-      :class="[{ highlighted: props.selected }, props.piece.color]"
+      :class="[
+        { dragging: dragging },
+        { selected: props.selected },
+        props.piece.color,
+      ]"
       :style="{
-        transform: `translate(${translateX}px, ${translateY}px)
-            ${props.selected ? 'scale(1.05)' : ''} ${
-          props.rotated ? 'rotate(-0.5turn)' : ''
+        transform: `${translate} ${scale} ${
+          props.rotated ? 'rotate(-0.5turn)' : ' '
         }`,
         width: `${size}px`,
         height: `${size}px`,
         zIndex: zIndex,
       }"
-      :piece-set="pieceSet"
       :piece-id="props.piece.pieceId"
       :color="props.piece.color"
     />
@@ -113,6 +266,7 @@ onBeforeUnmount(() => {
 
 .piece {
   @include clickable;
+  touch-action: none;
   filter: var(--svg-shadow-filter);
   -webkit-tap-highlight-color: transparent;
   z-index: var(--z-index-piece);
@@ -126,8 +280,13 @@ onBeforeUnmount(() => {
   transition: transform var(--transition-duration-medium) ease-in-out,
     filter var(--transition-duration-short) linear;
 
-  &.highlighted {
+  &.selected,
+  &.dragging {
     filter: var(--piece-selected-shadow-filter);
+  }
+
+  &.dragging {
+    transition: filter var(--transition-duration-short) linear;
   }
 }
 </style>

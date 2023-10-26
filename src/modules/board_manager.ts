@@ -9,6 +9,12 @@ abstract class BoardManager {
   public abstract onPieceClick(boardPiece: BoardPieceProps): void;
 
   public abstract onCellClick(position: BoardPosition): void;
+
+  public abstract onPieceDragStart(boardPiece: BoardPieceProps): void;
+
+  public abstract onPieceDragEnd(rowDelta: number, colDelta: number): void;
+
+  public abstract onPieceDragOverCell(rowDelta: number, colDelta: number): void;
 }
 
 export function getPositionNotation(position: BoardPosition) {
