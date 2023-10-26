@@ -380,6 +380,7 @@ class GameBoardManager extends BoardManager {
   }
 
   public onPieceDragEnd(
+    // @ts-ignore
     boardPiece: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
