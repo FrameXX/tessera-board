@@ -27,7 +27,6 @@ class ToastManager {
     iconId?: string,
     durationMs?: number
   ): string {
-    console.log(message);
     const id = getRandomId();
 
     // If stack is full hide last toast
