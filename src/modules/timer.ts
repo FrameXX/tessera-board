@@ -18,7 +18,7 @@ class Timer {
   }
 
   private setInterval() {
-    this.interval = setInterval(() => this.seconds.value++, 1000);
+    this.interval = window.setInterval(() => this.seconds.value++, 1000);
   }
 
   public reset() {
