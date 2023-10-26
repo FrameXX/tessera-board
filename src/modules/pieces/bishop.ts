@@ -7,7 +7,7 @@ import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import {
   type BoardPositionValue,
   getDeltaPosition,
-  isTargetOnBoard,
+  isPositionOnBoard,
 } from "./piece";
 
 export class Bishop extends Piece {
@@ -32,7 +32,7 @@ export class Bishop extends Piece {
             totalColDelta,
             totalRowDelta
           );
-          if (!isTargetOnBoard(target)) {
+          if (!isPositionOnBoard(target)) {
             break;
           }
           const piece = getBoardPositionPiece(target, boardStateValue);

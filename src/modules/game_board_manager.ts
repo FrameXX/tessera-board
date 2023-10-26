@@ -20,7 +20,6 @@ import { isMoveTransform } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
 import type ToastManager from "./toast_manager";
 
-// @ts-ignore
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
   private _selectedCell: BoardPosition | null = null;
@@ -93,6 +92,10 @@ class GameBoardManager extends BoardManager {
     if (this.selectedCell) {
       this.selectedCells.value = [];
     }
+  }
+
+  private clearDraggingOverCells() {
+    this.draggingOverCells.value = [];
   }
 
   private invalidatePiecesCache() {
@@ -318,30 +321,73 @@ class GameBoardManager extends BoardManager {
     this.updateCapturingPaths();
   }
 
-  private moveToIfPossible(position: BoardPosition): boolean {
-    if (this.winner.value !== "none") return false;
-    if (!this.availibleMoves || !this.selectedPiece) return false;
+  private getMoveIfPossible(position: BoardPosition): Move | null {
+    if (this.winner.value !== "none") return null;
+    if (!this.availibleMoves || !this.selectedPiece) return null;
     if (this.secondCheckboard.value) {
       if (
         this.selectedPiece.piece.color !== this.playerColor.value &&
         this.playerBoard
       )
-        return false;
+        return null;
       if (
         this.selectedPiece.piece.color === this.playerColor.value &&
         !this.playerBoard
       )
-        return false;
+        return null;
     }
-    if (this.selectedPiece.piece.color !== this.playingColor.value)
-      return false;
+    if (this.selectedPiece.piece.color !== this.playingColor.value) return null;
     const matchingMove = this.getPositionMatchingMove(position);
+    if (!matchingMove) {
+      return null;
+    }
+    return matchingMove;
+  }
+
+  private moveToIfPossible(position: BoardPosition): boolean {
+    const matchingMove = this.getMoveIfPossible(position);
     if (!matchingMove) {
       return false;
     }
-
     this.interpretMove(matchingMove);
     return true;
+  }
+
+  public onPieceDragStart(
+    boardPiece: BoardPieceProps,
+    targetPosition: BoardPosition
+  ): void {
+    this.onPieceDragOverCell(boardPiece, targetPosition);
+    if (this.selectedPiece === null) {
+      this.onPieceClick(boardPiece);
+      return;
+    }
+    if (!positionsEqual(boardPiece, this.selectedPiece))
+      this.onPieceClick(boardPiece);
+  }
+
+  public onPieceDragOverCell(
+    boardPiece: BoardPieceProps,
+    targetPosition: BoardPosition
+  ): void {
+    if (
+      this.getMoveIfPossible(targetPosition) !== null ||
+      positionsEqual(boardPiece, targetPosition)
+    ) {
+      this.clearDraggingOverCells();
+      this.draggingOverCells.value.push(targetPosition);
+    }
+  }
+
+  public onPieceDragEnd(
+    boardPiece: BoardPieceProps,
+    targetPosition: BoardPosition
+  ): void {
+    this.clearDraggingOverCells();
+    const matchingMove = this.getMoveIfPossible(targetPosition);
+    if (matchingMove !== null) {
+      this.interpretMove(matchingMove);
+    }
   }
 
   // Called by Board component

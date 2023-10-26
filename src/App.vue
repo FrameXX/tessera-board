@@ -320,6 +320,7 @@ const playerSelectedCells = ref<BoardPosition[]>([]);
 const opponentSelectedCells = ref<BoardPosition[]>([]);
 const playerDraggingOverCells = ref<BoardPosition[]>([]);
 const opponentDraggingOverCells = ref<BoardPosition[]>([]);
+const defaultDraggingOverCells = ref<BoardPosition[]>([]);
 
 // User data refs
 // Simple values
@@ -723,6 +724,7 @@ const escapeManager = new EscapeManager(toggleActionsPanel);
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
   configPieceDialog,
+  defaultDraggingOverCells,
   audioEffects,
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
@@ -877,6 +879,7 @@ onMounted(() => {
         :selected-pieces="playerSelectedPieces"
         :selected-cells="playerSelectedCells"
         :highlighted-cells-state="highlightedCells"
+        :dragging-over-cells="playerDraggingOverCells"
         :marks-state="playerCellsMarks"
         :content-rotated="playerBoardContentRotated"
         :rotated="playerBoardRotated"
@@ -895,6 +898,7 @@ onMounted(() => {
         :selected-pieces="opponentSelectedPieces"
         :selected-cells="opponentSelectedCells"
         :highlighted-cells-state="highlightedCells"
+        :dragging-over-cells="opponentDraggingOverCells"
         :marks-state="opponentCellsMarks"
         :content-rotated="opponentBoardContentRotated"
         :rotated="opponentBoardRotated"
@@ -928,6 +932,7 @@ onMounted(() => {
     :default-board-manager="defaultBoardManager"
     :default-board-state="defaultBoardState"
     :user-data-manager="userDataManager"
+    :default-dragging-over-cells="defaultDraggingOverCells"
   />
   <About :open="aboutOpen" />
 

@@ -3,6 +3,10 @@ import type { PieceId } from "./pieces/piece";
 
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
+export function isBoardPosition(object: any): object is BoardPosition {
+  return typeof object.row === "number" && typeof object.col === "number";
+}
+
 abstract class BoardManager {
   constructor() {}
 
@@ -10,11 +14,20 @@ abstract class BoardManager {
 
   public abstract onCellClick(position: BoardPosition): void;
 
-  public abstract onPieceDragStart(boardPiece: BoardPieceProps): void;
+  public abstract onPieceDragStart(
+    boardPiece: BoardPieceProps,
+    targetPosition: BoardPosition
+  ): void;
 
-  public abstract onPieceDragEnd(rowDelta: number, colDelta: number): void;
+  public abstract onPieceDragEnd(
+    boardPiece: BoardPieceProps,
+    targetPosition: BoardPosition
+  ): void;
 
-  public abstract onPieceDragOverCell(rowDelta: number, colDelta: number): void;
+  public abstract onPieceDragOverCell(
+    boardPiece: BoardPieceProps,
+    targetPosition: BoardPosition
+  ): void;
 }
 
 export function getPositionNotation(position: BoardPosition) {

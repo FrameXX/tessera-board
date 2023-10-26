@@ -6,7 +6,7 @@ import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece, {
   getDeltaPosition,
-  isTargetOnBoard,
+  isPositionOnBoard,
   isFriendlyPiece,
   type BoardPositionValue,
   type Path,
@@ -65,7 +65,7 @@ export class King extends Piece {
           continue;
         }
         const target = getDeltaPosition(position, colDelta, rowDelta);
-        if (!isTargetOnBoard(target)) {
+        if (!isPositionOnBoard(target)) {
           continue;
         }
         capturingPositions.push(target);
@@ -116,7 +116,7 @@ export class King extends Piece {
             totalColDelta,
             position.row
           );
-          if (!isTargetOnBoard(searchRookPosition)) break;
+          if (!isPositionOnBoard(searchRookPosition)) break;
           // Rook moves on the other side of the moved king
           if (Math.abs(totalColDelta) === 1) {
             rookTarget = searchRookPosition;

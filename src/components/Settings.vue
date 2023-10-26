@@ -5,7 +5,7 @@ import UserOption from "./UserOption.vue";
 import Category from "./Category.vue";
 import Icon from "./Icon.vue";
 import TimeDurationInput from "./TimeDurationInput.vue";
-import Board from "./Board.vue";
+import Board, { type BoardPosition } from "./Board.vue";
 import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
 import FragmentTitle from "./FragmentTitle.vue";
@@ -40,6 +40,10 @@ const props = defineProps({
   },
   userDataManager: {
     type: Object as PropType<UserDataManager>,
+    required: true,
+  },
+  defaultDraggingOverCells: {
+    type: Object as PropType<BoardPosition[]>,
     required: true,
   },
 });
@@ -335,6 +339,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
                 :piece-set="pieceSet"
                 :piece-padding="piecePadding"
                 :piece-border="pieceBorder"
+                :dragging-over-cells="defaultDraggingOverCells"
                 board-id="default"
                 id="default-board"
               />

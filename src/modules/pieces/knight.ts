@@ -4,7 +4,11 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { BoardStateValue } from "../user_data/board_state";
 import Piece, { isFriendlyPiece } from "./piece";
-import { BoardPositionValue, getDeltaPosition, isTargetOnBoard } from "./piece";
+import {
+  BoardPositionValue,
+  getDeltaPosition,
+  isPositionOnBoard,
+} from "./piece";
 
 export class Knight extends Piece {
   constructor(color: PlayerColor, id?: string) {
@@ -19,7 +23,7 @@ export class Knight extends Piece {
           continue;
         }
         const target = getDeltaPosition(position, colDelta, rowDelta);
-        if (!isTargetOnBoard(target)) {
+        if (!isPositionOnBoard(target)) {
           continue;
         }
         capturingPositions.push(target);

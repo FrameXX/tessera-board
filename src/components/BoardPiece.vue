@@ -13,8 +13,11 @@ import {
 } from "vue";
 import { waitForTransitionEnd } from "../modules/utils/elements";
 import type Piece from "../modules/pieces/piece";
+import { getDeltaPosition } from "../modules/pieces/piece";
+import { BoardPosition } from "./Board.vue";
+import { isBoardPosition } from "../modules/board_manager";
 
-const INCH_OFFSET = 1.8;
+let inchOffset = ref(1.8);
 
 const props = defineProps({
   piece: { type: Object as PropType<Piece>, required: true },
@@ -31,14 +34,14 @@ const useVibrations = inject("useVibrations") as Ref<boolean>;
 const pixelsPerCm = inject("pixelsPerCm") as number;
 
 const emit = defineEmits({
-  dragStart: (event: { row: number; col: number }) => {
-    return typeof event.row === "number" && typeof event.col === "number";
+  dragStart: (event: BoardPosition) => {
+    return isBoardPosition(event);
   },
-  dragEnd: (event: { row: number; col: number }) => {
-    return typeof event.row === "number" && typeof event.col === "number";
+  dragEnd: (event: BoardPosition) => {
+    return isBoardPosition(event);
   },
-  dragDeltaChange: (event: { row: number; col: number }) => {
-    return typeof event.row === "number" && typeof event.col === "number";
+  dragTargetChange: (event: BoardPosition) => {
+    return isBoardPosition(event);
   },
   move: null,
   remove: null,
@@ -72,7 +75,7 @@ const translate = computed(() => {
     return `translate(${translateX.value}px, ${translateY.value}px)`;
   }
   return `translate(${translateX.value}px, calc(${translateY.value}px + ${
-    props.rotated ? INCH_OFFSET + "cm" : -INCH_OFFSET + "cm"
+    props.rotated ? inchOffset.value + "cm" : -inchOffset.value + "cm"
   }))`;
 });
 
@@ -101,8 +104,20 @@ watch(piecePosition, async () => {
   emit("move");
 });
 
-watch(dragging, (newValue) => {
-  newValue ? (zIndex.value = "var(--z-index-piece-top)") : (zIndex.value = "");
+watch(dragging, async (newValue) => {
+  if (newValue) {
+    zIndex.value = "var(--z-index-piece-top)";
+  } else {
+    const pieceIconElement = element.value?.$el;
+    if (!(pieceIconElement instanceof SVGElement)) {
+      console.error(
+        "Element of Piece Icon is not accessible, so its z-index cannot be altered."
+      );
+      return;
+    }
+    await waitForTransitionEnd(pieceIconElement, "transform");
+    zIndex.value = "";
+  }
 });
 
 async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
@@ -111,7 +126,9 @@ async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   zIndex.value = "";
 }
 
-const inchPxOffset = INCH_OFFSET * pixelsPerCm;
+const inchPxOffset = computed(() => {
+  return inchOffset.value * pixelsPerCm;
+});
 let pressTimeout: number = 0;
 let lastDragX: number = 0;
 let lastDragY: number = 0;
@@ -121,8 +138,8 @@ const dragYDelta = ref(0);
 const dragRowDelta = computed(() => {
   let totalDelta;
   props.rotated
-    ? (totalDelta = inchPxOffset + dragYDelta.value)
-    : (totalDelta = dragYDelta.value - inchPxOffset);
+    ? (totalDelta = -inchPxOffset.value - dragYDelta.value)
+    : (totalDelta = inchPxOffset.value - dragYDelta.value);
   let delta = Math.round(totalDelta / props.cellSize);
   if (delta === -0) {
     delta = 0;
@@ -136,14 +153,20 @@ const dragColDelta = computed(() => {
   }
   return delta;
 });
-watch(dragRowDelta, () => {
-  console.log(dragRowDelta.value, dragColDelta.value);
+const targetingDragPosition = computed(() => {
+  const position = getDeltaPosition(
+    { row: props.row, col: props.col },
+    dragColDelta.value,
+    dragRowDelta.value
+  );
+  return position;
 });
-watch(dragColDelta, () => {
-  console.log(dragRowDelta.value, dragColDelta.value);
+watch(targetingDragPosition, () => {
+  if (!dragging.value) {
+    return;
+  }
+  emit("dragTargetChange", targetingDragPosition.value);
 });
-
-// function onDragDeltaChange() {}
 
 function resetDragDelta() {
   dragXDelta.value = 0;
@@ -151,17 +174,23 @@ function resetDragDelta() {
 }
 
 function onMouseDown(event: MouseEvent) {
+  if (event.button !== 0) {
+    return;
+  }
+  inchOffset.value = 0;
   onPressStart(event.clientX, event.clientY);
 }
 
 function onTouchStart(event: TouchEvent) {
   const touch = event.touches[0];
+  inchOffset.value = 1.8;
   onPressStart(touch.clientX, touch.clientY);
 }
 
 function onPressStart(x: number, y: number) {
-  pressTimeout = setTimeout(() => {
+  pressTimeout = window.setTimeout(() => {
     dragging.value = true;
+    emit("dragStart", targetingDragPosition.value);
     lastDragX = x;
     lastDragY = y;
     if (useVibrations.value) navigator.vibrate(30);
@@ -171,8 +200,10 @@ function onPressStart(x: number, y: number) {
 function onPressEnd() {
   if (!dragging.value) {
     clearTimeout(pressTimeout);
+    return;
   }
   dragging.value = false;
+  emit("dragEnd", targetingDragPosition.value);
   resetDragDelta();
 }
 

@@ -11,7 +11,11 @@ import Piece, {
   isFriendlyPiece,
   positionWillBeCaptured,
 } from "./piece";
-import { BoardPositionValue, getDeltaPosition, isTargetOnBoard } from "./piece";
+import {
+  BoardPositionValue,
+  getDeltaPosition,
+  isPositionOnBoard,
+} from "./piece";
 import { getRawPiece, type RawPiece } from "./rawPiece";
 
 interface RawRook extends RawPiece {
@@ -69,7 +73,7 @@ export class Rook extends Piece {
           axis === "x"
             ? (target = getDeltaPosition(position, totalDelta, 0))
             : (target = getDeltaPosition(position, 0, totalDelta));
-          if (!isTargetOnBoard(target)) {
+          if (!isPositionOnBoard(target)) {
             break;
           }
           const piece = getBoardPositionPiece(target, boardStateValue);
@@ -120,7 +124,7 @@ export class Rook extends Piece {
             totalColDelta,
             position.row
           );
-          if (!isTargetOnBoard(searchKingPosition)) break;
+          if (!isPositionOnBoard(searchKingPosition)) break;
           const piece = getBoardPositionPiece(
             searchKingPosition,
             boardStateValue

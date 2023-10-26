@@ -117,7 +117,7 @@ export function isFriendlyPiece(
   return piece.color === friendlyColor;
 }
 
-export function isTargetOnBoard(target: BoardPosition) {
+export function isPositionOnBoard(target: BoardPosition) {
   return (
     target.row >= 0 && target.row <= 7 && target.col >= 0 && target.col <= 7
   );

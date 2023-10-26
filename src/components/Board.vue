@@ -188,6 +188,11 @@ function isCellDraggedOver(position: BoardPosition) {
           v-for="pieceProps in allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
+          @drag-start="props.manager.onPieceDragStart(pieceProps, $event)"
+          @drag-target-change="
+            props.manager.onPieceDragOverCell(pieceProps, $event)
+          "
+          @drag-end="props.manager.onPieceDragEnd(pieceProps, $event)"
           :selected="
             isPieceSelected({
               row: pieceProps.row,

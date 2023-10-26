@@ -49,7 +49,8 @@ export function transformPositionValue(
 export async function movePositionValue(
   origin: BoardPosition,
   target: BoardPosition,
-  boardStateValue: BoardStateValue
+  boardStateValue: BoardStateValue,
+  boardId: string = "player-board"
 ) {
   const piece = boardStateValue[origin.row][origin.col];
   if (!piece) {
@@ -57,7 +58,8 @@ export async function movePositionValue(
   }
   boardStateValue[target.row][target.col] = piece;
   boardStateValue[origin.row][origin.col] = null;
-  const board = getElementInstanceById("player-board");
+  // Player board is always visible so it's ok to observe the transition only on player board
+  const board = getElementInstanceById(boardId);
   const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);
   if (!(pieceElement instanceof SVGElement)) {
     console.error(`Could not find piece element of piece ${piece.id}`);
