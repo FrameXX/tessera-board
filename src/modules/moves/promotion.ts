@@ -39,14 +39,7 @@ class Promotion extends Move {
       : whiteCapturedPieces;
   }
 
-  private getLimitedTransformOptions(
-    blackCapturedPieces: Ref<PieceId[]>,
-    whiteCapturedPieces: Ref<PieceId[]>
-  ) {
-    const capturedPieces = this.getRelevantCapturedPieces(
-      blackCapturedPieces,
-      whiteCapturedPieces
-    );
+  private getLimitedTransformOptions(capturedPieces: Ref<PieceId[]>) {
     return this.transformOptions.filter((option) => {
       return capturedPieces.value.includes(option.pieceId);
     });
@@ -79,12 +72,13 @@ class Promotion extends Move {
 
     let transformOptions: RawPiece[];
     let limitedTransformOptions: RawPiece[] = [];
+    const capturedPieces = this.getRelevantCapturedPieces(
+      blackCapturedPieces,
+      whiteCapturedPieces
+    );
 
     if (reviveFromCapturedPieces.value) {
-      limitedTransformOptions = this.getLimitedTransformOptions(
-        blackCapturedPieces,
-        whiteCapturedPieces
-      );
+      limitedTransformOptions = this.getLimitedTransformOptions(capturedPieces);
     }
 
     const limitedTransformOptionsAvailible =
@@ -104,14 +98,10 @@ class Promotion extends Move {
     transformPositionValue(this.target, newPiece, boardStateValue);
     if (useVibrations) navigator.vibrate([40, 60, 20]);
 
-    const capturedPieces = this.getRelevantCapturedPieces(
-      blackCapturedPieces,
-      whiteCapturedPieces
-    );
-    console.log(capturedPieces.value);
     if (limitedTransformOptionsAvailible)
       capturedPieces.value.splice(
-        capturedPieces.value.indexOf(newPiece.pieceId)
+        capturedPieces.value.indexOf(newPiece.pieceId),
+        1
       );
     if (reviveFromCapturedPieces.value) capturedPieces.value.push(this.pieceId);
 
