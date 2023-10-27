@@ -44,13 +44,13 @@ class DefaultBoardManager extends BoardManager {
     boardPiece: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
+    this.clearDraggingOverCells();
     if (
       !this.isPositionAvailible(targetPosition) &&
       !positionsEqual(boardPiece, targetPosition)
     ) {
       return;
     }
-    this.clearDraggingOverCells();
     this.draggingOverCells.value.push(targetPosition);
   }
 

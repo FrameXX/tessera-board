@@ -205,6 +205,7 @@ function isCellDraggedOver(position: BoardPosition) {
           :cell-size="cellSize"
           :piece-padding="piecePadding"
           :rotated="props.contentRotated"
+          :board-rotated="props.rotated"
         />
       </TransitionGroup>
 

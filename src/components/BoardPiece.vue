@@ -26,6 +26,7 @@ const props = defineProps({
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
   rotated: { type: Boolean, default: false },
+  boardRotated: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
 });
 
@@ -223,8 +224,12 @@ function onTouchMove(event: TouchEvent) {
 }
 
 function onMove(x: number, y: number) {
-  const xDelta = x - lastDragX;
-  const yDelta = y - lastDragY;
+  let xDelta = x - lastDragX;
+  let yDelta = y - lastDragY;
+  if (props.boardRotated) {
+    xDelta = -xDelta;
+    yDelta = -yDelta;
+  }
   lastDragX = x;
   lastDragY = y;
   dragXDelta.value = dragXDelta.value + xDelta;
