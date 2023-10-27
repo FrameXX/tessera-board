@@ -17,7 +17,6 @@ import type {
   MoveSecondsLimitRunOutPunishment,
   PlayerColor,
 } from "../modules/game";
-import type DurationDialog from "../modules/dialogs/duration";
 import type ConfigsDialog from "../modules/dialogs/configs";
 import ConfigManager from "../modules/config_manager";
 import DefaultBoardManager from "../modules/default_board_manager";
@@ -89,9 +88,6 @@ const prefferedFirstMoveColor = inject(
 const useVibrations = inject("useVibrations") as Ref<boolean>;
 const longPressTimeout = inject("longPressTimeout") as Ref<number>;
 
-const durationDialog = inject<DurationDialog>(
-  "durationDialog"
-) as DurationDialog;
 const configsDialog = inject("configsDialog") as ConfigsDialog;
 </script>
 
@@ -169,7 +165,6 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <TimeDurationInput
               id="input-player-seconds-per-move"
               v-model="playerMoveSecondsLimit"
-              :duration-dialog="durationDialog"
             />
             <template #description
               >Limits player's time per move. If the time runs out (expires) an
@@ -187,7 +182,6 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <TimeDurationInput
               id="input-opponent-seconds-per-move"
               v-model="opponentMoveSecondsLimit"
-              :duration-dialog="durationDialog"
             />
             <template #description
               >Limits opponent's time per move. If the time runs out (expires)
@@ -205,7 +199,6 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <TimeDurationInput
               id="input-player-seconds-per-match"
               v-model="playerMatchSecondsLimit"
-              :duration-dialog="durationDialog"
             />
             <template #description
               >Limits player's time for whole match (game). If the time runs out
@@ -223,7 +216,6 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <TimeDurationInput
               id="input-opponent-seconds-per-match"
               v-model="opponentMatchSecondsLimit"
-              :duration-dialog="durationDialog"
             />
             <template #description
               >Limits opponent's time for whole match (game). If the time runs
@@ -271,7 +263,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           </UserOption>
           <UserOption
             name="show availible piece moves of not playing player"
-            icon-id="circle-small"
+            icon-id="arrow-top-right-bold-box-outline"
             option-id="show-other-availible-moves"
           >
             <Checkbox
@@ -350,8 +342,8 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </template>
           </UserOption>
         </Category>
-        <!-- Look, feel and behavior -->
-        <Category name="look, feel and behavior" icon-id="palette-advanced">
+        <!-- Look, feel, behavior -->
+        <Category name="look, feel, behavior" icon-id="palette-advanced">
           <!-- Behavior and elements -->
           <SectionTitle title="Behavior and elements" />
           <UserOption
@@ -469,8 +461,8 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           <!-- Checkboard -->
           <SectionTitle title="Checkboard" />
           <UserOption
-            name="piece set"
-            icon-id="chess-pawn"
+            name="pieces icon pack"
+            icon-id="package-variant-closed"
             option-id="select-piece-set"
           >
             <select id="select-piece-set" v-model="pieceSet">
@@ -543,7 +535,18 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox id="check-audio-effects" v-model="audioEffects" />
             <template #description>
-              Enables simple audio effects when a piece is moved and similiar.
+              Enables simple audio effects when a piece is moved, added etc...
+            </template>
+          </UserOption>
+          <UserOption
+            name="haptic feedback"
+            icon-id="vibrate"
+            option-id="check-use-vibrations"
+          >
+            <Checkbox id="check-use-vibrations" v-model="useVibrations" />
+            <template #description>
+              Vibrations will be performed on devices that have a vibration
+              motor when pieces is captured, removed, long-pressed etc...
             </template>
           </UserOption>
           <UserOption
@@ -579,17 +582,6 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <template #description
               >Changes duration of all the transitions and animations (except
               for the splashscreen animation) in the same ratio.
-            </template>
-          </UserOption>
-          <UserOption
-            name="haptic feedback"
-            icon-id="vibrate"
-            option-id="check-use-vibrations"
-          >
-            <Checkbox id="check-use-vibrations" v-model="useVibrations" />
-            <template #description>
-              Vibrations will be performed on devices that have a vibration
-              motor when pieces is captured, removed, long-pressed etc...
             </template>
           </UserOption>
         </Category>

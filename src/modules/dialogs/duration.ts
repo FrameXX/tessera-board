@@ -26,6 +26,12 @@ class DurationDialog {
     }
   };
 
+  public disable = () => {
+    this.props.minutes = 0;
+    this.props.seconds = 0;
+    this.confirm();
+  };
+
   public cancel = () => {
     if (this.resolve) {
       this.resolve(null);

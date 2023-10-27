@@ -24,6 +24,7 @@ class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
   private _selectedCell: BoardPosition | null = null;
   private availibleMoves: Move[] = [];
+  private dragEndTimeout: boolean = false;
 
   constructor(
     private whiteCapturingPaths: Ref<Path[]>,
@@ -370,11 +371,11 @@ class GameBoardManager extends BoardManager {
     boardPiece: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
+    this.clearDraggingOverCells();
     if (
       this.getMoveIfPossible(targetPosition) !== null ||
       positionsEqual(boardPiece, targetPosition)
     ) {
-      this.clearDraggingOverCells();
       this.draggingOverCells.value.push(targetPosition);
     }
   }
@@ -384,6 +385,10 @@ class GameBoardManager extends BoardManager {
     boardPiece: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
+    this.dragEndTimeout = true;
+    setTimeout(() => {
+      this.dragEndTimeout = false;
+    }, 100);
     this.clearDraggingOverCells();
     const matchingMove = this.getMoveIfPossible(targetPosition);
     if (matchingMove !== null) {
@@ -393,6 +398,7 @@ class GameBoardManager extends BoardManager {
 
   // Called by Board component
   public onPieceClick(boardPiece: BoardPieceProps): void {
+    if (this.dragEndTimeout) return;
     const position = this.getPiecePosition(boardPiece.piece.id);
     if (position) {
       const moved = this.moveToIfPossible(position);

@@ -207,7 +207,7 @@ const DEFAULT_OPPONENT_HUE_VALUE = 198;
 const DEFAULT_OPPONENT_OVER_LAN_VALUE = false;
 const DEFAULT_PIECE_BORDER_VALUE = 1.1;
 const DEFAULT_PIECE_PADDING_VALUE = 6;
-const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "material_design";
+const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "font_awesome";
 const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PlayerColorOptionValue = "random";
 const DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE = false;
 const DEFAULT_ROTATE_SCREEN_VALUE = false;
@@ -1155,6 +1155,9 @@ onMounted(() => {
       />
     </div>
     <template #action-buttons>
+      <button @click="durationDialog.disable()" title="Cancel">
+        <Icon side icon-id="cancel" />Disable
+      </button>
       <button @click="durationDialog.cancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />Cancel
       </button>

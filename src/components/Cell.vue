@@ -185,14 +185,32 @@ const markIconId = computed(() => {
   @include no-select;
   color: var(--color-cell-white);
   position: absolute;
-  mix-blend-mode: exclusion;
   transition: transform var(--transition-duration-short)
     var(--transition-timing-bounce);
   width: 15%;
   height: 15%;
   font-size: calc(var(--board-size) * 0.02);
+  font-weight: 600;
   padding: calc(var(--board-size) * 0.006);
   opacity: var(--cell-index-opacity);
+}
+
+.cell.white {
+  .index-row-left,
+  .index-row-right,
+  .index-col-bottom,
+  .index-col-top {
+    color: var(--color-cell-black);
+  }
+}
+
+.cell.black {
+  .index-row-left,
+  .index-row-right,
+  .index-col-bottom,
+  .index-col-top {
+    color: var(--color-cell-white);
+  }
 }
 
 .board.contentRotated {

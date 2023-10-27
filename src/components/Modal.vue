@@ -13,6 +13,20 @@ const emit = defineEmits(["open", "close", "backdropClick"]);
 
 const buttons = ref<HTMLDivElement | null>(null);
 let lastButton: undefined | HTMLButtonElement;
+
+function selectInputEnd(input: HTMLInputElement) {
+  const length = input.value.length;
+  let numberType: boolean = false;
+  if (input.type === "number") {
+    numberType = true;
+    input.type = "tel";
+  }
+  input.setSelectionRange(length, length);
+  if (numberType) {
+    input.type = "number";
+  }
+}
+
 onMounted(() => {
   const lastChild = buttons.value?.lastElementChild;
   if (lastChild instanceof HTMLButtonElement) {
@@ -23,11 +37,14 @@ watch(
   () => props.open,
   () => {
     if (props.open) {
-      // HACK: The timeout is here only becuase for the button to be focuseable the dialog element can't have display style set to none
+      // HACK: The timeout is here only becuase for the button to be focusable the dialog element can't have display style set to none
       setTimeout(() => {
         emit("open");
         if (props.focusOnOpen) {
           props.focusOnOpen.focus();
+          if (props.focusOnOpen instanceof HTMLInputElement) {
+            selectInputEnd(props.focusOnOpen);
+          }
           return;
         }
         if (lastButton) {
@@ -37,7 +54,7 @@ watch(
             "Reference of last button of WindowDialog is null, thus impossible to focus."
           );
         }
-      }, 10);
+      }, 100);
     } else {
       emit("close");
     }
