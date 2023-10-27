@@ -58,10 +58,13 @@ export function isWinner(string: string): string is Winner {
   return isPlayer(string) || isUndecidedWinner(string);
 }
 
-export type WinReason = "none" | "move_timeout" | "match_timeout";
+export type WinReason = "none" | "move_timeout" | "match_timeout" | "resign";
 export function isWinReason(string: string): string is WinReason {
   return (
-    string === "none" || string === "move_timeout" || string === "match_timeout"
+    string === "none" ||
+    string === "move_timeout" ||
+    string === "match_timeout" ||
+    string === "resign"
   );
 }
 
@@ -153,7 +156,6 @@ class Game {
     );
     watch(this.playerMatchSecondsTimer.beyondLimit, (newValue) => {
       if (newValue) {
-        console.log("byeond");
         this.onPlayerMatchSecondsBeyondLimit();
       } else if (
         this.winReason.value === "match_timeout" &&
@@ -331,6 +333,28 @@ class Game {
     }
   }
 
+  public resign() {
+    if (this.winner.value !== "none") {
+      this.toastManager.showToast(
+        `You cannot resign. The game ending was already decided.`,
+        "error",
+        "flag-off"
+      );
+      return;
+    }
+    this.toastManager.showToast(
+      `${getPlayerTeamName(
+        this.playerPlaying ? "player" : "opponent",
+        this.playerColor.value
+      )} resigned`,
+      "info",
+      "flag"
+    );
+    this.playerPlaying.value
+      ? this.opponentWin("resign")
+      : this.playerWin("resign");
+  }
+
   public restart() {
     this.winner.value = "none";
     this.setupDefaultBoardState();
@@ -345,7 +369,11 @@ class Game {
   }
 
   public restore() {
-    this.updateTimerState();
+    if (this.gamePaused.value === "auto") {
+      this.gamePaused.value = "not";
+    } else {
+      this.updateTimerState();
+    }
   }
 
   public onMove() {

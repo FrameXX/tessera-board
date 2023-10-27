@@ -85,6 +85,7 @@ const prefferedFirstMoveColor = inject(
 ) as Ref<PlayerColor>;
 const useVibrations = inject("useVibrations") as Ref<boolean>;
 const longPressTimeout = inject("longPressTimeout") as Ref<number>;
+const autoPause = inject("autoPause") as Ref<boolean>;
 
 const configsDialog = inject("configsDialog") as ConfigsDialog;
 </script>
@@ -384,6 +385,17 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               player. This option is great for separating player zone for each
               player especially if you are playing on a larger screen, but it's
               not recommended on a smaller screen.
+            </template>
+          </UserOption>
+          <UserOption
+            name="automatically pause game on focus loss"
+            icon-id="play-pause"
+            option-id="check-auto-pause"
+          >
+            <Checkbox id="check-auto-pause" v-model="autoPause" />
+            <template #description>
+              The game will be automatically paused when settings is opened,
+              borwser tab is switched, browser window is not focused etc...
             </template>
           </UserOption>
           <UserOption

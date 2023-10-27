@@ -17,6 +17,7 @@ const emit = defineEmits([
   "restartGame",
   "aboutGame",
   "pause",
+  "resign",
 ]);
 
 watch(
@@ -37,11 +38,11 @@ watch(
           icon-id="information-outline"
           title="About game"
         />
-        <FastButton icon-id="flag" title="Resign" />
+        <FastButton @click="emit('resign')" icon-id="flag" title="Resign" />
         <FastButton
           @click="$emit('pause')"
           :icon-id="props.gamePaused !== 'not' ? 'play-outline' : 'pause'"
-          title="Pause game"
+          :title="`${props.gamePaused !== 'not' ? 'Resume' : 'Pause'} game`"
         />
         <FastButton
           @click="$emit('restartGame')"

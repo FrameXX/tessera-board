@@ -244,6 +244,7 @@ const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishme
 const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
 const DEFAULT_USE_VIBRATIONS_VALUE: boolean = true;
 const DEFAULT_LONG_PRESS_TIMEOUT: number = 200;
+const DEFAULT_AUTO_PAUSE_VALUE: boolean = true;
 
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
@@ -389,6 +390,8 @@ const useVibrations = ref(DEFAULT_USE_VIBRATIONS_VALUE);
 provide("useVibrations", useVibrations);
 const longPressTimeout = ref(DEFAULT_LONG_PRESS_TIMEOUT);
 provide("longPressTimeout", longPressTimeout);
+const autoPause = ref(DEFAULT_AUTO_PAUSE_VALUE);
+provide("autoPause", autoPause);
 
 // Game specific
 const winner = ref<Winner>("none");
@@ -478,6 +481,12 @@ const userDataManager = new UserDataManager(
       DEFAULT_USE_VIBRATIONS_VALUE,
       toastManager,
       useVibrations
+    ),
+    new BooleanUserData(
+      "auto_pause",
+      DEFAULT_AUTO_PAUSE_VALUE,
+      toastManager,
+      autoPause
     ),
     new HueData(DEFAULT_PLAYER_HUE_VALUE, playerHue, false, toastManager),
     new HueData(DEFAULT_OPPONENT_HUE_VALUE, opponentHue, true, toastManager),
@@ -848,6 +857,15 @@ onMounted(() => {
     }
   });
 
+  addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden" && autoPause.value) {
+      gamePaused.value = "auto";
+    }
+    if (document.visibilityState === "visible" && gamePaused.value === "auto") {
+      gamePaused.value = "not";
+    }
+  });
+
   // Let the app wait another 600ms to make sure its fully loaded.
   setTimeout(() => {
     playerBoardManager.updateCapturingPaths();
@@ -945,6 +963,7 @@ onMounted(() => {
     @configure-game="toggleSettings()"
     @restart-game="onGameRestart()"
     @pause="manualyTogglePause()"
+    @resign="game.resign()"
     :open="actionPanelOpen"
     :status-text="statusText"
     :game-paused="gamePaused"
