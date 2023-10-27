@@ -169,7 +169,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
   flex-shrink: 0.9;
   background-color: var(--color-primary-surface-accent);
   height: 100%;
-  border-width: 0 var(--border-width) 0 var(--border-width);
+  border-width: 0 calc(var(--border-width) * 1.5) 0
+    calc(var(--border-width) * 1.5);
   border-style: dashed;
 
   &.player {

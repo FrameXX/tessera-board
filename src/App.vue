@@ -68,6 +68,8 @@ import Game, {
   type Winner,
   type WinReason,
   isWinReason,
+  type GamePaused,
+  isGamePaused,
 } from "./modules/game";
 import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
@@ -95,6 +97,7 @@ import ActionPanel from "./components/ActionPanel.vue";
 import Status from "./components/Status.vue";
 import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
+import FragmentTitle from "./components/FragmentTitle.vue";
 
 function toggleActionsPanel() {
   actionPanelOpen.value = !actionPanelOpen.value;
@@ -152,6 +155,14 @@ async function onGameRestart() {
   if (!confirmed) return;
   actionPanelOpen.value = false;
   game.restart();
+}
+
+function manualyTogglePause() {
+  if (gamePaused.value === "not") {
+    gamePaused.value = "manual";
+  } else {
+    gamePaused.value = "not";
+  }
 }
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
@@ -218,7 +229,7 @@ const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
 const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
 const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: PieceId[] = [];
 const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: PieceId[] = [];
-const DEFAULT_GAME_PAUSED_VALUE = false;
+const DEFAULT_GAME_PAUSED_VALUE: GamePaused = "not";
 const DEFAULT_AUDIO_EFFECTS_VALUE = true;
 const DEFAULT_FIRST_MOVE_COLOR: PlayerColorOptionValue = "white";
 const DEFAULT_SHOW_CAPTURING_PIECES_VALUE = true;
@@ -387,7 +398,7 @@ const winReason = ref<WinReason>(DEFAULT_WIN_REASON_VALUE);
 const moveIndex = ref(0);
 const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
-const gamePaused = ref(DEFAULT_GAME_PAUSED_VALUE);
+const gamePaused = ref<GamePaused>(DEFAULT_GAME_PAUSED_VALUE);
 const whiteCapturedPieces = ref<PieceId[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
 const blackCapturedPieces = ref<PieceId[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
 const highlightedCells: BooleanBoardState = reactive(
@@ -558,9 +569,10 @@ const userDataManager = new UserDataManager(
       toastManager,
       secondsMoveLimitRunOutPunishment
     ),
-    new BooleanUserData(
+    new SelectUserData(
       "game_paused",
       DEFAULT_GAME_PAUSED_VALUE,
+      isGamePaused,
       toastManager,
       gamePaused
     ),
@@ -799,6 +811,7 @@ userDataManager.applyData();
 userDataManager.updateReferences();
 
 const game = new Game(
+  gamePaused,
   playerBoardManager,
   gameBoardStateData,
   defaultBoardStateData,
@@ -843,7 +856,7 @@ onMounted(() => {
     if (visited === null) {
       game.restart();
     } else {
-      game.resume();
+      game.restore();
     }
     hideSplashscreen(transitionsManager.preferredTransitions);
   }, 600);
@@ -912,6 +925,17 @@ onMounted(() => {
         primary
         id="opponent-board"
       />
+      <Transition name="slide-side">
+        <div id="game-paused" v-show="gamePaused !== 'not'">
+          <div class="content">
+            <FragmentTitle icon-id="pause">Game paused</FragmentTitle>
+            <button @click="gamePaused = 'not'">
+              <Icon icon-id="play-outline" side />
+              Resume game
+            </button>
+          </div>
+        </div>
+      </Transition>
     </div>
     <div class="captured-pieces-placeholder"></div>
   </div>
@@ -922,8 +946,10 @@ onMounted(() => {
     @backdrop-click="toggleActionsPanel()"
     @configure-game="toggleSettings()"
     @restart-game="onGameRestart()"
+    @pause="manualyTogglePause()"
     :open="actionPanelOpen"
     :status-text="statusText"
+    :game-paused="gamePaused"
   />
 
   <Settings
@@ -1229,6 +1255,7 @@ onMounted(() => {
 
 #boards-area {
   @include flex-center;
+  position: relative;
   width: 100%;
   flex-grow: 1;
   padding: var(--spacing-small) 0;
@@ -1239,6 +1266,25 @@ onMounted(() => {
 
   .board-container {
     padding: 0 var(--spacing-small);
+  }
+}
+
+#game-paused {
+  @include centered;
+  @include flex-center;
+  margin: auto;
+  z-index: var(--z-index-top-fragment);
+  flex-direction: column;
+  position: absolute;
+  text-align: center;
+  background-color: var(--color-primary-surface);
+
+  .fragment-title {
+    justify-content: center;
+  }
+
+  h2 {
+    flex-grow: 0;
   }
 }
 

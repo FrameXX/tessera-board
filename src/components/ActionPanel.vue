@@ -1,11 +1,13 @@
 <script lang="ts" setup>
-import { watch } from "vue";
+import { type PropType, watch } from "vue";
 import Backdrop from "./Backdrop.vue";
 import FastButton from "./FastButton.vue";
+import type { GamePaused } from "../modules/game";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
   statusText: { type: String, required: true },
+  gamePaused: { type: String as PropType<GamePaused>, required: true },
 });
 const emit = defineEmits([
   "open",
@@ -14,6 +16,7 @@ const emit = defineEmits([
   "configureGame",
   "restartGame",
   "aboutGame",
+  "pause",
 ]);
 
 watch(
@@ -35,7 +38,11 @@ watch(
           title="About game"
         />
         <FastButton icon-id="flag" title="Resign" />
-        <FastButton icon-id="pause" title="Pause match" />
+        <FastButton
+          @click="$emit('pause')"
+          :icon-id="props.gamePaused !== 'not' ? 'play-outline' : 'pause'"
+          title="Pause game"
+        />
         <FastButton
           @click="$emit('restartGame')"
           icon-id="restart"

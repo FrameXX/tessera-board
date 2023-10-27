@@ -62,6 +62,21 @@
   transform: translateY(100%);
 }
 
+// Slide side
+.slide-side-enter-active,
+.slide-side-leave-active {
+  transition: transform var(--transition-duration-medium)
+    var(--transition-timing-jump);
+}
+
+.slide-side-enter-from {
+  transform: translateX(-100%);
+}
+
+.slide-side-leave-to {
+  transform: translateX(100%);
+}
+
 // [Group] Scale
 .scale-move,
 .scale-enter-active,

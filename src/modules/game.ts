@@ -7,6 +7,11 @@ import ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 
+export type GamePaused = "not" | "auto" | "manual";
+export function isGamePaused(string: string): string is GamePaused {
+  return string === "not" || string === "auto" || string === "manual";
+}
+
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
   return string === "player" || string === "opponent";
@@ -82,6 +87,7 @@ class Game {
   private readonly opponentMatchSecondsTimer: Timer;
 
   constructor(
+    private readonly gamePaused: Ref<GamePaused>,
     private readonly gameBoardManager: GameBoardManager,
     private readonly gameBoardStateData: BoardStateData,
     private readonly defaultBoardStateData: RawBoardStateData,
@@ -104,6 +110,15 @@ class Game {
     private readonly winReason: Ref<WinReason>,
     private readonly toastManager: ToastManager
   ) {
+    watch(this.gamePaused, (newValue) => {
+      this.updateTimerState();
+      if (newValue !== "not") {
+        this.toastManager.showToast("Game paused", "info", "pause");
+      } else {
+        this.toastManager.showToast("Game resumed", "info", "play-outline");
+      }
+    });
+
     this.playerMoveSecondsTimer = new Timer(
       playerMoveSeconds,
       playerMoveSecondsLimit
@@ -288,15 +303,23 @@ class Game {
   }
 
   private updateTimerState() {
-    if (this.winner.value !== "none" || this.playerPlaying.value) {
+    if (
+      this.winner.value !== "none" ||
+      this.playerPlaying.value ||
+      this.gamePaused.value !== "not"
+    ) {
       this.opponentMoveSecondsTimer.pause();
       this.opponentMatchSecondsTimer.pause();
     }
-    if (this.winner.value !== "none" || !this.playerPlaying.value) {
+    if (
+      this.winner.value !== "none" ||
+      !this.playerPlaying.value ||
+      this.gamePaused.value !== "not"
+    ) {
       this.playerMoveSecondsTimer.pause();
       this.playerMatchSecondsTimer.pause();
     }
-    if (this.winner.value !== "none") {
+    if (this.winner.value !== "none" || this.gamePaused.value !== "not") {
       return;
     }
     if (this.playerPlaying.value) {
@@ -321,7 +344,7 @@ class Game {
     this.gameBoardStateData.save();
   }
 
-  public resume() {
+  public restore() {
     this.updateTimerState();
   }
 
