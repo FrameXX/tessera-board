@@ -30,16 +30,25 @@ class Promotion extends Move {
     super("promotion");
   }
 
+  private getRelevantCapturedPieces(
+    blackCapturedPieces: Ref<PieceId[]>,
+    whiteCapturedPieces: Ref<PieceId[]>
+  ) {
+    return this.pieceColor === "white"
+      ? blackCapturedPieces
+      : whiteCapturedPieces;
+  }
+
   private getLimitedTransformOptions(
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>
   ) {
+    const capturedPieces = this.getRelevantCapturedPieces(
+      blackCapturedPieces,
+      whiteCapturedPieces
+    );
     return this.transformOptions.filter((option) => {
-      let captured: boolean;
-      this.pieceColor === "white"
-        ? (captured = whiteCapturedPieces.value.includes(option.pieceId))
-        : (captured = blackCapturedPieces.value.includes(option.pieceId));
-      return captured;
+      return capturedPieces.value.includes(option.pieceId);
     });
   }
 
@@ -49,7 +58,7 @@ class Promotion extends Move {
     whiteCapturedPieces: Ref<PieceId[]>,
     higlightedCells: BooleanBoardState,
     selectPieceDialog: SelectPieceDialog,
-    banPromotionToUncapturedPieces: Ref<boolean>,
+    reviveFromCapturedPieces: Ref<boolean>,
     audioEffects: boolean,
     moveAudioEffect: Howl,
     removeAudioEffect: Howl,
@@ -69,14 +78,20 @@ class Promotion extends Move {
     if (audioEffects) moveAudioEffect.play();
 
     let transformOptions: RawPiece[];
-    if (banPromotionToUncapturedPieces.value) {
-      transformOptions = this.getLimitedTransformOptions(
+    let limitedTransformOptions: RawPiece[] = [];
+
+    if (reviveFromCapturedPieces.value) {
+      limitedTransformOptions = this.getLimitedTransformOptions(
         blackCapturedPieces,
         whiteCapturedPieces
       );
-      if (transformOptions.length !== 0) {
-        transformOptions = this.transformOptions;
-      }
+    }
+
+    const limitedTransformOptionsAvailible =
+      limitedTransformOptions.length !== 0;
+
+    if (limitedTransformOptionsAvailible) {
+      transformOptions = limitedTransformOptions;
     } else {
       transformOptions = this.transformOptions;
     }
@@ -88,6 +103,17 @@ class Promotion extends Move {
 
     transformPositionValue(this.target, newPiece, boardStateValue);
     if (useVibrations) navigator.vibrate([40, 60, 20]);
+
+    const capturedPieces = this.getRelevantCapturedPieces(
+      blackCapturedPieces,
+      whiteCapturedPieces
+    );
+    console.log(capturedPieces.value);
+    if (limitedTransformOptionsAvailible)
+      capturedPieces.value.splice(
+        capturedPieces.value.indexOf(newPiece.pieceId)
+      );
+    if (reviveFromCapturedPieces.value) capturedPieces.value.push(this.pieceId);
 
     highlightBoardPosition(this.origin, higlightedCells);
     highlightBoardPosition(this.target, higlightedCells);

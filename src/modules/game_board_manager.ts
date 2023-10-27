@@ -49,7 +49,7 @@ class GameBoardManager extends BoardManager {
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly useVibrations: Ref<boolean>,
     private readonly showCapturingPieces: Ref<boolean>,
-    private readonly banPromotionToUncapturedPieces: Ref<boolean>,
+    private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
     private readonly moveIndex: Ref<number>,
     // @ts-ignore
@@ -204,7 +204,7 @@ class GameBoardManager extends BoardManager {
         this.whiteCapturedPieces,
         this.higlightedCells,
         this.selectPieceDialog,
-        this.banPromotionToUncapturedPieces,
+        this.reviveFromCapturedPieces,
         this.audioEffects.value,
         this.pieceMoveAudioEffect,
         this.pieceRemoveAudioEffect,

@@ -63,9 +63,7 @@ const tableMode = inject("tableMode") as Ref<boolean>;
 const requireMoveConfirm = inject("requireMoveConfirm") as Ref<boolean>;
 const audioEffects = inject("audioEffects") as Ref<boolean>;
 const showCapturingPieces = inject("showCapturingPieces") as Ref<boolean>;
-const banPromotionToUncapturedPieces = inject<boolean>(
-  "banPromotionToUncapturedPieces"
-);
+const reviveFromCapturedPieces = inject<boolean>("reviveFromCapturedPieces");
 const playerMoveSecondsLimit = inject("playerMoveSecondsLimit") as Ref<number>;
 const opponentMoveSecondsLimit = inject(
   "opponentMoveSecondsLimit"
@@ -294,20 +292,20 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </template>
           </UserOption>
           <UserOption
-            name="Ban promotion to uncaptured pieces"
-            icon-id="plus-lock"
-            option-id="promotion-to-uncaptured-pieces"
+            name="Promote from captured pieces"
+            icon-id="ghost-outline"
+            option-id="revive-from-captured-pieces"
           >
             <Checkbox
-              id="promotion-to-uncaptured-pieces"
-              v-model="banPromotionToUncapturedPieces"
+              id="revive-from-captured-pieces"
+              v-model="reviveFromCapturedPieces"
             />
             <template #description>
-              When a piece promotes (in chess it is a pawn) it is only allowed
-              to promote to pieces that were that the player already lost. In
-              the very rare case when the player lost no pieces and pawn it to
-              be promoted he will be again able to choose any piece as a
-              fallback.
+              If enabled pieces that promote (for example when pawn promotes
+              after reaching end of the board) will get promoted only to already
+              captured pieces which will get revived and removed from list of
+              captured pieces and the original piece will be added to captured
+              pieces.
             </template>
           </UserOption>
           <!-- Checkboard -->

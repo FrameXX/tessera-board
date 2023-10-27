@@ -233,12 +233,12 @@ const DEFAULT_GAME_PAUSED_VALUE: GamePaused = "not";
 const DEFAULT_AUDIO_EFFECTS_VALUE = true;
 const DEFAULT_FIRST_MOVE_COLOR: PlayerColorOptionValue = "white";
 const DEFAULT_SHOW_CAPTURING_PIECES_VALUE = true;
-const DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE = false;
+const DEFAULT_REVIVE_FROM_CAPTURED_PIECES_VALUE = false;
 const DEFAULT_PLAYER_SECONDS_PER_MOVE = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MOVE = 0;
 const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
 const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
-const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = true;
+const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = false;
 const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishment =
   "random_move";
 const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
@@ -367,10 +367,8 @@ const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
 provide("audioEffects", audioEffects);
 const showCapturingPieces = ref(DEFAULT_SHOW_CAPTURING_PIECES_VALUE);
 provide("showCapturingPieces", showCapturingPieces);
-const banPromotionToUncapturedPieces = ref(
-  DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE
-);
-provide("banPromotionToUncapturedPieces", banPromotionToUncapturedPieces);
+const reviveFromCapturedPieces = ref(DEFAULT_REVIVE_FROM_CAPTURED_PIECES_VALUE);
+provide("reviveFromCapturedPieces", reviveFromCapturedPieces);
 const playerMoveSecondsLimit = ref(DEFAULT_PLAYER_SECONDS_PER_MOVE);
 provide("playerMoveSecondsLimit", playerMoveSecondsLimit);
 const opponentMoveSecondsLimit = ref(DEFAULT_OPPONENT_SECONDS_PER_MOVE);
@@ -578,9 +576,9 @@ const userDataManager = new UserDataManager(
     ),
     new BooleanUserData(
       "ban_promotion_to_uncaptured_pieces",
-      DEFAULT_BAN_PROMOTION_TO_UNCAPTURED_PIECES_VALUE,
+      DEFAULT_REVIVE_FROM_CAPTURED_PIECES_VALUE,
       toastManager,
-      banPromotionToUncapturedPieces
+      reviveFromCapturedPieces
     ),
     new BooleanUserData(
       "audio_effects",
@@ -767,7 +765,7 @@ const playerBoardManager = new GameBoardManager(
   pieceRemoveAudioEffect,
   useVibrations,
   showCapturingPieces,
-  banPromotionToUncapturedPieces,
+  reviveFromCapturedPieces,
   showOtherAvailibleMoves,
   moveIndex,
   toastManager
@@ -794,7 +792,7 @@ const opponentBoardManager = new GameBoardManager(
   pieceRemoveAudioEffect,
   useVibrations,
   showCapturingPieces,
-  banPromotionToUncapturedPieces,
+  reviveFromCapturedPieces,
   showOtherAvailibleMoves,
   moveIndex,
   toastManager
