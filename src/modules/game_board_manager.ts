@@ -129,7 +129,8 @@ class GameBoardManager extends BoardManager {
       )
         return;
       if (
-        (this.playerBoard &&
+        (this.secondCheckboard.value &&
+          this.playerBoard &&
           pieceProps.piece.color !== this.playerColor.value) ||
         (!this.playerBoard && pieceProps.piece.color === this.playerColor.value)
       )
