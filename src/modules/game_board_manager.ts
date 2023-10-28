@@ -110,6 +110,21 @@ class GameBoardManager extends BoardManager {
     }
   }
 
+  private shouldShowMoves(pieceColor: PlayerColor) {
+    if (this.showOtherAvailibleMoves.value) return true;
+    if (!this.secondCheckboard.value && pieceColor !== this.playingColor.value)
+      return false;
+    if (this.secondCheckboard.value) {
+      if (
+        (this.playerBoard && pieceColor !== this.playerColor.value) ||
+        (!this.playerBoard && pieceColor === this.playerColor.value)
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private set selectedPiece(pieceProps: BoardPieceProps | null) {
     this.clearCellsMarks();
     this.clearSelectedPiece();
@@ -122,19 +137,8 @@ class GameBoardManager extends BoardManager {
     this._selectedPiece = pieceProps;
     this.selectedPieces.value.push(pieceProps);
 
-    if (!this.showOtherAvailibleMoves.value) {
-      if (
-        pieceProps.piece.color !== this.playingColor.value &&
-        !this.secondCheckboard.value
-      )
-        return;
-      if (
-        (this.secondCheckboard.value &&
-          this.playerBoard &&
-          pieceProps.piece.color !== this.playerColor.value) ||
-        (!this.playerBoard && pieceProps.piece.color === this.playerColor.value)
-      )
-        return;
+    if (!this.shouldShowMoves(pieceProps.piece.color)) {
+      return;
     }
 
     const moves = pieceProps.piece.getPossibleMoves(
