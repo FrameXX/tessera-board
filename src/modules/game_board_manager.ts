@@ -122,11 +122,19 @@ class GameBoardManager extends BoardManager {
     this._selectedPiece = pieceProps;
     this.selectedPieces.value.push(pieceProps);
 
-    if (
-      !this.showOtherAvailibleMoves.value &&
-      pieceProps.piece.color !== this.playingColor.value
-    )
-      return;
+    if (!this.showOtherAvailibleMoves.value) {
+      if (
+        pieceProps.piece.color !== this.playingColor.value &&
+        !this.secondCheckboard.value
+      )
+        return;
+      if (
+        (this.playerBoard &&
+          pieceProps.piece.color !== this.playerColor.value) ||
+        (!this.playerBoard && pieceProps.piece.color === this.playerColor.value)
+      )
+        return;
+    }
 
     const moves = pieceProps.piece.getPossibleMoves(
       pieceProps,
