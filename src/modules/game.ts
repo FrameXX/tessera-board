@@ -6,6 +6,7 @@ import GameBoardManager from "./game_board_manager";
 import ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
+import ConfirmDialog from "./dialogs/confirm";
 
 export type GamePaused = "not" | "auto" | "manual";
 export function isGamePaused(string: string): string is GamePaused {
@@ -111,6 +112,7 @@ class Game {
     private readonly secondsMoveLimitRunOutPunishment: Ref<MoveSecondsLimitRunOutPunishment>,
     private readonly winner: Ref<Winner>,
     private readonly winReason: Ref<WinReason>,
+    private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
     watch(this.gamePaused, (newValue) => {
@@ -333,7 +335,7 @@ class Game {
     }
   }
 
-  public resign() {
+  public async resign() {
     if (this.winner.value !== "none") {
       this.toastManager.showToast(
         `You cannot resign. The game ending was already decided.`,
@@ -342,9 +344,15 @@ class Game {
       );
       return;
     }
+    const confirmed = await this.confirmDialog.show(
+      "Do you really want to give up this match? You are responsible for your decisions and this cannot be undone."
+    );
+    if (!confirmed) {
+      return;
+    }
     this.toastManager.showToast(
       `${getPlayerTeamName(
-        this.playerPlaying ? "player" : "opponent",
+        this.playerPlaying.value ? "player" : "opponent",
         this.playerColor.value
       )} resigned`,
       "info",

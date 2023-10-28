@@ -165,6 +165,15 @@ function manualyTogglePause() {
   }
 }
 
+function onFocusChange(focused: boolean) {
+  if (!focused && autoPause.value && gamePaused.value === "not") {
+    gamePaused.value = "auto";
+  }
+  if (focused && gamePaused.value === "auto") {
+    gamePaused.value = "not";
+  }
+}
+
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
     new Rook("white"),
@@ -253,7 +262,13 @@ provide("pixelsPerCm", pixelsPerCm);
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
 const pieceRemoveAudioEffect = new Howl({ src: [removeAudioEffectUrl] });
 const settingsOpen = ref(false);
+watch(settingsOpen, () => {
+  onFocusChange(!settingsOpen.value);
+});
 const aboutOpen = ref(false);
+watch(aboutOpen, () => {
+  onFocusChange(!aboutOpen.value);
+});
 const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<null | HTMLInputElement>(null);
@@ -839,6 +854,7 @@ const game = new Game(
   secondsMoveLimitRunOutPunishment,
   winner,
   winReason,
+  confirmDialog,
   toastManager
 );
 
@@ -858,12 +874,7 @@ onMounted(() => {
   });
 
   addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden" && autoPause.value) {
-      gamePaused.value = "auto";
-    }
-    if (document.visibilityState === "visible" && gamePaused.value === "auto") {
-      gamePaused.value = "not";
-    }
+    onFocusChange(document.visibilityState === "visible");
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.
