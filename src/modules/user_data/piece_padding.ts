@@ -13,7 +13,7 @@ class PiecePaddingData extends NumberUserData {
   }
 
   public apply(): void {
-    setCSSVariable("piece-padding", this.value.toString() + "px");
+    setCSSVariable("piece-padding", this.value.toString() + "%");
   }
 }
 

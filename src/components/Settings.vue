@@ -486,7 +486,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </template>
           </UserOption>
           <UserOption
-            name="piece padding (px)"
+            name="piece padding (%)"
             icon-id="padding-piece"
             option-id="input-piece-padding"
           >

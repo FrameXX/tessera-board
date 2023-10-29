@@ -28,6 +28,7 @@ const props = defineProps({
   rotated: { type: Boolean, default: false },
   boardRotated: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
+  size: { type: Number, required: true },
 });
 
 const longPressTimeout = inject("longPressTimeout") as Ref<number>;
@@ -58,9 +59,6 @@ const translateX = computed(() => {
 });
 const translateY = computed(() => {
   return (7 - props.row) * props.cellSize + dragYDelta.value;
-});
-const size = computed(() => {
-  return props.cellSize - props.piecePadding * 2;
 });
 
 // Values for setting the translate origin of piece wrapper
@@ -281,8 +279,8 @@ onBeforeUnmount(() => {
         transform: `${translate} ${scale} ${
           props.rotated ? 'rotate(-0.5turn)' : ' '
         }`,
-        width: `${size}px`,
-        height: `${size}px`,
+        width: `${props.size}px`,
+        height: `${props.size}px`,
         zIndex: zIndex,
       }"
       :piece-id="props.piece.pieceId"
@@ -312,7 +310,7 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 0;
   left: 0;
-  padding: var(--piece-padding);
+  padding: calc(var(--piece-padding) / 8);
   transition: transform var(--transition-duration-medium) ease-in-out,
     filter var(--transition-duration-short) linear;
 

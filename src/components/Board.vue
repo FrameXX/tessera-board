@@ -91,6 +91,9 @@ const containerSize = ref<number>(0);
 const cellSize = computed(() => {
   return containerSize.value / 8;
 });
+const pieceSize = computed(() => {
+  return cellSize.value - (props.piecePadding / 50) * cellSize.value;
+});
 
 onMounted(() => {
   const observer = new ResizeObserver(updateContainerSize);
@@ -206,6 +209,7 @@ function isCellDraggedOver(position: BoardPosition) {
           :piece-padding="piecePadding"
           :rotated="props.contentRotated"
           :board-rotated="props.rotated"
+          :size="pieceSize"
         />
       </TransitionGroup>
 

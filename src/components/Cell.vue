@@ -191,7 +191,7 @@ const markIconId = computed(() => {
   height: 15%;
   font-size: calc(var(--board-size) * 0.02);
   font-weight: 600;
-  padding: calc(var(--board-size) * 0.006);
+  padding: calc(var(--board-size) * 0.008);
   opacity: var(--cell-index-opacity);
 }
 
