@@ -147,7 +147,7 @@ function isInArrayOfBoardPositions(
 }
 
 function isPieceDragged(position: BoardPosition) {
-  if (draggingPiece.value === null) {
+  if (!draggingPiece.value) {
     return false;
   }
   return positionsEqual(draggingPiece.value, position);
@@ -172,7 +172,7 @@ const dragColDelta = computed(() => {
   return delta;
 });
 const targetingDragPosition = computed(() => {
-  if (draggingPiece.value === null) {
+  if (!draggingPiece.value) {
     return { row: 0, col: 0 };
   }
   const position = getDeltaPosition(
@@ -183,7 +183,7 @@ const targetingDragPosition = computed(() => {
   return position;
 });
 watch(targetingDragPosition, () => {
-  if (draggingPiece.value === null) {
+  if (!draggingPiece.value) {
     return;
   }
   props.manager.onPieceDragOverCell(
@@ -207,19 +207,26 @@ const dragXDelta = ref(0);
 const dragYDelta = ref(0);
 
 function onPieceMouseDown(event: MouseEvent, pieceProps: BoardPieceProps) {
-  if (event.button !== 0) return;
+  if (
+    event.button !== 0 ||
+    pressTimeout !== null ||
+    draggingPiece.value !== null
+  )
+    return;
   inchOffset.value = 0;
   onPiecePressStart(event.clientX, event.clientY, pieceProps);
 }
 
 function onPieceTouchStart(event: TouchEvent, pieceProps: BoardPieceProps) {
-  const touch = event.touches[0];
+  if (pressTimeout !== null || draggingPiece.value !== null) return;
   inchOffset.value = 1.8;
+  const touch = event.touches[0];
   onPiecePressStart(touch.clientX, touch.clientY, pieceProps);
 }
 
 function onPiecePressStart(x: number, y: number, pieceProps: BoardPieceProps) {
   pressTimeout = window.setTimeout(() => {
+    pressTimeout = null;
     draggingPiece.value = pieceProps;
     props.manager.onPieceDragStart(pieceProps, targetingDragPosition.value);
     lastDragX = x;
@@ -228,10 +235,18 @@ function onPiecePressStart(x: number, y: number, pieceProps: BoardPieceProps) {
   }, longPressTimeout.value);
 }
 
+function onTouchEnd(event: TouchEvent) {
+  if (event.touches.length > 0 && draggingPiece.value) {
+    return;
+  }
+  onPressEnd();
+}
+
 function onPressEnd() {
-  if (draggingPiece.value === null) {
+  if (!draggingPiece.value) {
     if (pressTimeout === null) return;
     clearTimeout(pressTimeout);
+    pressTimeout = null;
     return;
   }
   props.manager.onPieceDragEnd(
@@ -239,19 +254,18 @@ function onPressEnd() {
     targetingDragPosition.value
   );
   draggingPiece.value = null;
-  pressTimeout = null;
   resetDragDelta();
 }
 
 function onMouseMove(event: MouseEvent) {
-  if (draggingPiece.value === null) {
+  if (!draggingPiece.value) {
     return;
   }
   onPieceMove(event.clientX, event.clientY);
 }
 
 function onTouchMove(event: TouchEvent) {
-  if (draggingPiece.value === null) {
+  if (!draggingPiece.value) {
     return;
   }
   const touch = event.touches[0];
@@ -282,7 +296,7 @@ onMounted(() => {
   }
 
   addEventListener("mouseup", onPressEnd);
-  addEventListener("touchend", onPressEnd, {
+  addEventListener("touchend", onTouchEnd, {
     passive: true,
   });
   addEventListener("mousemove", onMouseMove);
@@ -297,7 +311,11 @@ onMounted(() => {
     <table
       role="grid"
       class="board"
-      :class="{ rotated: props.rotated, contentRotated: props.contentRotated }"
+      :class="{
+        rotated: props.rotated,
+        contentRotated: props.contentRotated,
+        active: draggingPiece,
+      }"
       :style="`--board-size: ${containerSize}px;`"
     >
       <div v-if="primary" class="black captured-pieces">
@@ -432,6 +450,10 @@ onMounted(() => {
 
   &.rotated {
     rotate: -0.5turn;
+  }
+
+  &.active {
+    z-index: var(--z-index-piece-top);
   }
 
   .row {
