@@ -1,61 +1,76 @@
 import { setCSSVariable } from "./utils/elements";
-import type { ThemeValue } from "./user_data/theme";
+import { Ref, watch } from "vue";
 
-export type Theme = "light" | "dark";
+export type ApplyedTheme = "light" | "dark";
+export type Theme = "auto" | "light" | "dark";
+export function isTheme(string: string): string is Theme {
+  return string === "auto" || string === "light" || string === "dark";
+}
 
 class ThemeManager {
-  public usedTheme: ThemeValue;
+  constructor(private readonly theme: Ref<Theme>) {
+    this.updateTheme(this.theme.value);
 
-  constructor(usedTheme: ThemeValue) {
-    this.usedTheme = usedTheme;
-    this.applyUsedTheme();
     matchMedia("(prefers-color-scheme: dark)").addEventListener(
       "change",
       () => {
-        if (this.usedTheme === "auto") {
-          this.applyUsedTheme();
+        if (this.theme.value === "auto") {
+          this.updateTheme(this.theme.value);
         }
       }
     );
+
+    watch(this.theme, (newValue) => {
+      this.updateTheme(newValue);
+    });
   }
 
-  public get preferredTheme(): Theme {
-    let theme: Theme;
-    if (this.usedTheme == "auto") {
+  private updateTheme(newTheme: Theme) {
+    this.setThemeProperties(this.getApplyedTheme(newTheme));
+  }
+
+  public getApplyedTheme(theme: Theme): ApplyedTheme {
+    let applyedTheme: ApplyedTheme;
+    if (theme == "auto") {
       if (matchMedia("(prefers-color-scheme: dark)").matches) {
-        theme = "dark";
+        applyedTheme = "dark";
       } else {
-        theme = "light";
+        applyedTheme = "light";
       }
     } else {
-      theme = this.usedTheme;
+      applyedTheme = theme;
     }
-    return theme;
+    return applyedTheme;
   }
 
-  private setThemeProperties(theme: Theme): void {
-    setCSSVariable("L-text", `var(--L-${theme}-text)`);
-    setCSSVariable("L-surface", `var(--L-${theme}-surface)`);
-    setCSSVariable("L-surface-top", `var(--L-${theme}-surface-top)`);
-    setCSSVariable("L-surface-accent", `var(--L-${theme}-surface-accent)`);
-    setCSSVariable("L-accent", `var(--L-${theme}-accent)`);
-    setCSSVariable("L-cell-white", `var(--L-${theme}-cell-white)`);
-    setCSSVariable("L-cell-black", `var(--L-${theme}-cell-black)`);
-    setCSSVariable("L-piece-fill-white", `var(--L-${theme}-piece-fill-white)`);
-    setCSSVariable("L-piece-fill-black", `var(--L-${theme}-piece-fill-black)`);
+  private setThemeProperties(applyedTheme: ApplyedTheme): void {
+    setCSSVariable("L-text", `var(--L-${applyedTheme}-text)`);
+    setCSSVariable("L-surface", `var(--L-${applyedTheme}-surface)`);
+    setCSSVariable("L-surface-top", `var(--L-${applyedTheme}-surface-top)`);
+    setCSSVariable(
+      "L-surface-accent",
+      `var(--L-${applyedTheme}-surface-accent)`
+    );
+    setCSSVariable("L-accent", `var(--L-${applyedTheme}-accent)`);
+    setCSSVariable("L-cell-white", `var(--L-${applyedTheme}-cell-white)`);
+    setCSSVariable("L-cell-black", `var(--L-${applyedTheme}-cell-black)`);
+    setCSSVariable(
+      "L-piece-fill-white",
+      `var(--L-${applyedTheme}-piece-fill-white)`
+    );
+    setCSSVariable(
+      "L-piece-fill-black",
+      `var(--L-${applyedTheme}-piece-fill-black)`
+    );
     setCSSVariable(
       "L-piece-stroke-white",
-      `var(--L-${theme}-piece-stroke-white)`
+      `var(--L-${applyedTheme}-piece-stroke-white)`
     );
     setCSSVariable(
       "L-piece-stroke-black",
-      `var(--L-${theme}-piece-stroke-black)`
+      `var(--L-${applyedTheme}-piece-stroke-black)`
     );
-    setCSSVariable("L-dim", `var(--L-${theme}-dim)`);
-  }
-
-  public applyUsedTheme(): void {
-    this.setThemeProperties(this.preferredTheme);
+    setCSSVariable("L-dim", `var(--L-${applyedTheme}-dim)`);
   }
 }
 

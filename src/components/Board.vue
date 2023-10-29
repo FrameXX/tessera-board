@@ -200,20 +200,19 @@ function resetDragDelta() {
 const inchPxOffset = computed(() => {
   return inchOffset.value * pixelsPerCm;
 });
-let pressTimeout: number = 0;
+let pressTimeout: number | null = null;
 let lastDragX: number = 0;
 let lastDragY: number = 0;
 const dragXDelta = ref(0);
 const dragYDelta = ref(0);
 
 function onPieceMouseDown(event: MouseEvent, pieceProps: BoardPieceProps) {
-  if (event.button !== 0 || pressTimeout !== 0) return;
+  if (event.button !== 0) return;
   inchOffset.value = 0;
   onPiecePressStart(event.clientX, event.clientY, pieceProps);
 }
 
 function onPieceTouchStart(event: TouchEvent, pieceProps: BoardPieceProps) {
-  if (pressTimeout !== 0) return;
   const touch = event.touches[0];
   inchOffset.value = 1.8;
   onPiecePressStart(touch.clientX, touch.clientY, pieceProps);
@@ -229,8 +228,9 @@ function onPiecePressStart(x: number, y: number, pieceProps: BoardPieceProps) {
   }, longPressTimeout.value);
 }
 
-function onPiecePressEnd() {
+function onPressEnd() {
   if (draggingPiece.value === null) {
+    if (pressTimeout === null) return;
     clearTimeout(pressTimeout);
     return;
   }
@@ -239,18 +239,18 @@ function onPiecePressEnd() {
     targetingDragPosition.value
   );
   draggingPiece.value = null;
-  pressTimeout = 0;
+  pressTimeout = null;
   resetDragDelta();
 }
 
-function onPieceMouseMove(event: MouseEvent) {
+function onMouseMove(event: MouseEvent) {
   if (draggingPiece.value === null) {
     return;
   }
   onPieceMove(event.clientX, event.clientY);
 }
 
-function onPieceTouchMove(event: TouchEvent) {
+function onTouchMove(event: TouchEvent) {
   if (draggingPiece.value === null) {
     return;
   }
@@ -281,12 +281,12 @@ onMounted(() => {
     );
   }
 
-  addEventListener("mouseup", onPiecePressEnd);
-  addEventListener("touchend", onPiecePressEnd, {
+  addEventListener("mouseup", onPressEnd);
+  addEventListener("touchend", onPressEnd, {
     passive: true,
   });
-  addEventListener("mousemove", onPieceMouseMove);
-  addEventListener("touchmove", onPieceTouchMove, {
+  addEventListener("mousemove", onMouseMove);
+  addEventListener("touchmove", onTouchMove, {
     passive: true,
   });
 });

@@ -10,10 +10,8 @@ import { Howl } from "howler";
 import SelectUserData from "./modules/user_data/select_user_data";
 import BooleanUserData from "./modules/user_data/boolean_user_data";
 import UserDataManager from "./modules/user_data_manager";
-import ThemeData, { type ThemeValue } from "./modules/user_data/theme";
-import TransitionsData, {
-  type TransitionsValue,
-} from "./modules/user_data/transitions";
+import { type Theme, isTheme } from "./modules/theme_manager";
+import { type Transitions, isTransitions } from "./modules/transitions_manager";
 import HueData from "./modules/user_data/hue";
 import PieceSetData, {
   type PieceSetValue,
@@ -48,7 +46,6 @@ import { PIECE_IDS, type Path } from "./modules/pieces/piece";
 import {
   activateColors,
   hideSplashscreen,
-  setCSSVariable,
   updatePrimaryHue,
   updatePieceColors,
 } from "./modules/utils/elements";
@@ -83,6 +80,7 @@ import { RawPiece } from "./modules/pieces/rawPiece";
 import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
+import InteractionManager from "./modules/interactionManager";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -98,81 +96,6 @@ import Status from "./components/Status.vue";
 import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
-
-function toggleActionsPanel() {
-  actionPanelOpen.value = !actionPanelOpen.value;
-  actionPanelOpen.value
-    ? escapeManager.addLayer(toggleActionsPanel)
-    : escapeManager.removeLayer();
-
-  if (!actionPanelOpen.value) {
-    if (settingsOpen.value) {
-      toggleSettings();
-    }
-    if (aboutOpen.value) {
-      toggleAbout();
-    }
-  }
-}
-
-function toggleSettings() {
-  settingsOpen.value = !settingsOpen.value;
-  settingsOpen.value
-    ? escapeManager.addLayer(toggleActionsPanel)
-    : escapeManager.removeLayer();
-}
-
-function toggleAbout() {
-  aboutOpen.value = !aboutOpen.value;
-  aboutOpen.value
-    ? escapeManager.addLayer(toggleActionsPanel)
-    : escapeManager.removeLayer();
-}
-
-function updateScreenRotation(rotate: boolean): void {
-  rotate
-    ? setCSSVariable("app-transform", "rotate(-0.5turn)")
-    : setCSSVariable("app-transform", "");
-}
-
-function tryRecoverData() {
-  if (!navigator.cookieEnabled) {
-    toastManager.showToast(
-      "Cookies are disabled. -> No changes will be restored in next session.",
-      "error",
-      "cookie-alert"
-    );
-    return false;
-  }
-  userDataManager.recoverData();
-  return true;
-}
-
-async function onGameRestart() {
-  const confirmed = await confirmDialog.show(
-    "Currently played game will be lost. Are you sure?"
-  );
-  if (!confirmed) return;
-  actionPanelOpen.value = false;
-  game.restart();
-}
-
-function manualyTogglePause() {
-  if (gamePaused.value === "not") {
-    gamePaused.value = "manual";
-  } else {
-    gamePaused.value = "not";
-  }
-}
-
-function onFocusChange(focused: boolean) {
-  if (!focused && autoPause.value && gamePaused.value === "not") {
-    gamePaused.value = "auto";
-  }
-  if (focused && gamePaused.value === "auto") {
-    gamePaused.value = "not";
-  }
-}
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -232,9 +155,9 @@ const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PlayerColorOptionValue = "random";
 const DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE = false;
 const DEFAULT_ROTATE_SCREEN_VALUE = false;
 const DEFAULT_SECOND_CHECKBOARD_VALUE = false;
-const DEFAULT_THEME_VALUE: ThemeValue = "auto";
+const DEFAULT_THEME_VALUE: Theme = "auto";
 const DEFAULT_TRANSITION_DURATION_VALUE = 100;
-const DEFAULT_TRANSITIONS_VALUE: TransitionsValue = "auto";
+const DEFAULT_TRANSITIONS_VALUE: Transitions = "auto";
 const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
 const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: PieceId[] = [];
 const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: PieceId[] = [];
@@ -263,11 +186,11 @@ const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
 const pieceRemoveAudioEffect = new Howl({ src: [removeAudioEffectUrl] });
 const settingsOpen = ref(false);
 watch(settingsOpen, () => {
-  onFocusChange(!settingsOpen.value);
+  interactionManager.onFocusChange(!settingsOpen.value);
 });
 const aboutOpen = ref(false);
 watch(aboutOpen, () => {
-  onFocusChange(!aboutOpen.value);
+  interactionManager.onFocusChange(!aboutOpen.value);
 });
 const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
@@ -465,8 +388,10 @@ const configsDialog = new ConfigsDialog(
   toastManager
 );
 provide("configsDialog", configsDialog);
-const themeManger = new ThemeManager(DEFAULT_THEME_VALUE);
-const transitionsManager = new TransitionsManager(DEFAULT_TRANSITIONS_VALUE);
+
+// @ts-ignore
+const themeManger = new ThemeManager(theme);
+const transitionsManager = new TransitionsManager(transitions);
 
 // Data
 const defaultBoardStateData = new RawBoardStateData(
@@ -484,13 +409,6 @@ const gameBoardStateData = new BoardStateData(
 // NOTE: Most of the UserData instances use Ref but some of them may use reactive if their value is more complex. These classes are extending ComplexUserData class.
 const userDataManager = new UserDataManager(
   [
-    new ThemeData(DEFAULT_THEME_VALUE, theme, themeManger, toastManager),
-    new TransitionsData(
-      DEFAULT_TRANSITIONS_VALUE,
-      transitions,
-      transitionsManager,
-      toastManager
-    ),
     new BooleanUserData(
       "use_vibrations",
       DEFAULT_USE_VIBRATIONS_VALUE,
@@ -575,6 +493,20 @@ const userDataManager = new UserDataManager(
       isPlayerColor,
       toastManager,
       playerColor
+    ),
+    new SelectUserData(
+      "theme",
+      DEFAULT_THEME_VALUE,
+      isTheme,
+      toastManager,
+      theme
+    ),
+    new SelectUserData(
+      "transitions",
+      DEFAULT_TRANSITIONS_VALUE,
+      isTransitions,
+      toastManager,
+      transitions
     ),
     new SelectUserData(
       "win_reason",
@@ -734,7 +666,7 @@ const opponentBoardRotated = computed(() => {
 });
 
 watch(screenRotated, (newValue) => {
-  updateScreenRotation(newValue);
+  interactionManager.updateScreenRotation(newValue);
 });
 watch(playerPlaying, (newValue) => {
   updatePrimaryHue(newValue);
@@ -754,7 +686,7 @@ const defaultBoardConfigManager = new ConfigManager(
   toastManager
 );
 
-const escapeManager = new EscapeManager(toggleActionsPanel);
+const escapeManager = new EscapeManager();
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
   configPieceDialog,
@@ -822,16 +754,6 @@ const opponentBoardManager = new GameBoardManager(
   toastManager
 );
 
-const visited = localStorage.getItem("tessera_board-visited");
-if (visited === null) {
-  localStorage.setItem("tessera_board-visited", "1");
-} else {
-  tryRecoverData();
-}
-userDataManager.onRecoverCheck();
-userDataManager.applyData();
-userDataManager.updateReferences();
-
 const game = new Game(
   gamePaused,
   playerBoardManager,
@@ -857,6 +779,29 @@ const game = new Game(
   confirmDialog,
   toastManager
 );
+const interactionManager = new InteractionManager(
+  escapeManager,
+  toastManager,
+  userDataManager,
+  game,
+  confirmDialog,
+  actionPanelOpen,
+  settingsOpen,
+  aboutOpen,
+  gamePaused,
+  autoPause
+);
+escapeManager.defaultCallBack = interactionManager.toggleActionsPanel;
+
+const visited = localStorage.getItem("tessera_board-visited");
+if (visited === null) {
+  localStorage.setItem("tessera_board-visited", "1");
+} else {
+  interactionManager.tryRecoverData();
+}
+userDataManager.onRecoverCheck();
+userDataManager.applyData();
+userDataManager.updateReferences();
 
 onMounted(() => {
   // Sets CSS Saturation variables from 0 to their appropriate user configured values
@@ -866,15 +811,15 @@ onMounted(() => {
     if (event.key === "Escape") escapeManager.escape();
     if (event.key === "R" && event.shiftKey) game.restart();
     if (event.key === "C" && event.shiftKey) {
-      toggleActionsPanel();
+      interactionManager.toggleActionsPanel();
       if (actionPanelOpen.value) {
-        toggleSettings();
+        interactionManager.toggleSettings();
       }
     }
   });
 
   addEventListener("visibilitychange", () => {
-    onFocusChange(document.visibilityState === "visible");
+    interactionManager.onFocusChange(document.visibilityState === "visible");
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.
@@ -885,7 +830,9 @@ onMounted(() => {
     } else {
       game.restore();
     }
-    hideSplashscreen(transitionsManager.preferredTransitions);
+    hideSplashscreen(
+      transitionsManager.getApplyedTransitions(transitions.value)
+    );
   }, 600);
 });
 </script>
@@ -969,11 +916,11 @@ onMounted(() => {
 
   <!-- Fixed -->
   <ActionPanel
-    @about-game="toggleAbout()"
-    @backdrop-click="toggleActionsPanel()"
-    @configure-game="toggleSettings()"
-    @restart-game="onGameRestart()"
-    @pause="manualyTogglePause()"
+    @about-game="interactionManager.toggleAbout()"
+    @backdrop-click="interactionManager.toggleActionsPanel()"
+    @configure-game="interactionManager.toggleSettings()"
+    @restart-game="interactionManager.onGameRestart()"
+    @pause="interactionManager.manualyTogglePause()"
     @resign="game.resign()"
     :open="actionPanelOpen"
     :status-text="statusText"
@@ -1005,7 +952,7 @@ onMounted(() => {
     </Transition>
     <button
       id="action-button"
-      @click="toggleActionsPanel"
+      @click="interactionManager.toggleActionsPanel"
       aria-label="Actions"
       title="Actions"
     >

@@ -9,9 +9,6 @@ import Board, { type BoardPosition } from "./Board.vue";
 import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
 import FragmentTitle from "./FragmentTitle.vue";
-
-import type { ThemeValue } from "../modules/user_data/theme";
-import type { TransitionsValue } from "../modules/user_data/transitions";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type {
   MoveSecondsLimitRunOutPunishment,
@@ -22,6 +19,8 @@ import ConfigManager from "../modules/config_manager";
 import DefaultBoardManager from "../modules/default_board_manager";
 import { BoardStateValue } from "../modules/user_data/board_state";
 import UserDataManager from "../modules/user_data_manager";
+import { type Theme } from "../modules/theme_manager";
+import { type Transitions } from "../modules/transitions_manager";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -47,8 +46,8 @@ const props = defineProps({
   },
 });
 
-const theme = inject("theme") as Ref<ThemeValue>;
-const transitions = inject("transitions") as Ref<TransitionsValue>;
+const theme = inject("theme") as Ref<Theme>;
+const transitions = inject("transitions") as Ref<Transitions>;
 const playerHue = inject("playerHue") as Ref<number>;
 const opponentHue = inject("opponentHue") as Ref<number>;
 const pieceSet = inject("pieceSet") as Ref<PieceSetValue>;

@@ -2,14 +2,19 @@ type EscapeCallback = (args?: any) => void;
 
 class EscapeManager {
   private readonly escapeStack: EscapeCallback[];
+  public defaultCallBack: EscapeCallback | null = null;
 
-  constructor(private readonly defaultCallBack: EscapeCallback) {
+  constructor() {
     this.escapeStack = [];
   }
 
   public escape() {
     const callBack = this.escapeStack[this.escapeStack.length - 1];
-    callBack ? callBack() : this.defaultCallBack();
+    if (callBack) {
+      callBack();
+    } else if (this.defaultCallBack) {
+      this.defaultCallBack();
+    }
   }
 
   addLayer(escapeCallback: EscapeCallback) {

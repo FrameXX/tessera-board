@@ -1,35 +1,45 @@
 import { setCSSVariable } from "./utils/elements";
-import type { TransitionsValue } from "./user_data/transitions";
+import { Ref, watch } from "vue";
+
+export type Transitions = "auto" | "enabled" | "disabled";
+export function isTransitions(string: string): string is Transitions {
+  return string === "auto" || string === "enabled" || string === "disabled";
+}
 
 class TransitionsManager {
-  public usedTransitions: TransitionsValue;
+  constructor(private readonly transitions: Ref<Transitions>) {
+    this.updateTransitions(this.transitions.value);
 
-  constructor(usedTransitions: TransitionsValue) {
-    this.usedTransitions = usedTransitions;
-    this.applyUsedTransitions();
     matchMedia("(prefers-reduced-motion: reduce)").addEventListener(
       "change",
       () => {
-        if (this.usedTransitions === "auto") {
-          this.applyUsedTransitions();
+        if (this.transitions.value === "auto") {
+          this.updateTransitions(this.transitions.value);
         }
       }
     );
+
+    watch(this.transitions, (newValue) => {
+      this.updateTransitions(newValue);
+    });
   }
 
-  public get preferredTransitions(): boolean {
-    let preferred: boolean;
-    if (this.usedTransitions === "auto") {
-      preferred = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  private updateTransitions(newTransitions: Transitions) {
+    this.setTransitionsProperties(this.getApplyedTransitions(newTransitions));
+  }
+
+  public getApplyedTransitions(transitions: Transitions): boolean {
+    let enabled: boolean;
+    if (transitions === "auto") {
+      enabled = !matchMedia("(prefers-reduced-motion: reduce)").matches;
     } else {
-      preferred = this.usedTransitions === "enabled";
+      enabled = transitions === "enabled";
     }
-    return preferred;
+    return enabled;
   }
 
-  public applyUsedTransitions() {
-    const preferred = this.preferredTransitions;
-    if (preferred) {
+  private setTransitionsProperties(enabled: boolean): void {
+    if (enabled) {
       setCSSVariable(
         "transition-duration-multiplier",
         "var(--transition-duration-multiplier-config)"
