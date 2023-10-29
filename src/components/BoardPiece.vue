@@ -7,17 +7,9 @@ import {
   watch,
   type ComponentPublicInstance,
   onBeforeUnmount,
-  inject,
-  onMounted,
-  type Ref,
 } from "vue";
 import { waitForTransitionEnd } from "../modules/utils/elements";
 import type Piece from "../modules/pieces/piece";
-import { getDeltaPosition } from "../modules/pieces/piece";
-import { BoardPosition } from "./Board.vue";
-import { isBoardPosition } from "../modules/board_manager";
-
-let inchOffset = ref(1.8);
 
 const props = defineProps({
   piece: { type: Object as PropType<Piece>, required: true },
@@ -29,36 +21,30 @@ const props = defineProps({
   boardRotated: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
   size: { type: Number, required: true },
+  dragging: { type: Boolean, default: false },
+  dragXDelta: { type: Number, default: 0 },
+  dragYDelta: { type: Number, default: 0 },
+  inchOffset: { type: Number, default: 0 },
 });
 
-const longPressTimeout = inject("longPressTimeout") as Ref<number>;
-const useVibrations = inject("useVibrations") as Ref<boolean>;
-const pixelsPerCm = inject("pixelsPerCm") as number;
-
-const emit = defineEmits({
-  dragStart: (event: BoardPosition) => {
-    return isBoardPosition(event);
-  },
-  dragEnd: (event: BoardPosition) => {
-    return isBoardPosition(event);
-  },
-  dragTargetChange: (event: BoardPosition) => {
-    return isBoardPosition(event);
-  },
-  move: null,
-  remove: null,
-});
+const emit = defineEmits<{
+  (e: "move"): void;
+  (e: "remove"): void;
+  (e: "touchstart", data: TouchEvent): void;
+  (e: "mousedown", data: MouseEvent): void;
+}>();
 
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
 const element = ref<null | ComponentPublicInstance>(null);
-const dragging = ref(false);
 
 // Values for translating pieces to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
-  return props.col * props.cellSize + dragXDelta.value;
+  const offset = props.dragging ? props.dragXDelta : 0;
+  return props.col * props.cellSize + offset;
 });
 const translateY = computed(() => {
-  return (7 - props.row) * props.cellSize + dragYDelta.value;
+  const offset = props.dragging ? props.dragYDelta : 0;
+  return (7 - props.row) * props.cellSize + offset;
 });
 
 // Values for setting the translate origin of piece wrapper
@@ -70,16 +56,16 @@ const originY = computed(() => {
 });
 
 const translate = computed(() => {
-  if (!dragging.value) {
+  if (!props.dragging) {
     return `translate(${translateX.value}px, ${translateY.value}px)`;
   }
   return `translate(${translateX.value}px, calc(${translateY.value}px + ${
-    props.rotated ? inchOffset.value + "cm" : -inchOffset.value + "cm"
+    props.rotated ? props.inchOffset + "cm" : -props.inchOffset + "cm"
   }))`;
 });
 
 const scale = computed(() => {
-  if (!dragging.value) {
+  if (!props.dragging) {
     return props.selected ? "scale(1.05)" : " ";
   } else {
     return "scale(1.1)";
@@ -103,158 +89,30 @@ watch(piecePosition, async () => {
   emit("move");
 });
 
-watch(dragging, async (newValue) => {
-  if (newValue) {
-    zIndex.value = "var(--z-index-piece-top)";
-  } else {
-    const pieceIconElement = element.value?.$el;
-    if (!(pieceIconElement instanceof SVGElement)) {
-      console.error(
-        "Element of Piece Icon is not accessible, so its z-index cannot be altered."
-      );
-      return;
+watch(
+  () => props.dragging,
+  async (newValue) => {
+    if (newValue) {
+      zIndex.value = "var(--z-index-piece-top)";
+    } else {
+      const pieceIconElement = element.value?.$el;
+      if (!(pieceIconElement instanceof SVGElement)) {
+        console.error(
+          "Element of Piece Icon is not accessible, so its z-index cannot be altered."
+        );
+        return;
+      }
+      await waitForTransitionEnd(pieceIconElement, "transform");
+      zIndex.value = "";
     }
-    await waitForTransitionEnd(pieceIconElement, "transform");
-    zIndex.value = "";
   }
-});
+);
 
 async function temporarilyMoveToTop(boardPieceElement: SVGElement) {
   zIndex.value = "var(--z-index-piece-top)";
   await waitForTransitionEnd(boardPieceElement, "transform");
   zIndex.value = "";
 }
-
-const inchPxOffset = computed(() => {
-  return inchOffset.value * pixelsPerCm;
-});
-let pressTimeout: number = 0;
-let lastDragX: number = 0;
-let lastDragY: number = 0;
-const dragXDelta = ref(0);
-const dragYDelta = ref(0);
-
-const dragRowDelta = computed(() => {
-  let totalDelta;
-  props.rotated
-    ? (totalDelta = -inchPxOffset.value - dragYDelta.value)
-    : (totalDelta = inchPxOffset.value - dragYDelta.value);
-  let delta = Math.round(totalDelta / props.cellSize);
-  if (delta === -0) {
-    delta = 0;
-  }
-  return delta;
-});
-const dragColDelta = computed(() => {
-  let delta = Math.round(dragXDelta.value / props.cellSize);
-  if (delta === -0) {
-    delta = 0;
-  }
-  return delta;
-});
-const targetingDragPosition = computed(() => {
-  const position = getDeltaPosition(
-    { row: props.row, col: props.col },
-    dragColDelta.value,
-    dragRowDelta.value
-  );
-  return position;
-});
-watch(targetingDragPosition, () => {
-  if (!dragging.value) {
-    return;
-  }
-  emit("dragTargetChange", targetingDragPosition.value);
-});
-
-function resetDragDelta() {
-  dragXDelta.value = 0;
-  dragYDelta.value = 0;
-}
-
-function onMouseDown(event: MouseEvent) {
-  if (event.button !== 0) {
-    return;
-  }
-  inchOffset.value = 0;
-  onPressStart(event.clientX, event.clientY);
-}
-
-function onTouchStart(event: TouchEvent) {
-  const touch = event.touches[0];
-  inchOffset.value = 1.8;
-  onPressStart(touch.clientX, touch.clientY);
-}
-
-function onPressStart(x: number, y: number) {
-  pressTimeout = window.setTimeout(() => {
-    dragging.value = true;
-    emit("dragStart", targetingDragPosition.value);
-    lastDragX = x;
-    lastDragY = y;
-    if (useVibrations.value) navigator.vibrate(30);
-  }, longPressTimeout.value);
-}
-
-function onPressEnd() {
-  if (!dragging.value) {
-    clearTimeout(pressTimeout);
-    return;
-  }
-  dragging.value = false;
-  emit("dragEnd", targetingDragPosition.value);
-  resetDragDelta();
-}
-
-function onMouseMove(event: MouseEvent) {
-  if (!dragging.value) {
-    return;
-  }
-  onMove(event.clientX, event.clientY);
-}
-
-function onTouchMove(event: TouchEvent) {
-  if (!dragging.value) {
-    return;
-  }
-  const touch = event.touches[0];
-  onMove(touch.clientX, touch.clientY);
-}
-
-function onMove(x: number, y: number) {
-  let xDelta = x - lastDragX;
-  let yDelta = y - lastDragY;
-  if (props.boardRotated) {
-    xDelta = -xDelta;
-    yDelta = -yDelta;
-  }
-  lastDragX = x;
-  lastDragY = y;
-  dragXDelta.value = dragXDelta.value + xDelta;
-  dragYDelta.value = dragYDelta.value + yDelta;
-}
-
-onMounted(() => {
-  const pieceIconElement = element.value?.$el;
-  if (!(pieceIconElement instanceof SVGElement)) {
-    console.error(
-      "Element of Piece Icon is not accessible, so its z-index cannot be altered."
-    );
-    return;
-  }
-  pieceIconElement.addEventListener("mousedown", onMouseDown);
-  pieceIconElement.addEventListener("touchstart", onTouchStart, {
-    passive: true,
-  });
-  addEventListener("mouseup", onPressEnd);
-  addEventListener("touchend", onPressEnd, {
-    passive: true,
-  });
-  addEventListener("mousemove", onMouseMove);
-  addEventListener("touchmove", onTouchMove, {
-    passive: true,
-  });
-});
 
 onBeforeUnmount(() => {
   emit("remove");
@@ -267,11 +125,13 @@ onBeforeUnmount(() => {
     :style="`transform-origin: ${originX}px ${originY}px`"
   >
     <PieceIcon
+      @touchstart.passive="emit('touchstart', $event)"
+      @mousedown.passive="emit('mousedown', $event)"
       :data-id="`piece-${props.piece.id}`"
       ref="element"
       class="piece"
       :class="[
-        { dragging: dragging },
+        { dragging: props.dragging },
         { selected: props.selected },
         props.piece.color,
       ]"

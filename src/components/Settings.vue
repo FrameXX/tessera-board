@@ -482,7 +482,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </select>
             <template #description
               >Chooses what vector icons are used for pieces. Different icon
-              sets have different shapes.
+              packs have different shapes, look and feel.
             </template>
           </UserOption>
           <UserOption
@@ -493,7 +493,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <input
               type="number"
               min="0"
-              max="20"
+              max="30"
               id="input-piece-padding"
               v-model="piecePadding"
             />

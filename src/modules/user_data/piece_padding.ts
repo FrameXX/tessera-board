@@ -9,7 +9,7 @@ class PiecePaddingData extends NumberUserData {
     valueRef: Ref<number>,
     toastManager: ToastManager
   ) {
-    super("piece_padding", value, toastManager, valueRef);
+    super("piece_padding", value, toastManager, valueRef, 0, 30);
   }
 
   public apply(): void {
