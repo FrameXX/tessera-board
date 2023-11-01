@@ -74,29 +74,15 @@ const props = defineProps({
     default: [],
   },
   primary: { type: Boolean, default: false },
+  allPieceProps: {
+    type: Object as PropType<BoardPieceProps[]>,
+    required: true,
+  },
 });
 
 const longPressTimeout = inject("longPressTimeout") as Ref<number>;
 const useVibrations = inject("useVibrations") as Ref<boolean>;
 const pixelsPerCm = inject("pixelsPerCm") as number;
-
-// All pieces are extracted from the boardPieces 2D array into a list of objects with row and col attached. They are simpler to render using v-for in this form.
-const allPieceProps = computed(() => {
-  const allPieceProps: BoardPieceProps[] = [];
-  for (const [rowIndex, row] of props.state.entries()) {
-    for (const [colIndex, piece] of row.entries()) {
-      if (piece) {
-        allPieceProps.push({
-          row: rowIndex,
-          col: colIndex,
-          piece: piece,
-        });
-      }
-    }
-  }
-  allPieceProps.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
-  return allPieceProps;
-});
 
 const container = ref<HTMLDivElement | null>(null);
 const containerSize = ref<number>(0);
@@ -344,7 +330,7 @@ onMounted(() => {
 
       <TransitionGroup name="piece">
         <BoardPiece
-          v-for="pieceProps in allPieceProps"
+          v-for="pieceProps in props.allPieceProps"
           :key="pieceProps.piece.id"
           @click="props.manager.onPieceClick(pieceProps)"
           @pointerdown="onPiecePointerStart($event, pieceProps)"

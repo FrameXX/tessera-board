@@ -115,11 +115,11 @@ class Game {
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
-    watch(this.gamePaused, (newValue) => {
+    watch(this.gamePaused, (newValue, oldValue) => {
       this.updateTimerState();
-      if (newValue !== "not") {
+      if (newValue === "manual" && oldValue === "not") {
         this.toastManager.showToast("Game paused", "info", "pause");
-      } else {
+      } else if (newValue === "not" && oldValue === "manual") {
         this.toastManager.showToast("Game resumed", "info", "play-outline");
       }
     });
