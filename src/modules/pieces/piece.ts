@@ -138,6 +138,22 @@ export function positionWillBeCaptured(
   return matchingPositions.length !== 0;
 }
 
+export function getCapturingPositionPath(
+  target: BoardPosition,
+  origin: BoardPosition
+): Path {
+  return { origin: origin, target: target };
+}
+
+export function positionsToPath(
+  boardPositions: BoardPosition[],
+  origin: BoardPosition
+) {
+  return boardPositions.map((target) =>
+    getCapturingPositionPath(target, origin)
+  );
+}
+
 export const PIECE_IDS: PieceId[] = [
   "rook",
   "knight",

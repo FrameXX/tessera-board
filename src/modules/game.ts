@@ -1,4 +1,4 @@
-import { ComputedRef, Ref, watch } from "vue";
+import { type ComputedRef, type Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
@@ -7,6 +7,9 @@ import ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 import ConfirmDialog from "./dialogs/confirm";
+import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
+import { positionsToPath, type Path } from "./pieces/piece";
+import { BoardStateValue } from "./user_data/board_state";
 
 export type GamePaused = "not" | "auto" | "manual";
 export function isGamePaused(string: string): string is GamePaused {
@@ -91,9 +94,13 @@ class Game {
   private readonly opponentMatchSecondsTimer: Timer;
 
   constructor(
-    private readonly gamePaused: Ref<GamePaused>,
-    private readonly gameBoardManager: GameBoardManager,
-    private readonly gameBoardStateData: BoardStateData,
+    private readonly paused: Ref<GamePaused>,
+    private readonly boardManager: GameBoardManager,
+    private readonly boardStateData: BoardStateData,
+    private readonly boardStateValue: BoardStateValue,
+    private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
+    private whiteCapturingPaths: Ref<Path[]>,
+    private blackCapturingPaths: Ref<Path[]>,
     private readonly defaultBoardStateData: RawBoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
     private readonly firstMoveColor: Ref<PlayerColor>,
@@ -115,12 +122,12 @@ class Game {
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
-    watch(this.gamePaused, (newValue, oldValue) => {
+    watch(this.paused, (newValue) => {
       this.updateTimerState();
-      if (newValue === "manual" && oldValue === "not") {
-        this.toastManager.showToast("Game paused", "info", "pause");
-      } else if (newValue === "not" && oldValue === "manual") {
-        this.toastManager.showToast("Game resumed", "info", "play-outline");
+      if (newValue !== "not") {
+        this.toastManager.showToast("Game paused", "pause");
+      } else {
+        this.toastManager.showToast("Game resumed", "play-outline");
       }
     });
 
@@ -189,7 +196,7 @@ class Game {
     const winner: Winner = "player";
     this.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
-      "info",
+
       "crown-outline"
     );
     this.winner.value = winner;
@@ -201,7 +208,6 @@ class Game {
     const winner: Winner = "opponent";
     this.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
-      "info",
       "crown-outline"
     );
     this.winner.value = winner;
@@ -212,7 +218,6 @@ class Game {
   private onPlayerMoveSecondsBeyondLimit() {
     this.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of move time!`,
-      "info",
       "timer-alert-outline"
     );
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
@@ -225,7 +230,6 @@ class Game {
       `${getColorTeamName(
         getOpossitePlayerColor(this.playerColor.value)
       )} run out of move time!`,
-      "info",
       "timer-alert-outline"
     );
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
@@ -236,7 +240,6 @@ class Game {
   private onPlayerMatchSecondsBeyondLimit() {
     this.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of match time!`,
-      "info",
       "timer-alert-outline"
     );
     this.opponentWin("match_timeout");
@@ -247,7 +250,6 @@ class Game {
       `${getColorTeamName(
         getOpossitePlayerColor(this.playerColor.value)
       )} run out of match time!`,
-      "info",
       "timer-alert-outline"
     );
     this.playerWin("match_timeout");
@@ -262,7 +264,6 @@ class Game {
       `${getOpossiteTeamName(
         getPlayerTeamName(this.winner.value, this.playerColor.value)
       )} is back in the game.`,
-      "info",
       "keyboard-return"
     );
     this.winReason.value = "none";
@@ -271,8 +272,8 @@ class Game {
   }
 
   private setupDefaultBoardState() {
-    this.gameBoardStateData.load(this.defaultBoardStateData.dump(), true);
-    this.gameBoardStateData.updateReference();
+    this.boardStateData.load(this.defaultBoardStateData.dump(), true);
+    this.boardStateData.updateReference();
   }
 
   private choosePlayerColor() {
@@ -310,7 +311,7 @@ class Game {
     if (
       this.winner.value !== "none" ||
       this.playerPlaying.value ||
-      this.gamePaused.value !== "not"
+      this.paused.value !== "not"
     ) {
       this.opponentMoveSecondsTimer.pause();
       this.opponentMatchSecondsTimer.pause();
@@ -318,12 +319,12 @@ class Game {
     if (
       this.winner.value !== "none" ||
       !this.playerPlaying.value ||
-      this.gamePaused.value !== "not"
+      this.paused.value !== "not"
     ) {
       this.playerMoveSecondsTimer.pause();
       this.playerMatchSecondsTimer.pause();
     }
-    if (this.winner.value !== "none" || this.gamePaused.value !== "not") {
+    if (this.winner.value !== "none" || this.paused.value !== "not") {
       return;
     }
     if (this.playerPlaying.value) {
@@ -339,8 +340,8 @@ class Game {
     if (this.winner.value !== "none") {
       this.toastManager.showToast(
         `You cannot resign. The game ending was already decided.`,
-        "error",
-        "flag-off"
+        "flag-off",
+        "error"
       );
       return;
     }
@@ -355,7 +356,7 @@ class Game {
         this.playerPlaying.value ? "player" : "opponent",
         this.playerColor.value
       )} resigned`,
-      "info",
+
       "flag"
     );
     this.playerPlaying.value
@@ -368,26 +369,68 @@ class Game {
     this.setupDefaultBoardState();
     this.choosePlayerColor();
     this.chooseFirstMoveColor();
-    this.gameBoardManager.resetBoard();
-    this.toastManager.showToast("New match started.", "info", "flag-checkered");
+    this.boardManager.resetBoard();
+    this.toastManager.showToast("New match started.", "flag-checkered");
     this.moveIndex.value = 0;
     this.resetTimers();
     this.updateTimerState();
-    this.gameBoardStateData.save();
+    this.boardStateData.save();
+    this.invalidatePiecesCache();
+    this.updateCapturingPaths();
   }
 
   public restore() {
-    if (this.gamePaused.value === "auto") {
-      this.gamePaused.value = "not";
+    if (this.paused.value === "auto") {
+      this.paused.value = "not";
     } else {
       this.updateTimerState();
     }
+    this.updateCapturingPaths();
   }
 
   public onMove() {
     this.updateTimerState();
     this.resetMoveTimers();
-    this.gameBoardStateData.save();
+    this.boardStateData.save();
+    this.invalidatePiecesCache();
+    this.updateCapturingPaths();
+  }
+
+  private invalidatePiecesCache() {
+    for (const pieceProps of this.pieceProps.value) {
+      pieceProps.piece.invalidateCache();
+    }
+  }
+
+  public updateCapturingPaths() {
+    let whiteCapturingPaths: Path[] = [];
+    let blackCapturingPaths: Path[] = [];
+    for (const pieceProps of this.pieceProps.value) {
+      const piece = pieceProps.piece;
+      const origin: BoardPosition = {
+        row: +pieceProps.row,
+        col: +pieceProps.col,
+      };
+      if (piece.color === "white") {
+        whiteCapturingPaths = [
+          ...whiteCapturingPaths,
+          ...positionsToPath(
+            piece.getCapturingPositions(origin, this.boardStateValue),
+            origin
+          ),
+        ];
+      } else {
+        blackCapturingPaths = [
+          ...blackCapturingPaths,
+          ...positionsToPath(
+            piece.getCapturingPositions(origin, this.boardStateValue),
+            origin
+          ),
+        ];
+      }
+    }
+    this.whiteCapturingPaths.value = whiteCapturingPaths;
+    this.blackCapturingPaths.value = blackCapturingPaths;
   }
 }
 

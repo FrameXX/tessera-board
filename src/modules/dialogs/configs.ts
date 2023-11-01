@@ -57,7 +57,7 @@ class ConfigsDialog {
     this.updateConfigList();
     this.toastManager.showToast(
       "Config saved.",
-      "info",
+
       "check-circle-outline"
     );
   };
@@ -88,7 +88,7 @@ class ConfigsDialog {
     this.updateConfigList();
     this.toastManager.showToast(
       "Config renamed.",
-      "info",
+
       "check-circle-outline"
     );
   };
@@ -100,7 +100,7 @@ class ConfigsDialog {
     this.configManager?.applyEntries();
     this.toastManager.showToast(
       "Config loaded.",
-      "info",
+
       "check-circle-outline"
     );
   }

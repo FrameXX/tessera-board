@@ -61,7 +61,7 @@ class InteractionManager {
     if (!navigator.cookieEnabled) {
       this.toastManager.showToast(
         "Cookies are disabled. -> No changes will be restored in next session.",
-        "error",
+
         "cookie-alert"
       );
       return false;
@@ -79,7 +79,7 @@ class InteractionManager {
     this.game.restart();
   }
 
-  manualyTogglePause() {
+  manuallyTogglePause() {
     if (this.gamePaused.value === "not") {
       this.gamePaused.value = "manual";
     } else {

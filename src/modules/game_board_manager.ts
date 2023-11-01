@@ -99,17 +99,6 @@ class GameBoardManager extends BoardManager {
     this.draggingOverCells.value = [];
   }
 
-  private invalidatePiecesCache() {
-    for (const rowIndex in this.boardStateValue) {
-      for (const colIndex in this.boardStateValue[rowIndex]) {
-        const piece = this.boardStateValue[rowIndex][colIndex];
-        if (piece) {
-          piece.invalidateCache();
-        }
-      }
-    }
-  }
-
   private shouldShowMoves(pieceColor: PlayerColor) {
     if (this.showOtherAvailibleMoves.value) return true;
     if (!this.secondCheckboard.value && pieceColor !== this.playingColor.value)
@@ -232,24 +221,6 @@ class GameBoardManager extends BoardManager {
       );
     }
     this.moveIndex.value++;
-    this.invalidatePiecesCache();
-    this.updateCapturingPaths();
-  }
-
-  private getCapturingPositionPath(
-    position: BoardPosition,
-    origin: BoardPosition
-  ): Path {
-    return { origin: origin, target: position };
-  }
-
-  private transformToPaths(
-    boardPositions: BoardPosition[],
-    origin: BoardPosition
-  ) {
-    return boardPositions.map((position) =>
-      this.getCapturingPositionPath(position, origin)
-    );
   }
 
   private get selectedCell(): BoardPosition | null {
@@ -290,49 +261,11 @@ class GameBoardManager extends BoardManager {
     this._selectedCell = position;
   }
 
-  public updateCapturingPaths() {
-    let whiteCapturingPaths: Path[] = [];
-    let blackCapturingPaths: Path[] = [];
-    for (const rowIndex in this.boardStateValue) {
-      for (const colIndex in this.boardStateValue[rowIndex]) {
-        const piece = this.boardStateValue[rowIndex][colIndex];
-        if (!piece) {
-          continue;
-        }
-        const origin: BoardPosition = {
-          row: +rowIndex,
-          col: +colIndex,
-        };
-        if (piece.color === "white") {
-          whiteCapturingPaths = [
-            ...whiteCapturingPaths,
-            ...this.transformToPaths(
-              piece.getCapturingPositions(origin, this.boardStateValue),
-              origin
-            ),
-          ];
-        } else {
-          blackCapturingPaths = [
-            ...blackCapturingPaths,
-            ...this.transformToPaths(
-              piece.getCapturingPositions(origin, this.boardStateValue),
-              origin
-            ),
-          ];
-        }
-      }
-    }
-    this.whiteCapturingPaths.value = whiteCapturingPaths;
-    this.blackCapturingPaths.value = blackCapturingPaths;
-  }
-
   public resetBoard() {
     this.selectedPiece = null;
     this.selectedCell = null;
     this.clearHihlightedCellsPositions();
     this.clearCapturedPieces();
-    this.invalidatePiecesCache();
-    this.updateCapturingPaths();
   }
 
   private getMoveIfPossible(position: BoardPosition): Move | null {

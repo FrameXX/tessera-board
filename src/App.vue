@@ -672,7 +672,7 @@ const opponentBoardRotated = computed(() => {
 /**
  * All pieces are extracted from the boardStateValue 2D array into a list of objects with row and col attached. They are simpler too loop through and therefore also simpler to render using v-for in this form. They are sorted according to their unique id so, Vue transitions them smoothly as they appear and disappear from the checkboard.
  */
-const allPieceProps = computed(() => {
+const gamePieceProps = computed(() => {
   const allPieceProps: BoardPieceProps[] = [];
   for (const [rowIndex, row] of gameBoardState.entries()) {
     for (const [colIndex, piece] of row.entries()) {
@@ -782,6 +782,10 @@ const game = new Game(
   gamePaused,
   playerBoardManager,
   gameBoardStateData,
+  gameBoardState,
+  gamePieceProps,
+  whiteCapturingPaths,
+  blackCapturingPaths,
   defaultBoardStateData,
   playerColor,
   firstMoveColor,
@@ -844,7 +848,6 @@ onMounted(() => {
 
   // Let the app wait another 600ms to make sure its fully loaded.
   setTimeout(() => {
-    playerBoardManager.updateCapturingPaths();
     if (visited === null) {
       game.restart();
     } else {
@@ -901,7 +904,7 @@ onMounted(() => {
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         primary
-        :all-piece-props="allPieceProps"
+        :all-piece-props="gamePieceProps"
         id="player-board"
       />
       <Board
@@ -921,11 +924,11 @@ onMounted(() => {
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         primary
-        :all-piece-props="allPieceProps"
+        :all-piece-props="gamePieceProps"
         id="opponent-board"
       />
       <Transition name="slide-side">
-        <div id="game-paused" v-show="gamePaused !== 'not'">
+        <div id="game-paused" v-show="gamePaused === 'manual'">
           <div class="content">
             <FragmentTitle icon-id="pause">Game paused</FragmentTitle>
             <button @click="gamePaused = 'not'">
@@ -945,7 +948,7 @@ onMounted(() => {
     @backdrop-click="interactionManager.toggleActionsPanel()"
     @configure-game="interactionManager.toggleSettings()"
     @restart-game="interactionManager.onGameRestart()"
-    @pause="interactionManager.manualyTogglePause()"
+    @pause="interactionManager.manuallyTogglePause()"
     @resign="game.resign()"
     :open="actionPanelOpen"
     :status-text="statusText"
@@ -959,7 +962,7 @@ onMounted(() => {
     :default-board-state="defaultBoardState"
     :user-data-manager="userDataManager"
     :default-dragging-over-cells="defaultDraggingOverCells"
-    :default-board-all-piece-props="allPieceProps"
+    :default-board-all-piece-props="gamePieceProps"
   />
   <About :open="aboutOpen" />
 

@@ -35,8 +35,8 @@ class SelectPieceDialog {
     if (!this.props.selectedPiece) {
       this.toastManager.showToast(
         "Please select one of the pieces by clicking on them.",
-        "error",
-        "alert-circle-outline"
+        "alert-circle-outline",
+        "error"
       );
       return;
     }
@@ -47,7 +47,7 @@ class SelectPieceDialog {
   public cancel = () => {
     this.toastManager.showToast(
       "Cannot cancel. Please select one of the pieces.",
-      "error",
+
       "cancel"
     );
   };

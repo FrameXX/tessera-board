@@ -65,7 +65,7 @@ class ConfigInventory {
   private handleErrorOnLoad() {
     this.toastManager.showToast(
       "An error occured while trying to load data configurations from local storage. Your data are probably corrupted or invalid and it's recommended that you clear all data.",
-      "error",
+
       "database-alert"
     );
   }
@@ -85,7 +85,7 @@ class ConfigInventory {
       );
       this.toastManager.showToast(
         "An unknown error occured while trying to apply preloaded config.",
-        "error",
+
         "database-alert"
       );
       return;

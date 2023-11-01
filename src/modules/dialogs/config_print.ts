@@ -38,7 +38,7 @@ class ConfigPrintDialog {
       if (this.props.name === "") {
         this.toastManager.showToast(
           "Configuration name cannot be an empty string.",
-          "error",
+
           "alert-circle-outline"
         );
         return;

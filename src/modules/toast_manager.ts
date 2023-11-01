@@ -23,8 +23,8 @@ class ToastManager {
 
   public showToast(
     message: string,
-    toastCase: ToastCase = "info",
     iconId?: string,
+    toastCase: ToastCase = "info",
     durationMs?: number
   ): string {
     const id = getRandomId();

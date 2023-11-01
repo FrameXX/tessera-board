@@ -78,9 +78,9 @@ abstract class UserData<ValueType> {
   protected handleInvalidLoadValue(value: string) {
     console.error("Invalid load value.", value);
     this.toastManager.showToast(
-      "An error occured while trying to load data from local storage. Your data are probably corrupted or invalid and it's recommended that you clear all data.",
-      "error",
-      "database-alert"
+      "An error occured while trying to load data from local storage. Your data are probably corrupted or invalid. If the problem persists clear all data.",
+      "database-alert",
+      "error"
     );
   }
 

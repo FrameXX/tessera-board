@@ -13,7 +13,7 @@ class ConfigManager {
   private handleErrorOnRestore() {
     this.toastManager.showToast(
       "An error occured while trying to load and apply configuration. Your data are probably corrupted or invalid and it's recommended that you clear all data.",
-      "error",
+
       "database-alert"
     );
   }

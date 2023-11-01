@@ -22,7 +22,7 @@ class UserDataManager {
         entry.recover();
       } catch (error) {
         console.error(
-          `An eerror occured when restoring ${entry.id}. No data was restored. Data may be corrupted or invalid. Alerting user.`,
+          `An unexpected error occured when restoring ${entry.id}. No data was restored. Data may be corrupted or invalid. Alerting user.`,
           error
         );
         recoverError = true;
@@ -31,8 +31,8 @@ class UserDataManager {
     if (recoverError) {
       this.toastManager.showToast(
         "Some values could not be restored from local storage. Data may be corrupted or invalid. If the problem persists clear all data.",
-        "error",
-        "database-alert"
+        "database-alert",
+        "error"
       );
     }
   }
@@ -59,7 +59,7 @@ class UserDataManager {
     if (!navigator.cookieEnabled) {
       this.toastManager.showToast(
         "It's not possible to clear any data because cookies are disabled. -> Access to local storage was denied.",
-        "error",
+
         "database-alert"
       );
       return;
