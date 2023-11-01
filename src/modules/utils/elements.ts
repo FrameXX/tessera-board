@@ -1,5 +1,12 @@
 import type { PlayerColor } from "../game";
 
+export function getElementSizes(element: HTMLElement): [number, number] {
+  const computedStyle = getComputedStyle(element);
+  const width = +computedStyle.width.split("px")[0];
+  const height = +computedStyle.height.split("px")[0];
+  return [width, height];
+}
+
 export class ElementNotFoundError extends Error {
   constructor(message: string) {
     super(message);

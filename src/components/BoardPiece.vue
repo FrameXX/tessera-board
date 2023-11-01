@@ -24,14 +24,12 @@ const props = defineProps({
   dragging: { type: Boolean, default: false },
   dragXDelta: { type: Number, default: 0 },
   dragYDelta: { type: Number, default: 0 },
-  inchOffset: { type: Number, default: 0 },
 });
 
 const emit = defineEmits<{
   (e: "move"): void;
   (e: "remove"): void;
-  (e: "touchstart", data: TouchEvent): void;
-  (e: "mousedown", data: MouseEvent): void;
+  (e: "pointerdown", data: PointerEvent): void;
 }>();
 
 const zIndex = ref<"" | "var(--z-index-piece-top)">("");
@@ -56,12 +54,7 @@ const originY = computed(() => {
 });
 
 const translate = computed(() => {
-  if (!props.dragging) {
-    return `translate(${translateX.value}px, ${translateY.value}px)`;
-  }
-  return `translate(${translateX.value}px, calc(${translateY.value}px + ${
-    props.rotated ? props.inchOffset + "cm" : -props.inchOffset + "cm"
-  }))`;
+  return `translate(${translateX.value}px, ${translateY.value}px)`;
 });
 
 const scale = computed(() => {
@@ -125,8 +118,7 @@ onBeforeUnmount(() => {
     :style="`transform-origin: ${originX}px ${originY}px`"
   >
     <PieceIcon
-      @touchstart.passive="emit('touchstart', $event)"
-      @mousedown.passive="emit('mousedown', $event)"
+      @pointerdown.passive="emit('pointerdown', $event)"
       :data-id="`piece-${props.piece.id}`"
       ref="element"
       class="piece"

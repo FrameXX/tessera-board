@@ -96,7 +96,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
       <div class="content">
         <FragmentTitle icon-id="cog-outline">Configure game</FragmentTitle>
         <!-- Player -->
-        <Category name="Player (you)" icon-id="account">
+        <Category name="Primary player (you)" icon-id="account">
           <UserOption
             name="color"
             icon-id="invert-colors"
@@ -125,7 +125,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           </UserOption>
         </Category>
         <!-- Opponent -->
-        <Category name="Opponent" icon-id="target-account">
+        <Category name="Secondary player (opponent)" icon-id="target-account">
           <UserOption
             name="over local network"
             icon-id="lan-connect"
@@ -156,7 +156,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           <!-- Time restrictions -->
           <SectionTitle title="Time restrictions" />
           <UserOption
-            name="Player time per move"
+            name="Primary player time per move"
             icon-id="timer-outline"
             option-id="input-player-seconds-per-move"
           >
@@ -173,7 +173,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             >
           </UserOption>
           <UserOption
-            name="Opponent time per move"
+            name="Secondary player time per move"
             icon-id="timer-outline"
             option-id="input-opponent-seconds-per-move"
           >
@@ -190,7 +190,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             >
           </UserOption>
           <UserOption
-            name="Player time per match"
+            name="Primary player time per match"
             icon-id="clock-outline"
             option-id="input-player-seconds-per-match"
           >
@@ -207,7 +207,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             >
           </UserOption>
           <UserOption
-            name="Opponent time per match"
+            name="Secondary player time per match"
             icon-id="clock-outline"
             option-id="input-opponent-seconds-per-match"
           >

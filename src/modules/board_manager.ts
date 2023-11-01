@@ -15,17 +15,17 @@ abstract class BoardManager {
   public abstract onCellClick(position: BoardPosition): void;
 
   public abstract onPieceDragStart(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void;
 
   public abstract onPieceDragEnd(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void;
 
   public abstract onPieceDragOverCell(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void;
 }

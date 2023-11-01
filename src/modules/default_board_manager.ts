@@ -34,20 +34,20 @@ class DefaultBoardManager extends BoardManager {
   }
 
   public onPieceDragStart(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
-    this.onPieceDragOverCell(boardPiece, targetPosition);
+    this.onPieceDragOverCell(pieceProps, targetPosition);
   }
 
   public onPieceDragOverCell(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
     this.clearDraggingOverCells();
     if (
       !this.isPositionAvailible(targetPosition) &&
-      !positionsEqual(boardPiece, targetPosition)
+      !positionsEqual(pieceProps, targetPosition)
     ) {
       return;
     }
@@ -55,7 +55,7 @@ class DefaultBoardManager extends BoardManager {
   }
 
   public async onPieceDragEnd(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ) {
     this.dragEndTimeout = true;
@@ -67,7 +67,7 @@ class DefaultBoardManager extends BoardManager {
       return;
     }
     await movePositionValue(
-      boardPiece,
+      pieceProps,
       targetPosition,
       this.boardStateValue,
       "default-board"
@@ -75,11 +75,11 @@ class DefaultBoardManager extends BoardManager {
     if (this.audioEffects.value) this.pieceMoveAudioEffect.play();
   }
 
-  public onPieceClick(boardPiece: BoardPieceProps): void {
+  public onPieceClick(pieceProps: BoardPieceProps): void {
     if (this.dragEndTimeout) {
       return;
     }
-    this.boardStateValue[boardPiece.row][boardPiece.col] = null;
+    this.boardStateValue[pieceProps.row][pieceProps.col] = null;
     if (this.audioEffects.value) this.pieceRemoveAudioEffect.play();
     if (this.useVibratons.value) navigator.vibrate(30);
   }

@@ -80,7 +80,7 @@ import { RawPiece } from "./modules/pieces/rawPiece";
 import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
-import InteractionManager from "./modules/interactionManager";
+import InteractionManager from "./modules/interaction_manager";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -185,17 +185,17 @@ provide("pixelsPerCm", pixelsPerCm);
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
 const pieceRemoveAudioEffect = new Howl({ src: [removeAudioEffectUrl] });
 const settingsOpen = ref(false);
-watch(settingsOpen, () => {
-  interactionManager.onFocusChange(!settingsOpen.value);
+watch(settingsOpen, (newValue) => {
+  interactionManager.onFocusChange(!newValue);
 });
 const aboutOpen = ref(false);
-watch(aboutOpen, () => {
-  interactionManager.onFocusChange(!aboutOpen.value);
+watch(aboutOpen, (newValue) => {
+  interactionManager.onFocusChange(!newValue);
 });
 const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
-const configNameInput = ref<null | HTMLInputElement>(null);
-const minutesDurationInput = ref<null | HTMLInputElement>(null);
+const configNameInput = ref<HTMLElement | null>(null);
+const minutesDurationInput = ref<HTMLElement | null>(null);
 const configsNameFilter = ref("");
 const filteredConfigsPrints = computed(() => {
   return configsDialog.props.configsPrints.filter((print) =>
@@ -1235,12 +1235,12 @@ onMounted(() => {
   flex-grow: 1;
   padding: var(--spacing-small) 0;
 
-  &.rotated {
-    rotate: -0.5turn;
+  &.column {
+    flex-direction: column;
   }
 
-  .board-container {
-    padding: 0 var(--spacing-small);
+  &.rotated {
+    rotate: -0.5turn;
   }
 }
 

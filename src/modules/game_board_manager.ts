@@ -368,26 +368,26 @@ class GameBoardManager extends BoardManager {
   }
 
   public onPieceDragStart(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
-    this.onPieceDragOverCell(boardPiece, targetPosition);
+    this.onPieceDragOverCell(pieceProps, targetPosition);
     if (this.selectedPiece === null) {
-      this.onPieceClick(boardPiece);
+      this.onPieceClick(pieceProps);
       return;
     }
-    if (!positionsEqual(boardPiece, this.selectedPiece))
-      this.onPieceClick(boardPiece);
+    if (!positionsEqual(pieceProps, this.selectedPiece))
+      this.onPieceClick(pieceProps);
   }
 
   public onPieceDragOverCell(
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
     this.clearDraggingOverCells();
     if (
       this.getMoveIfPossible(targetPosition) !== null ||
-      positionsEqual(boardPiece, targetPosition)
+      positionsEqual(pieceProps, targetPosition)
     ) {
       this.draggingOverCells.value.push(targetPosition);
     }
@@ -395,7 +395,7 @@ class GameBoardManager extends BoardManager {
 
   public onPieceDragEnd(
     // @ts-ignore
-    boardPiece: BoardPieceProps,
+    pieceProps: BoardPieceProps,
     targetPosition: BoardPosition
   ): void {
     this.dragEndTimeout = true;
@@ -410,9 +410,9 @@ class GameBoardManager extends BoardManager {
   }
 
   // Called by Board component
-  public onPieceClick(boardPiece: BoardPieceProps): void {
+  public onPieceClick(pieceProps: BoardPieceProps): void {
     if (this.dragEndTimeout) return;
-    const position = this.getPiecePosition(boardPiece.piece.id);
+    const position = this.getPiecePosition(pieceProps.piece.id);
     if (position) {
       const moved = this.moveToIfPossible(position);
       if (moved) return;
@@ -421,11 +421,11 @@ class GameBoardManager extends BoardManager {
     // Unselect cell
     if (this.selectedCell) this.selectedCell = null;
     if (this.selectedPiece === null) {
-      this.selectedPiece = boardPiece;
+      this.selectedPiece = pieceProps;
       return;
     }
-    if (!positionsEqual(this.selectedPiece, boardPiece)) {
-      this.selectedPiece = boardPiece;
+    if (!positionsEqual(this.selectedPiece, pieceProps)) {
+      this.selectedPiece = pieceProps;
       return;
     }
     this.selectedPiece = null;
