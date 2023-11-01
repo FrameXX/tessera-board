@@ -688,6 +688,22 @@ const gamePieceProps = computed(() => {
   allPieceProps.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
   return allPieceProps;
 });
+const defaultPieceProps = computed(() => {
+  const allPieceProps: BoardPieceProps[] = [];
+  for (const [rowIndex, row] of defaultBoardState.entries()) {
+    for (const [colIndex, piece] of row.entries()) {
+      if (piece) {
+        allPieceProps.push({
+          row: rowIndex,
+          col: colIndex,
+          piece: piece,
+        });
+      }
+    }
+  }
+  allPieceProps.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
+  return allPieceProps;
+});
 
 watch(screenRotated, (newValue) => {
   interactionManager.updateScreenRotation(newValue);
@@ -962,7 +978,7 @@ onMounted(() => {
     :default-board-state="defaultBoardState"
     :user-data-manager="userDataManager"
     :default-dragging-over-cells="defaultDraggingOverCells"
-    :default-board-all-piece-props="gamePieceProps"
+    :default-board-all-piece-props="defaultPieceProps"
   />
   <About :open="aboutOpen" />
 
