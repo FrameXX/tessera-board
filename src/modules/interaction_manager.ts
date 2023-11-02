@@ -10,7 +10,7 @@ import type UserDataManager from "./user_data_manager";
 import type ConfirmDialog from "./dialogs/confirm";
 import type Game from "./game";
 import type { GamePaused } from "./user_data/game_paused";
-import { Winner } from "./game";
+import type { Winner } from "./game";
 
 class InteractionManager {
   constructor(
@@ -26,7 +26,7 @@ class InteractionManager {
     private readonly autoPause: Ref<boolean>
   ) {}
 
-  updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
+  public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
       case "none":
         setPrimaryHue(playerPlaying);
@@ -48,7 +48,7 @@ class InteractionManager {
     }
   }
 
-  toggleActionsPanel() {
+  public toggleActionsPanel() {
     this.actionPanelOpen.value = !this.actionPanelOpen.value;
     this.actionPanelOpen.value
       ? this.escapeManager.addLayer(this.toggleActionsPanel)
@@ -64,27 +64,27 @@ class InteractionManager {
     }
   }
 
-  toggleSettings() {
+  public toggleSettings() {
     this.settingsOpen.value = !this.settingsOpen.value;
     this.settingsOpen.value
       ? this.escapeManager.addLayer(this.toggleActionsPanel)
       : this.escapeManager.removeLayer();
   }
 
-  toggleAbout() {
+  public toggleAbout() {
     this.aboutOpen.value = !this.aboutOpen.value;
     this.aboutOpen.value
       ? this.escapeManager.addLayer(this.toggleActionsPanel)
       : this.escapeManager.removeLayer();
   }
 
-  updateScreenRotation(rotate: boolean): void {
+  public updateScreenRotation(rotate: boolean): void {
     rotate
       ? setCSSVariable("app-transform", "rotate(-0.5turn)")
       : setCSSVariable("app-transform", "");
   }
 
-  tryRecoverData() {
+  public tryRecoverData() {
     if (!navigator.cookieEnabled) {
       this.toastManager.showToast(
         "Cookies are disabled. -> No changes will be restored in next session.",
@@ -97,7 +97,7 @@ class InteractionManager {
     return true;
   }
 
-  async onGameRestart() {
+  public async onGameRestart() {
     const confirmed = await this.confirmDialog.show(
       "Currently played game will be lost. Are you sure?"
     );
@@ -106,7 +106,7 @@ class InteractionManager {
     this.game.restart();
   }
 
-  manuallyTogglePause() {
+  public manuallyTogglePause() {
     if (this.gamePaused.value === "not") {
       this.gamePaused.value = "manual";
     } else {
@@ -114,7 +114,7 @@ class InteractionManager {
     }
   }
 
-  onFocusChange(focused: boolean) {
+  public onFocusChange(focused: boolean) {
     if (!focused && this.autoPause.value && this.gamePaused.value === "not") {
       this.gamePaused.value = "auto";
     }
