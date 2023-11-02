@@ -1,7 +1,7 @@
 import BoardManager from "./board_manager";
 import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
 import type ConfigPieceDialog from "./dialogs/config_piece";
-import { BoardStateValue } from "./user_data/board_state";
+import type { BoardStateValue } from "./user_data/board_state";
 import type { Ref } from "vue";
 import { isPositionOnBoard } from "./pieces/piece";
 import { movePositionValue } from "./moves/move";
@@ -34,15 +34,15 @@ class DefaultBoardManager extends BoardManager {
   }
 
   public onPieceDragStart(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ): void {
-    this.onPieceDragOverCell(pieceProps, targetPosition);
+    this.onPieceDragOverCell(targetPosition, pieceProps);
   }
 
   public onPieceDragOverCell(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ): void {
     this.clearDraggingOverCells();
     if (
@@ -55,8 +55,8 @@ class DefaultBoardManager extends BoardManager {
   }
 
   public async onPieceDragEnd(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ) {
     this.dragEndTimeout = true;
     setTimeout(() => {

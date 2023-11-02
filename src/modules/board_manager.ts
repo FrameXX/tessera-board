@@ -3,7 +3,8 @@ import type { PieceId } from "./pieces/piece";
 
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-export function isBoardPosition(object: any): object is BoardPosition {
+export function isBoardPosition(object: object): object is BoardPosition {
+  if (!("row" in object && "col" in object)) return false;
   return typeof object.row === "number" && typeof object.col === "number";
 }
 
@@ -15,18 +16,18 @@ abstract class BoardManager {
   public abstract onCellClick(position: BoardPosition): void;
 
   public abstract onPieceDragStart(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ): void;
 
   public abstract onPieceDragEnd(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ): void;
 
   public abstract onPieceDragOverCell(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ): void;
 }
 

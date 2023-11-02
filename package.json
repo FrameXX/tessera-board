@@ -6,18 +6,25 @@
   "scripts": {
     "dev": "npx vite",
     "landev": "npx vite --host 192.168.0.8 --port 3000",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "build": "eslint . && vue-tsc && vite build",
+    "preview": "vite preview",
+    "eslint": "eslint ."
   },
   "dependencies": {
+    "@types/eslint": "^8.44.6",
+    "eslint-plugin-typescript": "^0.14.0",
     "howler": "^2.2.4",
     "vue": "^3.3.4"
   },
   "devDependencies": {
     "@types/howler": "^2.2.9",
+    "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "@typescript-eslint/parser": "^6.9.1",
     "@vitejs/plugin-vue": "^4.2.3",
+    "eslint": "^8.52.0",
+    "eslint-plugin-vue": "^9.18.1",
     "sass": "^1.66.1",
-    "typescript": "^5.0.2",
+    "typescript": "^5.2.2",
     "vite": "^4.4.9",
     "vue-tsc": "^1.8.8"
   }

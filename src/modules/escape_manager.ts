@@ -1,4 +1,4 @@
-type EscapeCallback = (args?: any) => void;
+type EscapeCallback = () => void;
 
 class EscapeManager {
   private readonly escapeStack: EscapeCallback[];

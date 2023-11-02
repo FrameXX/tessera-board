@@ -176,8 +176,8 @@ watch(targetingDragPosition, () => {
     return;
   }
   props.manager.onPieceDragOverCell(
-    draggingPiece.value,
-    targetingDragPosition.value
+    targetingDragPosition.value,
+    draggingPiece.value
   );
 });
 
@@ -213,7 +213,7 @@ function updatePointerPosition(x: number, y: number) {
 function initDrag(event: PointerEvent, pieceProps: BoardPieceProps) {
   pressTimeout = null;
   draggingPiece.value = pieceProps;
-  props.manager.onPieceDragStart(pieceProps, targetingDragPosition.value);
+  props.manager.onPieceDragStart(targetingDragPosition.value, pieceProps);
 
   const x = event.clientX;
   const y = event.clientY;
@@ -259,8 +259,8 @@ function onPointerUp() {
     return;
   }
   props.manager.onPieceDragEnd(
-    draggingPiece.value,
-    targetingDragPosition.value
+    targetingDragPosition.value,
+    draggingPiece.value
   );
   draggingPiece.value = null;
   resetDragDelta();

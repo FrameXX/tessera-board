@@ -16,7 +16,7 @@ export interface CommonConfigPrint extends UserConfigPrint {
 }
 
 // Validators
-function isUserConfigPrint(object: any): object is UserConfigPrint {
+function isUserConfigPrint(object: object): object is UserConfigPrint {
   if (!("id" in object && "name" in object && "description" in object)) {
     return false;
   }
@@ -27,14 +27,16 @@ function isUserConfigPrint(object: any): object is UserConfigPrint {
   );
 }
 
-function isArrayOfUserConfigPrints(object: any): object is UserConfigPrint[] {
+function isArrayOfUserConfigPrints(
+  object: object
+): object is UserConfigPrint[] {
   if (!Array.isArray(object)) {
     return false;
   }
   return object.every((element) => isUserConfigPrint(element));
 }
 
-function isArrayofStrings(object: any): object is string[] {
+function isArrayofStrings(object: object): object is string[] {
   if (!Array.isArray(object)) {
     return false;
   }
@@ -104,7 +106,7 @@ class ConfigInventory {
       return;
     }
 
-    let configValues: any;
+    let configValues: object;
     try {
       configValues = JSON.parse(configValuesStr);
     } catch (error) {
@@ -135,7 +137,7 @@ class ConfigInventory {
       return;
     }
 
-    let configPrints: any;
+    let configPrints: object;
     try {
       configPrints = JSON.parse(configPrintsStr);
     } catch (error) {

@@ -1,11 +1,12 @@
-import { BoardPosition } from "../../components/Board.vue";
-import { PlayerColor } from "../game";
+import type { BoardPosition } from "../../components/Board.vue";
+import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import { BoardStateValue } from "../user_data/board_state";
+import type { BoardStateValue } from "../user_data/board_state";
 import Piece, { isFriendlyPiece } from "./piece";
+import type {
+  BoardPositionValue} from "./piece";
 import {
-  BoardPositionValue,
   getDeltaPosition,
   isPositionOnBoard,
 } from "./piece";
@@ -56,6 +57,8 @@ export class Knight extends Piece {
 
     return moves;
   }
+
+  public loadCustomProps(): void {}
 }
 
 export default Knight;

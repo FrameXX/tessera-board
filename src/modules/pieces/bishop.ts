@@ -2,7 +2,7 @@ import type { BoardPosition } from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import { BoardStateValue } from "../user_data/board_state";
+import type { BoardStateValue } from "../user_data/board_state";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import {
   type BoardPositionValue,
@@ -24,7 +24,9 @@ export class Bishop extends Piece {
       for (const rowDelta of [-1, 1]) {
         let totalColDelta = 0;
         let totalRowDelta = 0;
-        while (true) {
+
+        let piece = null;
+        do {
           totalColDelta += colDelta;
           totalRowDelta += rowDelta;
           const target = getDeltaPosition(
@@ -35,12 +37,9 @@ export class Bishop extends Piece {
           if (!isPositionOnBoard(target)) {
             break;
           }
-          const piece = getBoardPositionPiece(target, boardStateValue);
+          piece = getBoardPositionPiece(target, boardStateValue);
           capturingPositions.push(target);
-          if (piece) {
-            break;
-          }
-        }
+        } while (piece === null);
       }
     }
     return capturingPositions;
@@ -68,6 +67,8 @@ export class Bishop extends Piece {
 
     return moves;
   }
+
+  public loadCustomProps(): void {}
 }
 
 export default Bishop;

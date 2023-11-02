@@ -6,7 +6,6 @@ class Timer {
 
   constructor(
     private readonly seconds: Ref<number>,
-    // @ts-ignore
     private readonly secondsLimit: Ref<number>
   ) {
     this.beyondLimit = computed(() => {

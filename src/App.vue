@@ -69,8 +69,6 @@ import Game, {
   type Winner,
   type WinReason,
   isWinReason,
-  type GamePaused,
-  isGamePaused,
 } from "./modules/game";
 import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
@@ -85,6 +83,7 @@ import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
 import InteractionManager from "./modules/interaction_manager";
+import { type GamePaused, isGamePaused } from "./modules/user_data/game_paused";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -688,6 +687,7 @@ const gamePieceProps = computed(() => {
   allPieceProps.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
   return allPieceProps;
 });
+
 const defaultPieceProps = computed(() => {
   const allPieceProps: BoardPieceProps[] = [];
   for (const [rowIndex, row] of defaultBoardState.entries()) {
@@ -763,8 +763,7 @@ const playerBoardManager = new GameBoardManager(
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
-  moveIndex,
-  toastManager
+  moveIndex
 );
 const opponentBoardManager = new GameBoardManager(
   whiteCapturingPaths,
@@ -790,8 +789,7 @@ const opponentBoardManager = new GameBoardManager(
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
-  moveIndex,
-  toastManager
+  moveIndex
 );
 
 const game = new Game(

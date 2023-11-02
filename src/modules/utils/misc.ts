@@ -1,8 +1,8 @@
 import type { BoardPosition } from "../../components/Board.vue";
 
 export function getRandomNumber(min: number, max: number) {
-  var number = Math.round(Math.random() * (max + 1 - min) + (min - 0.5)) * 1;
-  return number === -0 ? 0 : number;
+  const number = Math.round(Math.random() * (max + 1 - min) + (min - 0.5)) * 1;
+  return number + 0;
 }
 
 export function getRandomId(chars: number = 8) {

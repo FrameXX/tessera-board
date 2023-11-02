@@ -30,7 +30,7 @@ class RawBoardStateData extends ComplexUserData<BoardStateValue> {
   }
 
   public load(dumped: string): void {
-    let value = this.safelyParse(dumped);
+    const value = this.safelyParse(dumped);
     if (!value) {
       return;
     }

@@ -9,7 +9,8 @@ import Piece, {
   isFriendlyPiece,
 } from "./piece";
 import { getDeltaPosition } from "./piece";
-import { RawPiece, getRawPiece } from "./rawPiece";
+import type { RawPiece} from "./rawPiece";
+import { getRawPiece } from "./rawPiece";
 import type { PlayerColor } from "../game";
 
 interface RawPawn extends RawPiece {

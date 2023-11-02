@@ -1,11 +1,11 @@
-import { Ref } from "vue";
-import { BoardPosition, MarkBoardState } from "../../components/Board.vue";
+import type { Ref } from "vue";
+import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type { BooleanBoardState } from "../user_data/boolean_board_state";
-import { BoardPositionValue, PieceId } from "../pieces/piece";
-import { RawPiece } from "../pieces/rawPiece";
-import { BoardStateValue } from "../user_data/board_state";
+import type { BoardPositionValue, PieceId } from "../pieces/piece";
+import type { RawPiece } from "../pieces/rawPiece";
+import type { BoardStateValue } from "../user_data/board_state";
 import Move, { highlightBoardPosition } from "./move";
-import SelectPieceDialog from "../dialogs/select_piece";
+import type SelectPieceDialog from "../dialogs/select_piece";
 import {
   capturePosition,
   movePositionValue,
@@ -111,11 +111,11 @@ class Promotion extends Move {
     let notation: string;
     this.captures
       ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-          this.captures
-        )}=${getPieceNotation(newPiece.pieceId)}`)
+        this.captures
+      )}=${getPieceNotation(newPiece.pieceId)}`)
       : (notation = `${getPositionNotation(this.target)}=${getPieceNotation(
-          newPiece.pieceId
-        )}`);
+        newPiece.pieceId
+      )}`);
     return notation;
   }
 

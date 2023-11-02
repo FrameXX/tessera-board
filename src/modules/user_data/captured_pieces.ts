@@ -25,7 +25,7 @@ class CapturedPiecesData extends UserData<PieceId[]> {
     }
     const pieceIds = this.safelyParse(dumped);
     if (!Array.isArray(pieceIds)) {
-      console.error(`Captured pieces didn't parse into an array.`);
+      console.error("Captured pieces didn't parse into an array.");
       this.handleInvalidLoadValue(dumped);
     }
     for (const i in pieceIds) {

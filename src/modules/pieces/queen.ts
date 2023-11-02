@@ -48,6 +48,8 @@ export class Queen extends Piece {
 
     return moves;
   }
+
+  public loadCustomProps(): void {}
 }
 
 export default Queen;

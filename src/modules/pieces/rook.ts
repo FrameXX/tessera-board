@@ -1,9 +1,9 @@
-import { BoardPosition } from "../../components/Board.vue";
+import type { BoardPosition } from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import { BoardStateValue } from "../user_data/board_state";
+import type { BoardStateValue } from "../user_data/board_state";
 import { isPieceKing } from "./king";
 import Piece, {
   type Path,
@@ -11,8 +11,9 @@ import Piece, {
   isFriendlyPiece,
   positionWillBeCaptured,
 } from "./piece";
+import type {
+  BoardPositionValue} from "./piece";
 import {
-  BoardPositionValue,
   getDeltaPosition,
   isPositionOnBoard,
 } from "./piece";

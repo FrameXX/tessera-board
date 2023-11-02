@@ -13,12 +13,11 @@ import {
 } from "./pieces/piece";
 import { GameLogicError, type Winner, type PlayerColor } from "./game";
 import type { BoardStateValue } from "./user_data/board_state";
-import Move from "./moves/move";
-import SelectPieceDialog from "./dialogs/select_piece";
+import type Move from "./moves/move";
+import type SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
 import { isMoveTransform } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
-import type ToastManager from "./toast_manager";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
@@ -40,7 +39,6 @@ class GameBoardManager extends BoardManager {
     private readonly cellsMarks: MarkBoardState,
     private readonly selectedPieces: Ref<BoardPosition[]>,
     private readonly selectedCells: Ref<BoardPosition[]>,
-    // @ts-ignore
     private readonly draggingOverCells: Ref<BoardPosition[]>,
     private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
@@ -51,9 +49,7 @@ class GameBoardManager extends BoardManager {
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
-    private readonly moveIndex: Ref<number>,
-    // @ts-ignore
-    private readonly toastManager: ToastManager
+    private readonly moveIndex: Ref<number>
   ) {
     super();
   }
@@ -301,10 +297,10 @@ class GameBoardManager extends BoardManager {
   }
 
   public onPieceDragStart(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ): void {
-    this.onPieceDragOverCell(pieceProps, targetPosition);
+    this.onPieceDragOverCell(targetPosition, pieceProps);
     if (this.selectedPiece === null) {
       this.onPieceClick(pieceProps);
       return;
@@ -314,8 +310,8 @@ class GameBoardManager extends BoardManager {
   }
 
   public onPieceDragOverCell(
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
+    targetPosition: BoardPosition,
+    pieceProps: BoardPieceProps
   ): void {
     this.clearDraggingOverCells();
     if (
@@ -326,11 +322,7 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  public onPieceDragEnd(
-    // @ts-ignore
-    pieceProps: BoardPieceProps,
-    targetPosition: BoardPosition
-  ): void {
+  public onPieceDragEnd(targetPosition: BoardPosition): void {
     this.dragEndTimeout = true;
     setTimeout(() => {
       this.dragEndTimeout = false;

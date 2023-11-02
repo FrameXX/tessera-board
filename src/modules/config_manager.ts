@@ -1,4 +1,4 @@
-import UserData from "./user_data/user_data";
+import type UserData from "./user_data/user_data";
 import type ConfigInventory from "./config_inventory";
 import type ToastManager from "./toast_manager";
 import { getRandomId } from "./utils/misc";
@@ -83,7 +83,7 @@ class ConfigManager {
   public async saveConfig(name: string, description: string) {
     const id = getRandomId();
 
-    let values: string[] = [];
+    const values: string[] = [];
     for (const entry of this.entries) {
       values.push(entry.dump());
     }

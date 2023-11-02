@@ -47,7 +47,7 @@ abstract class UserData<ValueType> {
     return isSavedOnce;
   }
 
-  protected safelyParse(dumped: string): any | void {
+  protected safelyParse(dumped: string) {
     let value;
     try {
       value = JSON.parse(dumped);

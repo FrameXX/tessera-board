@@ -2,19 +2,15 @@ import { type ComputedRef, type Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
-import GameBoardManager from "./game_board_manager";
-import ToastManager from "./toast_manager";
+import type GameBoardManager from "./game_board_manager";
+import type ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
-import ConfirmDialog from "./dialogs/confirm";
+import type ConfirmDialog from "./dialogs/confirm";
 import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
 import { positionsToPath, type Path } from "./pieces/piece";
-import { BoardStateValue } from "./user_data/board_state";
-
-export type GamePaused = "not" | "auto" | "manual";
-export function isGamePaused(string: string): string is GamePaused {
-  return string === "not" || string === "auto" || string === "manual";
-}
+import type { BoardStateValue } from "./user_data/board_state";
+import type { GamePaused } from "./user_data/game_paused";
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
@@ -44,8 +40,7 @@ export function getPlayerTeamName(
   player: Player,
   playerColor: PlayerColor
 ): TeamName {
-  let teamName: TeamName;
-  teamName =
+  const teamName =
     player === "player"
       ? getColorTeamName(playerColor)
       : getColorTeamName(getOpossitePlayerColor(playerColor));
@@ -339,7 +334,7 @@ class Game {
   public async resign() {
     if (this.winner.value !== "none") {
       this.toastManager.showToast(
-        `You cannot resign. The game ending was already decided.`,
+        "You cannot resign. The game ending was already decided.",
         "flag-off",
         "error"
       );

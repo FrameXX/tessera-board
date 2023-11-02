@@ -4,7 +4,7 @@ import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
-import { RawPiece, getRawPiece } from "./rawPiece";
+import { type RawPiece, getRawPiece } from "./rawPiece";
 
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 export function isPieceId(string: string): string is PieceId {
@@ -41,8 +41,7 @@ export abstract class Piece {
   }
 
   // Every piece can override this method and possibly load some custom properties from the restored raw piece object.
-  // @ts-ignore
-  public loadCustomProps(rawPiece: RawPiece) {}
+  public abstract loadCustomProps(rawPiece: RawPiece): void;
 
   // Every piece can override this method and return object with extra custom props.
   public dumpObject(): object {

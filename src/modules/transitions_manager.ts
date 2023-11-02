@@ -1,5 +1,6 @@
 import { setCSSVariable } from "./utils/elements";
-import { Ref, watch } from "vue";
+import type { Ref} from "vue";
+import { watch } from "vue";
 
 export type Transitions = "auto" | "enabled" | "disabled";
 export function isTransitions(string: string): string is Transitions {
