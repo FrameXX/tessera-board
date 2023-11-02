@@ -1,11 +1,16 @@
 import { type Ref } from "vue";
 import type EscapeManager from "./escape_manager";
-import { setCSSVariable } from "./utils/elements";
+import {
+  setCSSVariable,
+  setPrimaryHue,
+  setSaturationMultiplier,
+} from "./utils/elements";
 import type ToastManager from "./toast_manager";
 import type UserDataManager from "./user_data_manager";
 import type ConfirmDialog from "./dialogs/confirm";
 import type Game from "./game";
 import type { GamePaused } from "./user_data/game_paused";
+import { Winner } from "./game";
 
 class InteractionManager {
   constructor(
@@ -20,6 +25,28 @@ class InteractionManager {
     private readonly gamePaused: Ref<GamePaused>,
     private readonly autoPause: Ref<boolean>
   ) {}
+
+  updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
+    switch (winner) {
+      case "none":
+        setPrimaryHue(playerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "player":
+        setPrimaryHue(true);
+        break;
+      case "opponent":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
+    }
+    if (winner !== "draw") {
+      setSaturationMultiplier(1);
+    }
+  }
 
   toggleActionsPanel() {
     this.actionPanelOpen.value = !this.actionPanelOpen.value;

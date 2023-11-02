@@ -13,7 +13,7 @@ html {
   --cell-index-opacity: 0.8;
   --piece-padding: 5px;
   --piece-stroke-width: 1.1px;
-  --saturation-multiplier: 1;
+  --saturation-multiplier: 0;
 
   // ===== Box shadow =====
   --box-shadow-offset-x: 0;
@@ -95,26 +95,16 @@ html {
   --H-error: 0;
 
   // ===== Saturation =====
-  --S-primary-text-active: calc(5% * var(--saturation-multiplier));
-  --S-primary-surface-active: calc(5% * var(--saturation-multiplier));
-  --S-primary-surface-top-active: calc(5% * var(--saturation-multiplier));
-  --S-primary-surface-accent-active: calc(30% * var(--saturation-multiplier));
-  --S-primary-accent-active: calc(55% * var(--saturation-multiplier));
-  --S-cell-active: calc(8% * var(--saturation-multiplier));
-  --S-piece-fill-active: calc(60% * var(--saturation-multiplier));
-  --S-piece-stroke-active: calc(60% * var(--saturation-multiplier));
-  --S-backdrop-active: calc(6% * var(--saturation-multiplier));
+  --S-primary-text: calc(5% * var(--saturation-multiplier));
+  --S-primary-surface: calc(5% * var(--saturation-multiplier));
+  --S-primary-surface-top: calc(5% * var(--saturation-multiplier));
+  --S-primary-surface-accent: calc(30% * var(--saturation-multiplier));
+  --S-primary-accent: calc(55% * var(--saturation-multiplier));
 
-  --S-primary-text: 0%;
-  --S-primary-surface: 0%;
-  --S-primary-surface-top: 0%;
-  --S-primary-surface-accent: 0%;
-  --S-primary-accent: 0%;
-
-  --S-cell: 0%;
-  --S-piece-fill: 0%;
-  --S-piece-stroke: 0%;
-  --S-backdrop: 0%;
+  --S-cell: calc(8% * var(--saturation-multiplier));
+  --S-piece-fill: calc(60% * var(--saturation-multiplier));
+  --S-piece-stroke: calc(60% * var(--saturation-multiplier));
+  --S-backdrop: calc(6% * var(--saturation-multiplier));
 
   --S-error-text: 45%;
   --S-error-surface: 45%;

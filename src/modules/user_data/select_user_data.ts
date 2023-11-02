@@ -6,7 +6,7 @@ class SelectUserData<ValueType extends string> extends UserData<ValueType> {
   constructor(
     id: string,
     value: ValueType,
-    private readonly validate: (string: string) => string is ValueType,
+    protected readonly validate: (string: string) => string is ValueType,
     toastManager: ToastManager,
     valueRef?: Ref<ValueType>
   ) {
@@ -18,14 +18,14 @@ class SelectUserData<ValueType extends string> extends UserData<ValueType> {
   }
 
   public load(dumped: string): void {
-    if (this.validate(dumped)) {
-      this.value = dumped;
-    } else {
+    if (!this.validate(dumped)) {
       console.error(
         `An error occured while trying to parse select user data ${this.id}.`
       );
       this.handleInvalidLoadValue(dumped);
+      return;
     }
+    this.value = dumped;
   }
 
   public apply(): void {}

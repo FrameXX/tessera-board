@@ -375,11 +375,7 @@ class Game {
   }
 
   public restore() {
-    if (this.paused.value === "auto") {
-      this.paused.value = "not";
-    } else {
-      this.updateTimerState();
-    }
+    this.updateTimerState();
     this.updateCapturingPaths();
   }
 

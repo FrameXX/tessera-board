@@ -44,9 +44,8 @@ import ConfigPieceDialog from "./modules/dialogs/config_piece";
 import SelectPieceDilog from "./modules/dialogs/select_piece";
 import { PIECE_IDS, type Path } from "./modules/pieces/piece";
 import {
-  activateColors,
+  setSaturationMultiplier,
   hideSplashscreen,
-  updatePrimaryHue,
   updatePieceColors,
 } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
@@ -83,7 +82,9 @@ import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
 import InteractionManager from "./modules/interaction_manager";
-import { type GamePaused, isGamePaused } from "./modules/user_data/game_paused";
+import GamePausedData, {
+  type GamePaused,
+} from "./modules/user_data/game_paused";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -526,13 +527,7 @@ const userDataManager = new UserDataManager(
       toastManager,
       secondsMoveLimitRunOutPunishment
     ),
-    new SelectUserData(
-      "game_paused",
-      DEFAULT_GAME_PAUSED_VALUE,
-      isGamePaused,
-      toastManager,
-      gamePaused
-    ),
+    new GamePausedData(DEFAULT_GAME_PAUSED_VALUE, toastManager, gamePaused),
     new BooleanUserData(
       "ban_promotion_to_uncaptured_pieces",
       DEFAULT_REVIVE_FROM_CAPTURED_PIECES_VALUE,
@@ -709,7 +704,10 @@ watch(screenRotated, (newValue) => {
   interactionManager.updateScreenRotation(newValue);
 });
 watch(playerPlaying, (newValue) => {
-  updatePrimaryHue(newValue);
+  interactionManager.updatePrimaryHue(newValue, winner.value);
+});
+watch(winner, (newValue) => {
+  interactionManager.updatePrimaryHue(playerPlaying.value, newValue);
 });
 watch(playerColor, (newValue) => {
   updatePieceColors(newValue);
@@ -847,7 +845,7 @@ userDataManager.updateReferences();
 
 onMounted(() => {
   // Sets CSS Saturation variables from 0 to their appropriate user configured values
-  activateColors();
+  setSaturationMultiplier(1);
 
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") escapeManager.escape();
@@ -899,6 +897,7 @@ onMounted(() => {
       :player-playing="playerPlaying"
       :move-index="moveIndex"
       :status-text="statusText"
+      :winner="winner"
     />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area" :class="{ rotated: screenRotated }">

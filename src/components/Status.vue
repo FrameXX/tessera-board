@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import { PropType, computed } from "vue";
 import SimpleInfo from "./SimpleInfo.vue";
 import {
   getMinsAndSecsTime,
   type MinSecTime,
   getDigitStr,
 } from "../modules/utils/misc";
+import { Winner } from "../modules/game";
 
 const TOO_FEW_MOVE_SECONDS = 11;
 const TOO_FEW_MATCH_SECONDS = 31;
@@ -22,6 +23,7 @@ const props = defineProps({
   playerPlaying: { type: Boolean, required: true },
   moveIndex: { type: Number, required: true },
   statusText: { type: String, required: true },
+  winner: { type: String as PropType<Winner>, required: true },
 });
 
 const playerTimeMove = computed<MinSecTime>(() => {
@@ -53,7 +55,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           pulsing:
             props.playerSecsMove < TOO_FEW_MOVE_SECONDS &&
             props.playerSecsMove > 0 &&
-            props.playerPlaying,
+            props.playerPlaying &&
+            winner === 'none',
         }"
         name="move"
         >{{
@@ -69,7 +72,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           pulsing:
             props.playerSecsMatch < TOO_FEW_MATCH_SECONDS &&
             props.playerSecsMatch > 0 &&
-            props.playerPlaying,
+            props.playerPlaying &&
+            winner === 'none',
         }"
         name="match"
         >{{
@@ -102,7 +106,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           pulsing:
             props.opponentSecsMove < TOO_FEW_MOVE_SECONDS &&
             props.opponentSecsMove > 0 &&
-            !props.playerPlaying,
+            !props.playerPlaying &&
+            winner === 'none',
         }"
         name="move"
         >{{
@@ -118,7 +123,8 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           pulsing:
             props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS &&
             props.opponentSecsMatch > 0 &&
-            !props.playerPlaying,
+            !props.playerPlaying &&
+            winner === 'none',
         }"
         name="match"
         >{{

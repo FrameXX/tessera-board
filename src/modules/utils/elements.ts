@@ -107,25 +107,11 @@ export function getElementInstanceById<T extends Element = Element>(
   return validateElementInstance(element, "#" + id, instance);
 }
 
-export function activateColors(): void {
-  setCSSVariable("S-primary-text", "var(--S-primary-text-active)");
-  setCSSVariable("S-primary-surface", "var(--S-primary-surface-active)");
-  setCSSVariable(
-    "S-primary-surface-top",
-    "var(--S-primary-surface-top-active)"
-  );
-  setCSSVariable(
-    "S-primary-surface-accent",
-    "var(--S-primary-surface-accent-active)"
-  );
-  setCSSVariable("S-primary-accent", "var(--S-primary-accent-active)");
-  setCSSVariable("S-cell", "var(--S-cell-active)");
-  setCSSVariable("S-piece-fill", "var(--S-piece-fill-active)");
-  setCSSVariable("S-piece-stroke", "var(--S-piece-stroke-active)");
-  setCSSVariable("S-dim", "var(--S-dim-active)");
+export function setSaturationMultiplier(value: number): void {
+  setCSSVariable("saturation-multiplier", value.toString());
 }
 
-export function updatePrimaryHue(playerPlaying: boolean) {
+export function setPrimaryHue(playerPlaying: boolean) {
   playerPlaying
     ? setCSSVariable("H-primary", "var(--H-player)")
     : setCSSVariable("H-primary", "var(--H-opponent)");
