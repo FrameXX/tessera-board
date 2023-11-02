@@ -2,7 +2,7 @@
 import { type PropType, watch } from "vue";
 import Backdrop from "./Backdrop.vue";
 import FastButton from "./FastButton.vue";
-import type { GamePaused } from "../modules/game";
+import { GamePaused } from "../modules/user_data/game_paused";
 
 const props = defineProps({
   open: { type: Boolean, default: false },

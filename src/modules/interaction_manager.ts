@@ -5,7 +5,7 @@ import type ToastManager from "./toast_manager";
 import type UserDataManager from "./user_data_manager";
 import type ConfirmDialog from "./dialogs/confirm";
 import type Game from "./game";
-import type { GamePaused } from "./game";
+import type { GamePaused } from "./user_data/game_paused";
 
 class InteractionManager {
   constructor(
