@@ -1329,12 +1329,6 @@ onMounted(() => {
   }
 }
 
-.action-buttons-drawer {
-  button {
-    margin: var(--spacing-medium) var(--spacing-medium) var(--spacing-medium) 0;
-  }
-}
-
 .nav-placeholder {
   height: 90px;
 }

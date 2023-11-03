@@ -1,9 +1,10 @@
 import type UserData from "./user_data/user_data";
 import type ConfirmDialog from "./dialogs/confirm";
 import type ToastManager from "./toast_manager";
+import { exportData, importData } from "./utils/data";
 
 class UserDataManager {
-  private readonly dialogManager: ConfirmDialog;
+  private readonly confirmDialog: ConfirmDialog;
   private readonly toastManager: ToastManager;
 
   constructor(
@@ -11,8 +12,36 @@ class UserDataManager {
     dialogManager: ConfirmDialog,
     toastManager: ToastManager
   ) {
-    this.dialogManager = dialogManager;
+    this.confirmDialog = dialogManager;
     this.toastManager = toastManager;
+  }
+
+  public requestExportData() {
+    if (!navigator.cookieEnabled) {
+      this.toastManager.showToast(
+        "Cannot access local storage because cookies are disabled.",
+        "database-alert",
+        "error"
+      );
+      return;
+    }
+    exportData();
+  }
+
+  public async requestImportData() {
+    const confirmed = await this.confirmDialog.show(
+      "Are you sure? All current data will be cleared, new data will be written and page reloaded."
+    );
+    if (!confirmed) return;
+    if (!navigator.cookieEnabled) {
+      this.toastManager.showToast(
+        "Cannot access local storage because cookies are disabled.",
+        "database-alert",
+        "error"
+      );
+      return;
+    }
+    importData(this.toastManager);
   }
 
   public recoverData() {
@@ -64,7 +93,7 @@ class UserDataManager {
       );
       return;
     }
-    const confirmed = await this.dialogManager.show(
+    const confirmed = await this.confirmDialog.show(
       "This action deletes all data, preferences, configuration and games played (including the current one) stored on this device and reloads the page. Are you sure?"
     );
     if (confirmed) {

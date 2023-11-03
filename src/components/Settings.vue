@@ -600,8 +600,16 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           </UserOption>
         </Category>
         <div class="action-buttons-drawer">
+          <button @click="userDataManager.requestImportData()">
+            <Icon icon-id="database-import-outline" side />
+            Import data
+          </button>
+          <button @click="userDataManager.requestExportData()">
+            <Icon icon-id="database-export-outline" side />
+            Export data
+          </button>
           <button @click="userDataManager.requestClearData()">
-            <Icon icon-id="delete-forever-outline" side />
+            <Icon icon-id="database-remove-outline" side />
             Clear all data
           </button>
         </div>
@@ -639,5 +647,11 @@ header {
 .board-box {
   aspect-ratio: 1;
   height: auto;
+}
+
+.action-buttons-drawer {
+  button {
+    margin: var(--spacing-small) var(--spacing-medium) var(--spacing-small) 0;
+  }
 }
 </style>

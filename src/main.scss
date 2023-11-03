@@ -180,6 +180,7 @@ header.version {
   width: var(--font-size-huge);
   height: var(--font-size-huge);
   display: inline;
+  fill: currentColor;
 
   &.side {
     margin: var(--spacing-tiny) var(--spacing-medium) var(--spacing-tiny) 0;
