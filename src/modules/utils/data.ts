@@ -29,17 +29,20 @@ function downloadBlob(blob: Blob) {
   link.download = fileName;
   document.body.prepend(link);
   link.click();
-  document.body.removeChild(link);
+  link.remove();
 }
 
 function requestFile(): Promise<null | File> {
   const input = document.createElement("input");
   input.type = "file";
+  input.accept = "application/json";
+  input.multiple = false;
   document.body.prepend(input);
   input.click();
   return new Promise((resolve: (file: null | File) => void) => {
     input.addEventListener("cancel", () => {
       resolve(null);
+      input.remove();
     });
     input.addEventListener("change", () => {
       if (!input.files) {
@@ -47,6 +50,7 @@ function requestFile(): Promise<null | File> {
       } else {
         resolve(input.files[0]);
       }
+      input.remove();
     });
   });
 }
@@ -84,7 +88,7 @@ export async function importData(toastManager: ToastManager) {
   const entries = await readFile(file);
   if (entries === null) {
     toastManager.showToast(
-      "Reading data from file failed. File may be corrupted",
+      "Reading data from file failed. File may be corrupted or in wrong format.",
       "file-alert-outline",
       "error"
     );
@@ -92,7 +96,7 @@ export async function importData(toastManager: ToastManager) {
   }
   if (!isEntries(entries)) {
     toastManager.showToast(
-      "An error occurred while attempting to write new data to storage. Your data has been lost! The file may be corrupted.",
+      "Provided file has incorrectly formated data. The file may be corrupted or in wrong format.",
       "file-alert-outline",
       "error"
     );
