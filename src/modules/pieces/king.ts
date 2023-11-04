@@ -35,7 +35,7 @@ export class King extends Piece {
   public hasCastled: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
-    super(color, "king", id, false);
+    super(color, "king", id, true);
   }
 
   public dumpObject(): object {

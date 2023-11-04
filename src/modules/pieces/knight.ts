@@ -9,7 +9,7 @@ import { getDeltaPosition, isPositionOnBoard } from "./piece";
 
 export class Knight extends Piece {
   constructor(color: PlayerColor, id?: string) {
-    super(color, "knight", false, id);
+    super(color, "knight", id);
   }
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {

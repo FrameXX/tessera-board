@@ -12,7 +12,7 @@ export interface ToastProps {
 
 class ToastManager {
   private readonly durationPerCharacter = 70;
-  private readonly initialDurationMs = 800;
+  private readonly initialDurationMs = 1200;
   private readonly maxStackSize = 3;
 
   constructor(private toasts: Ref<ToastProps[]>) {}

@@ -228,14 +228,6 @@ class GameBoardManager extends BoardManager {
     ]);
     for (const path of paths) {
       const origin = path.origin;
-      const piece = this.boardStateValue[origin.row][origin.col];
-      if (!piece) {
-        throw new GameLogicError(
-          `Path is defined from an origin that has no piece. Origin: ${JSON.stringify(
-            origin
-          )}`
-        );
-      }
       this.cellsMarks[origin.row][origin.col] = "capturing";
     }
   }

@@ -38,7 +38,7 @@ export abstract class Piece {
     id?: string,
     public readonly safeguarded: boolean = false
   ) {
-    id ? (this.id = id) : (this.id = getRandomId());
+    this.id = id ? id : getRandomId();
   }
 
   // Every piece can override this method and possibly load some custom properties from the restored raw piece object.

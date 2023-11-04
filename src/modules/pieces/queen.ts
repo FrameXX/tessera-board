@@ -9,7 +9,7 @@ import Rook from "./rook";
 
 export class Queen extends Piece {
   constructor(color: PlayerColor, id?: string) {
-    super(color, "queen", id, false);
+    super(color, "queen", id);
   }
 
   public getNewCapturingPositions(

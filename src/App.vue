@@ -50,11 +50,7 @@ import {
 } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type {
-  BoardPieceProps,
-  BoardPosition,
-  MarkBoardState,
-} from "./components/Board.vue";
+import type { BoardPosition, MarkBoardState } from "./components/Board.vue";
 import type { BooleanBoardState } from "./modules/user_data/boolean_board_state";
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
@@ -68,6 +64,7 @@ import Game, {
   type Winner,
   type WinReason,
   isWinReason,
+  getAllPieceProps,
 } from "./modules/game";
 import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
@@ -667,37 +664,11 @@ const opponentBoardRotated = computed(() => {
  * All pieces are extracted from the boardStateValue 2D array into a list of objects with row and col attached. They are simpler too loop through and therefore also simpler to render using v-for in this form. They are sorted according to their unique id so, Vue transitions them smoothly as they appear and disappear from the checkboard.
  */
 const gamePieceProps = computed(() => {
-  const allPieceProps: BoardPieceProps[] = [];
-  for (const [rowIndex, row] of gameBoardState.entries()) {
-    for (const [colIndex, piece] of row.entries()) {
-      if (piece) {
-        allPieceProps.push({
-          row: rowIndex,
-          col: colIndex,
-          piece: piece,
-        });
-      }
-    }
-  }
-  allPieceProps.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
-  return allPieceProps;
+  return getAllPieceProps(gameBoardState);
 });
 
 const defaultPieceProps = computed(() => {
-  const allPieceProps: BoardPieceProps[] = [];
-  for (const [rowIndex, row] of defaultBoardState.entries()) {
-    for (const [colIndex, piece] of row.entries()) {
-      if (piece) {
-        allPieceProps.push({
-          row: rowIndex,
-          col: colIndex,
-          piece: piece,
-        });
-      }
-    }
-  }
-  allPieceProps.sort((a, b) => a.piece.id.localeCompare(b.piece.id));
-  return allPieceProps;
+  return getAllPieceProps(defaultBoardState);
 });
 
 watch(screenRotated, (newValue) => {

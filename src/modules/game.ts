@@ -8,7 +8,11 @@ import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 import type ConfirmDialog from "./dialogs/confirm";
 import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
-import { positionsToPath, type Path } from "./pieces/piece";
+import Piece, {
+  positionsToPath,
+  type Path,
+  getTargetMatchingPaths,
+} from "./pieces/piece";
 import type { BoardStateValue } from "./user_data/board_state";
 import type { GamePaused } from "./user_data/game_paused";
 import Move from "./moves/move";
@@ -407,12 +411,22 @@ class Game {
     this.updateCapturingPaths();
   }
 
+  private get playingColor() {
+    if (this.playerPlaying.value) {
+      return this.playerColor.value;
+    } else {
+      return getOpossitePlayerColor(this.playerColor.value);
+    }
+  }
+
   public onMove() {
     this.updateTimerState();
     this.resetMoveTimer();
     this.boardStateData.save();
     this.invalidatePiecesCache();
     this.updateCapturingPaths();
+    if (isSafeguardedPieceChecked(this.boardStateValue, this.playingColor))
+      this.toastManager.showToast("Check!", "cross");
   }
 
   private invalidatePiecesCache() {
@@ -454,3 +468,64 @@ class Game {
 }
 
 export default Game;
+
+export function getAllPieceProps(boardStateValue: BoardStateValue) {
+  const allPieceProps: BoardPieceProps[] = [];
+  for (const [rowIndex, row] of boardStateValue.entries()) {
+    for (const [colIndex, piece] of row.entries()) {
+      if (!piece) {
+        continue;
+      }
+      allPieceProps.push({
+        row: rowIndex,
+        col: colIndex,
+        piece: piece,
+      });
+    }
+  }
+  allPieceProps.sort((a, b) => {
+    return a.piece.id.localeCompare(b.piece.id);
+  });
+  return allPieceProps;
+}
+
+export function isSafeguardedPieceChecked(
+  boardStateValue: BoardStateValue,
+  color: PlayerColor
+) {
+  let capturingPaths: Path[] = [];
+  const safeguardedPieces: BoardPieceProps[] = [];
+  for (const [rowIndex, row] of boardStateValue.entries()) {
+    for (const [colIndex, piece] of row.entries()) {
+      if (!piece) {
+        continue;
+      }
+      if (piece.color === color) {
+        if (piece.safeguarded)
+          safeguardedPieces.push({ row: rowIndex, col: colIndex, piece });
+      } else {
+        const origin: BoardPosition = {
+          row: rowIndex,
+          col: colIndex,
+        };
+        capturingPaths = [
+          ...capturingPaths,
+          ...positionsToPath(
+            piece.getCapturingPositions(origin, boardStateValue),
+            origin
+          ),
+        ];
+      }
+    }
+  }
+  for (const piece of safeguardedPieces) {
+    const paths = getTargetMatchingPaths(
+      { row: piece.row, col: piece.col },
+      capturingPaths
+    );
+    if (paths.length !== 0) {
+      return true;
+    }
+  }
+  return false;
+}
