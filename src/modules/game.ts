@@ -8,14 +8,14 @@ import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 import type ConfirmDialog from "./dialogs/confirm";
 import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
-import Piece, {
+import {
   positionsToPath,
   type Path,
   getTargetMatchingPaths,
 } from "./pieces/piece";
 import type { BoardStateValue } from "./user_data/board_state";
 import type { GamePaused } from "./user_data/game_paused";
-import Move from "./moves/move";
+import type Move from "./moves/move";
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
