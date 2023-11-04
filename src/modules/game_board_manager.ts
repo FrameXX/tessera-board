@@ -96,7 +96,8 @@ class GameBoardManager extends BoardManager {
   }
 
   private shouldShowMoves(pieceColor: PlayerColor) {
-    if (this.showOtherAvailibleMoves.value) return true;
+    if (this.showOtherAvailibleMoves.value || this.winner.value !== "none")
+      return true;
     if (!this.secondCheckboard.value && pieceColor !== this.playingColor.value)
       return false;
     if (this.secondCheckboard.value) {

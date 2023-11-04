@@ -35,7 +35,8 @@ export abstract class Piece {
   constructor(
     public readonly color: PlayerColor,
     public readonly pieceId: PieceId,
-    id?: string
+    id?: string,
+    public readonly safeguarded: boolean = false
   ) {
     id ? (this.id = id) : (this.id = getRandomId());
   }

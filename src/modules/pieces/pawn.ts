@@ -9,7 +9,7 @@ import Piece, {
   isFriendlyPiece,
 } from "./piece";
 import { getDeltaPosition } from "./piece";
-import type { RawPiece} from "./rawPiece";
+import type { RawPiece } from "./rawPiece";
 import { getRawPiece } from "./rawPiece";
 import type { PlayerColor } from "../game";
 
@@ -25,7 +25,7 @@ export class Pawn extends Piece {
   private hasMoved: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
-    super(color, "pawn", id);
+    super(color, "pawn", id, false);
   }
 
   private get transformOptions(): [RawPiece, ...RawPiece[]] {

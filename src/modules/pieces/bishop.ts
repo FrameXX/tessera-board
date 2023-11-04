@@ -12,7 +12,7 @@ import {
 
 export class Bishop extends Piece {
   constructor(color: PlayerColor, id?: string) {
-    super(color, "bishop", id);
+    super(color, "bishop", id, false);
   }
 
   public getNewCapturingPositions(

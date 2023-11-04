@@ -4,16 +4,12 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece, { isFriendlyPiece } from "./piece";
-import type {
-  BoardPositionValue} from "./piece";
-import {
-  getDeltaPosition,
-  isPositionOnBoard,
-} from "./piece";
+import type { BoardPositionValue } from "./piece";
+import { getDeltaPosition, isPositionOnBoard } from "./piece";
 
 export class Knight extends Piece {
   constructor(color: PlayerColor, id?: string) {
-    super(color, "knight", id);
+    super(color, "knight", false, id);
   }
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {

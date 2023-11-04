@@ -40,28 +40,28 @@ export function getRawPiece(piece: Piece): RawPiece {
 export function getPieceFromRaw(genericPiece: RawPiece): Piece {
   let piece: Piece | null;
   switch (genericPiece.pieceId) {
-  case "bishop":
-    piece = new Bishop(genericPiece.color, genericPiece.id);
-    break;
-  case "king":
-    piece = new King(genericPiece.color, genericPiece.id);
-    break;
-  case "knight":
-    piece = new Knight(genericPiece.color, genericPiece.id);
-    break;
-  case "pawn":
-    piece = new Pawn(genericPiece.color, genericPiece.id);
-    break;
-  case "queen":
-    piece = new Queen(genericPiece.color, genericPiece.id);
-    break;
-  case "rook":
-    piece = new Rook(genericPiece.color, genericPiece.id);
-    break;
-  default:
-    throw new UserDataError(
-      `Provided pieceId "${genericPiece.pieceId}" is invalid.`
-    );
+    case "bishop":
+      piece = new Bishop(genericPiece.color, genericPiece.id);
+      break;
+    case "king":
+      piece = new King(genericPiece.color, genericPiece.id);
+      break;
+    case "knight":
+      piece = new Knight(genericPiece.color, genericPiece.id);
+      break;
+    case "pawn":
+      piece = new Pawn(genericPiece.color, genericPiece.id);
+      break;
+    case "queen":
+      piece = new Queen(genericPiece.color, genericPiece.id);
+      break;
+    case "rook":
+      piece = new Rook(genericPiece.color, genericPiece.id);
+      break;
+    default:
+      throw new UserDataError(
+        `Provided pieceId "${genericPiece.pieceId}" is invalid.`
+      );
   }
   return piece;
 }
