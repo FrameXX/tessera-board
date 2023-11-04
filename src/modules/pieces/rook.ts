@@ -5,18 +5,9 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import { isPieceKing } from "./king";
-import Piece, {
-  type Path,
-  getBoardPositionPiece,
-  isFriendlyPiece,
-  positionWillBeCaptured,
-} from "./piece";
-import type {
-  BoardPositionValue} from "./piece";
-import {
-  getDeltaPosition,
-  isPositionOnBoard,
-} from "./piece";
+import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
+import type { BoardPositionValue } from "./piece";
+import { getDeltaPosition, isPositionOnBoard } from "./piece";
 import { getRawPiece, type RawPiece } from "./rawPiece";
 
 interface RawRook extends RawPiece {
@@ -91,8 +82,7 @@ export class Rook extends Piece {
 
   public getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    opponentCapturingPaths: Path[]
+    boardStateValue: BoardStateValue
   ): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getCapturingPositions(
@@ -142,11 +132,6 @@ export class Rook extends Piece {
             row: kingTarget.row,
             col: kingTarget.col + colDelta,
           };
-          if (
-            positionWillBeCaptured(kingTarget, opponentCapturingPaths) ||
-            positionWillBeCaptured(rookTarget, opponentCapturingPaths)
-          )
-            break;
           moves.push(
             new Castling(
               false,

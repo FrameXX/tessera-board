@@ -9,8 +9,6 @@ import Piece, {
   isPositionOnBoard,
   isFriendlyPiece,
   type BoardPositionValue,
-  type Path,
-  positionWillBeCaptured,
   getBoardPositionPiece,
 } from "./piece";
 import { type RawPiece, getRawPiece } from "./rawPiece";
@@ -76,16 +74,12 @@ export class King extends Piece {
 
   public getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    opponentCapturingPaths: Path[]
+    boardStateValue: BoardStateValue
   ): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getNewCapturingPositions(position);
 
     for (const target of capturingPositions) {
-      if (positionWillBeCaptured(target, opponentCapturingPaths)) {
-        continue;
-      }
       let captures: BoardPositionValue | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
@@ -120,14 +114,10 @@ export class King extends Piece {
           // Rook moves on the other side of the moved king
           if (Math.abs(totalColDelta) === 1) {
             rookTarget = searchRookPosition;
-            if (positionWillBeCaptured(rookTarget, opponentCapturingPaths))
-              break;
           }
           // King moves 2 cells in rook direction
           if (Math.abs(totalColDelta) === 2) {
             kingTarget = searchRookPosition;
-            if (positionWillBeCaptured(kingTarget, opponentCapturingPaths))
-              break;
           }
           const piece = getBoardPositionPiece(
             searchRookPosition,

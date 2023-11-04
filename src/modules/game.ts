@@ -1,7 +1,7 @@
 import { type ComputedRef, type Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
-import { getRandomNumber } from "./utils/misc";
+import { getRandomArrayValue, getRandomNumber } from "./utils/misc";
 import type GameBoardManager from "./game_board_manager";
 import type ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
@@ -11,6 +11,7 @@ import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
 import { positionsToPath, type Path } from "./pieces/piece";
 import type { BoardStateValue } from "./user_data/board_state";
 import type { GamePaused } from "./user_data/game_paused";
+import Move from "./moves/move";
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
@@ -210,6 +211,25 @@ class Game {
     this.updateTimerState();
   }
 
+  private performRandomMove(pieceColor?: PlayerColor) {
+    let randomPiece: BoardPieceProps;
+    let moves: Move[];
+    do {
+      do {
+        randomPiece = getRandomArrayValue(this.pieceProps.value);
+      } while (
+        typeof pieceColor === "undefined" ||
+        randomPiece.piece.color !== pieceColor
+      );
+      moves = randomPiece.piece.getPossibleMoves(
+        randomPiece,
+        this.boardStateValue
+      );
+    } while (moves.length === 0);
+    const chosenMove = getRandomArrayValue(moves);
+    this.boardManager.performMove(chosenMove);
+  }
+
   private onPlayerMoveSecondsBeyondLimit() {
     this.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of move time!`,
@@ -217,6 +237,8 @@ class Game {
     );
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.opponentWin("move_timeout");
+    } else if (this.secondsMoveLimitRunOutPunishment.value === "random_move") {
+      this.performRandomMove(this.playerColor.value);
     }
   }
 
@@ -229,6 +251,8 @@ class Game {
     );
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.playerWin("move_timeout");
+    } else if (this.secondsMoveLimitRunOutPunishment.value === "random_move") {
+      this.performRandomMove(getOpossitePlayerColor(this.playerColor.value));
     }
   }
 
@@ -291,13 +315,17 @@ class Game {
     }
   }
 
-  private resetMoveTimers() {
-    this.playerMoveSecondsTimer.reset();
-    this.opponentMoveSecondsTimer.reset();
+  private resetMoveTimer() {
+    if (this.playerPlaying.value) {
+      this.opponentMoveSecondsTimer.reset();
+    } else {
+      this.playerMoveSecondsTimer.reset();
+    }
   }
 
-  private resetTimers() {
-    this.resetMoveTimers();
+  private clearTimers() {
+    this.playerMoveSecondsTimer.reset();
+    this.opponentMoveSecondsTimer.reset();
     this.playerMatchSecondsTimer.reset();
     this.opponentMatchSecondsTimer.reset();
   }
@@ -367,7 +395,7 @@ class Game {
     this.boardManager.resetBoard();
     this.toastManager.showToast("New match started.", "flag-checkered");
     this.moveIndex.value = 0;
-    this.resetTimers();
+    this.clearTimers();
     this.updateTimerState();
     this.boardStateData.save();
     this.invalidatePiecesCache();
@@ -381,7 +409,7 @@ class Game {
 
   public onMove() {
     this.updateTimerState();
-    this.resetMoveTimers();
+    this.resetMoveTimer();
     this.boardStateData.save();
     this.invalidatePiecesCache();
     this.updateCapturingPaths();

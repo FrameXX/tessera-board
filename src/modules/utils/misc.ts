@@ -86,3 +86,7 @@ export function getPixelsPerCm() {
   el.remove();
   return pixelsPerCm;
 }
+
+export function getRandomArrayValue<T>(array: T[]) {
+  return array[getRandomNumber(0, array.length - 1)];
+}

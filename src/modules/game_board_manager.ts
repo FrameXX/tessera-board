@@ -128,10 +128,7 @@ class GameBoardManager extends BoardManager {
 
     const moves = pieceProps.piece.getPossibleMoves(
       pieceProps,
-      this.boardStateValue,
-      pieceProps.piece.color === "white"
-        ? this.blackCapturingPaths.value
-        : this.whiteCapturingPaths.value
+      this.boardStateValue
     );
     moves.forEach((move) =>
       move.showCellMarks(this.cellsMarks, this.boardStateValue)
@@ -181,7 +178,7 @@ class GameBoardManager extends BoardManager {
     return null;
   }
 
-  private async interpretMove(move: Move) {
+  public async performMove(move: Move) {
     this.selectedPiece = null;
     this.clearHihlightedCellsPositions();
     if (isMoveShift(move)) {
@@ -292,7 +289,7 @@ class GameBoardManager extends BoardManager {
     if (!matchingMove) {
       return false;
     }
-    this.interpretMove(matchingMove);
+    this.performMove(matchingMove);
     return true;
   }
 
@@ -330,7 +327,7 @@ class GameBoardManager extends BoardManager {
     this.clearDraggingOverCells();
     const matchingMove = this.getMoveIfPossible(targetPosition);
     if (matchingMove !== null) {
-      this.interpretMove(matchingMove);
+      this.performMove(matchingMove);
     }
   }
 

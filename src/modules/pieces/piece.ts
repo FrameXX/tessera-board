@@ -72,22 +72,19 @@ export abstract class Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    opponentCapturingPaths: Path[]
+    boardStateValue: BoardStateValue
   ): Move[] {
     if (!this.possibleMovesCache)
       this.possibleMovesCache = this.getNewPossibleMoves(
         position,
-        boardStateValue,
-        opponentCapturingPaths
+        boardStateValue
       );
     return this.possibleMovesCache;
   }
 
   public abstract getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    opponentCapturingPaths: Path[]
+    boardStateValue: BoardStateValue
   ): Move[];
 }
 

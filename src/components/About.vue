@@ -20,9 +20,9 @@ const props = defineProps({ open: { type: Boolean, default: false } });
             >Github repository</a
           >.
           <br />
-          This work is licensed under
+          This software is licensed under
           <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
-            >General Public License v3</a
+            >General Public License v3.0</a
           >.
         </p>
         <div class="nav-placeholder"></div>
