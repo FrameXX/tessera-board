@@ -9,9 +9,9 @@ class EscapeManager {
   }
 
   public escape() {
-    const callBack = this.escapeStack[this.escapeStack.length - 1];
-    if (callBack) {
-      callBack();
+    if (this.escapeStack.length > 0) {
+      const callback = this.escapeStack[this.escapeStack.length - 1];
+      callback();
     } else if (this.defaultCallBack) {
       this.defaultCallBack();
     }

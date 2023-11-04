@@ -28,27 +28,27 @@ class InteractionManager {
 
   public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(playerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "player":
-      setPrimaryHue(true);
-      break;
-    case "opponent":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(playerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "player":
+        setPrimaryHue(true);
+        break;
+      case "opponent":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
     }
   }
 
-  public toggleActionsPanel() {
+  public toggleActionsPanel = () => {
     this.actionPanelOpen.value = !this.actionPanelOpen.value;
     this.actionPanelOpen.value
       ? this.escapeManager.addLayer(this.toggleActionsPanel)
@@ -62,21 +62,21 @@ class InteractionManager {
         this.toggleAbout();
       }
     }
-  }
+  };
 
-  public toggleSettings() {
+  public toggleSettings = () => {
     this.settingsOpen.value = !this.settingsOpen.value;
     this.settingsOpen.value
       ? this.escapeManager.addLayer(this.toggleActionsPanel)
       : this.escapeManager.removeLayer();
-  }
+  };
 
-  public toggleAbout() {
+  public toggleAbout = () => {
     this.aboutOpen.value = !this.aboutOpen.value;
     this.aboutOpen.value
       ? this.escapeManager.addLayer(this.toggleActionsPanel)
       : this.escapeManager.removeLayer();
-  }
+  };
 
   public updateScreenRotation(rotate: boolean): void {
     rotate
