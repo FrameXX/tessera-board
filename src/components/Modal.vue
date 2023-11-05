@@ -102,7 +102,7 @@ watch(
   max-width: calc(100% - var(--spacing-huge) * 3);
   width: 450px;
 
-  .content {
+  > .content {
     @include fill-availible;
     padding: var(--spacing-small);
     overflow-y: auto;
