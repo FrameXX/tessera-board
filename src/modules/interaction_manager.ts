@@ -28,20 +28,20 @@ class InteractionManager {
 
   public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(playerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "player":
-      setPrimaryHue(true);
-      break;
-    case "opponent":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(playerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "player":
+        setPrimaryHue(true);
+        break;
+      case "opponent":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
@@ -99,7 +99,10 @@ class InteractionManager {
 
   public async onGameRestart() {
     const confirmed = await this.confirmDialog.show(
-      "Currently played game will be lost. Are you sure?"
+      "Currently played game will be lost. Are you sure?",
+      "Confirm",
+      "Cancel",
+      "You can also start a new game by pressing Shift + R, which will bypass this confirmation dialog."
     );
     if (!confirmed) return;
     this.actionPanelOpen.value = false;

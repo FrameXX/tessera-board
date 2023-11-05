@@ -82,6 +82,7 @@ defineEmits({
 .config-item {
   @include shadow;
   @include round-border;
+  background-color: var(--color-primary-surface-top);
   border: var(--border-width) solid var(--color-primary-accent);
   padding: var(--spacing-medium);
   display: flex;

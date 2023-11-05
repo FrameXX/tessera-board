@@ -5,6 +5,8 @@ interface ConfirmDialogProps {
   message: string;
   confirmText: string;
   cancelText: string;
+  showHint: boolean;
+  hint: string | null;
 }
 
 class ConfirmDialog {
@@ -14,6 +16,8 @@ class ConfirmDialog {
   constructor() {
     this.props = reactive({
       open: false,
+      showHint: false,
+      hint: "",
       message: "",
       confirmText: "",
       cancelText: "",
@@ -39,11 +43,18 @@ class ConfirmDialog {
   public show = (
     message: string,
     confirmText: string = "Confirm",
-    cancelText: string = "Cancel"
+    cancelText: string = "Cancel",
+    hint: string | null = null
   ) => {
     this.props.message = message;
     this.props.confirmText = confirmText;
     this.props.cancelText = cancelText;
+    if (hint === null) {
+      this.props.showHint = false;
+    } else {
+      this.props.showHint = true;
+      this.props.hint = hint;
+    }
     this.props.open = true;
 
     return new Promise((resolve: (confirmed: boolean) => void) => {

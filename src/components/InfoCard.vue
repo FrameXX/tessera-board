@@ -1,20 +1,14 @@
 <script lang="ts" setup>
-import { PropType, computed } from "vue";
 import Icon from "./Icon.vue";
 
 const props = defineProps({
-  type: { type: String as PropType<"info" | "warn">, default: "info" },
-});
-
-const iconId = computed(() => {
-  let iconId = props.type === "info" ? "information-outline" : "alert-outline";
-  return iconId;
+  iconId: { type: String, default: "information-outline" },
 });
 </script>
 
 <template>
   <div class="info-card">
-    <Icon :icon-id="iconId" side big />
+    <Icon :icon-id="props.iconId" side />
     <div class="content">
       <slot></slot>
     </div>
@@ -30,9 +24,10 @@ const iconId = computed(() => {
   @include round-border;
   font-size: var(--font-size-small);
   margin: var(--spacing-big) 0;
-  padding: var(--spacing-medium);
+  padding: var(--spacing-small);
   background-color: var(--color-primary-surface-top);
   border: var(--border-width) solid var(--color-primary-accent);
+  width: fit-content;
 
   .content {
     columns: 1;

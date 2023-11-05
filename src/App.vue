@@ -97,6 +97,7 @@ import Status from "./components/Status.vue";
 import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
+import InfoCard from "./components/InfoCard.vue";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -1256,6 +1257,9 @@ onMounted(() => {
     @close="escapeManager.removeLayer()"
   >
     <p class="message">{{ confirmDialog.props.message }}</p>
+    <InfoCard v-show="confirmDialog.props.showHint">{{
+      confirmDialog.props.hint
+    }}</InfoCard>
     <template #action-buttons>
       <button @click="confirmDialog.cancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />{{

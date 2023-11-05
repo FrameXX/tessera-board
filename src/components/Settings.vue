@@ -106,6 +106,9 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
     <div id="settings" v-show="props.open">
       <div class="content">
         <FragmentTitle icon-id="cog-outline">Configure game</FragmentTitle>
+        <InfoCard
+          >You can open game configuration by pressing Shift + C.</InfoCard
+        >
         <!-- Player -->
         <Category name="Primary player (you)" icon-id="account">
           <UserOption
