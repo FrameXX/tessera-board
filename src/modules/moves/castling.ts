@@ -23,7 +23,16 @@ class Castling extends Move {
     return [this.kingOrigin, this.kingTarget, this.rookOrigin, this.rookTarget];
   }
 
-  public forward(boardStateValue: BoardStateValue): void {}
+  public forward(boardStateValue: BoardStateValue): void {
+    const king = boardStateValue[this.kingOrigin.row][this.kingOrigin.col];
+    if (!king) {
+      return;
+    }
+    const rook = boardStateValue[this.rookOrigin.row][this.rookOrigin.col];
+    if (!rook) {
+      return;
+    }
+  }
 
   public async perform(
     boardStateValue: BoardStateValue,

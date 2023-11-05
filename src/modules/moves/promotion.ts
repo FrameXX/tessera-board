@@ -117,11 +117,11 @@ class Promotion extends Move {
     let notation: string;
     this.captures
       ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-          this.captures
-        )}=${getPieceNotation(newPiece.pieceId)}`)
+        this.captures
+      )}=${getPieceNotation(newPiece.pieceId)}`)
       : (notation = `${getPositionNotation(this.target)}=${getPieceNotation(
-          newPiece.pieceId
-        )}`);
+        newPiece.pieceId
+      )}`);
     return notation;
   }
 
