@@ -99,14 +99,18 @@ button {
   margin: var(--spacing-small);
   font-weight: bold;
   text-transform: uppercase;
-  background-color: var(--color-primary-surface-top);
-  color: var(--color-primary-accent);
+  background-color: var(--color-primary-surface-accent);
+  color: var(--color-primary-text);
   padding: var(--spacing-tiny) var(--spacing-big);
 
   &:hover:not(.checkbox, .set-time-duration),
   &:focus:not(.checkbox, .set-time-duration) {
     outline: var(--border-width) solid var(--color-primary-accent);
   }
+}
+
+button.form {
+  background-color: var(--color-primary-surface-top);
 }
 
 dialog {
@@ -184,5 +188,14 @@ header.version {
 
   &.side {
     margin: var(--spacing-tiny) var(--spacing-medium) var(--spacing-tiny) 0;
+  }
+
+  &.big {
+    width: var(--font-size-enormous);
+    height: var(--font-size-enormous);
+
+    &.side {
+      margin: var(--spacing-tiny) var(--spacing-big) var(--spacing-tiny) 0;
+    }
   }
 }

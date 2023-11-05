@@ -324,7 +324,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               class="single"
               @click="configsDialog.open(defaultBoardConfigManager)"
             >
-              <Icon icon-id="tune" side />Checkboard configurations
+              <Icon icon-id="folder-outline" side />Checkboard configurations
             </button>
             <div class="board-box">
               <Board

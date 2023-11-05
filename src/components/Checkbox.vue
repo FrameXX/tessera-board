@@ -26,7 +26,7 @@ function toggle() {
   <button
     title="Check checkbox"
     @click="toggle()"
-    class="checkbox"
+    class="checkbox form"
     role="checkbox"
     :aria-checked="checked"
   >

@@ -994,6 +994,7 @@ onMounted(() => {
   <Modal
     id="select-piece"
     title="Select promotion piece"
+    title-icon-id="arrow-up-bold-box-outline"
     :open="selectPieceDialog.props.open"
     @open="escapeManager.addLayer(selectPieceDialog.cancel)"
     @close="escapeManager.removeLayer()"
@@ -1014,6 +1015,7 @@ onMounted(() => {
   <Modal
     id="config-piece"
     title="Configure new piece"
+    title-icon-id="plus"
     :open="configPieceDialog.props.open"
     @open="escapeManager.addLayer(configPieceDialog.cancel)"
     @close="escapeManager.removeLayer()"
@@ -1051,6 +1053,7 @@ onMounted(() => {
   <Modal
     id="configs"
     title="Manage configurations"
+    title-icon-id="folder-outline"
     :open="configsDialog.props.open"
     @open="escapeManager.addLayer(configsDialog.cancel)"
     @close="escapeManager.removeLayer()"
@@ -1092,7 +1095,7 @@ onMounted(() => {
         title="Save current configuration"
         @click="configsDialog.saveConfig()"
       >
-        <Icon side icon-id="content-save-outline" />New config
+        <Icon side icon-id="folder-plus-outline" />New config
       </button>
     </template>
   </Modal>
@@ -1103,6 +1106,7 @@ onMounted(() => {
     title="Set configuration name and description"
     :open="configPrintDialog.props.open"
     :focus-on-open="configNameInput"
+    title-icon-id="folder-plus-outline"
     @open="escapeManager.addLayer(configPrintDialog.cancel)"
     @close="escapeManager.removeLayer()"
     @backdrop-click="configPrintDialog.cancel()"
@@ -1143,6 +1147,7 @@ onMounted(() => {
   <Modal
     id="duration-input"
     title="Enter time duration"
+    title-icon-id="clock-outline"
     :open="durationDialog.props.open"
     :focus-on-open="minutesDurationInput"
     @open="escapeManager.addLayer(durationDialog.cancel)"
@@ -1186,6 +1191,7 @@ onMounted(() => {
     id="confirm"
     title="Confirm"
     :open="confirmDialog.props.open"
+    title-icon-id="check-all"
     @open="escapeManager.addLayer(confirmDialog.cancel)"
     @close="escapeManager.removeLayer()"
   >

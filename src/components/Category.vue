@@ -58,7 +58,6 @@ const open = ref<Boolean>(false);
     @include round-border;
     margin: 0;
     padding: 0 var(--spacing-medium);
-    background-color: var(--color-primary-surface-top);
 
     .icon {
       @include no-shrink;

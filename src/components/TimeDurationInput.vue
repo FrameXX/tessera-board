@@ -50,7 +50,7 @@ async function set() {
 <template>
   <button
     title="Set time duration"
-    class="set-time-duration"
+    class="set-time-duration form"
     :class="{ infinite: text === '∞' }"
     :id="props.id"
     @click="set"

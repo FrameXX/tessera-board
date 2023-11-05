@@ -2,10 +2,12 @@
 import { ref, watch, onMounted, PropType } from "vue";
 import { capitalizeFirst } from "../modules/utils/misc";
 import Backdrop from "./Backdrop.vue";
+import FragmentTitle from "./FragmentTitle.vue";
 
 const props = defineProps({
   id: { type: String, required: true },
   title: { type: String, required: true },
+  titleIconId: { type: String, required: true },
   open: { type: Boolean, default: false },
   focusOnOpen: { type: Object as PropType<HTMLElement | null>, default: null },
 });
@@ -72,7 +74,9 @@ watch(
       :aria-label="props.title"
     >
       <div class="content">
-        <h2>{{ capitalizeFirst(props.title) }}</h2>
+        <FragmentTitle :icon-id="props.titleIconId">{{
+          capitalizeFirst(props.title)
+        }}</FragmentTitle>
         <slot></slot>
       </div>
       <div class="action-buttons" ref="buttons">
@@ -113,7 +117,7 @@ watch(
   }
 
   h2 {
-    margin-top: 0;
+    margin: var(--spacing-medium) 0;
   }
 }
 

@@ -49,19 +49,26 @@ const props = defineProps({
     border-color: var(--color-primary-accent);
     background-color: var(--color-primary-surface-top);
     color: var(--color-primary-text);
+
+    .close-overlay {
+      background-color: var(--color-primary-surface-top);
+    }
   }
 
   &.error {
     background-color: var(--color-error-surface-top);
     color: var(--color-error-text);
     border-color: var(--color-error-accent);
+
+    .close-overlay {
+      background-color: var(--color-error-surface-top);
+    }
   }
 
-  > .close-overlay {
+  .close-overlay {
     @include flex-center;
     @include stretch;
     position: fixed;
-    background-color: var(--color-primary-surface-top);
     opacity: 0;
     transition: opacity var(--transition-duration-medium) linear;
 

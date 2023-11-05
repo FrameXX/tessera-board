@@ -6,7 +6,7 @@ const props = defineProps({ iconId: { type: String, required: true } });
 
 <template>
   <div class="fragment-title">
-    <Icon :icon-id="props.iconId" side />
+    <Icon :icon-id="props.iconId" side big />
     <h2>
       <slot></slot>
     </h2>
