@@ -19,5 +19,12 @@ const props = defineProps({ iconId: { type: String, required: true } });
 .fragment-title {
   @include flex-center;
   padding: 0 var(--spacing-medium);
+
+  h2 {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-primary-accent);
+    text-decoration-thickness: var(--border-width);
+    text-underline-position: under;
+  }
 }
 </style>
