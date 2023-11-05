@@ -17,6 +17,8 @@ abstract class Move {
 
   public abstract get highlightedBoardPositions(): BoardPosition[];
 
+  public abstract forward(boardStateValue: BoardStateValue): void;
+
   public abstract perform(...args: any): Promise<string>;
 
   public abstract getClickablePositions(): BoardPosition[];
@@ -47,6 +49,16 @@ export function transformPositionValue(
   boardStateValue[position.row][position.col] = getPieceFromRaw(piece);
 }
 
+export function movePiece(
+  piece: Piece,
+  origin: BoardPosition,
+  target: BoardPosition,
+  boardStateValue: BoardStateValue
+) {
+  boardStateValue[target.row][target.col] = piece;
+  boardStateValue[origin.row][origin.col] = null;
+}
+
 export async function movePositionValue(
   origin: BoardPosition,
   target: BoardPosition,
@@ -57,8 +69,7 @@ export async function movePositionValue(
   if (!piece) {
     return;
   }
-  boardStateValue[target.row][target.col] = piece;
-  boardStateValue[origin.row][origin.col] = null;
+  movePiece(piece, origin, target, boardStateValue);
   // Player board is always visible so it's ok to observe the transition only on player board
   const board = getElementInstanceById(boardId);
   const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);

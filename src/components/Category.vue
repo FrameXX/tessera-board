@@ -73,7 +73,7 @@ const open = ref<Boolean>(false);
     }
   }
 
-  .content {
+  > .content {
     padding: var(--spacing-huge) 0;
   }
 }

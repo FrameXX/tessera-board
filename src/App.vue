@@ -176,8 +176,14 @@ const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishme
   "random_move";
 const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
 const DEFAULT_USE_VIBRATIONS_VALUE: boolean = true;
-const DEFAULT_LONG_PRESS_TIMEOUT: number = 200;
-const DEFAULT_AUTO_PAUSE_VALUE: boolean = true;
+const DEFAULT_LONG_PRESS_TIMEOUT = 200;
+const DEFAULT_AUTO_PAUSE_VALUE = true;
+const DEFAULT_PAWN_IMPORTANCE_VALUE = 1;
+const DEFAULT_KNIGHT_IMPORTANCE_VALUE = 3;
+const DEFAULT_BISHOP_IMPORTANCE_VALUE = 3.25;
+const DEFAULT_ROOK_IMPORTANCE_VALUE = 5;
+const DEFAULT_QUEEN_IMPORTANCE_VALUE = 9;
+const DEFAULT_KING_IMPORTANCE_VALUE = 18;
 
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
@@ -331,6 +337,18 @@ const longPressTimeout = ref(DEFAULT_LONG_PRESS_TIMEOUT);
 provide("longPressTimeout", longPressTimeout);
 const autoPause = ref(DEFAULT_AUTO_PAUSE_VALUE);
 provide("autoPause", autoPause);
+const pawnImportance = ref(DEFAULT_PAWN_IMPORTANCE_VALUE);
+provide("pawnImportance", pawnImportance);
+const knightImportance = ref(DEFAULT_KNIGHT_IMPORTANCE_VALUE);
+provide("knightImportance", knightImportance);
+const bishopImportance = ref(DEFAULT_BISHOP_IMPORTANCE_VALUE);
+provide("bishopImportance", bishopImportance);
+const rookImportance = ref(DEFAULT_ROOK_IMPORTANCE_VALUE);
+provide("rookImportance", rookImportance);
+const queenImportance = ref(DEFAULT_QUEEN_IMPORTANCE_VALUE);
+provide("queenImportance", queenImportance);
+const kingImportance = ref(DEFAULT_KING_IMPORTANCE_VALUE);
+provide("kingImportance", kingImportance);
 
 // Game specific
 const winner = ref<Winner>("none");
@@ -603,6 +621,48 @@ const userDataManager = new UserDataManager(
       0,
       toastManager,
       opponentMatchSeconds
+    ),
+    new NumberUserData(
+      "pawn_importance",
+      DEFAULT_PAWN_IMPORTANCE_VALUE,
+      toastManager,
+      pawnImportance
+    ),
+    new NumberUserData(
+      "knight_importance",
+      DEFAULT_KNIGHT_IMPORTANCE_VALUE,
+      toastManager,
+      knightImportance
+    ),
+    new NumberUserData(
+      "bishop_importance",
+      DEFAULT_BISHOP_IMPORTANCE_VALUE,
+      toastManager,
+      bishopImportance
+    ),
+    new NumberUserData(
+      "rook_importance",
+      DEFAULT_ROOK_IMPORTANCE_VALUE,
+      toastManager,
+      rookImportance
+    ),
+    new NumberUserData(
+      "queen_importance",
+      DEFAULT_QUEEN_IMPORTANCE_VALUE,
+      toastManager,
+      queenImportance
+    ),
+    new NumberUserData(
+      "king_importance",
+      DEFAULT_KING_IMPORTANCE_VALUE,
+      toastManager,
+      kingImportance
+    ),
+    new NumberUserData(
+      "kinght_importance",
+      DEFAULT_KNIGHT_IMPORTANCE_VALUE,
+      toastManager,
+      knightImportance
     ),
     new BooleanUserData(
       "show_other_availible_moves",

@@ -6,7 +6,7 @@ const props = defineProps({
   optionId: { type: String, required: true },
   iconId: { type: String },
   name: { type: String, required: true },
-  description: { type: String, default: "" },
+  description: { type: Boolean, default: true },
   simple: { type: Boolean, default: true },
 });
 </script>
@@ -20,7 +20,11 @@ const props = defineProps({
         <slot v-if="props.simple"></slot>
       </span>
     </label>
-    <span class="description" :id="`${props.optionId}-description`">
+    <span
+      class="description"
+      v-if="props.description"
+      :id="`${props.optionId}-description`"
+    >
       <slot name="description"></slot>
     </span>
     <span class="input" v-if="!props.simple">

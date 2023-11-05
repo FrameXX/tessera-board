@@ -48,6 +48,13 @@ class Promotion extends Move {
     return [this.origin, this.target];
   }
 
+  public forward(boardStateValue: BoardStateValue): void {
+    const piece = boardStateValue[this.origin.row][this.origin.col];
+    if (!piece) {
+      return;
+    }
+  }
+
   public async perform(
     boardStateValue: BoardStateValue,
     blackCapturedPieces: Ref<PieceId[]>,

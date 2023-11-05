@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { PropType, computed } from "vue";
-import SimpleInfo from "./SimpleInfo.vue";
+import InfoText from "./InfoText.vue";
 import {
   getMinsAndSecsTime,
   type MinSecTime,
@@ -48,7 +48,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         props.playerMoveSecondsLimitSet || props.playerMatchSecondsLimitSet
       "
     >
-      <SimpleInfo
+      <InfoText
         v-show="props.playerMoveSecondsLimitSet"
         content-role="timer"
         :class="{
@@ -63,9 +63,9 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           getDigitStr(playerTimeMove.mins) +
           ":" +
           getDigitStr(playerTimeMove.secs)
-        }}</SimpleInfo
+        }}</InfoText
       >
-      <SimpleInfo
+      <InfoText
         v-show="props.playerMatchSecondsLimitSet"
         content-role="timer"
         :class="{
@@ -80,7 +80,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           getDigitStr(playerTimeMatch.mins) +
           ":" +
           getDigitStr(playerTimeMatch.secs)
-        }}</SimpleInfo
+        }}</InfoText
       >
     </div>
 
@@ -88,9 +88,9 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
       id="status-text"
       :class="{ player: props.playerPlaying, opponent: !props.playerPlaying }"
     >
-      <SimpleInfo :name="`Move #${props.moveIndex + 1}`">{{
+      <InfoText :name="`Move #${props.moveIndex + 1}`">{{
         props.statusText
-      }}</SimpleInfo>
+      }}</InfoText>
     </div>
 
     <div
@@ -99,7 +99,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
         props.opponentMoveSecondsLimitSet || props.opponentMatchSecondsLimitSet
       "
     >
-      <SimpleInfo
+      <InfoText
         v-show="props.opponentMoveSecondsLimitSet"
         content-role="timer"
         :class="{
@@ -114,9 +114,9 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           getDigitStr(opponentTimeMove.mins) +
           ":" +
           getDigitStr(opponentTimeMove.secs)
-        }}</SimpleInfo
+        }}</InfoText
       >
-      <SimpleInfo
+      <InfoText
         v-show="props.opponentMatchSecondsLimitSet"
         content-role="timer"
         :class="{
@@ -131,7 +131,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
           getDigitStr(opponentTimeMatch.mins) +
           ":" +
           getDigitStr(opponentTimeMatch.secs)
-        }}</SimpleInfo
+        }}</InfoText
       >
     </div>
   </div>
@@ -145,7 +145,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
   @include flex-center;
   width: 100%;
 
-  .simple-info {
+  .info-text {
     display: inline-flex;
   }
 }
@@ -154,7 +154,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
 #timers-opponent {
   display: inline-block;
 
-  .simple-info {
+  .info-text {
     width: 70px;
   }
 }

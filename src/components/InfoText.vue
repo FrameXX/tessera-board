@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="simple-info">
+  <div class="info-text">
     <div class="name">{{ capitalizeFirst(props.name) }}</div>
     <div class="content" :role="props.contentRole">
       <slot></slot>
@@ -17,7 +17,7 @@ const props = defineProps({
 </template>
 
 <style lang="scss">
-.simple-info {
+.info-text {
   display: flex;
   padding: var(--spacing-small);
   flex-direction: column;

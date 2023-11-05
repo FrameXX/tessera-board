@@ -6,6 +6,14 @@ import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
 import { type RawPiece, getRawPiece } from "./rawPiece";
 
+export const PIECE_IDS: PieceId[] = [
+  "rook",
+  "knight",
+  "bishop",
+  "queen",
+  "king",
+  "pawn",
+];
 export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
 export function isPieceId(string: string): string is PieceId {
   return (
@@ -150,14 +158,5 @@ export function positionsToPath(
     getCapturingPositionPath(target, origin)
   );
 }
-
-export const PIECE_IDS: PieceId[] = [
-  "rook",
-  "knight",
-  "bishop",
-  "queen",
-  "king",
-  "pawn",
-];
 
 export default Piece;

@@ -23,6 +23,8 @@ class Castling extends Move {
     return [this.kingOrigin, this.kingTarget, this.rookOrigin, this.rookTarget];
   }
 
+  public forward(boardStateValue: BoardStateValue): void {}
+
   public async perform(
     boardStateValue: BoardStateValue,
     audioEffects: boolean,

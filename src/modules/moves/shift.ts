@@ -2,7 +2,7 @@ import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type { BoardPositionValue, PieceId } from "../pieces/piece";
 import type { BoardStateValue } from "../user_data/board_state";
-import Move from "./move";
+import Move, { movePiece } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
 import { capturePosition, movePositionValue } from "./move";
 
@@ -23,6 +23,14 @@ class Shift extends Move {
 
   get highlightedBoardPositions() {
     return [this.origin, this.target];
+  }
+
+  public forward(boardStateValue: BoardStateValue): void {
+    const piece = boardStateValue[this.origin.row][this.origin.col];
+    if (!piece) {
+      return;
+    }
+    movePiece(piece, this.origin, this.target, boardStateValue);
   }
 
   public async perform(

@@ -8,6 +8,7 @@ import TimeDurationInput from "./TimeDurationInput.vue";
 import Board, { type BoardPieceProps, type BoardPosition } from "./Board.vue";
 import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
+import InfoCard from "./InfoCard.vue";
 import FragmentTitle from "./FragmentTitle.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type {
@@ -89,6 +90,12 @@ const prefferedFirstMoveColor = inject(
 const useVibrations = inject("useVibrations") as Ref<boolean>;
 const longPressTimeout = inject("longPressTimeout") as Ref<number>;
 const autoPause = inject("autoPause") as Ref<boolean>;
+const pawnImportance = inject("pawnImportance") as Ref<number>;
+const knightImportance = inject("knightImportance") as Ref<number>;
+const bishopImportance = inject("bishopImportance") as Ref<number>;
+const rookImportance = inject("rookImportance") as Ref<number>;
+const queenImportance = inject("queenImportance") as Ref<number>;
+const kingImportance = inject("kingImportance") as Ref<number>;
 
 const configsDialog = inject("configsDialog") as ConfigsDialog;
 </script>
@@ -343,6 +350,84 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               Defines position of each piece at the start of the game. Click on
               piece to remove it. Click on empty cell to add a piece.
             </template>
+          </UserOption>
+          <SectionTitle title="Pieces importance" />
+          <InfoCard
+            >Piece importance determines how much of a loss it would be for the
+            player to lose that piece or how much of a win it would be for
+            his/her opponent to capture it.</InfoCard
+          >
+          <UserOption
+            name="Pawn importance"
+            icon-id="chess-pawn"
+            option-id="input-pawn-importance"
+            :description="false"
+          >
+            <input
+              type="number"
+              id="input-pawn-importance"
+              v-model="pawnImportance"
+            />
+          </UserOption>
+          <UserOption
+            name="Knight importance"
+            icon-id="chess-knight"
+            option-id="input-knight-importance"
+            :description="false"
+          >
+            <input
+              type="number"
+              id="input-knight-importance"
+              v-model="knightImportance"
+            />
+          </UserOption>
+          <UserOption
+            name="Bishop importance"
+            icon-id="chess-bishop"
+            option-id="input-bishop-importance"
+            :description="false"
+          >
+            <input
+              type="number"
+              id="input-bishop-importance"
+              v-model="bishopImportance"
+            />
+          </UserOption>
+          <UserOption
+            name="Rook importance"
+            icon-id="chess-rook"
+            option-id="input-rook-importance"
+            :description="false"
+          >
+            <input
+              type="number"
+              id="input-rook-importance"
+              v-model="rookImportance"
+            />
+          </UserOption>
+          <UserOption
+            name="Queen importance"
+            icon-id="chess-queen"
+            option-id="input-queen-importance"
+            :description="false"
+          >
+            <input
+              type="number"
+              id="input-queen-importance"
+              v-model="queenImportance"
+            />
+          </UserOption>
+          <UserOption
+            name="King importance"
+            icon-id="chess-king"
+            option-id="input-king-importance"
+            :description="false"
+          >
+            <input
+              type="number"
+              id="input-king-importance"
+              v-model="kingImportance"
+            />
           </UserOption>
         </Category>
         <!-- Look, feel, behavior -->
