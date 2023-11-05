@@ -1,7 +1,6 @@
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type { BoardStateValue } from "../user_data/board_state";
-import type { BooleanBoardState } from "../user_data/boolean_board_state";
-import Move, { highlightBoardPosition, movePositionValue } from "./move";
+import Move, { movePositionValue } from "./move";
 
 export function isMoveCastling(move: Move): move is Castling {
   return move.moveId == "castling";
@@ -20,20 +19,18 @@ class Castling extends Move {
     super("castling");
   }
 
+  get highlightedBoardPositions() {
+    return [this.kingOrigin, this.kingTarget, this.rookOrigin, this.rookTarget];
+  }
+
   public async perform(
     boardStateValue: BoardStateValue,
-    higlightedCells: BooleanBoardState,
     audioEffects: boolean,
     moveAudioEffect: Howl
   ): Promise<string> {
     movePositionValue(this.kingOrigin, this.kingTarget, boardStateValue);
     await movePositionValue(this.rookOrigin, this.rookTarget, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
-
-    highlightBoardPosition(this.kingOrigin, higlightedCells);
-    highlightBoardPosition(this.kingTarget, higlightedCells);
-    highlightBoardPosition(this.rookOrigin, higlightedCells);
-    highlightBoardPosition(this.rookTarget, higlightedCells);
 
     if (this.onPerform) this.onPerform(this);
 

@@ -16,6 +16,8 @@ abstract class Move {
   public notation?: string;
   constructor(public readonly moveId: MoveId) {}
 
+  public abstract get highlightedBoardPositions(): BoardPosition[];
+
   public abstract perform(...args: any): Promise<string>;
 
   public abstract getClickablePositions(): BoardPosition[];
@@ -80,13 +82,6 @@ export function capturePosition(
   }
   boardStateValue[position.row][position.col] = null;
   addCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
-}
-
-export function highlightBoardPosition(
-  position: BoardPosition,
-  higlightedCells: BooleanBoardState
-) {
-  higlightedCells[position.row][position.col] = true;
 }
 
 export default Move;

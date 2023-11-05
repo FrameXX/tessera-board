@@ -1,9 +1,8 @@
 import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
-import type { BooleanBoardState } from "../user_data/boolean_board_state";
 import type { BoardPositionValue, PieceId } from "../pieces/piece";
 import type { BoardStateValue } from "../user_data/board_state";
-import Move, { highlightBoardPosition } from "./move";
+import Move from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
 import { capturePosition, movePositionValue } from "./move";
 
@@ -22,11 +21,14 @@ class Shift extends Move {
     super("shift");
   }
 
+  get highlightedBoardPositions() {
+    return [this.origin, this.target];
+  }
+
   public async perform(
     boardStateValue: BoardStateValue,
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
-    higlightedCells: BooleanBoardState,
     audioEffects: boolean,
     moveAudioEffect: Howl,
     removeAudioEffect: Howl,
@@ -44,20 +46,16 @@ class Shift extends Move {
     }
     await movePositionValue(this.origin, this.target, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
-
-    highlightBoardPosition(this.origin, higlightedCells);
-    highlightBoardPosition(this.target, higlightedCells);
-
     if (this.onPerform) this.onPerform(this);
 
     let notation: string;
     this.captures
       ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`)
+          this.captures
+        )}`)
       : (notation = `${getPieceNotation(this.pieceId)}${getPositionNotation(
-        this.target
-      )}`);
+          this.target
+        )}`);
     return notation;
   }
 

@@ -16,7 +16,7 @@ import type { BoardStateValue } from "./user_data/board_state";
 import type Move from "./moves/move";
 import type SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
-import { isMoveTransform } from "./moves/promotion";
+import { isMovePromotion } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
 
 class GameBoardManager extends BoardManager {
@@ -179,6 +179,12 @@ class GameBoardManager extends BoardManager {
     return null;
   }
 
+  private highlightBoardPositions(positions: BoardPosition[]) {
+    for (const position of positions) {
+      this.higlightedCells[position.row][position.col] = true;
+    }
+  }
+
   public async performMove(move: Move) {
     this.selectedPiece = null;
     this.clearHihlightedCellsPositions();
@@ -187,18 +193,16 @@ class GameBoardManager extends BoardManager {
         this.boardStateValue,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
-        this.higlightedCells,
         this.audioEffects.value,
         this.pieceMoveAudioEffect,
         this.pieceRemoveAudioEffect,
         this.useVibrations.value
       );
-    } else if (isMoveTransform(move)) {
+    } else if (isMovePromotion(move)) {
       await move.perform(
         this.boardStateValue,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
-        this.higlightedCells,
         this.selectPieceDialog,
         this.reviveFromCapturedPieces,
         this.audioEffects.value,
@@ -209,11 +213,11 @@ class GameBoardManager extends BoardManager {
     } else if (isMoveCastling(move)) {
       await move.perform(
         this.boardStateValue,
-        this.higlightedCells,
         this.audioEffects.value,
         this.pieceMoveAudioEffect
       );
     }
+    this.highlightBoardPositions(move.highlightedBoardPositions);
     this.moveIndex.value++;
   }
 

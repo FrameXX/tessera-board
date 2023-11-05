@@ -1,10 +1,9 @@
 import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
-import type { BooleanBoardState } from "../user_data/boolean_board_state";
 import type { BoardPositionValue, PieceId } from "../pieces/piece";
 import type { RawPiece } from "../pieces/rawPiece";
 import type { BoardStateValue } from "../user_data/board_state";
-import Move, { highlightBoardPosition } from "./move";
+import Move from "./move";
 import type SelectPieceDialog from "../dialogs/select_piece";
 import {
   capturePosition,
@@ -14,7 +13,7 @@ import {
 import { getPieceNotation, getPositionNotation } from "../board_manager";
 import type { PlayerColor } from "../game";
 
-export function isMoveTransform(move: Move): move is Promotion {
+export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";
 }
 
@@ -45,11 +44,14 @@ class Promotion extends Move {
     });
   }
 
+  get highlightedBoardPositions() {
+    return [this.origin, this.target];
+  }
+
   public async perform(
     boardStateValue: BoardStateValue,
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
-    higlightedCells: BooleanBoardState,
     selectPieceDialog: SelectPieceDialog,
     reviveFromCapturedPieces: Ref<boolean>,
     audioEffects: boolean,
@@ -105,17 +107,14 @@ class Promotion extends Move {
       );
     if (reviveFromCapturedPieces.value) capturedPieces.value.push(this.pieceId);
 
-    highlightBoardPosition(this.origin, higlightedCells);
-    highlightBoardPosition(this.target, higlightedCells);
-
     let notation: string;
     this.captures
       ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(newPiece.pieceId)}`)
+          this.captures
+        )}=${getPieceNotation(newPiece.pieceId)}`)
       : (notation = `${getPositionNotation(this.target)}=${getPieceNotation(
-        newPiece.pieceId
-      )}`);
+          newPiece.pieceId
+        )}`);
     return notation;
   }
 
