@@ -10,16 +10,18 @@ const props = defineProps({ open: { type: Boolean, default: false } });
     <div id="about" v-show="props.open">
       <div class="content">
         <img id="logo" src="../assets/img/favicon.svg" />
-        <h1>Tessera board</h1>
-        <small class="version">v0.0.0 (13)</small>
+        <header>
+          <h1>Tessera board</h1>
+          <small class="version">v0.0.0 (13)</small>
+        </header>
+        <p>Made with ❤️ by Jiří Král.</p>
         <p>
-          Made with ❤️ by Jiří Král.
-          <br />
           Source code is availible at
           <a href="https://github.com/FrameXX/tessera-board" target="_blank"
             >Github repository</a
           >.
-          <br />
+        </p>
+        <p>
           This software is licensed under
           <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
             >General Public License v3</a
@@ -49,17 +51,16 @@ const props = defineProps({ open: { type: Boolean, default: false } });
     width: 150px;
   }
 
+  p {
+    margin: var(--spacing-small) 0;
+  }
+
   > .content {
     padding: var(--spacing-big);
     left: 0;
     right: 0;
     margin: auto;
     max-width: 900px;
-  }
-
-  p {
-    padding: var(--spacing-big) 0;
-    line-height: 28px;
   }
 }
 </style>

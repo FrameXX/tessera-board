@@ -51,3 +51,7 @@ The `landev` script in package.json is configured to start a server on the local
 ### Build
 
 Execute `npm run build` to run Vue and Vite build process.
+
+## License
+
+This software is licensed under [General Public License v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
