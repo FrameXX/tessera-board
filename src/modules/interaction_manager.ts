@@ -121,8 +121,11 @@ class InteractionManager {
     }
   }
 
-  public onDistractionChange(newDistraction: boolean) {
-    this.distractionLevel += newDistraction ? 1 : -1;
+  public onDistractionChange(distraction: boolean) {
+    this.distractionLevel = Math.max(
+      this.distractionLevel + (distraction ? 1 : -1),
+      0
+    );
     if (
       this.distractionLevel &&
       this.autoPause.value &&

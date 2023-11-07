@@ -119,6 +119,10 @@ watch(
   h2 {
     margin: var(--spacing-medium) 0;
   }
+
+  .fragment-title {
+    margin-bottom: var(--spacing-medium);
+  }
 }
 
 .select-piece-group {

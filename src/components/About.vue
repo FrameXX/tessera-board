@@ -12,7 +12,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
         <img id="logo" src="../assets/img/favicon.svg" />
         <header>
           <h1>Tessera board</h1>
-          <small class="version">v0.0.0 (13)</small>
+          <small class="version">v0.0.0 (14)</small>
         </header>
         <p>Made with ❤️ by Jiří Král.</p>
         <p>

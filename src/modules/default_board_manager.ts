@@ -4,7 +4,7 @@ import type ConfigPieceDialog from "./dialogs/config_piece";
 import type { BoardStateValue } from "./user_data/board_state";
 import type { Ref } from "vue";
 import { isPositionOnBoard } from "./pieces/piece";
-import { movePositionValue } from "./moves/move";
+import { movePiece } from "./moves/move";
 import { positionsEqual } from "./game_board_manager";
 
 class DefaultBoardManager extends BoardManager {
@@ -66,7 +66,7 @@ class DefaultBoardManager extends BoardManager {
     if (!this.isPositionAvailible(targetPosition)) {
       return;
     }
-    await movePositionValue(
+    await movePiece(
       pieceProps,
       targetPosition,
       this.boardStateValue,

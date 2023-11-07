@@ -26,7 +26,6 @@ import CellIndexOpacityData from "./modules/user_data/cell_index_opacity";
 import PlayerColorOptionData, {
   type PlayerColorOptionValue,
 } from "./modules/user_data/preferred_player_color";
-import OpponentOverLanData from "./modules/user_data/opponent_over_lan";
 import SecondCheckboardData from "./modules/user_data/second_checkboard";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 import CapturedPiecesData from "./modules/user_data/captured_pieces";
@@ -148,7 +147,6 @@ const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(Array(8).fill(null));
 const DEFAULT_CELL_INDEX_OPACITY_VALUE = 90;
 const DEFAULT_PLAYER_HUE_VALUE = 30;
 const DEFAULT_OPPONENT_HUE_VALUE = 198;
-const DEFAULT_OPPONENT_OVER_LAN_VALUE = false;
 const DEFAULT_PIECE_BORDER_VALUE = 1.1;
 const DEFAULT_PIECE_PADDING_VALUE = 10;
 const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "font_awesome";
@@ -176,7 +174,7 @@ const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishme
   "random_move";
 const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
 const DEFAULT_USE_VIBRATIONS_VALUE: boolean = true;
-const DEFAULT_LONG_PRESS_TIMEOUT = 200;
+const DEFAULT_LONG_PRESS_TIMEOUT = 150;
 const DEFAULT_AUTO_PAUSE_VALUE = true;
 const DEFAULT_PAWN_IMPORTANCE_VALUE = 1;
 const DEFAULT_KNIGHT_IMPORTANCE_VALUE = 3;
@@ -184,6 +182,7 @@ const DEFAULT_BISHOP_IMPORTANCE_VALUE = 3.25;
 const DEFAULT_ROOK_IMPORTANCE_VALUE = 5;
 const DEFAULT_QUEEN_IMPORTANCE_VALUE = 9;
 const DEFAULT_KING_IMPORTANCE_VALUE = 18;
+const DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE = false;
 
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
@@ -301,8 +300,6 @@ const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
 provide("cellIndexOpacity", cellIndexOpacity);
 const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
 provide("preferredPlayerColor", preferredPlayerColor);
-const opponentOverLan = ref(DEFAULT_OPPONENT_OVER_LAN_VALUE);
-provide("opponentOverLan", opponentOverLan);
 const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
 provide("secondCheckboard", secondCheckboard);
 const tableMode = ref(DEFAULT_ROTATE_SCREEN_VALUE);
@@ -349,6 +346,8 @@ const queenImportance = ref(DEFAULT_QUEEN_IMPORTANCE_VALUE);
 provide("queenImportance", queenImportance);
 const kingImportance = ref(DEFAULT_KING_IMPORTANCE_VALUE);
 provide("kingImportance", kingImportance);
+const ignorePiecesProtections = ref(DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE);
+provide("ignorePiecesProtections", ignorePiecesProtections);
 
 // Game specific
 const winner = ref<Winner>("none");
@@ -477,11 +476,6 @@ const userDataManager = new UserDataManager(
       toastManager,
       showCapturingPieces
     ),
-    new OpponentOverLanData(
-      DEFAULT_OPPONENT_OVER_LAN_VALUE,
-      opponentOverLan,
-      toastManager
-    ),
     new SecondCheckboardData(
       DEFAULT_SECOND_CHECKBOARD_VALUE,
       secondCheckboard,
@@ -500,6 +494,12 @@ const userDataManager = new UserDataManager(
       DEFAULT_ROTATE_SCREEN_VALUE,
       toastManager,
       tableMode
+    ),
+    new BooleanUserData(
+      "ignore_pieces_protections",
+      DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE,
+      toastManager,
+      ignorePiecesProtections
     ),
     new RequireMoveConfirmData(
       DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,

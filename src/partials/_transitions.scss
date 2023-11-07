@@ -158,6 +158,10 @@
   transform: translateY(-100%);
 }
 
+.slide-down-leave-active {
+  position: absolute;
+}
+
 // [Group] Opacity
 .opacity-move,
 .opacity-enter-active,

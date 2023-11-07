@@ -1,13 +1,14 @@
 import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type Piece from "../pieces/piece";
-import type { PieceId } from "../pieces/piece";
+import type { PieceId, PiecesImportance } from "../pieces/piece";
 import { type RawPiece, getPieceFromRaw } from "../pieces/rawPiece";
 import type { BoardStateValue } from "../user_data/board_state";
 import {
   getElementInstanceById,
   waitForTransitionEnd,
 } from "../utils/elements";
+import { GameLogicError } from "../game";
 
 type MoveId = "shift" | "castling" | "promotion";
 
@@ -17,7 +18,7 @@ abstract class Move {
 
   public abstract get highlightedBoardPositions(): BoardPosition[];
 
-  public abstract forward(boardStateValue: BoardStateValue): void;
+  public abstract forward(...args: any): void;
 
   public abstract perform(...args: any): Promise<string>;
 
@@ -41,7 +42,7 @@ export function addCapturedPiece(
   }
 }
 
-export function transformPositionValue(
+export function transformPiece(
   position: BoardPosition,
   piece: RawPiece,
   boardStateValue: BoardStateValue
@@ -49,7 +50,7 @@ export function transformPositionValue(
   boardStateValue[position.row][position.col] = getPieceFromRaw(piece);
 }
 
-export function movePiece(
+export function movePositionValue(
   piece: Piece,
   origin: BoardPosition,
   target: BoardPosition,
@@ -59,7 +60,7 @@ export function movePiece(
   boardStateValue[origin.row][origin.col] = null;
 }
 
-export async function movePositionValue(
+export async function movePiece(
   origin: BoardPosition,
   target: BoardPosition,
   boardStateValue: BoardStateValue,
@@ -67,9 +68,13 @@ export async function movePositionValue(
 ) {
   const piece = boardStateValue[origin.row][origin.col];
   if (!piece) {
-    return;
+    throw new GameLogicError(
+      `Board position is missing a piece to move. Position: ${JSON.stringify(
+        origin
+      )}`
+    );
   }
-  movePiece(piece, origin, target, boardStateValue);
+  movePositionValue(piece, origin, target, boardStateValue);
   // Player board is always visible so it's ok to observe the transition only on player board
   const board = getElementInstanceById(boardId);
   const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);

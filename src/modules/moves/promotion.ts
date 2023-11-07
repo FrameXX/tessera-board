@@ -1,17 +1,18 @@
 import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
-import type { BoardPositionValue, PieceId } from "../pieces/piece";
+import {
+  chooseBestPiece,
+  type BoardPositionValue,
+  type PieceId,
+  type PiecesImportance,
+} from "../pieces/piece";
 import type { RawPiece } from "../pieces/rawPiece";
 import type { BoardStateValue } from "../user_data/board_state";
-import Move from "./move";
+import Move, { movePositionValue } from "./move";
 import type SelectPieceDialog from "../dialogs/select_piece";
-import {
-  capturePosition,
-  movePositionValue,
-  transformPositionValue,
-} from "./move";
+import { capturePosition, movePiece, transformPiece } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
-import type { PlayerColor } from "../game";
+import { GameLogicError, type PlayerColor } from "../game";
 
 export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";
@@ -48,11 +49,48 @@ class Promotion extends Move {
     return [this.origin, this.target];
   }
 
-  public forward(boardStateValue: BoardStateValue): void {
+  public forward(
+    boardStateValue: BoardStateValue,
+    piecesImportance: PiecesImportance,
+    blackCapturedPieces: Ref<PieceId[]>,
+    whiteCapturedPieces: Ref<PieceId[]>,
+    reviveFromCapturedPieces: Ref<boolean>
+  ): void {
     const piece = boardStateValue[this.origin.row][this.origin.col];
     if (!piece) {
-      return;
+      throw new GameLogicError(
+        `Board position is missing a piece to promote. Position ${JSON.stringify(
+          this.origin
+        )}`
+      );
     }
+    movePositionValue(piece, this.origin, this.target, boardStateValue);
+    let transformOptions: RawPiece[];
+    let limitedTransformOptions: RawPiece[] = [];
+    const capturedPieces = this.getRelevantCapturedPieces(
+      blackCapturedPieces,
+      whiteCapturedPieces
+    );
+
+    if (reviveFromCapturedPieces.value) {
+      limitedTransformOptions = this.getLimitedTransformOptions(capturedPieces);
+    }
+
+    const limitedTransformOptionsAvailible =
+      limitedTransformOptions.length !== 0;
+
+    if (limitedTransformOptionsAvailible) {
+      transformOptions = limitedTransformOptions;
+    } else {
+      transformOptions = this.transformOptions;
+    }
+
+    const newPiece =
+      transformOptions.length === 1
+        ? transformOptions[0]
+        : chooseBestPiece(transformOptions, piecesImportance);
+
+    transformPiece(this.target, newPiece, boardStateValue);
   }
 
   public async perform(
@@ -76,7 +114,7 @@ class Promotion extends Move {
       if (audioEffects) removeAudioEffect.play();
       if (useVibrations) navigator.vibrate(30);
     }
-    await movePositionValue(this.origin, this.target, boardStateValue);
+    await movePiece(this.origin, this.target, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
 
     let transformOptions: RawPiece[];
@@ -99,13 +137,10 @@ class Promotion extends Move {
       transformOptions = this.transformOptions;
     }
 
-    let newPiece: RawPiece | null = null;
-    transformOptions.length === 1
-      ? (newPiece = transformOptions[0])
-      : (newPiece = await selectPieceDialog.open(transformOptions));
-
-    transformPositionValue(this.target, newPiece, boardStateValue);
-    if (useVibrations) navigator.vibrate([40, 60, 20]);
+    const newPiece =
+      transformOptions.length === 1
+        ? transformOptions[0]
+        : await selectPieceDialog.open(transformOptions);
 
     if (limitedTransformOptionsAvailible)
       capturedPieces.value.splice(
@@ -114,14 +149,17 @@ class Promotion extends Move {
       );
     if (reviveFromCapturedPieces.value) capturedPieces.value.push(this.pieceId);
 
+    transformPiece(this.target, newPiece, boardStateValue);
+    if (useVibrations) navigator.vibrate([40, 60, 20]);
+
     let notation: string;
     this.captures
       ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(newPiece.pieceId)}`)
+          this.captures
+        )}=${getPieceNotation(newPiece.pieceId)}`)
       : (notation = `${getPositionNotation(this.target)}=${getPieceNotation(
-        newPiece.pieceId
-      )}`);
+          newPiece.pieceId
+        )}`);
     return notation;
   }
 

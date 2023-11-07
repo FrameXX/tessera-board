@@ -1,3 +1,4 @@
+import { Ref } from "vue";
 import type { BoardPosition } from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import { positionsEqual } from "../game_board_manager";
@@ -25,6 +26,10 @@ export function isPieceId(string: string): string is PieceId {
     string === "pawn"
   );
 }
+
+export type PiecesImportance = {
+  [key in PieceId]: Ref<number>;
+};
 
 export interface BoardPositionValue extends BoardPosition {
   value: Piece | null;
@@ -157,6 +162,22 @@ export function positionsToPath(
   return boardPositions.map((target) =>
     getCapturingPositionPath(target, origin)
   );
+}
+
+export function chooseBestPiece(
+  pieces: RawPiece[],
+  piecesImportance: PiecesImportance
+) {
+  let bestPiece = pieces[0];
+  for (const piece of pieces) {
+    if (
+      piecesImportance[bestPiece.pieceId].value <
+      piecesImportance[piece.pieceId].value
+    ) {
+      bestPiece = piece;
+    }
+  }
+  return bestPiece;
 }
 
 export default Piece;

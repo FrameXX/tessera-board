@@ -1,6 +1,7 @@
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
+import { GameLogicError } from "../game";
 import type { BoardStateValue } from "../user_data/board_state";
-import Move, { movePositionValue } from "./move";
+import Move, { movePiece, movePositionValue } from "./move";
 
 export function isMoveCastling(move: Move): move is Castling {
   return move.moveId == "castling";
@@ -26,12 +27,23 @@ class Castling extends Move {
   public forward(boardStateValue: BoardStateValue): void {
     const king = boardStateValue[this.kingOrigin.row][this.kingOrigin.col];
     if (!king) {
-      return;
+      throw new GameLogicError(
+        `Position is missing a king to castle. Position: ${JSON.stringify(
+          this.kingOrigin
+        )}`
+      );
     }
     const rook = boardStateValue[this.rookOrigin.row][this.rookOrigin.col];
     if (!rook) {
-      return;
+      throw new GameLogicError(
+        `Position is missing a rook to castle. Position: ${JSON.stringify(
+          this.rookOrigin
+        )}`
+      );
     }
+
+    movePositionValue(king, this.kingOrigin, this.kingTarget, boardStateValue);
+    movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
   }
 
   public async perform(
@@ -39,8 +51,8 @@ class Castling extends Move {
     audioEffects: boolean,
     moveAudioEffect: Howl
   ): Promise<string> {
-    movePositionValue(this.kingOrigin, this.kingTarget, boardStateValue);
-    await movePositionValue(this.rookOrigin, this.rookTarget, boardStateValue);
+    movePiece(this.kingOrigin, this.kingTarget, boardStateValue);
+    await movePiece(this.rookOrigin, this.rookTarget, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
 
     if (this.onPerform) this.onPerform(this);

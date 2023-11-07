@@ -19,6 +19,7 @@ const props = defineProps({ iconId: { type: String, required: true } });
 .fragment-title {
   @include flex-center;
   padding: 0 var(--spacing-medium);
+  line-height: calc(var(--font-size-enormous) * 1.3);
 
   h2 {
     text-decoration-line: underline;

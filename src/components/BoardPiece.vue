@@ -61,7 +61,7 @@ const scale = computed(() => {
   if (!props.dragging) {
     return props.selected ? "scale(1.05)" : " ";
   } else {
-    return "scale(1.1)";
+    return "scale(1.15)";
   }
 });
 

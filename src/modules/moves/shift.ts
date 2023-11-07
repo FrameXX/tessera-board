@@ -2,9 +2,10 @@ import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type { BoardPositionValue, PieceId } from "../pieces/piece";
 import type { BoardStateValue } from "../user_data/board_state";
-import Move, { movePiece } from "./move";
+import Move, { movePositionValue } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
-import { capturePosition, movePositionValue } from "./move";
+import { capturePosition, movePiece } from "./move";
+import { GameLogicError } from "../game";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -28,9 +29,13 @@ class Shift extends Move {
   public forward(boardStateValue: BoardStateValue): void {
     const piece = boardStateValue[this.origin.row][this.origin.col];
     if (!piece) {
-      return;
+      throw new GameLogicError(
+        `Board position is missing a piece to shift. Position ${JSON.stringify(
+          this.origin
+        )}`
+      );
     }
-    movePiece(piece, this.origin, this.target, boardStateValue);
+    movePositionValue(piece, this.origin, this.target, boardStateValue);
   }
 
   public async perform(
@@ -52,18 +57,18 @@ class Shift extends Move {
       if (audioEffects) removeAudioEffect.play();
       if (useVibrations) navigator.vibrate(30);
     }
-    await movePositionValue(this.origin, this.target, boardStateValue);
+    await movePiece(this.origin, this.target, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
     if (this.onPerform) this.onPerform(this);
 
     let notation: string;
     this.captures
       ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`)
+          this.captures
+        )}`)
       : (notation = `${getPieceNotation(this.pieceId)}${getPositionNotation(
-        this.target
-      )}`);
+          this.target
+        )}`);
     return notation;
   }
 

@@ -61,7 +61,6 @@ const pieceBorder = inject("pieceBorder") as Ref<number>;
 const transitionDuration = inject("transitionDuration") as Ref<number>;
 const cellIndexOpacity = inject("cellIndexOpacity") as Ref<number>;
 const preferredPlayerColor = inject("preferredPlayerColor") as Ref<PlayerColor>;
-const opponentOverLan = inject("opponentOverLan") as Ref<boolean>;
 const secondCheckboard = inject("secondCheckboard") as Ref<boolean>;
 const tableMode = inject("tableMode") as Ref<boolean>;
 const requireMoveConfirm = inject("requireMoveConfirm") as Ref<boolean>;
@@ -96,6 +95,9 @@ const bishopImportance = inject("bishopImportance") as Ref<number>;
 const rookImportance = inject("rookImportance") as Ref<number>;
 const queenImportance = inject("queenImportance") as Ref<number>;
 const kingImportance = inject("kingImportance") as Ref<number>;
+const ignorePiecesProtections = inject(
+  "ignorePiecesProtections"
+) as Ref<boolean>;
 
 const configsDialog = inject("configsDialog") as ConfigsDialog;
 </script>
@@ -122,7 +124,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               <option value="black">Black</option>
             </select>
             <template #description>
-              Defines color of your pieces be it black or white.
+              Specifies the colour of your pieces, whether black or white.
             </template>
           </UserOption>
           <UserOption
@@ -133,25 +135,13 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox id="check-computer-player" />
             <template #description>
-              If this option is enabled an algorythm will play instead of a
+              If this feature is activated, an algorithm will play instead of a
               human player.
             </template>
           </UserOption>
         </Category>
         <!-- Opponent -->
         <Category name="Secondary player (opponent)" icon-id="target-account">
-          <UserOption
-            name="over local network"
-            icon-id="lan-connect"
-            option-id="check-remote-opponent"
-          >
-            <Checkbox id="check-remote-opponent" v-model="opponentOverLan" />
-            <template #description>
-              If this option is enabled the opponent won't play on the same
-              device, but instead play on another device connected to the same
-              network after peer connection is established.</template
-            >
-          </UserOption>
           <UserOption
             name="computer"
             icon-id="memory"
@@ -266,10 +256,11 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               v-model="showCapturingPieces"
             />
             <template #description>
-              If a cell on the board is selected, the game will highlight the
-              pieces that are checking that position. This feature helps the
-              player recognize which pieces are endangering the cell, but it is
-              considered a game rule, because it can give the player an
+              When a cell on the game board is selected, the pieces that are
+              checking that position will be highlighted. This feature assists
+              the player in identifying any pieces that may be endangering the
+              selected cell. It should be noted that highlighting the pieces is
+              considered a game rule, as it provides the player with an
               advantage.
             </template>
           </UserOption>
@@ -320,6 +311,25 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               captured pieces which will get revived and removed from list of
               captured pieces and the original piece will be added to captured
               pieces.
+            </template>
+          </UserOption>
+          <UserOption
+            name="Ignore pieces protections"
+            icon-id="shield-off-outline"
+            option-id="ignore-pieces-protections"
+          >
+            <Checkbox
+              id="ignore-pieces-protections"
+              v-model="ignorePiecesProtections"
+            />
+            <template #description>
+              Some pieces like a king in chess are protected. That means that
+              every move of a player that owns that piece that would result in
+              that piece being checked in the next move is not allowed. When no
+              move is availible because of this (every move leads to the piece
+              being checked in next move) player either loses the game (if the
+              piece was already checked) or it's a draw. This option disables
+              this rule.
             </template>
           </UserOption>
           <!-- Checkboard -->
