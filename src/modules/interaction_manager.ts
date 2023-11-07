@@ -32,20 +32,20 @@ class InteractionManager {
 
   public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
-      case "none":
-        setPrimaryHue(playerPlaying);
-        break;
-      case "draw":
-        setSaturationMultiplier(0);
-        break;
-      case "player":
-        setPrimaryHue(true);
-        break;
-      case "opponent":
-        setPrimaryHue(false);
-        break;
-      default:
-        break;
+    case "none":
+      setPrimaryHue(playerPlaying);
+      break;
+    case "draw":
+      setSaturationMultiplier(0);
+      break;
+    case "player":
+      setPrimaryHue(true);
+      break;
+    case "opponent":
+      setPrimaryHue(false);
+      break;
+    default:
+      break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);

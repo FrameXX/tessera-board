@@ -1,7 +1,7 @@
 import type { Ref } from "vue";
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type Piece from "../pieces/piece";
-import type { PieceId, PiecesImportance } from "../pieces/piece";
+import type { PieceId } from "../pieces/piece";
 import { type RawPiece, getPieceFromRaw } from "../pieces/rawPiece";
 import type { BoardStateValue } from "../user_data/board_state";
 import {

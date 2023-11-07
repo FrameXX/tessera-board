@@ -1,4 +1,4 @@
-import { Ref } from "vue";
+import type { Ref } from "vue";
 import type { BoardPosition } from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import { positionsEqual } from "../game_board_manager";
