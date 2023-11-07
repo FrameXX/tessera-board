@@ -54,7 +54,6 @@ import type { BoardPosition, MarkBoardState } from "./components/Board.vue";
 import type { BooleanBoardState } from "./modules/user_data/boolean_board_state";
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
-import EscapeManager from "./modules/escape_manager";
 import Game, {
   isPlayerColor,
   isMoveSecondsLimitRunOutPunishment,
@@ -194,11 +193,11 @@ const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
 const pieceRemoveAudioEffect = new Howl({ src: [removeAudioEffectUrl] });
 const settingsOpen = ref(false);
 watch(settingsOpen, (newValue) => {
-  interactionManager.onFocusChange(!newValue);
+  interactionManager.onDistractionChange(newValue);
 });
 const aboutOpen = ref(false);
 watch(aboutOpen, (newValue) => {
-  interactionManager.onFocusChange(!newValue);
+  interactionManager.onDistractionChange(newValue);
 });
 const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
@@ -756,7 +755,6 @@ const defaultBoardConfigManager = new ConfigManager(
   toastManager
 );
 
-const escapeManager = new EscapeManager();
 const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
   configPieceDialog,
@@ -852,7 +850,6 @@ const game = new Game(
   toastManager
 );
 const interactionManager = new InteractionManager(
-  escapeManager,
   toastManager,
   userDataManager,
   game,
@@ -863,7 +860,6 @@ const interactionManager = new InteractionManager(
   gamePaused,
   autoPause
 );
-escapeManager.defaultCallBack = interactionManager.toggleActionsPanel;
 
 const visited = localStorage.getItem("tessera_board-visited");
 if (visited === null) {
@@ -880,7 +876,7 @@ onMounted(() => {
   setSaturationMultiplier(1);
 
   addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape") escapeManager.escape();
+    if (event.key === "Escape") interactionManager.escapeManager.escape();
     if (event.key === "R" && event.shiftKey) game.restart();
     if (event.key === "C" && event.shiftKey) {
       interactionManager.toggleActionsPanel();
@@ -888,6 +884,12 @@ onMounted(() => {
         interactionManager.toggleSettings();
       }
     }
+  });
+
+  addEventListener("visibilitychange", () => {
+    interactionManager.onDistractionChange(
+      document.visibilityState === "hidden"
+    );
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.
@@ -900,9 +902,6 @@ onMounted(() => {
     hideSplashscreen(
       transitionsManager.getApplyedTransitions(transitions.value)
     );
-    addEventListener("visibilitychange", () => {
-      interactionManager.onFocusChange(document.visibilityState === "visible");
-    });
   }, 600);
 });
 </script>
@@ -1057,8 +1056,8 @@ onMounted(() => {
     title="Select promotion piece"
     title-icon-id="arrow-up-bold-box-outline"
     :open="selectPieceDialog.props.open"
-    @open="escapeManager.addLayer(selectPieceDialog.cancel)"
-    @close="escapeManager.removeLayer()"
+    @open="interactionManager.escapeManager.addLayer(selectPieceDialog.cancel)"
+    @close="interactionManager.escapeManager.removeLayer()"
   >
     <SelectPiece
       :pieces="selectPieceDialog.props.pieceOptions"
@@ -1078,8 +1077,8 @@ onMounted(() => {
     title="Configure new piece"
     title-icon-id="plus"
     :open="configPieceDialog.props.open"
-    @open="escapeManager.addLayer(configPieceDialog.cancel)"
-    @close="escapeManager.removeLayer()"
+    @open="interactionManager.escapeManager.addLayer(configPieceDialog.cancel)"
+    @close="interactionManager.escapeManager.removeLayer()"
     @backdrop-click="configPieceDialog.cancel()"
   >
     <SelectPiece
@@ -1116,8 +1115,8 @@ onMounted(() => {
     title="Manage configurations"
     title-icon-id="folder-outline"
     :open="configsDialog.props.open"
-    @open="escapeManager.addLayer(configsDialog.cancel)"
-    @close="escapeManager.removeLayer()"
+    @open="interactionManager.escapeManager.addLayer(configsDialog.cancel)"
+    @close="interactionManager.escapeManager.removeLayer()"
     @backdrop-click="configsDialog.cancel()"
   >
     <input
@@ -1168,8 +1167,8 @@ onMounted(() => {
     :open="configPrintDialog.props.open"
     :focus-on-open="configNameInput"
     title-icon-id="folder-plus-outline"
-    @open="escapeManager.addLayer(configPrintDialog.cancel)"
-    @close="escapeManager.removeLayer()"
+    @open="interactionManager.escapeManager.addLayer(configPrintDialog.cancel)"
+    @close="interactionManager.escapeManager.removeLayer()"
     @backdrop-click="configPrintDialog.cancel()"
   >
     <input
@@ -1211,8 +1210,8 @@ onMounted(() => {
     title-icon-id="clock-outline"
     :open="durationDialog.props.open"
     :focus-on-open="minutesDurationInput"
-    @open="escapeManager.addLayer(durationDialog.cancel)"
-    @close="escapeManager.removeLayer()"
+    @open="interactionManager.escapeManager.addLayer(durationDialog.cancel)"
+    @close="interactionManager.escapeManager.removeLayer()"
     @backdrop-click="durationDialog.cancel"
   >
     <div class="duration-inputs">
@@ -1253,8 +1252,8 @@ onMounted(() => {
     title="Confirm"
     :open="confirmDialog.props.open"
     title-icon-id="check-all"
-    @open="escapeManager.addLayer(confirmDialog.cancel)"
-    @close="escapeManager.removeLayer()"
+    @open="interactionManager.escapeManager.addLayer(confirmDialog.cancel)"
+    @close="interactionManager.escapeManager.removeLayer()"
   >
     <p class="message">{{ confirmDialog.props.message }}</p>
     <InfoCard v-show="confirmDialog.props.showHint">{{

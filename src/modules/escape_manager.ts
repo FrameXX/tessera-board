@@ -2,9 +2,8 @@ type EscapeCallback = () => void;
 
 class EscapeManager {
   private readonly escapeStack: EscapeCallback[];
-  public defaultCallBack: EscapeCallback | null = null;
 
-  constructor() {
+  constructor(public defaultCallBack: EscapeCallback | null = null) {
     this.escapeStack = [];
   }
 

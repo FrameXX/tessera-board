@@ -1,5 +1,5 @@
 import { type Ref } from "vue";
-import type EscapeManager from "./escape_manager";
+import EscapeManager from "./escape_manager";
 import {
   setCSSVariable,
   setPrimaryHue,
@@ -13,8 +13,10 @@ import type { GamePaused } from "./user_data/game_paused";
 import type { Winner } from "./game";
 
 class InteractionManager {
+  public readonly escapeManager: EscapeManager;
+  private distractionLevel: number = 0;
+
   constructor(
-    private readonly escapeManager: EscapeManager,
     private readonly toastManager: ToastManager,
     private readonly userDataManager: UserDataManager,
     private readonly game: Game,
@@ -24,24 +26,26 @@ class InteractionManager {
     private readonly aboutOpen: Ref<boolean>,
     private readonly gamePaused: Ref<GamePaused>,
     private readonly autoPause: Ref<boolean>
-  ) {}
+  ) {
+    this.escapeManager = new EscapeManager(this.toggleActionsPanel);
+  }
 
   public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(playerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "player":
-      setPrimaryHue(true);
-      break;
-    case "opponent":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(playerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "player":
+        setPrimaryHue(true);
+        break;
+      case "opponent":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
@@ -117,11 +121,16 @@ class InteractionManager {
     }
   }
 
-  public onFocusChange(focused: boolean) {
-    if (!focused && this.autoPause.value && this.gamePaused.value === "not") {
+  public onDistractionChange(newDistraction: boolean) {
+    this.distractionLevel += newDistraction ? 1 : -1;
+    if (
+      this.distractionLevel &&
+      this.autoPause.value &&
+      this.gamePaused.value === "not"
+    ) {
       this.gamePaused.value = "auto";
     }
-    if (focused && this.gamePaused.value === "auto") {
+    if (!this.distractionLevel && this.gamePaused.value === "auto") {
       this.gamePaused.value = "not";
     }
   }
