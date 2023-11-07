@@ -191,13 +191,7 @@ provide("pixelsPerCm", pixelsPerCm);
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
 const pieceRemoveAudioEffect = new Howl({ src: [removeAudioEffectUrl] });
 const settingsOpen = ref(false);
-watch(settingsOpen, (newValue) => {
-  interactionManager.onDistractionChange(newValue);
-});
 const aboutOpen = ref(false);
-watch(aboutOpen, (newValue) => {
-  interactionManager.onDistractionChange(newValue);
-});
 const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<HTMLElement | null>(null);
@@ -887,9 +881,7 @@ onMounted(() => {
   });
 
   addEventListener("visibilitychange", () => {
-    interactionManager.onDistractionChange(
-      document.visibilityState === "hidden"
-    );
+    interactionManager.onDistractionChange();
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.

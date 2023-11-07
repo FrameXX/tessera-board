@@ -1,4 +1,4 @@
-import { type Ref } from "vue";
+import { watch, type Ref } from "vue";
 import EscapeManager from "./escape_manager";
 import {
   setCSSVariable,
@@ -14,7 +14,6 @@ import type { Winner } from "./game";
 
 class InteractionManager {
   public readonly escapeManager: EscapeManager;
-  private distractionLevel: number = 0;
 
   constructor(
     private readonly toastManager: ToastManager,
@@ -28,24 +27,30 @@ class InteractionManager {
     private readonly autoPause: Ref<boolean>
   ) {
     this.escapeManager = new EscapeManager(this.toggleActionsPanel);
+    watch(settingsOpen, () => {
+      this.onDistractionChange();
+    });
+    watch(aboutOpen, () => {
+      this.onDistractionChange();
+    });
   }
 
   public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(playerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "player":
-      setPrimaryHue(true);
-      break;
-    case "opponent":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(playerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "player":
+        setPrimaryHue(true);
+        break;
+      case "opponent":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
@@ -121,19 +126,16 @@ class InteractionManager {
     }
   }
 
-  public onDistractionChange(distraction: boolean) {
-    this.distractionLevel = Math.max(
-      this.distractionLevel + (distraction ? 1 : -1),
-      0
-    );
-    if (
-      this.distractionLevel &&
-      this.autoPause.value &&
-      this.gamePaused.value === "not"
-    ) {
+  public onDistractionChange() {
+    const distracted =
+      document.visibilityState === "hidden" ||
+      this.settingsOpen.value ||
+      this.aboutOpen.value;
+
+    if (distracted && this.autoPause.value && this.gamePaused.value === "not") {
       this.gamePaused.value = "auto";
     }
-    if (!this.distractionLevel && this.gamePaused.value === "auto") {
+    if (!distracted && this.gamePaused.value === "auto") {
       this.gamePaused.value = "not";
     }
   }
