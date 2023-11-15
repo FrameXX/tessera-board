@@ -8,16 +8,19 @@ import {
   getElementInstanceById,
   waitForTransitionEnd,
 } from "../utils/elements";
+import { getPositionPiece } from "../game_board_manager";
 import { GameLogicError } from "../game";
 
 type MoveId = "shift" | "castling" | "promotion";
 
 /**
  * Represents a generic move.
+ * @class
  * @abstract
  */
 abstract class Move {
   public notation?: string;
+  protected performed = false;
   constructor(public readonly moveId: MoveId) {}
 
   /**
@@ -32,12 +35,35 @@ abstract class Move {
    */
   public abstract forward(...args: any): void;
 
+  protected onPerformForward() {
+    if (this.performed) {
+      throw new GameLogicError(
+        "A move that was already performed shouldn't be performed again."
+      );
+    }
+  }
+
+  /**
+   * Alters the gameBoardState according to the move, but reverse and without any further effects or requiring any user input.
+   * @param args The arguments and their count vary from class to class
+   * @abstract
+   */
+  public abstract reverse(...args: any): void;
+
+  protected onPerformReverse() {
+    if (!this.performed) {
+      throw new GameLogicError(
+        "A move that wasn't performed yet shouldn't be reversed already."
+      );
+    }
+  }
+
   /**
    * Alters the gameBoardState according to the move. May include audio effects, vibrations or user dialogs.
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  public abstract perform(...args: any): Promise<string>;
+  public abstract perform(...args: any): Promise<void>;
 
   /**
    * Returns an array of board positions that after click should perform this move.
@@ -70,10 +96,18 @@ export function addCapturedPiece(
 
 export function transformPiece(
   position: BoardPosition,
-  piece: RawPiece,
+  newPiece: RawPiece,
   boardStateValue: BoardStateValue
 ) {
-  boardStateValue[position.row][position.col] = getPieceFromRaw(piece);
+  const piece = boardStateValue[position.row][position.col];
+  if (!piece) {
+    throw new GameLogicError(
+      `Board position is missing a required piece. Position: ${JSON.stringify(
+        position
+      )}`
+    );
+  }
+  boardStateValue[position.row][position.col] = getPieceFromRaw(newPiece);
 }
 
 export function movePositionValue(
@@ -92,14 +126,7 @@ export async function movePiece(
   boardStateValue: BoardStateValue,
   boardId: string = "player-board"
 ) {
-  const piece = boardStateValue[origin.row][origin.col];
-  if (!piece) {
-    throw new GameLogicError(
-      `Board position is missing a piece to move. Position: ${JSON.stringify(
-        origin
-      )}`
-    );
-  }
+  const piece = getPositionPiece(origin, boardStateValue);
   movePositionValue(piece, origin, target, boardStateValue);
   // Player board is always visible so it's ok to observe the transition only on player board
   const board = getElementInstanceById(boardId);

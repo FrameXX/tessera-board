@@ -1,7 +1,7 @@
 import { type ComputedRef, type Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
-import { getRandomArrayValue, getRandomNumber } from "./utils/misc";
+import { getRandomNumber } from "./utils/misc";
 import type GameBoardManager from "./game_board_manager";
 import type ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
@@ -15,7 +15,6 @@ import {
 } from "./pieces/piece";
 import type { BoardStateValue } from "./user_data/board_state";
 import type { GamePaused } from "./user_data/game_paused";
-import type Move from "./moves/move";
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
@@ -215,25 +214,6 @@ class Game {
     this.updateTimerState();
   }
 
-  private performRandomMove(pieceColor?: PlayerColor) {
-    let randomPiece: BoardPieceProps;
-    let moves: Move[];
-    do {
-      do {
-        randomPiece = getRandomArrayValue(this.pieceProps.value);
-      } while (
-        typeof pieceColor === "undefined" ||
-        randomPiece.piece.color !== pieceColor
-      );
-      moves = randomPiece.piece.getPossibleMoves(
-        randomPiece,
-        this.boardStateValue
-      );
-    } while (moves.length === 0);
-    const chosenMove = getRandomArrayValue(moves);
-    this.boardManager.performMove(chosenMove);
-  }
-
   private onPlayerMoveSecondsBeyondLimit() {
     this.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of move time!`,
@@ -242,7 +222,7 @@ class Game {
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.opponentWin("move_timeout");
     } else if (this.secondsMoveLimitRunOutPunishment.value === "random_move") {
-      this.performRandomMove(this.playerColor.value);
+      this.boardManager.performRandomMove(this.playerColor.value);
     }
   }
 
@@ -256,7 +236,9 @@ class Game {
     if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.playerWin("move_timeout");
     } else if (this.secondsMoveLimitRunOutPunishment.value === "random_move") {
-      this.performRandomMove(getOpossitePlayerColor(this.playerColor.value));
+      this.boardManager.performRandomMove(
+        getOpossitePlayerColor(this.playerColor.value)
+      );
     }
   }
 
@@ -425,7 +407,7 @@ class Game {
     this.boardStateData.save();
     this.invalidatePiecesCache();
     this.updateCapturingPaths();
-    if (isSafeguardedPieceChecked(this.boardStateValue, this.playingColor))
+    if (isGuardedPieceChecked(this.boardStateValue, this.playingColor))
       this.toastManager.showToast("Check!", "cross");
   }
 
@@ -489,20 +471,20 @@ export function getAllPieceProps(boardStateValue: BoardStateValue) {
   return allPieceProps;
 }
 
-export function isSafeguardedPieceChecked(
+export function isGuardedPieceChecked(
   boardStateValue: BoardStateValue,
   color: PlayerColor
 ) {
   let capturingPaths: Path[] = [];
-  const safeguardedPieces: BoardPieceProps[] = [];
+  const guardedPieces: BoardPieceProps[] = [];
   for (const [rowIndex, row] of boardStateValue.entries()) {
     for (const [colIndex, piece] of row.entries()) {
       if (!piece) {
         continue;
       }
       if (piece.color === color) {
-        if (piece.safeguarded)
-          safeguardedPieces.push({ row: rowIndex, col: colIndex, piece });
+        if (piece.guarded)
+          guardedPieces.push({ row: rowIndex, col: colIndex, piece });
       } else {
         const origin: BoardPosition = {
           row: rowIndex,
@@ -518,7 +500,7 @@ export function isSafeguardedPieceChecked(
       }
     }
   }
-  for (const piece of safeguardedPieces) {
+  for (const piece of guardedPieces) {
     const paths = getTargetMatchingPaths(
       { row: piece.row, col: piece.col },
       capturingPaths

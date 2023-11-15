@@ -1,5 +1,5 @@
 import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
-import { GameLogicError } from "../game";
+import { getPositionPiece } from "../game_board_manager";
 import type { BoardStateValue } from "../user_data/board_state";
 import Move, { movePiece, movePositionValue } from "./move";
 
@@ -25,22 +25,16 @@ class Castling extends Move {
   }
 
   public forward(boardStateValue: BoardStateValue): void {
-    const king = boardStateValue[this.kingOrigin.row][this.kingOrigin.col];
-    if (!king) {
-      throw new GameLogicError(
-        `Position is missing a king to castle. Position: ${JSON.stringify(
-          this.kingOrigin
-        )}`
-      );
-    }
-    const rook = boardStateValue[this.rookOrigin.row][this.rookOrigin.col];
-    if (!rook) {
-      throw new GameLogicError(
-        `Position is missing a rook to castle. Position: ${JSON.stringify(
-          this.rookOrigin
-        )}`
-      );
-    }
+    const king = getPositionPiece(this.kingOrigin, boardStateValue);
+    const rook = getPositionPiece(this.rookOrigin, boardStateValue);
+
+    movePositionValue(king, this.kingOrigin, this.kingTarget, boardStateValue);
+    movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
+  }
+
+  public reverse(boardStateValue: BoardStateValue): void {
+    const king = getPositionPiece(this.kingTarget, boardStateValue);
+    const rook = getPositionPiece(this.rookTarget, boardStateValue);
 
     movePositionValue(king, this.kingOrigin, this.kingTarget, boardStateValue);
     movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
@@ -50,16 +44,15 @@ class Castling extends Move {
     boardStateValue: BoardStateValue,
     audioEffects: boolean,
     moveAudioEffect: Howl
-  ): Promise<string> {
+  ): Promise<void> {
     movePiece(this.kingOrigin, this.kingTarget, boardStateValue);
     await movePiece(this.rookOrigin, this.rookTarget, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
 
     if (this.onPerform) this.onPerform(this);
 
-    let notation: string;
-    this.kingSide ? (notation = "0-0") : (notation = "0-0-0");
-    return notation;
+    this.notation = this.kingSide ? "0-0" : "0-0-0";
+    this.performed = true;
   }
 
   public get clickablePositions(): BoardPosition[] {

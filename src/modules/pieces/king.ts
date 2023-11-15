@@ -38,7 +38,7 @@ export class King extends Piece {
     super(color, "king", id, true);
   }
 
-  public dumpObject(): object {
+  public getRawPiece(): RawKing {
     return {
       ...getRawPiece(this),
       hasMoved: this.hasMoved,

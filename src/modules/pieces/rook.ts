@@ -34,7 +34,7 @@ export class Rook extends Piece {
     super(color, "rook", id);
   }
 
-  public dumpObject(): object {
+  public getRawPiece(): RawRook {
     return {
       ...getRawPiece(this),
       hasMoved: this.hasMoved,

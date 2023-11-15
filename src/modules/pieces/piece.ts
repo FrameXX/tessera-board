@@ -1,11 +1,16 @@
 import type { Ref } from "vue";
 import type { BoardPosition } from "../../components/Board.vue";
-import type { PlayerColor } from "../game";
+import { isGuardedPieceChecked, type PlayerColor } from "../game";
 import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
 import { type RawPiece, getRawPiece } from "./rawPiece";
+import { isMoveShift } from "../moves/shift";
+import { isMovePromotion } from "../moves/promotion";
+import { isMoveCastling } from "../moves/castling";
+import BoardStateData from "../user_data/board_state";
+import { DEFAULT_GAME_BOARD_STATE_VALUE } from "../../App.vue";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",
@@ -40,6 +45,11 @@ export interface Path {
   target: BoardPosition;
 }
 
+/**
+ * Represent a generic piece
+ * @class
+ * @abstract
+ */
 export abstract class Piece {
   protected capturingPositionsCache?: BoardPosition[];
   protected possibleMovesCache?: Move[];
@@ -49,16 +59,22 @@ export abstract class Piece {
     public readonly color: PlayerColor,
     public readonly pieceId: PieceId,
     id?: string,
-    public readonly safeguarded: boolean = false
+    public readonly guarded: boolean = false
   ) {
     this.id = id ? id : getRandomId();
   }
 
-  // Every piece can override this method and possibly load some custom properties from the restored raw piece object.
+  /**
+   * Every piece can override this method and possibly load some custom properties from the restored raw piece object.
+   * @param rawPiece Raw piece object usually parsed from storage from which the props will be extracted.
+   */
   public abstract loadCustomProps(rawPiece: RawPiece): void;
 
-  // Every piece can override this method and return object with extra custom props.
-  public dumpObject(): object {
+  /**
+   * Every piece can override this method and return object with extra custom props to be saved into localStorage.
+   * @returns RawPiece object with extra custom props.
+   */
+  public getRawPiece(): RawPiece {
     return getRawPiece(this);
   }
 
@@ -86,13 +102,58 @@ export abstract class Piece {
 
   public getPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    boardStateData: BoardStateData,
+    piecesImportance: PiecesImportance,
+    blackCapturedPieces: Ref<PieceId[]>,
+    whiteCapturedPieces: Ref<PieceId[]>,
+    reviveFromCapturedPieces: Ref<boolean>
   ): Move[] {
-    if (!this.possibleMovesCache)
-      this.possibleMovesCache = this.getNewPossibleMoves(
+    if (!this.possibleMovesCache) {
+      const allPossibleMoves = this.getNewPossibleMoves(
         position,
         boardStateValue
       );
+
+      const newBoardStateData = new BoardStateData(
+        DEFAULT_GAME_BOARD_STATE_VALUE,
+        DEFAULT_GAME_BOARD_STATE_VALUE
+      );
+      newBoardStateData.load(boardStateData.dump());
+      const newBoardStateValue = boardStateData.value;
+
+      const guardedPossibleMoves = allPossibleMoves.filter((move) => {
+        if (isMoveShift(move)) {
+          move.forward(newBoardStateValue);
+        } else if (isMovePromotion(move)) {
+          move.forward(
+            newBoardStateValue,
+            piecesImportance,
+            blackCapturedPieces,
+            whiteCapturedPieces,
+            reviveFromCapturedPieces
+          );
+        } else if (isMoveCastling(move)) {
+          move.forward(boardStateValue);
+        }
+
+        const checksGuardedPiece = isGuardedPieceChecked(
+          boardStateValue,
+          this.color
+        );
+
+        if (isMoveShift(move)) {
+          move.reverse(boardStateValue);
+        } else if (isMovePromotion(move)) {
+          move.reverse(boardStateValue);
+        } else if (isMoveCastling(move)) {
+          move.reverse(boardStateValue);
+        }
+
+        return !checksGuardedPiece;
+      });
+      this.possibleMovesCache = guardedPossibleMoves;
+    }
     return this.possibleMovesCache;
   }
 

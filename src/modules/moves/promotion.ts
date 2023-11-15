@@ -13,12 +13,15 @@ import type SelectPieceDialog from "../dialogs/select_piece";
 import { capturePosition, movePiece, transformPiece } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
 import { GameLogicError, type PlayerColor } from "../game";
+import { getPositionPiece } from "../game_board_manager";
 
 export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";
 }
 
 class Promotion extends Move {
+  private newPieceId?: PieceId;
+
   constructor(
     private readonly pieceId: PieceId,
     private readonly pieceColor: PlayerColor,
@@ -56,14 +59,9 @@ class Promotion extends Move {
     whiteCapturedPieces: Ref<PieceId[]>,
     reviveFromCapturedPieces: Ref<boolean>
   ): void {
-    const piece = boardStateValue[this.origin.row][this.origin.col];
-    if (!piece) {
-      throw new GameLogicError(
-        `Board position is missing a piece to promote. Position ${JSON.stringify(
-          this.origin
-        )}`
-      );
-    }
+    this.onPerformForward();
+
+    const piece = getPositionPiece(this.origin, boardStateValue);
     movePositionValue(piece, this.origin, this.target, boardStateValue);
     let transformOptions: RawPiece[];
     let limitedTransformOptions: RawPiece[] = [];
@@ -91,6 +89,25 @@ class Promotion extends Move {
         : chooseBestPiece(transformOptions, piecesImportance);
 
     transformPiece(this.target, newPiece, boardStateValue);
+
+    this.newPieceId = newPiece.pieceId;
+    this.performed = true;
+  }
+
+  private get oldPiece() {
+    return { pieceId: this.pieceId, color: this.pieceColor };
+  }
+
+  public reverse(boardStateValue: BoardStateValue): void {
+    this.onPerformReverse();
+    if (!this.newPieceId) {
+      throw new GameLogicError(
+        "newPieceId is not availible thus cannot reverse the promotion."
+      );
+    }
+    transformPiece(this.target, this.oldPiece, boardStateValue);
+    const piece = getPositionPiece(this.target, boardStateValue);
+    movePositionValue(piece, this.target, this.origin, boardStateValue);
   }
 
   public async perform(
@@ -103,7 +120,9 @@ class Promotion extends Move {
     moveAudioEffect: Howl,
     removeAudioEffect: Howl,
     useVibrations: boolean
-  ): Promise<string> {
+  ): Promise<void> {
+    this.onPerformForward();
+
     if (this.captures) {
       capturePosition(
         this.captures,
@@ -152,15 +171,14 @@ class Promotion extends Move {
     transformPiece(this.target, newPiece, boardStateValue);
     if (useVibrations) navigator.vibrate([40, 60, 20]);
 
-    let notation: string;
-    this.captures
-      ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
+    this.notation = this.captures
+      ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
           this.captures
-        )}=${getPieceNotation(newPiece.pieceId)}`)
-      : (notation = `${getPositionNotation(this.target)}=${getPieceNotation(
+        )}=${getPieceNotation(newPiece.pieceId)}`
+      : `${getPositionNotation(this.target)}=${getPieceNotation(
           newPiece.pieceId
-        )}`);
-    return notation;
+        )}`;
+    this.performed = true;
   }
 
   public get clickablePositions(): BoardPosition[] {

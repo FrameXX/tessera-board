@@ -1,4 +1,4 @@
-import type { Ref } from "vue";
+import type { ComputedRef, Ref } from "vue";
 import BoardManager from "./board_manager";
 import type {
   BoardPieceProps,
@@ -6,8 +6,9 @@ import type {
   BoardPosition,
 } from "../components/Board.vue";
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
-import {
+import Piece, {
   getTargetMatchingPaths,
+  PiecesImportance,
   type Path,
   type PieceId,
 } from "./pieces/piece";
@@ -18,6 +19,7 @@ import type SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";
 import { isMovePromotion } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
+import { getRandomArrayValue } from "./utils/misc";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
@@ -49,6 +51,8 @@ class GameBoardManager extends BoardManager {
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
+    private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
+    private readonly piecesImportance: PiecesImportance,
     private readonly moveIndex: Ref<number>
   ) {
     super();
@@ -129,7 +133,11 @@ class GameBoardManager extends BoardManager {
 
     const moves = pieceProps.piece.getPossibleMoves(
       pieceProps,
-      this.boardStateValue
+      this.boardStateValue,
+      this.piecesImportance,
+      this.blackCapturedPieces,
+      this.whiteCapturedPieces,
+      this.reviveFromCapturedPieces
     );
     moves.forEach((move) =>
       move.showCellMarks(this.cellsMarks, this.boardStateValue)
@@ -183,6 +191,29 @@ class GameBoardManager extends BoardManager {
     for (const position of positions) {
       this.higlightedCells[position.row][position.col] = true;
     }
+  }
+
+  public performRandomMove(pieceColor?: PlayerColor) {
+    let randomPiece: BoardPieceProps;
+    let moves: Move[];
+    do {
+      do {
+        randomPiece = getRandomArrayValue(this.pieceProps.value);
+      } while (
+        typeof pieceColor === "undefined" ||
+        randomPiece.piece.color !== pieceColor
+      );
+      moves = randomPiece.piece.getPossibleMoves(
+        randomPiece,
+        this.boardStateValue,
+        this.piecesImportance,
+        this.blackCapturedPieces,
+        this.whiteCapturedPieces,
+        this.reviveFromCapturedPieces
+      );
+    } while (moves.length === 0);
+    const chosenMove = getRandomArrayValue(moves);
+    this.performMove(chosenMove);
   }
 
   public async performMove(move: Move) {
@@ -410,6 +441,21 @@ export function positionsEqual(
   position2: BoardPosition
 ) {
   return position1.row === position2.row && position1.col === position2.col;
+}
+
+export function getPositionPiece(
+  position: BoardPosition,
+  boardStateValue: BoardStateValue
+): Piece {
+  const piece = boardStateValue[position.row][position.col];
+  if (piece) {
+    return piece;
+  }
+  throw new GameLogicError(
+    `Board position is missing a required piece. Position: ${JSON.stringify(
+      position
+    )}`
+  );
 }
 
 export default GameBoardManager;

@@ -41,7 +41,7 @@ import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/dialogs/config_piece";
 import SelectPieceDilog from "./modules/dialogs/select_piece";
-import { PIECE_IDS, type Path } from "./modules/pieces/piece";
+import { PIECE_IDS, PiecesImportance, type Path } from "./modules/pieces/piece";
 import {
   setSaturationMultiplier,
   hideSplashscreen,
@@ -143,7 +143,9 @@ const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
     new Rook("black"),
   ],
 ];
-const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(Array(8).fill(null));
+export const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(
+  Array(8).fill(null)
+);
 const DEFAULT_CELL_INDEX_OPACITY_VALUE = 90;
 const DEFAULT_PLAYER_HUE_VALUE = 30;
 const DEFAULT_OPPONENT_HUE_VALUE = 198;
@@ -761,6 +763,16 @@ const defaultBoardManager = new DefaultBoardManager(
 
 const whiteCapturingPaths = ref<Path[]>([]);
 const blackCapturingPaths = ref<Path[]>([]);
+
+const piecesImportance: PiecesImportance = {
+  rook: rookImportance,
+  knight: knightImportance,
+  bishop: bishopImportance,
+  pawn: pawnImportance,
+  queen: queenImportance,
+  king: kingImportance,
+};
+
 const playerBoardManager = new GameBoardManager(
   whiteCapturingPaths,
   blackCapturingPaths,
@@ -785,6 +797,8 @@ const playerBoardManager = new GameBoardManager(
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
+  gamePieceProps,
+  piecesImportance,
   moveIndex
 );
 const opponentBoardManager = new GameBoardManager(
@@ -811,6 +825,8 @@ const opponentBoardManager = new GameBoardManager(
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
+  gamePieceProps,
+  piecesImportance,
   moveIndex
 );
 

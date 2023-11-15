@@ -37,7 +37,7 @@ export class Pawn extends Piece {
     ];
   }
 
-  public dumpObject(): object {
+  public getRawPiece(): RawPawn {
     return { ...getRawPiece(this), hasMoved: this.hasMoved };
   }
 

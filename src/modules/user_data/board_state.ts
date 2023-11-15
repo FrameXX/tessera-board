@@ -9,7 +9,7 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     value: BoardStateValue,
     reactiveValue: BoardStateValue,
-    toastManager: ToastManager,
+    toastManager?: ToastManager,
     autoSave: boolean = true
   ) {
     super("game_board_state", value, reactiveValue, toastManager, autoSave);
@@ -17,7 +17,7 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
 
   get rawVersion() {
     return this.value.map((row) =>
-      row.map((piece) => (piece ? piece.dumpObject() : null))
+      row.map((piece) => (piece ? piece.getRawPiece() : null))
     );
   }
 

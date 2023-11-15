@@ -5,7 +5,7 @@ import type { BoardStateValue } from "../user_data/board_state";
 import Move, { movePositionValue } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
 import { capturePosition, movePiece } from "./move";
-import { GameLogicError } from "../game";
+import { getPositionPiece } from "../game_board_manager";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -27,15 +27,13 @@ class Shift extends Move {
   }
 
   public forward(boardStateValue: BoardStateValue): void {
-    const piece = boardStateValue[this.origin.row][this.origin.col];
-    if (!piece) {
-      throw new GameLogicError(
-        `Board position is missing a piece to shift. Position ${JSON.stringify(
-          this.origin
-        )}`
-      );
-    }
+    const piece = getPositionPiece(this.origin, boardStateValue);
     movePositionValue(piece, this.origin, this.target, boardStateValue);
+  }
+
+  public reverse(boardStateValue: BoardStateValue): void {
+    const piece = getPositionPiece(this.target, boardStateValue);
+    movePositionValue(piece, this.target, this.origin, boardStateValue);
   }
 
   public async perform(
@@ -46,7 +44,7 @@ class Shift extends Move {
     moveAudioEffect: Howl,
     removeAudioEffect: Howl,
     useVibrations: boolean
-  ): Promise<string> {
+  ): Promise<void> {
     if (this.captures) {
       capturePosition(
         this.captures,
@@ -61,15 +59,12 @@ class Shift extends Move {
     if (audioEffects) moveAudioEffect.play();
     if (this.onPerform) this.onPerform(this);
 
-    let notation: string;
-    this.captures
-      ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
+    this.notation = this.captures
+      ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
           this.captures
-        )}`)
-      : (notation = `${getPieceNotation(this.pieceId)}${getPositionNotation(
-          this.target
-        )}`);
-    return notation;
+        )}`
+      : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
+    this.performed = true;
   }
 
   public get clickablePositions(): BoardPosition[] {

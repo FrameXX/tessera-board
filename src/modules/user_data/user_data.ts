@@ -20,8 +20,8 @@ abstract class UserData<ValueType> {
 
   constructor(
     public readonly id: string,
-    protected value: ValueType,
-    private readonly toastManager: ToastManager,
+    public value: ValueType,
+    private readonly toastManager?: ToastManager,
     valueRef?: Ref<ValueType>
   ) {
     this.storageKey = `${UserData.BASE_STORAGE_KEY}-${this.id}`;
@@ -77,6 +77,9 @@ abstract class UserData<ValueType> {
 
   protected handleInvalidLoadValue(value: string) {
     console.error("Invalid load value.", value);
+    if (!this.toastManager) {
+      return;
+    }
     this.toastManager.showToast(
       "An error occured while trying to load data from local storage. Your data are probably corrupted or invalid. If the problem persists clear all data.",
       "database-alert",

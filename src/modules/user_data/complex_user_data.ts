@@ -2,13 +2,15 @@ import { toRaw, watch } from "vue";
 import type ToastManager from "../toast_manager";
 import UserData from "./user_data";
 
-// The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values. This is still an abstract class and some methods need to be implemented by extending classes (children).
+/**
+ * The ComplexUserData class uses reactive instead of ref which means it can also watch and react for changes in properties of the reatcive value, thus it's more suitable for more complex values. This is still an abstract class and some methods need to be implemented by extending classes (children).
+ */
 abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   constructor(
     id: string,
     value: ValueType,
     protected reactiveValue: ValueType,
-    toastManager: ToastManager,
+    toastManager?: ToastManager,
     autoSave: boolean = true,
     private readonly saveImmidiately = false
   ) {
