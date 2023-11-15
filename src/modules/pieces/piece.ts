@@ -1,6 +1,11 @@
 import type { Ref } from "vue";
 import type { BoardPosition } from "../../components/Board.vue";
-import { isGuardedPieceChecked, type PlayerColor } from "../game";
+import {
+  getAllPieceProps,
+  invalidatePiecesCache,
+  isGuardedPieceChecked,
+  type PlayerColor,
+} from "../game";
 import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import type { BoardStateValue } from "../user_data/board_state";
@@ -10,7 +15,6 @@ import { isMoveShift } from "../moves/shift";
 import { isMovePromotion } from "../moves/promotion";
 import { isMoveCastling } from "../moves/castling";
 import BoardStateData from "../user_data/board_state";
-import { DEFAULT_GAME_BOARD_STATE_VALUE } from "../../App.vue";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",
@@ -115,14 +119,11 @@ export abstract class Piece {
         boardStateValue
       );
 
-      const newBoardStateData = new BoardStateData(
-        DEFAULT_GAME_BOARD_STATE_VALUE,
-        DEFAULT_GAME_BOARD_STATE_VALUE
-      );
+      const newBoardStateData = new BoardStateData([]);
       newBoardStateData.load(boardStateData.dump());
       const newBoardStateValue = boardStateData.value;
 
-      const guardedPossibleMoves = allPossibleMoves.filter((move) => {
+      this.possibleMovesCache = allPossibleMoves.filter((move) => {
         if (isMoveShift(move)) {
           move.forward(newBoardStateValue);
         } else if (isMovePromotion(move)) {
@@ -137,9 +138,12 @@ export abstract class Piece {
           move.forward(boardStateValue);
         }
 
+        const pieceProps = getAllPieceProps(newBoardStateValue);
+        invalidatePiecesCache(pieceProps);
         const checksGuardedPiece = isGuardedPieceChecked(
           boardStateValue,
-          this.color
+          this.color,
+          pieceProps
         );
 
         if (isMoveShift(move)) {
@@ -152,7 +156,6 @@ export abstract class Piece {
 
         return !checksGuardedPiece;
       });
-      this.possibleMovesCache = guardedPossibleMoves;
     }
     return this.possibleMovesCache;
   }

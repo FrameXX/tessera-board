@@ -143,9 +143,7 @@ const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
     new Rook("black"),
   ],
 ];
-export const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(
-  Array(8).fill(null)
-);
+const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(Array(8).fill(null));
 const DEFAULT_CELL_INDEX_OPACITY_VALUE = 90;
 const DEFAULT_PLAYER_HUE_VALUE = 30;
 const DEFAULT_OPPONENT_HUE_VALUE = 198;
@@ -782,6 +780,7 @@ const playerBoardManager = new GameBoardManager(
   true,
   playingColor,
   gameBoardState,
+  gameBoardStateData,
   whiteCapturedPieces,
   blackCapturedPieces,
   playerCellsMarks,
@@ -810,6 +809,7 @@ const opponentBoardManager = new GameBoardManager(
   false,
   playingColor,
   gameBoardState,
+  gameBoardStateData,
   whiteCapturedPieces,
   blackCapturedPieces,
   opponentCellsMarks,

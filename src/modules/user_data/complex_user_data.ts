@@ -9,14 +9,14 @@ abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   constructor(
     id: string,
     value: ValueType,
-    protected reactiveValue: ValueType,
+    protected reactiveValue?: ValueType,
     toastManager?: ToastManager,
     autoSave: boolean = true,
     private readonly saveImmidiately = false
   ) {
     super(id, value, toastManager);
 
-    if (autoSave) {
+    if (autoSave && this.reactiveValue) {
       watch(reactiveValue!, (newValue) => {
         this.onValueChange(newValue);
       });
@@ -36,7 +36,11 @@ abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
 
   // NOTE: Reactive loses reactivity if the whole value is overwritten. The values needs to be chnaged key by key instead of updating it as a whole.
   public updateReference() {
+    if (!this.reactiveValue) {
+      return;
+    }
     for (const key in this.reactiveValue) {
+      // @ts-ignore
       this.reactiveValue[key] = this.value[key];
     }
   }

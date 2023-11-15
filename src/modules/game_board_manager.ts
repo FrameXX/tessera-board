@@ -20,6 +20,7 @@ import { isMoveShift } from "./moves/shift";
 import { isMovePromotion } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
 import { getRandomArrayValue } from "./utils/misc";
+import BoardStateData from "./user_data/board_state";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
@@ -36,6 +37,7 @@ class GameBoardManager extends BoardManager {
     private readonly playerBoard: boolean,
     private readonly playingColor: Ref<PlayerColor>,
     private readonly boardStateValue: BoardStateValue,
+    private readonly boardStateData: BoardStateData,
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
     private readonly cellsMarks: MarkBoardState,
@@ -134,6 +136,7 @@ class GameBoardManager extends BoardManager {
     const moves = pieceProps.piece.getPossibleMoves(
       pieceProps,
       this.boardStateValue,
+      this.boardStateData,
       this.piecesImportance,
       this.blackCapturedPieces,
       this.whiteCapturedPieces,
@@ -206,6 +209,7 @@ class GameBoardManager extends BoardManager {
       moves = randomPiece.piece.getPossibleMoves(
         randomPiece,
         this.boardStateValue,
+        this.boardStateData,
         this.piecesImportance,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,

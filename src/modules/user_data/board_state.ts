@@ -8,7 +8,7 @@ export type BoardStateValue = (Piece | null)[][];
 class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     value: BoardStateValue,
-    reactiveValue: BoardStateValue,
+    reactiveValue?: BoardStateValue,
     toastManager?: ToastManager,
     autoSave: boolean = true
   ) {

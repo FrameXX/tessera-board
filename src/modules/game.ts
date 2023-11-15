@@ -384,7 +384,7 @@ class Game {
     this.clearTimers();
     this.updateTimerState();
     this.boardStateData.save();
-    this.invalidatePiecesCache();
+    invalidatePiecesCache(this.pieceProps.value);
     this.updateCapturingPaths();
   }
 
@@ -405,16 +405,16 @@ class Game {
     this.updateTimerState();
     this.resetMoveTimer();
     this.boardStateData.save();
-    this.invalidatePiecesCache();
+    invalidatePiecesCache(this.pieceProps.value);
     this.updateCapturingPaths();
-    if (isGuardedPieceChecked(this.boardStateValue, this.playingColor))
+    if (
+      isGuardedPieceChecked(
+        this.boardStateValue,
+        this.playingColor,
+        this.pieceProps.value
+      )
+    )
       this.toastManager.showToast("Check!", "cross");
-  }
-
-  private invalidatePiecesCache() {
-    for (const pieceProps of this.pieceProps.value) {
-      pieceProps.piece.invalidateCache();
-    }
   }
 
   public updateCapturingPaths() {
@@ -473,33 +473,28 @@ export function getAllPieceProps(boardStateValue: BoardStateValue) {
 
 export function isGuardedPieceChecked(
   boardStateValue: BoardStateValue,
-  color: PlayerColor
+  color: PlayerColor,
+  allPieceProps: BoardPieceProps[]
 ) {
   let capturingPaths: Path[] = [];
   const guardedPieces: BoardPieceProps[] = [];
-  for (const [rowIndex, row] of boardStateValue.entries()) {
-    for (const [colIndex, piece] of row.entries()) {
-      if (!piece) {
-        continue;
-      }
-      if (piece.color === color) {
-        if (piece.guarded)
-          guardedPieces.push({ row: rowIndex, col: colIndex, piece });
-      } else {
-        const origin: BoardPosition = {
-          row: rowIndex,
-          col: colIndex,
-        };
-        capturingPaths = [
-          ...capturingPaths,
-          ...positionsToPath(
-            piece.getCapturingPositions(origin, boardStateValue),
-            origin
-          ),
-        ];
-      }
+
+  for (const pieceProps of allPieceProps) {
+    const piece = pieceProps.piece;
+    if (piece.color === color) {
+      if (piece.guarded) guardedPieces.push(pieceProps);
+    } else {
+      const origin: BoardPosition = pieceProps;
+      capturingPaths = [
+        ...capturingPaths,
+        ...positionsToPath(
+          piece.getCapturingPositions(origin, boardStateValue),
+          origin
+        ),
+      ];
     }
   }
+
   for (const piece of guardedPieces) {
     const paths = getTargetMatchingPaths(
       { row: piece.row, col: piece.col },
@@ -510,4 +505,10 @@ export function isGuardedPieceChecked(
     }
   }
   return false;
+}
+
+export function invalidatePiecesCache(allPieceProps: BoardPieceProps[]) {
+  for (const pieceProps of allPieceProps) {
+    pieceProps.piece.invalidateCache();
+  }
 }
