@@ -382,7 +382,7 @@ function moveHasClickablePosition(
   position: BoardPosition
 ): boolean {
   const matchingPositions = getMatchingPositions(
-    move.getClickablePositions(),
+    move.clickablePositions,
     position
   );
 

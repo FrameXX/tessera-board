@@ -64,15 +64,15 @@ class Shift extends Move {
     let notation: string;
     this.captures
       ? (notation = `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`)
+          this.captures
+        )}`)
       : (notation = `${getPieceNotation(this.pieceId)}${getPositionNotation(
-        this.target
-      )}`);
+          this.target
+        )}`);
     return notation;
   }
 
-  public getClickablePositions(): BoardPosition[] {
+  public get clickablePositions(): BoardPosition[] {
     return [this.target];
   }
 

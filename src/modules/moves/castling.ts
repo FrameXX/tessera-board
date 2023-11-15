@@ -62,7 +62,7 @@ class Castling extends Move {
     return notation;
   }
 
-  public getClickablePositions(): BoardPosition[] {
+  public get clickablePositions(): BoardPosition[] {
     if (this.king) {
       return [this.kingTarget, this.rookOrigin];
     } else {

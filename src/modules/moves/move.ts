@@ -12,18 +12,44 @@ import { GameLogicError } from "../game";
 
 type MoveId = "shift" | "castling" | "promotion";
 
+/**
+ * Represents a generic move.
+ * @abstract
+ */
 abstract class Move {
   public notation?: string;
   constructor(public readonly moveId: MoveId) {}
 
+  /**
+   * Returns an array of board positions that should be highlighted after the move is performed to indicate what has happened in the last move
+   */
   public abstract get highlightedBoardPositions(): BoardPosition[];
 
+  /**
+   * Alters the gameBoardState according to the move without any further effects or requiring any user input.
+   * @param args The arguments and their count vary from class to class
+   * @abstract
+   */
   public abstract forward(...args: any): void;
 
+  /**
+   * Alters the gameBoardState according to the move. May include audio effects, vibrations or user dialogs.
+   * @param args The arguments and their count vary from class to class
+   * @abstract
+   */
   public abstract perform(...args: any): Promise<string>;
 
-  public abstract getClickablePositions(): BoardPosition[];
+  /**
+   * Returns an array of board positions that after click should perform this move.
+   */
+  public abstract get clickablePositions(): BoardPosition[];
 
+  /**
+   * Sets specific cell marks related to the move to show on the checkboard.
+   * @param cellMarks reactive
+   * @param boardStateValue
+   * @abstract
+   */
   public abstract showCellMarks(
     cellMarks: MarkBoardState,
     boardStateValue: BoardStateValue
