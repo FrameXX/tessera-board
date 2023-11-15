@@ -102,6 +102,7 @@ button {
   background-color: var(--color-primary-surface-accent);
   color: var(--color-primary-text);
   padding: var(--spacing-tiny) var(--spacing-big);
+  transition: background-color var(--transition-duration-medium) linear;
 
   &:hover:not(.checkbox, .set-time-duration),
   &:focus:not(.checkbox, .set-time-duration) {
@@ -154,7 +155,6 @@ h3 {
 #app {
   @include screen;
   @include no-overflow;
-  @include no-overrender;
   display: flex;
   flex-direction: column;
   align-items: center;

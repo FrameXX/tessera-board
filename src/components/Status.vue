@@ -178,6 +178,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
   border-width: 0 calc(var(--border-width) * 1.5) 0
     calc(var(--border-width) * 1.5);
   border-style: dashed;
+  transition: background-color var(--transition-duration-medium) linear;
 
   &.player {
     border-color: transparent var(--color-primary-accent) transparent

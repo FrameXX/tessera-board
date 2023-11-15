@@ -336,7 +336,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           <SectionTitle title="Checkboard" />
           <UserOption
             :simple="false"
-            name="default piece positions"
+            name="starting piece positions"
             icon-id="checkerboard"
             option-id="default-board"
           >

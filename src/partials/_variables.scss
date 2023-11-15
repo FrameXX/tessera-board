@@ -1,5 +1,6 @@
-html {
+:root {
   // ===== Global properties =====
+  transition: background-color var(--transition-duration-medium) linear;
   background-color: var(--color-primary-surface);
   color: var(--color-primary-text);
   font-family: "JetBrains Mono", system-ui, Arial;
