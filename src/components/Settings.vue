@@ -461,7 +461,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             />
             <template #description
               >Changes duration of press/hold on a piece to be recognized as
-              long press and start a piece dragging.
+              long press and allow for a piece to be dragged out of position.
             </template>
           </UserOption>
           <UserOption

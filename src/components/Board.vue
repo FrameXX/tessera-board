@@ -87,6 +87,7 @@ const pixelsPerCm = inject("pixelsPerCm") as number;
 const container = ref<HTMLDivElement | null>(null);
 const containerSize = ref<number>(0);
 const draggingPiece = ref<BoardPieceProps | null>(null);
+const showDragging = ref<boolean>(false);
 let inchCmOffset = ref(1.8);
 
 const cellSize = computed(() => {
@@ -132,7 +133,7 @@ function isInArrayOfBoardPositions(
 }
 
 function isPieceDragged(position: BoardPosition) {
-  if (!draggingPiece.value) {
+  if (!draggingPiece.value || !showDragging.value) {
     return false;
   }
   return positionsEqual(draggingPiece.value, position);
@@ -143,8 +144,12 @@ function resetDragDelta() {
   dragYDelta.value = 0;
 }
 
+const shiftedDragYDelta = computed(() => {
+  return dragYDelta.value - inchPxOffset.value;
+});
+
 const dragRowDelta = computed(() => {
-  let delta = Math.round(-dragYDelta.value / cellSize.value);
+  let delta = Math.round(-shiftedDragYDelta.value / cellSize.value);
   if (delta === -0) {
     delta = 0;
   }
@@ -172,13 +177,18 @@ const targetingDragPosition = computed(() => {
 });
 
 watch(targetingDragPosition, () => {
-  if (!draggingPiece.value) {
+  if (!draggingPiece.value || !showDragging.value) {
     return;
   }
   props.manager.onPieceDragOverCell(
     targetingDragPosition.value,
     draggingPiece.value
   );
+});
+
+watch(showDragging, (newValue) => {
+  if (!draggingPiece.value || !newValue) return;
+  if (useVibrations.value) navigator.vibrate(30);
 });
 
 const inchPxOffset = computed(() => {
@@ -194,6 +204,19 @@ let lastDragX = 0;
 let lastDragY = 0;
 const dragXDelta = ref(0);
 const dragYDelta = ref(0);
+
+watch(dragXDelta, dragDeltaChange);
+watch(dragYDelta, dragDeltaChange);
+
+function dragDeltaChange() {
+  if (showDragging.value || !draggingPiece.value) return;
+  if (
+    Math.abs(dragXDelta.value) / cellSize.value > 0.5 ||
+    Math.abs(dragYDelta.value) / cellSize.value > 0.5
+  ) {
+    showDragging.value = true;
+  }
+}
 
 function updatePointerPosition(x: number, y: number) {
   let xDelta = x - lastDragX;
@@ -213,14 +236,16 @@ function updatePointerPosition(x: number, y: number) {
 function initDrag(event: PointerEvent, pieceProps: BoardPieceProps) {
   pressTimeout = null;
   draggingPiece.value = pieceProps;
-  props.manager.onPieceDragStart(targetingDragPosition.value, pieceProps);
+  props.manager.onPieceDragStart(
+    targetingDragPosition.value,
+    draggingPiece.value
+  );
 
   const x = event.clientX;
   const y = event.clientY;
 
   lastDragX = x;
-  lastDragY = y + inchPxOffset.value;
-  if (useVibrations.value) navigator.vibrate(30);
+  lastDragY = y;
   updatePointerPosition(x, y);
 }
 
@@ -258,10 +283,13 @@ function onPointerUp() {
     pressTimeout = null;
     return;
   }
-  props.manager.onPieceDragEnd(
-    targetingDragPosition.value,
-    draggingPiece.value
-  );
+  if (showDragging.value) {
+    props.manager.onPieceDragEnd(
+      targetingDragPosition.value,
+      draggingPiece.value
+    );
+    showDragging.value = false;
+  }
   draggingPiece.value = null;
   resetDragDelta();
 }
@@ -350,7 +378,7 @@ onMounted(() => {
             })
           "
           :drag-x-delta="dragXDelta"
-          :drag-y-delta="dragYDelta"
+          :drag-y-delta="shiftedDragYDelta"
           :inch-offset="inchCmOffset"
           :row="pieceProps.row"
           :col="pieceProps.col"
