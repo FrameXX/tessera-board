@@ -6,9 +6,11 @@ import type {
   BoardPosition,
 } from "../components/Board.vue";
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
-import Piece, {
+import type {
+  PiecesImportance} from "./pieces/piece";
+import type Piece from "./pieces/piece";
+import {
   getTargetMatchingPaths,
-  PiecesImportance,
   type Path,
   type PieceId,
 } from "./pieces/piece";
@@ -20,7 +22,7 @@ import { isMoveShift } from "./moves/shift";
 import { isMovePromotion } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
 import { getRandomArrayValue } from "./utils/misc";
-import BoardStateData from "./user_data/board_state";
+import type BoardStateData from "./user_data/board_state";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;

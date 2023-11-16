@@ -39,10 +39,7 @@ abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
     if (!this.reactiveValue) {
       return;
     }
-    for (const key in this.reactiveValue) {
-      // @ts-ignore
-      this.reactiveValue[key] = this.value[key];
-    }
+    Object.assign(this.reactiveValue, this.value);
   }
 
   public apply(): void {}

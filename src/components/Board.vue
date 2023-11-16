@@ -188,6 +188,10 @@ watch(targetingDragPosition, () => {
 
 watch(showDragging, (newValue) => {
   if (!draggingPiece.value || !newValue) return;
+  props.manager.onPieceDragStart(
+    targetingDragPosition.value,
+    draggingPiece.value
+  );
   if (useVibrations.value) navigator.vibrate(30);
 });
 
@@ -236,10 +240,6 @@ function updatePointerPosition(x: number, y: number) {
 function initDrag(event: PointerEvent, pieceProps: BoardPieceProps) {
   pressTimeout = null;
   draggingPiece.value = pieceProps;
-  props.manager.onPieceDragStart(
-    targetingDragPosition.value,
-    draggingPiece.value
-  );
 
   const x = event.clientX;
   const y = event.clientY;
@@ -272,7 +272,6 @@ function onPointerMove(event: PointerEvent) {
   if (!draggingPiece.value) {
     return;
   }
-
   updatePointerPosition(event.clientX, event.clientY);
 }
 

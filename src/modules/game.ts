@@ -8,12 +8,13 @@ import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 import type ConfirmDialog from "./dialogs/confirm";
 import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
+import type {
+  PieceId,
+  PiecesImportance} from "./pieces/piece";
 import {
   positionsToPath,
   type Path,
-  getTargetMatchingPaths,
-  PieceId,
-  PiecesImportance,
+  getTargetMatchingPaths
 } from "./pieces/piece";
 import type { BoardStateValue } from "./user_data/board_state";
 import type { GamePaused } from "./user_data/game_paused";
@@ -232,7 +233,7 @@ class Game {
   }
 
   private draw(reason: WinReason) {
-    this.toastManager.showToast(`Draw.`, "sword-cross");
+    this.toastManager.showToast("Draw.", "sword-cross");
     this.winner.value = "draw";
     this.winReason.value = reason;
     this.updateTimerState();
