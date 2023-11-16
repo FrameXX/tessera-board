@@ -249,7 +249,7 @@ const statusText = computed(() => {
       text = playingColor.value === "white" ? "White plays" : "Black plays";
       break;
     case "draw":
-      text = "draw";
+      text = "Draw";
       break;
     case "opponent":
       text = playerColor.value === "white" ? "Black won" : "White won";
@@ -796,6 +796,7 @@ const playerBoardManager = new GameBoardManager(
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
+  ignorePiecesProtections,
   gamePieceProps,
   piecesImportance,
   moveIndex
@@ -825,6 +826,7 @@ const opponentBoardManager = new GameBoardManager(
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
+  ignorePiecesProtections,
   gamePieceProps,
   piecesImportance,
   moveIndex
@@ -856,6 +858,11 @@ const game = new Game(
   secondsMoveLimitRunOutPunishment,
   winner,
   winReason,
+  piecesImportance,
+  blackCapturedPieces,
+  whiteCapturedPieces,
+  reviveFromCapturedPieces,
+  ignorePiecesProtections,
   confirmDialog,
   toastManager
 );
@@ -884,6 +891,7 @@ userDataManager.updateReferences();
 onMounted(() => {
   // Sets CSS Saturation variables from 0 to their appropriate user configured values
   setSaturationMultiplier(1);
+  interactionManager.updatePrimaryHue(playerPlaying.value, winner.value);
 
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") interactionManager.escapeManager.escape();

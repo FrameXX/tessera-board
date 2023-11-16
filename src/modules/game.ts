@@ -12,6 +12,8 @@ import {
   positionsToPath,
   type Path,
   getTargetMatchingPaths,
+  PieceId,
+  PiecesImportance,
 } from "./pieces/piece";
 import type { BoardStateValue } from "./user_data/board_state";
 import type { GamePaused } from "./user_data/game_paused";
@@ -61,13 +63,23 @@ export function isWinner(string: string): string is Winner {
   return isPlayer(string) || isUndecidedWinner(string);
 }
 
-export type WinReason = "none" | "move_timeout" | "match_timeout" | "resign";
+export type WinReason =
+  | "none"
+  | "move_timeout"
+  | "match_timeout"
+  | "resign"
+  | "checkmate"
+  | "stalemate"
+  | "block";
 export function isWinReason(string: string): string is WinReason {
   return (
     string === "none" ||
     string === "move_timeout" ||
     string === "match_timeout" ||
-    string === "resign"
+    string === "resign" ||
+    string === "checkmate" ||
+    string === "stalemate" ||
+    string === "block"
   );
 }
 
@@ -118,6 +130,11 @@ class Game {
     private readonly secondsMoveLimitRunOutPunishment: Ref<MoveSecondsLimitRunOutPunishment>,
     private readonly winner: Ref<Winner>,
     private readonly winReason: Ref<WinReason>,
+    private readonly piecesImportance: PiecesImportance,
+    private readonly blackCapturedPieces: Ref<PieceId[]>,
+    private readonly whiteCapturedPieces: Ref<PieceId[]>,
+    private readonly reviveFromCapturedPieces: Ref<boolean>,
+    private readonly ignorePiecesProtections: Ref<boolean>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
@@ -210,6 +227,13 @@ class Game {
       "crown-outline"
     );
     this.winner.value = winner;
+    this.winReason.value = reason;
+    this.updateTimerState();
+  }
+
+  private draw(reason: WinReason) {
+    this.toastManager.showToast(`Draw.`, "sword-cross");
+    this.winner.value = "draw";
     this.winReason.value = reason;
     this.updateTimerState();
   }
@@ -381,6 +405,7 @@ class Game {
     this.boardManager.resetBoard();
     this.toastManager.showToast("New match started.", "flag-checkered");
     this.moveIndex.value = 0;
+    this.onMove();
     this.clearTimers();
     this.updateTimerState();
     this.boardStateData.save();
@@ -407,14 +432,56 @@ class Game {
     this.boardStateData.save();
     invalidatePiecesCache(this.pieceProps.value);
     this.updateCapturingPaths();
-    if (
-      isGuardedPieceChecked(
+    this.checkLoss();
+  }
+
+  private checkLoss() {
+    const guardedPieces = getGuardedPieces(
+      this.pieceProps.value,
+      this.playingColor
+    );
+    const checked = isGuardedPieceChecked(
+      this.boardStateValue,
+      this.playingColor,
+      this.pieceProps.value,
+      guardedPieces
+    );
+    if (checked) this.toastManager.showToast("Check!", "cross");
+    const canPlayerMove = this.canPlayerMove(
+      this.playingColor,
+      this.pieceProps.value
+    );
+    if (!canPlayerMove) {
+      if (checked || guardedPieces.length === 0) {
+        const winReason: WinReason =
+          guardedPieces.length !== 0 ? "block" : "checkmate";
+        this.playerPlaying.value
+          ? this.opponentWin(winReason)
+          : this.playerWin(winReason);
+      } else {
+        this.draw("stalemate");
+      }
+    }
+  }
+
+  private canPlayerMove(color: PlayerColor, pieceProps: BoardPieceProps[]) {
+    for (const props of pieceProps) {
+      if (props.piece.color !== color) continue;
+      const moves = props.piece.getPossibleMoves(
+        props,
         this.boardStateValue,
-        this.playingColor,
-        this.pieceProps.value
-      )
-    )
-      this.toastManager.showToast("Check!", "cross");
+        this.boardStateData,
+        this.piecesImportance,
+        this.blackCapturedPieces,
+        this.whiteCapturedPieces,
+        this.reviveFromCapturedPieces,
+        this.ignorePiecesProtections
+      );
+      if (moves.length !== 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public updateCapturingPaths() {
@@ -449,8 +516,6 @@ class Game {
   }
 }
 
-export default Game;
-
 export function getAllPieceProps(boardStateValue: BoardStateValue) {
   const allPieceProps: BoardPieceProps[] = [];
   for (const [rowIndex, row] of boardStateValue.entries()) {
@@ -471,28 +536,37 @@ export function getAllPieceProps(boardStateValue: BoardStateValue) {
   return allPieceProps;
 }
 
+export function getGuardedPieces(
+  pieceProps: BoardPieceProps[],
+  color: PlayerColor
+) {
+  return pieceProps.filter((props) => {
+    if (props.piece.color !== color) return false;
+    return props.piece.guarded;
+  });
+}
+
 export function isGuardedPieceChecked(
   boardStateValue: BoardStateValue,
   color: PlayerColor,
-  allPieceProps: BoardPieceProps[]
+  allPieceProps: BoardPieceProps[],
+  guardedPieces: BoardPieceProps[]
 ) {
   let capturingPaths: Path[] = [];
-  const guardedPieces: BoardPieceProps[] = [];
 
   for (const pieceProps of allPieceProps) {
     const piece = pieceProps.piece;
     if (piece.color === color) {
-      if (piece.guarded) guardedPieces.push(pieceProps);
-    } else {
-      const origin: BoardPosition = pieceProps;
-      capturingPaths = [
-        ...capturingPaths,
-        ...positionsToPath(
-          piece.getCapturingPositions(origin, boardStateValue),
-          origin
-        ),
-      ];
+      continue;
     }
+    const origin: BoardPosition = pieceProps;
+    capturingPaths = [
+      ...capturingPaths,
+      ...positionsToPath(
+        piece.getCapturingPositions(origin, boardStateValue),
+        origin
+      ),
+    ];
   }
 
   for (const piece of guardedPieces) {
@@ -512,3 +586,5 @@ export function invalidatePiecesCache(allPieceProps: BoardPieceProps[]) {
     pieceProps.piece.invalidateCache();
   }
 }
+
+export default Game;

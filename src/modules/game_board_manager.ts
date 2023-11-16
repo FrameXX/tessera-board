@@ -53,6 +53,7 @@ class GameBoardManager extends BoardManager {
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
+    private readonly ignorePiecesProtections: Ref<boolean>,
     private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
     private readonly piecesImportance: PiecesImportance,
     private readonly moveIndex: Ref<number>
@@ -140,7 +141,8 @@ class GameBoardManager extends BoardManager {
       this.piecesImportance,
       this.blackCapturedPieces,
       this.whiteCapturedPieces,
-      this.reviveFromCapturedPieces
+      this.reviveFromCapturedPieces,
+      this.ignorePiecesProtections
     );
     moves.forEach((move) =>
       move.showCellMarks(this.cellsMarks, this.boardStateValue)
@@ -173,23 +175,6 @@ class GameBoardManager extends BoardManager {
     return matchingMoves[0];
   }
 
-  private getPiecePosition(id: string): BoardPosition | null {
-    for (const rowIndex in this.cellsMarks) {
-      for (const colIndex in this.cellsMarks[rowIndex]) {
-        const piece = this.boardStateValue[rowIndex][colIndex];
-        if (!piece) {
-          continue;
-        }
-        if (piece.id != id) {
-          continue;
-        }
-        return { row: +rowIndex, col: +colIndex };
-      }
-    }
-
-    return null;
-  }
-
   private highlightBoardPositions(positions: BoardPosition[]) {
     for (const position of positions) {
       this.higlightedCells[position.row][position.col] = true;
@@ -213,7 +198,8 @@ class GameBoardManager extends BoardManager {
         this.piecesImportance,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
-        this.reviveFromCapturedPieces
+        this.reviveFromCapturedPieces,
+        this.ignorePiecesProtections
       );
     } while (moves.length === 0);
     const chosenMove = getRandomArrayValue(moves);
@@ -366,11 +352,8 @@ class GameBoardManager extends BoardManager {
   // Called by Board component
   public onPieceClick(pieceProps: BoardPieceProps): void {
     if (this.dragEndTimeout) return;
-    const position = this.getPiecePosition(pieceProps.piece.id);
-    if (position) {
-      const moved = this.moveToIfPossible(position);
-      if (moved) return;
-    }
+    const moved = this.moveToIfPossible(pieceProps);
+    if (moved) return;
 
     // Unselect cell
     if (this.selectedCell) this.selectedCell = null;

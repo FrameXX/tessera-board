@@ -86,7 +86,11 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
 
     <div
       id="status-text"
-      :class="{ player: props.playerPlaying, opponent: !props.playerPlaying }"
+      :class="{
+        player: props.playerPlaying,
+        opponent: !props.playerPlaying,
+        draw: props.winner === 'draw',
+      }"
     >
       <InfoText :name="`Move #${props.moveIndex + 1}`">{{
         props.statusText
@@ -188,6 +192,10 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
   &.opponent {
     border-color: transparent transparent transparent
       var(--color-primary-accent);
+  }
+
+  &.draw {
+    border-color: transparent;
   }
 }
 

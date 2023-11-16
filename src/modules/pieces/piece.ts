@@ -2,6 +2,7 @@ import type { Ref } from "vue";
 import type { BoardPosition } from "../../components/Board.vue";
 import {
   getAllPieceProps,
+  getGuardedPieces,
   invalidatePiecesCache,
   isGuardedPieceChecked,
   type PlayerColor,
@@ -111,51 +112,31 @@ export abstract class Piece {
     piecesImportance: PiecesImportance,
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
-    reviveFromCapturedPieces: Ref<boolean>
+    reviveFromCapturedPieces: Ref<boolean>,
+    ignorePiecesProtections: Ref<boolean>
   ): Move[] {
     if (!this.possibleMovesCache) {
-      const allPossibleMoves = this.getNewPossibleMoves(
-        position,
-        boardStateValue
-      );
+      let possibleMoves = this.getNewPossibleMoves(position, boardStateValue);
 
-      const newBoardStateData = new BoardStateData([]);
-      newBoardStateData.load(boardStateData.dump());
-      const newBoardStateValue = boardStateData.value;
+      if (!ignorePiecesProtections.value) {
+        const newBoardStateData = new BoardStateData([]);
+        newBoardStateData.load(boardStateData.dump());
+        const newBoardStateValue = newBoardStateData.value;
 
-      this.possibleMovesCache = allPossibleMoves.filter((move) => {
-        if (isMoveShift(move)) {
-          move.forward(newBoardStateValue);
-        } else if (isMovePromotion(move)) {
-          move.forward(
+        possibleMoves = possibleMoves.filter((move) => {
+          return !willMoveCheckGuardedPiece(
+            move,
+            this.color,
             newBoardStateValue,
             piecesImportance,
             blackCapturedPieces,
             whiteCapturedPieces,
             reviveFromCapturedPieces
           );
-        } else if (isMoveCastling(move)) {
-          move.forward(boardStateValue);
-        }
+        });
+      }
 
-        const pieceProps = getAllPieceProps(newBoardStateValue);
-        invalidatePiecesCache(pieceProps);
-        const checksGuardedPiece = isGuardedPieceChecked(
-          boardStateValue,
-          this.color,
-          pieceProps
-        );
-
-        if (isMoveShift(move)) {
-          move.reverse(boardStateValue);
-        } else if (isMovePromotion(move)) {
-          move.reverse(boardStateValue);
-        } else if (isMoveCastling(move)) {
-          move.reverse(boardStateValue);
-        }
-
-        return !checksGuardedPiece;
-      });
+      this.possibleMovesCache = possibleMoves;
     }
     return this.possibleMovesCache;
   }
@@ -164,6 +145,44 @@ export abstract class Piece {
     position: BoardPosition,
     boardStateValue: BoardStateValue
   ): Move[];
+}
+
+function willMoveCheckGuardedPiece(
+  move: Move,
+  color: PlayerColor,
+  newBoardStateValue: BoardStateValue,
+  piecesImportance: PiecesImportance,
+  blackCapturedPieces: Ref<PieceId[]>,
+  whiteCapturedPieces: Ref<PieceId[]>,
+  reviveFromCapturedPieces: Ref<boolean>
+) {
+  if (isMoveShift(move)) {
+    move.forward(newBoardStateValue);
+  } else if (isMovePromotion(move)) {
+    move.forward(
+      newBoardStateValue,
+      piecesImportance,
+      blackCapturedPieces,
+      whiteCapturedPieces,
+      reviveFromCapturedPieces
+    );
+  } else if (isMoveCastling(move)) {
+    move.forward(newBoardStateValue);
+  }
+
+  const pieceProps = getAllPieceProps(newBoardStateValue);
+  invalidatePiecesCache(pieceProps);
+  const guardedPieces = getGuardedPieces(pieceProps, color);
+  const checksGuardedPiece = isGuardedPieceChecked(
+    newBoardStateValue,
+    color,
+    pieceProps,
+    guardedPieces
+  );
+
+  move.reverse(newBoardStateValue);
+
+  return checksGuardedPiece;
 }
 
 export function getDeltaPosition(
