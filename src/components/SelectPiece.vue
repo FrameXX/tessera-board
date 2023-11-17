@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, type PropType, watch } from "vue";
-import type { RawPiece } from "../modules/pieces/rawPiece";
+import type { RawPiece } from "../modules/pieces/raw_piece";
 import { PieceSetValue } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
 
@@ -57,3 +57,4 @@ function selectPiece(piece: RawPiece) {
     </div>
   </div>
 </template>
+../modules/pieces/raw_piece

@@ -8,7 +8,7 @@ import { isPieceKing } from "./king";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import type { BoardPositionValue } from "./piece";
 import { getDeltaPosition, isPositionOnBoard } from "./piece";
-import { getRawPiece, type RawPiece } from "./rawPiece";
+import { getRawPiece, type RawPiece } from "./raw_piece";
 
 interface RawRook extends RawPiece {
   hasMoved: boolean;

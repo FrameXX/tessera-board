@@ -11,7 +11,7 @@ import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
-import { type RawPiece, getRawPiece } from "./rawPiece";
+import { type RawPiece, getRawPiece } from "./raw_piece";
 import { isMoveShift } from "../moves/shift";
 import { isMovePromotion } from "../moves/promotion";
 import { isMoveCastling } from "../moves/castling";

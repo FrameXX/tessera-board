@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import type { RawPiece } from "../pieces/rawPiece";
+import type { RawPiece } from "../pieces/raw_piece";
 import type ToastManager from "../toast_manager";
 
 interface SelectPieceDialogProps {

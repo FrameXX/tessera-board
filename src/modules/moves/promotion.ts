@@ -6,7 +6,7 @@ import {
   type PieceId,
   type PiecesImportance,
 } from "../pieces/piece";
-import type { RawPiece } from "../pieces/rawPiece";
+import type { RawPiece } from "../pieces/raw_piece";
 import type { BoardStateValue } from "../user_data/board_state";
 import Move, { movePositionValue } from "./move";
 import type SelectPieceDialog from "../dialogs/select_piece";
@@ -173,11 +173,11 @@ class Promotion extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(newPiece.pieceId)}`
+          this.captures
+        )}=${getPieceNotation(newPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-        newPiece.pieceId
-      )}`;
+          newPiece.pieceId
+        )}`;
     this.performed = true;
   }
 

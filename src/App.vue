@@ -1389,3 +1389,4 @@ onMounted(() => {
   height: 90px;
 }
 </style>
+./modules/pieces/raw_piece
