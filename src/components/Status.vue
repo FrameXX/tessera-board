@@ -38,6 +38,15 @@ const opponentTimeMove = computed<MinSecTime>(() => {
 const opponentTimeMatch = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(props.opponentSecsMatch);
 });
+
+const primaryClass = computed<"player" | "opponent" | "none">(() => {
+  if (props.winner === "none") {
+    return props.playerPlaying ? "player" : "opponent";
+  } else if (props.winner !== "draw") {
+    return props.winner;
+  }
+  return "none";
+});
 </script>
 
 <template>
@@ -84,14 +93,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
       >
     </div>
 
-    <div
-      id="status-text"
-      :class="{
-        player: props.playerPlaying,
-        opponent: !props.playerPlaying,
-        draw: props.winner === 'draw',
-      }"
-    >
+    <div id="status-text" :class="primaryClass">
       <InfoText :name="`Move #${props.moveIndex + 1}`">{{
         props.statusText
       }}</InfoText>
@@ -194,7 +196,7 @@ const opponentTimeMatch = computed<MinSecTime>(() => {
       var(--color-primary-accent);
   }
 
-  &.draw {
+  &.none {
     border-color: transparent;
   }
 }
