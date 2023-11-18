@@ -16,11 +16,7 @@ import HueData from "./modules/user_data/hue";
 import PieceSetData, {
   type PieceSetValue,
 } from "./modules/user_data/piece_set";
-import BoardStateData, {
-  MarkBoardState,
-  type BoardStateValue,
-  BoardPosition,
-} from "./modules/user_data/board_state";
+import BoardStateData from "./modules/user_data/board_state";
 import PiecePaddingData from "./modules/user_data/piece_padding";
 import PieceBorderData from "./modules/user_data/piece_border";
 import TransitionDurationData from "./modules/user_data/transition_duration";
@@ -96,8 +92,12 @@ import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
 import InfoCard from "./components/InfoCard.vue";
-import { opponentSelectedCells } from "./opponentSelectedCells";
 import { RawPiece } from "./modules/pieces/raw_piece";
+import {
+  BoardPosition,
+  BoardStateValue,
+  MarkBoardState,
+} from "./modules/board_manager";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -269,6 +269,7 @@ const statusText = computed(() => {
 const playerSelectedPieces = ref<BoardPosition[]>([]);
 const opponentSelectedPieces = ref<BoardPosition[]>([]);
 const playerSelectedCells = ref<BoardPosition[]>([]);
+const opponentSelectedCells = ref<BoardPosition[]>([]);
 const playerDraggingOverCells = ref<BoardPosition[]>([]);
 const opponentDraggingOverCells = ref<BoardPosition[]>([]);
 const defaultDraggingOverCells = ref<BoardPosition[]>([]);
