@@ -1,19 +1,25 @@
 import type { Ref } from "vue";
 import { isPieceId, type PieceId } from "../pieces/piece";
-import Move, { movePositionValue, tellPieceItMoved } from "./move";
+import Move, {
+  handleInvalidRawMove,
+  movePositionValue,
+  tellPieceItMoved,
+} from "./move";
 import {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
   getPieceNotation,
   getPositionNotation,
+  isRawBoardPieceProps,
   isBoardPosition,
   MarkBoardState,
+  RawBoardPieceProps,
 } from "../board_manager";
 import { capturePosition, movePiece } from "./move";
 import { getPositionPiece } from "../game_board_manager";
 import { RawMove } from "./raw_move";
-import { GameLogicError } from "../game";
+import { getPieceFromRaw } from "../pieces/raw_piece";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -23,7 +29,7 @@ export interface RawShift extends RawMove {
   pieceId: PieceId;
   origin: BoardPosition;
   target: BoardPosition;
-  captures?: BoardPieceProps;
+  captures?: RawBoardPieceProps;
   id?: string;
 }
 
@@ -34,6 +40,11 @@ export function isRawShift(rawMove: RawMove): rawMove is RawShift {
   if (!isPieceId(rawMove.pieceId)) return false;
   if (!isBoardPosition(rawMove.origin)) return false;
   if (!isBoardPosition(rawMove.target)) return false;
+  if (rawMove.captures) {
+    if (!isRawBoardPieceProps(rawMove.captures)) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -50,13 +61,33 @@ class Shift extends Move {
     super("shift");
   }
 
-  public static restoreShift(rawMove: RawMove) {
+  public static restore(rawMove: RawMove): Shift {
     if (!isRawShift(rawMove)) {
-      console.log(rawMove);
-      throw new GameLogicError(
-        "Provided rawMove is not a rawShift. No props were loaded."
-      );
+      handleInvalidRawMove(rawMove);
     }
+
+    let captures: BoardPieceProps | undefined = undefined;
+    if (rawMove.captures) {
+      const rawPiece = rawMove.captures.piece;
+      const piece = getPieceFromRaw(rawPiece);
+      piece.loadCustomProps(rawPiece);
+      captures = {
+        row: rawMove.captures.row,
+        col: rawMove.captures.col,
+        piece: piece,
+      };
+    }
+
+    let id: string | undefined = undefined;
+    if (rawMove.id) id = rawMove.id;
+
+    return new Shift(
+      rawMove.pieceId,
+      rawMove.origin,
+      rawMove.target,
+      captures,
+      id
+    );
   }
 
   get highlightedBoardPositions() {

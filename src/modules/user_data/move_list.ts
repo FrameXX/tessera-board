@@ -3,6 +3,9 @@ import Move from "../moves/move";
 import { isRawMove } from "../moves/raw_move";
 import ToastManager from "../toast_manager";
 import UserData from "./user_data";
+import Shift from "../moves/shift";
+import Promotion from "../moves/promotion";
+import Castling from "../moves/castling";
 
 class MoveListData extends UserData<Move[]> {
   constructor(
@@ -19,32 +22,39 @@ class MoveListData extends UserData<Move[]> {
   }
 
   public load(dumped: string): void {
-    const moves = this.safelyParse(dumped);
-    if (!moves) {
+    const rawMoves = this.safelyParse(dumped);
+    if (!rawMoves) {
       return;
     }
-    if (!Array.isArray(moves)) {
+    if (!Array.isArray(rawMoves)) {
       console.error("The parsed value of move list is not an array");
       this.handleInvalidLoadValue(dumped);
       return;
     }
-    for (const move of moves) {
-      if (!isRawMove(move)) {
+    const moves: Move[] = [];
+    for (const rawMove of rawMoves) {
+      if (!isRawMove(rawMove)) {
         console.error("The parsed value of move list is not an array");
         this.handleInvalidLoadValue(dumped);
         return;
       }
-      switch (move.moveId) {
+      let move: Move;
+      switch (rawMove.moveId) {
         case "shift":
+          move = Shift.restore(rawMove);
           break;
         case "promotion":
+          move = Promotion.restore(rawMove);
           break;
         case "castling":
+          move = Castling.restore(rawMove);
           break;
         default:
           return;
       }
+      moves.push(move);
     }
+    this.value = moves;
   }
 
   public apply(): void {}

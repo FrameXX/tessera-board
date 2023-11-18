@@ -1,5 +1,6 @@
 import { Mark } from "../components/Cell.vue";
 import type { Piece, PieceId } from "./pieces/piece";
+import { RawPiece, isRawPiece } from "./pieces/raw_piece";
 
 export type BoardStateValue = (Piece | null)[][];
 
@@ -9,13 +10,27 @@ export interface BoardPosition {
   row: number;
   col: number;
 }
-export function isBoardPosition(object: object): object is BoardPosition {
-  if (!("row" in object && "col" in object)) return false;
-  return typeof object.row === "number" && typeof object.col === "number";
+export function isBoardPosition(object: any): object is BoardPosition {
+  if (typeof object.row !== "number") return false;
+  if (typeof object.col !== "number") return false;
+  return true;
 }
 
 export interface BoardPieceProps extends BoardPosition {
   piece: Piece;
+}
+
+export interface RawBoardPieceProps extends BoardPosition {
+  piece: RawPiece;
+}
+export function isRawBoardPieceProps(
+  object: any
+): object is RawBoardPieceProps {
+  if (typeof object.row !== "number") return false;
+  if (typeof object.col !== "number") return false;
+  if (typeof object.piece !== "object") return false;
+  if (!isRawPiece(object.piece)) return false;
+  return true;
 }
 
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];

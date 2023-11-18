@@ -13,6 +13,7 @@ import {
   BoardStateValue,
   MarkBoardState,
 } from "../board_manager";
+import { RawMove } from "./raw_move";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {
@@ -116,6 +117,11 @@ export function transformPiece(
     );
   }
   boardStateValue[position.row][position.col] = getPieceFromRaw(newPiece);
+}
+
+export function handleInvalidRawMove(rawMove: RawMove): never {
+  console.error("Invalid rawMove was provided.", rawMove);
+  throw new GameLogicError("Provided rawMove is invalid.");
 }
 
 export function movePositionValue(

@@ -6,6 +6,7 @@ import {
 } from "../board_manager";
 import { getPositionPiece } from "../game_board_manager";
 import Move, {
+  handleInvalidRawMove,
   movePiece,
   movePositionValue,
   tellPieceItCastled,
@@ -26,7 +27,7 @@ export interface RawCastling extends RawMove {
   rookTarget: BoardPosition;
 }
 
-export function isRawShift(rawMove: RawMove): rawMove is RawCastling {
+export function isRawCastling(rawMove: RawMove): rawMove is RawCastling {
   if (typeof rawMove.king !== "boolean") return false;
   if (typeof rawMove.kingSide !== "boolean") return false;
   if (typeof rawMove.kingOrigin !== "object") return false;
@@ -54,6 +55,25 @@ class Castling extends Move {
     private readonly id?: string
   ) {
     super("castling");
+  }
+
+  public static restore(rawMove: RawMove): Castling {
+    if (!isRawCastling(rawMove)) {
+      handleInvalidRawMove(rawMove);
+    }
+
+    let id: string | undefined = undefined;
+    if (rawMove.id) id = rawMove.id;
+
+    return new Castling(
+      rawMove.king,
+      rawMove.kingSide,
+      rawMove.kingOrigin,
+      rawMove.kingTarget,
+      rawMove.rookOrigin,
+      rawMove.rookTarget,
+      id
+    );
   }
 
   get highlightedBoardPositions() {

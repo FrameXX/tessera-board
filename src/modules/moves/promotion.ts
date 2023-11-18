@@ -5,8 +5,12 @@ import {
   type PieceId,
   type PiecesImportance,
 } from "../pieces/piece";
-import type { RawPiece } from "../pieces/raw_piece";
-import Move, { movePositionValue, tellPieceItMoved } from "./move";
+import { getPieceFromRaw, type RawPiece } from "../pieces/raw_piece";
+import Move, {
+  handleInvalidRawMove,
+  movePositionValue,
+  tellPieceItMoved,
+} from "./move";
 import type SelectPieceDialog from "../dialogs/select_piece";
 import { capturePosition, movePiece, transformPiece } from "./move";
 import {
@@ -36,7 +40,7 @@ export interface RawPromotion extends RawMove {
   id?: string;
 }
 
-export function isRawShift(rawMove: RawMove): rawMove is RawPromotion {
+export function isRawPromotion(rawMove: RawMove): rawMove is RawPromotion {
   if (typeof rawMove.pieceId !== "string") return false;
   if (typeof rawMove.pieceColor !== "string") return false;
   if (typeof rawMove.origin !== "object") return false;
@@ -64,6 +68,37 @@ class Promotion extends Move {
     private readonly id?: string
   ) {
     super("promotion");
+  }
+
+  public static restore(rawMove: RawMove): Promotion {
+    if (!isRawPromotion(rawMove)) {
+      handleInvalidRawMove(rawMove);
+    }
+
+    let captures: BoardPieceProps | undefined = undefined;
+    if (rawMove.captures) {
+      const rawPiece = rawMove.captures.piece;
+      const piece = getPieceFromRaw(rawPiece);
+      piece.loadCustomProps(rawPiece);
+      captures = {
+        row: rawMove.captures.row,
+        col: rawMove.captures.col,
+        piece: piece,
+      };
+    }
+
+    let id: string | undefined = undefined;
+    if (rawMove.id) id = rawMove.id;
+
+    return new Promotion(
+      rawMove.pieceId,
+      rawMove.pieceColor,
+      rawMove.origin,
+      rawMove.target,
+      rawMove.transformOptions,
+      captures,
+      id
+    );
   }
 
   private getRelevantCapturedPieces(
