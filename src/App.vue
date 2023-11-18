@@ -224,11 +224,11 @@ const configPieceSelectOptions = computed(() => {
   return pieces;
 });
 const playingColor = computed(() => {
-  let color: PlayerColor;
-  (isEven(moveIndex.value) && firstMoveColor.value === "white") ||
-  (!isEven(moveIndex.value) && firstMoveColor.value === "black")
-    ? (color = "white")
-    : (color = "black");
+  let color: PlayerColor =
+    (isEven(moveIndex.value) && firstMoveColor.value === "black") ||
+    (!isEven(moveIndex.value) && firstMoveColor.value === "white")
+      ? "white"
+      : "black";
   return color;
 });
 const playerPlaying = computed(() => {
