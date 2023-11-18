@@ -14,13 +14,13 @@ import { getRawPiece, type RawPiece } from "./raw_piece";
 
 interface RawRook extends RawPiece {
   hasMoved: boolean;
-  hasCastled: boolean;
+  castled: boolean;
 }
 
 function isRawRook(rawPiece: RawPiece): rawPiece is RawRook {
   return (
     typeof rawPiece.hasMoved === "boolean" &&
-    typeof rawPiece.hasCastled === "boolean"
+    typeof rawPiece.castled === "boolean"
   );
 }
 
@@ -30,7 +30,7 @@ export function isPieceRook(piece: Piece): piece is Rook {
 
 export class Rook extends Piece {
   public hasMoved: boolean = false;
-  public hasCastled: boolean = false;
+  public castled: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
     super(color, "rook", id);
@@ -40,7 +40,7 @@ export class Rook extends Piece {
     return {
       ...getRawPiece(this),
       hasMoved: this.hasMoved,
-      hasCastled: this.hasCastled,
+      castled: this.castled,
     };
   }
 
@@ -107,7 +107,7 @@ export class Rook extends Piece {
     }
 
     // https://en.wikipedia.org/wiki/Castling
-    if (!this.hasMoved && !this.hasCastled) {
+    if (!this.hasMoved && !this.castled) {
       for (const colDelta of [-1, 1]) {
         let totalColDelta = 0;
         while (true) {
@@ -125,7 +125,7 @@ export class Rook extends Piece {
           if (!piece) continue;
           // There is wrong piece in way. Castling cannot be performed.
           if (!isPieceKing(piece) || piece.color !== this.color) break;
-          if (piece.hasCastled || piece.hasMoved) break;
+          if (piece.castled || piece.hasMoved) break;
           const kingTarget = {
             row: searchKingPosition.row,
             col: searchKingPosition.col + colDelta * -2,
@@ -143,7 +143,7 @@ export class Rook extends Piece {
               position,
               rookTarget,
               () => {
-                this.hasCastled = true;
+                this.castled = true;
               }
             )
           );

@@ -18,13 +18,13 @@ import { isPieceRook } from "./rook";
 
 interface RawKing extends RawPiece {
   hasMoved: boolean;
-  hasCastled: boolean;
+  castled: boolean;
 }
 
 function isRawKing(rawPiece: RawPiece): rawPiece is RawKing {
   return (
     typeof rawPiece.hasMoved === "boolean" &&
-    typeof rawPiece.hasCastled === "boolean"
+    typeof rawPiece.castled === "boolean"
   );
 }
 
@@ -34,7 +34,7 @@ export function isPieceKing(piece: Piece): piece is King {
 
 export class King extends Piece {
   public hasMoved: boolean = false;
-  public hasCastled: boolean = false;
+  public castled: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
     super(color, "king", id, true);
@@ -44,7 +44,7 @@ export class King extends Piece {
     return {
       ...getRawPiece(this),
       hasMoved: this.hasMoved,
-      hasCastled: this.hasCastled,
+      castled: this.castled,
     };
   }
 
@@ -54,7 +54,7 @@ export class King extends Piece {
       return;
     }
     this.hasMoved = rawPiece.hasMoved;
-    this.hasCastled = rawPiece.hasCastled;
+    this.castled = rawPiece.castled;
   }
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
@@ -100,7 +100,7 @@ export class King extends Piece {
     }
 
     // https://en.wikipedia.org/wiki/Castling
-    if (!this.hasMoved && !this.hasCastled) {
+    if (!this.hasMoved && !this.castled) {
       for (const colDelta of [-1, 1]) {
         let kingTarget: BoardPosition | null = null;
         let rookTarget: BoardPosition | null = null;
@@ -134,7 +134,7 @@ export class King extends Piece {
             !kingTarget
           )
             break;
-          if (piece.hasCastled || piece.hasMoved) break;
+          if (piece.castled || piece.hasMoved) break;
           moves.push(
             new Castling(
               true,
@@ -144,7 +144,7 @@ export class King extends Piece {
               searchRookPosition,
               rookTarget,
               () => {
-                this.hasCastled = true;
+                this.castled = true;
               }
             )
           );
