@@ -1,29 +1,58 @@
 import type { Ref } from "vue";
-import type {
-  BoardPieceProps,
-  BoardPosition,
-  MarkBoardState,
-} from "../../components/Board.vue";
 import {
   chooseBestPiece,
+  isPieceId,
   type PieceId,
   type PiecesImportance,
 } from "../pieces/piece";
 import type { RawPiece } from "../pieces/raw_piece";
-import type { BoardStateValue } from "../user_data/board_state";
-import Move, { movePositionValue } from "./move";
+import Move, { movePositionValue, tellPieceItMoved } from "./move";
 import type SelectPieceDialog from "../dialogs/select_piece";
 import { capturePosition, movePiece, transformPiece } from "./move";
-import { getPieceNotation, getPositionNotation } from "../board_manager";
-import { GameLogicError, type PlayerColor } from "../game";
+import {
+  BoardPieceProps,
+  BoardPosition,
+  BoardStateValue,
+  getPieceNotation,
+  getPositionNotation,
+  isBoardPosition,
+  MarkBoardState,
+} from "../board_manager";
+import { isPlayerColor, type PlayerColor } from "../game";
 import { getPositionPiece } from "../game_board_manager";
+import { RawMove } from "./raw_move";
 
 export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";
 }
 
+export interface RawPromotion extends RawMove {
+  pieceId: PieceId;
+  pieceColor: PlayerColor;
+  origin: BoardPosition;
+  target: BoardPosition;
+  transformOptions: [RawPiece, ...RawPiece[]];
+  captures?: BoardPieceProps;
+  id?: string;
+}
+
+export function isRawShift(rawMove: RawMove): rawMove is RawPromotion {
+  if (typeof rawMove.pieceId !== "string") return false;
+  if (typeof rawMove.pieceColor !== "string") return false;
+  if (typeof rawMove.origin !== "object") return false;
+  if (typeof rawMove.target !== "object") return false;
+  if (typeof rawMove.transformOptions !== "object") return false;
+
+  if (!isPieceId(rawMove.pieceId)) return false;
+  if (!isPlayerColor(rawMove.pieceColor)) return false;
+  if (!isBoardPosition(rawMove.origin)) return false;
+  if (!isBoardPosition(rawMove.target)) return false;
+  if (!Array.isArray(rawMove.transformOptions)) return false;
+  return true;
+}
+
 class Promotion extends Move {
-  private newPieceId?: PieceId;
+  private firstMove = false;
 
   constructor(
     private readonly pieceId: PieceId,
@@ -31,7 +60,8 @@ class Promotion extends Move {
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
     private readonly transformOptions: [RawPiece, ...RawPiece[]],
-    private readonly captures?: BoardPieceProps
+    private readonly captures?: BoardPieceProps,
+    private readonly id?: string
   ) {
     super("promotion");
   }
@@ -55,6 +85,13 @@ class Promotion extends Move {
     return [this.origin, this.target];
   }
 
+  private onForward(boardStateValue: BoardStateValue) {
+    super.onPerformForward();
+    if (this.id) {
+      this.firstMove = !tellPieceItMoved(this.id, boardStateValue, true);
+    }
+  }
+
   public forward(
     boardStateValue: BoardStateValue,
     piecesImportance: PiecesImportance,
@@ -62,7 +99,7 @@ class Promotion extends Move {
     whiteCapturedPieces: Ref<PieceId[]>,
     reviveFromCapturedPieces: Ref<boolean>
   ): void {
-    this.onPerformForward();
+    this.onForward(boardStateValue);
 
     if (this.captures) {
       capturePosition(
@@ -101,18 +138,17 @@ class Promotion extends Move {
         : chooseBestPiece(transformOptions, piecesImportance);
 
     transformPiece(this.target, newPiece, boardStateValue);
+  }
 
-    this.newPieceId = newPiece.pieceId;
-    this.performed = true;
+  private onReverse(boardStateValue: BoardStateValue) {
+    super.onPerformReverse();
+    if (this.id) {
+      tellPieceItMoved(this.id, boardStateValue, !this.firstMove);
+    }
   }
 
   public reverse(boardStateValue: BoardStateValue): void {
-    this.onPerformReverse();
-    if (!this.newPieceId) {
-      throw new GameLogicError(
-        "newPieceId is not availible thus cannot reverse the promotion."
-      );
-    }
+    this.onReverse(boardStateValue);
     transformPiece(this.target, this.oldPiece, boardStateValue);
     const piece = getPositionPiece(this.target, boardStateValue);
     movePositionValue(piece, this.target, this.origin, boardStateValue);
@@ -121,8 +157,6 @@ class Promotion extends Move {
       boardStateValue[this.captures.row][this.captures.col] =
         this.captures.piece;
     }
-
-    this.performed = false;
   }
 
   private get oldPiece() {
@@ -140,7 +174,7 @@ class Promotion extends Move {
     removeAudioEffect: Howl,
     useVibrations: boolean
   ): Promise<void> {
-    this.onPerformForward();
+    this.onForward(boardStateValue);
 
     if (this.captures) {
       capturePosition(
@@ -197,7 +231,6 @@ class Promotion extends Move {
       : `${getPositionNotation(this.target)}=${getPieceNotation(
           newPiece.pieceId
         )}`;
-    this.performed = true;
   }
 
   public get clickablePositions(): BoardPosition[] {

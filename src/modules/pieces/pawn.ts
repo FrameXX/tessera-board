@@ -1,27 +1,27 @@
-import type {
-  BoardPieceProps,
-  BoardPosition,
-} from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import Promotion from "../moves/promotion";
-import type { BoardStateValue } from "../user_data/board_state";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import { getDeltaPosition } from "./piece";
 import type { RawPiece } from "./raw_piece";
 import { getRawPiece } from "./raw_piece";
 import type { PlayerColor } from "../game";
+import {
+  BoardPieceProps,
+  BoardPosition,
+  BoardStateValue,
+} from "../board_manager";
 
 interface RawPawn extends RawPiece {
-  hasMoved: boolean;
+  moved: boolean;
 }
 
 function isRawPawn(rawPiece: RawPiece): rawPiece is RawPawn {
-  return typeof rawPiece.hasMoved === "boolean";
+  return typeof rawPiece.moved === "boolean";
 }
 
 export class Pawn extends Piece {
-  private hasMoved: boolean = false;
+  private moved: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
     super(color, "pawn", id, false);
@@ -37,7 +37,7 @@ export class Pawn extends Piece {
   }
 
   public getRawPiece(): RawPawn {
-    return { ...getRawPiece(this), hasMoved: this.hasMoved };
+    return { ...getRawPiece(this), moved: this.moved };
   }
 
   public loadCustomProps(rawPiece: RawPiece): void {
@@ -45,7 +45,7 @@ export class Pawn extends Piece {
       console.error("Given raw piece is not a rawPawn. No props were loaded.");
       return;
     }
-    this.hasMoved = rawPiece.hasMoved;
+    this.moved = rawPiece.moved;
   }
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
@@ -69,7 +69,7 @@ export class Pawn extends Piece {
 
     // Move one cell forward
     for (let rowDelta of [1, 2]) {
-      if (rowDelta === 2 && this.hasMoved) {
+      if (rowDelta === 2 && this.moved) {
         break;
       }
       if (this.color === "black") rowDelta = rowDelta * -1;
@@ -94,9 +94,7 @@ export class Pawn extends Piece {
         break;
       } else {
         moves.push(
-          new Shift(this.pieceId, position, target, undefined, () => {
-            this.hasMoved = true;
-          })
+          new Shift(this.pieceId, position, target, undefined, this.id)
         );
       }
     }
@@ -129,14 +127,13 @@ export class Pawn extends Piece {
             position,
             target,
             this.transformOptions,
-            captures
+            captures,
+            this.id
           )
         );
       } else {
         moves.push(
-          new Shift(this.pieceId, position, target, captures, () => {
-            this.hasMoved = true;
-          })
+          new Shift(this.pieceId, position, target, captures, this.id)
         );
       }
     }

@@ -1,9 +1,7 @@
 import ComplexUserData from "./complex_user_data";
-import type Piece from "../pieces/piece";
 import type ToastManager from "../toast_manager";
 import { isRawPiece, getPieceFromRaw } from "../pieces/raw_piece";
-
-export type BoardStateValue = (Piece | null)[][];
+import { BoardStateValue } from "../board_manager";
 
 class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(

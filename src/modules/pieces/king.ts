@@ -1,12 +1,12 @@
-import type {
+import {
   BoardPieceProps,
   BoardPosition,
-} from "../../components/Board.vue";
+  BoardStateValue,
+} from "../board_manager";
 import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import type { BoardStateValue } from "../user_data/board_state";
 import Piece, {
   getDeltaPosition,
   isPositionOnBoard,
@@ -17,14 +17,13 @@ import { type RawPiece, getRawPiece } from "./raw_piece";
 import { isPieceRook } from "./rook";
 
 interface RawKing extends RawPiece {
-  hasMoved: boolean;
+  moved: boolean;
   castled: boolean;
 }
 
 function isRawKing(rawPiece: RawPiece): rawPiece is RawKing {
   return (
-    typeof rawPiece.hasMoved === "boolean" &&
-    typeof rawPiece.castled === "boolean"
+    typeof rawPiece.moved === "boolean" && typeof rawPiece.castled === "boolean"
   );
 }
 
@@ -33,7 +32,7 @@ export function isPieceKing(piece: Piece): piece is King {
 }
 
 export class King extends Piece {
-  public hasMoved: boolean = false;
+  public moved: boolean = false;
   public castled: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
@@ -43,7 +42,7 @@ export class King extends Piece {
   public getRawPiece(): RawKing {
     return {
       ...getRawPiece(this),
-      hasMoved: this.hasMoved,
+      moved: this.moved,
       castled: this.castled,
     };
   }
@@ -53,7 +52,7 @@ export class King extends Piece {
       console.error("Given raw piece is not a rawKing. No props were loaded.");
       return;
     }
-    this.hasMoved = rawPiece.hasMoved;
+    this.moved = rawPiece.moved;
     this.castled = rawPiece.castled;
   }
 
@@ -88,19 +87,11 @@ export class King extends Piece {
         continue;
       }
       if (piece) captures = { ...target, piece: piece };
-      moves.push(
-        new Shift(
-          this.pieceId,
-          position,
-          target,
-          captures,
-          () => (this.hasMoved = true)
-        )
-      );
+      moves.push(new Shift(this.pieceId, position, target, captures, this.id));
     }
 
     // https://en.wikipedia.org/wiki/Castling
-    if (!this.hasMoved && !this.castled) {
+    if (!this.moved && !this.castled) {
       for (const colDelta of [-1, 1]) {
         let kingTarget: BoardPosition | null = null;
         let rookTarget: BoardPosition | null = null;
@@ -134,7 +125,7 @@ export class King extends Piece {
             !kingTarget
           )
             break;
-          if (piece.castled || piece.hasMoved) break;
+          if (piece.castled || piece.moved) break;
           moves.push(
             new Castling(
               true,
@@ -143,9 +134,7 @@ export class King extends Piece {
               kingTarget,
               searchRookPosition,
               rookTarget,
-              () => {
-                this.castled = true;
-              }
+              this.id
             )
           );
         }

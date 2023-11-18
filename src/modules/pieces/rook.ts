@@ -1,26 +1,25 @@
-import type {
+import {
   BoardPieceProps,
   BoardPosition,
-} from "../../components/Board.vue";
+  BoardStateValue,
+} from "../board_manager";
 import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import type { BoardStateValue } from "../user_data/board_state";
 import { isPieceKing } from "./king";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import { getDeltaPosition, isPositionOnBoard } from "./piece";
 import { getRawPiece, type RawPiece } from "./raw_piece";
 
 interface RawRook extends RawPiece {
-  hasMoved: boolean;
+  moved: boolean;
   castled: boolean;
 }
 
 function isRawRook(rawPiece: RawPiece): rawPiece is RawRook {
   return (
-    typeof rawPiece.hasMoved === "boolean" &&
-    typeof rawPiece.castled === "boolean"
+    typeof rawPiece.moved === "boolean" && typeof rawPiece.castled === "boolean"
   );
 }
 
@@ -29,7 +28,7 @@ export function isPieceRook(piece: Piece): piece is Rook {
 }
 
 export class Rook extends Piece {
-  public hasMoved: boolean = false;
+  public moved: boolean = false;
   public castled: boolean = false;
 
   constructor(color: PlayerColor, id?: string) {
@@ -39,7 +38,7 @@ export class Rook extends Piece {
   public getRawPiece(): RawRook {
     return {
       ...getRawPiece(this),
-      hasMoved: this.hasMoved,
+      moved: this.moved,
       castled: this.castled,
     };
   }
@@ -49,7 +48,7 @@ export class Rook extends Piece {
       console.error("Given raw piece is not a rawRook. No props were loaded.");
       return;
     }
-    this.hasMoved = rawPiece.hasMoved;
+    this.moved = rawPiece.moved;
   }
 
   public getNewCapturingPositions(
@@ -99,15 +98,11 @@ export class Rook extends Piece {
         continue;
       }
       if (piece) captures = { ...target, piece: piece };
-      moves.push(
-        new Shift(this.pieceId, position, target, captures, () => {
-          this.hasMoved = true;
-        })
-      );
+      moves.push(new Shift(this.pieceId, position, target, captures, this.id));
     }
 
     // https://en.wikipedia.org/wiki/Castling
-    if (!this.hasMoved && !this.castled) {
+    if (!this.moved && !this.castled) {
       for (const colDelta of [-1, 1]) {
         let totalColDelta = 0;
         while (true) {
@@ -125,7 +120,7 @@ export class Rook extends Piece {
           if (!piece) continue;
           // There is wrong piece in way. Castling cannot be performed.
           if (!isPieceKing(piece) || piece.color !== this.color) break;
-          if (piece.castled || piece.hasMoved) break;
+          if (piece.castled || piece.moved) break;
           const kingTarget = {
             row: searchKingPosition.row,
             col: searchKingPosition.col + colDelta * -2,
@@ -142,9 +137,7 @@ export class Rook extends Piece {
               kingTarget,
               position,
               rookTarget,
-              () => {
-                this.castled = true;
-              }
+              this.id
             )
           );
         }

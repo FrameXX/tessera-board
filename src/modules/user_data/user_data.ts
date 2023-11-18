@@ -76,7 +76,7 @@ abstract class UserData<ValueType> {
   }
 
   protected handleInvalidLoadValue(value: string) {
-    console.error("Invalid load value.", value);
+    console.error(`Invalid load value for ${this.id}.`, value);
     if (!this.toastManager) {
       return;
     }

@@ -5,7 +5,6 @@ import UserOption from "./UserOption.vue";
 import Category from "./Category.vue";
 import Icon from "./Icon.vue";
 import TimeDurationInput from "./TimeDurationInput.vue";
-import Board, { type BoardPieceProps, type BoardPosition } from "./Board.vue";
 import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
@@ -18,10 +17,14 @@ import type {
 import type ConfigsDialog from "../modules/dialogs/configs";
 import ConfigManager from "../modules/config_manager";
 import DefaultBoardManager from "../modules/default_board_manager";
-import { BoardStateValue } from "../modules/user_data/board_state";
 import UserDataManager from "../modules/user_data_manager";
 import { type Theme } from "../modules/theme_manager";
 import { type Transitions } from "../modules/transitions_manager";
+import {
+  BoardPieceProps,
+  BoardPosition,
+  BoardStateValue,
+} from "../modules/board_manager";
 
 const props = defineProps({
   open: { type: Boolean, default: false },

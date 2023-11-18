@@ -1,17 +1,23 @@
 import type { Ref } from "vue";
-import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
 import type Piece from "../pieces/piece";
 import type { PieceId } from "../pieces/piece";
 import { type RawPiece, getPieceFromRaw } from "../pieces/raw_piece";
-import type { BoardStateValue } from "../user_data/board_state";
 import {
   getElementInstanceById,
   waitForTransitionEnd,
 } from "../utils/elements";
 import { getPositionPiece } from "../game_board_manager";
-import { GameLogicError } from "../game";
+import { GameLogicError, getAllPieceProps } from "../game";
+import {
+  BoardPosition,
+  BoardStateValue,
+  MarkBoardState,
+} from "../board_manager";
 
-type MoveId = "shift" | "castling" | "promotion";
+export type MoveId = "shift" | "castling" | "promotion";
+export function isMoveId(string: string): string is MoveId {
+  return string === "shift" || string === "castling" || string === "promotion";
+}
 
 /**
  * Represents a generic move.
@@ -41,6 +47,7 @@ abstract class Move {
         "A move that was already performed shouldn't be performed again."
       );
     }
+    this.performed = true;
   }
 
   /**
@@ -56,6 +63,7 @@ abstract class Move {
         "A move that wasn't performed yet shouldn't be reversed already."
       );
     }
+    this.performed = false;
   }
 
   /**
@@ -136,6 +144,54 @@ export async function movePiece(
     return;
   }
   await waitForTransitionEnd(pieceElement);
+}
+
+export function getPieceById(id: string, boardStateValue: BoardStateValue) {
+  const pieceProps = getAllPieceProps(boardStateValue);
+  for (const props of pieceProps) {
+    if (props.piece.id !== id) {
+      continue;
+    } else {
+      return props.piece;
+    }
+  }
+  throw new GameLogicError(
+    `Piece with id ${id} is not be found in provided boardStateValue.`
+  );
+}
+
+export function tellPieceItMoved(
+  id: string,
+  boardStateValue: BoardStateValue,
+  newValue: boolean = true
+): boolean {
+  const piece = getPieceById(id, boardStateValue);
+  if (!("moved" in piece)) {
+    return false;
+  }
+  if (typeof piece.moved !== "boolean") {
+    return false;
+  }
+  const previousValue = piece.moved;
+  piece.moved = newValue;
+  return previousValue;
+}
+
+export function tellPieceItCastled(
+  id: string,
+  boardStateValue: BoardStateValue,
+  newValue: boolean = true
+): boolean {
+  const piece = getPieceById(id, boardStateValue);
+  if (!("castled" in piece)) {
+    return false;
+  }
+  if (typeof piece.castled !== "boolean") {
+    return false;
+  }
+  const previousValue = piece.castled;
+  piece.castled = newValue;
+  return previousValue;
 }
 
 export function capturePosition(

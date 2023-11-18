@@ -1,46 +1,91 @@
 import type { Ref } from "vue";
-import type {
+import { isPieceId, type PieceId } from "../pieces/piece";
+import Move, { movePositionValue, tellPieceItMoved } from "./move";
+import {
   BoardPieceProps,
   BoardPosition,
+  BoardStateValue,
+  getPieceNotation,
+  getPositionNotation,
+  isBoardPosition,
   MarkBoardState,
-} from "../../components/Board.vue";
-import type { PieceId } from "../pieces/piece";
-import type { BoardStateValue } from "../user_data/board_state";
-import Move, { movePositionValue } from "./move";
-import { getPieceNotation, getPositionNotation } from "../board_manager";
+} from "../board_manager";
 import { capturePosition, movePiece } from "./move";
 import { getPositionPiece } from "../game_board_manager";
+import { RawMove } from "./raw_move";
+import { GameLogicError } from "../game";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
 }
 
+export interface RawShift extends RawMove {
+  pieceId: PieceId;
+  origin: BoardPosition;
+  target: BoardPosition;
+  captures?: BoardPieceProps;
+  id?: string;
+}
+
+export function isRawShift(rawMove: RawMove): rawMove is RawShift {
+  if (typeof rawMove.pieceId !== "string") return false;
+  if (typeof rawMove.origin !== "object") return false;
+  if (typeof rawMove.target !== "object") return false;
+  if (!isPieceId(rawMove.pieceId)) return false;
+  if (!isBoardPosition(rawMove.origin)) return false;
+  if (!isBoardPosition(rawMove.target)) return false;
+  return true;
+}
+
 class Shift extends Move {
+  private firstMove = false;
+
   constructor(
     private readonly pieceId: PieceId,
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
     public readonly captures?: BoardPieceProps,
-    private readonly onPerform?: (move: Move) => void
+    private readonly id?: string
   ) {
     super("shift");
+  }
+
+  public static restoreShift(rawMove: RawMove) {
+    if (!isRawShift(rawMove)) {
+      console.log(rawMove);
+      throw new GameLogicError(
+        "Provided rawMove is not a rawShift. No props were loaded."
+      );
+    }
   }
 
   get highlightedBoardPositions() {
     return [this.origin, this.target];
   }
 
+  private onForward(boardStateValue: BoardStateValue) {
+    super.onPerformForward();
+    if (this.id) {
+      this.firstMove = !tellPieceItMoved(this.id, boardStateValue, true);
+    }
+  }
+
   public forward(boardStateValue: BoardStateValue): void {
-    this.onPerformForward();
+    this.onForward(boardStateValue);
 
     const piece = getPositionPiece(this.origin, boardStateValue);
     movePositionValue(piece, this.origin, this.target, boardStateValue);
+  }
 
-    this.performed = true;
+  private onReverse(boardStateValue: BoardStateValue) {
+    super.onPerformReverse();
+    if (this.id) {
+      tellPieceItMoved(this.id, boardStateValue, !this.firstMove);
+    }
   }
 
   public reverse(boardStateValue: BoardStateValue): void {
-    this.onPerformReverse();
+    this.onReverse(boardStateValue);
 
     const piece = getPositionPiece(this.target, boardStateValue);
     movePositionValue(piece, this.target, this.origin, boardStateValue);
@@ -49,8 +94,6 @@ class Shift extends Move {
       boardStateValue[this.captures.row][this.captures.col] =
         this.captures.piece;
     }
-
-    this.performed = false;
   }
 
   public async perform(
@@ -62,7 +105,7 @@ class Shift extends Move {
     removeAudioEffect: Howl,
     useVibrations: boolean
   ): Promise<void> {
-    this.onPerformForward();
+    this.onForward(boardStateValue);
 
     if (this.captures) {
       capturePosition(
@@ -82,9 +125,6 @@ class Shift extends Move {
           this.captures
         )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
-
-    if (this.onPerform) this.onPerform(this);
-    this.performed = true;
   }
 
   public get clickablePositions(): BoardPosition[] {

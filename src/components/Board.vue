@@ -8,10 +8,14 @@ import {
   type Ref,
   watch,
 } from "vue";
-import type { BoardStateValue } from "../modules/user_data/board_state";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+  BoardStateValue,
+  MarkBoardState,
+} from "../modules/user_data/board_state";
 import { getDeltaPosition, type PieceId } from "../modules/pieces/piece";
-import type Piece from "../modules/pieces/piece";
-import Cell, { type Mark } from "./Cell.vue";
+import Cell from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
@@ -19,17 +23,6 @@ import type { BooleanBoardState } from "../modules/user_data/boolean_board_state
 import { positionsEqual } from "../modules/game_board_manager";
 import type { PlayerColor } from "../modules/game";
 import { getElementSizes } from "../modules/utils/elements";
-
-export type MarkBoardState = (Mark | null)[][];
-
-export interface BoardPosition {
-  row: number;
-  col: number;
-}
-
-export interface BoardPieceProps extends BoardPosition {
-  piece: Piece;
-}
 
 interface Arrow {
   color: PlayerColor;

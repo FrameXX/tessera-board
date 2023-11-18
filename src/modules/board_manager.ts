@@ -1,12 +1,24 @@
-import type { BoardPieceProps, BoardPosition } from "../components/Board.vue";
-import type { PieceId } from "./pieces/piece";
+import { Mark } from "../components/Cell.vue";
+import type { Piece, PieceId } from "./pieces/piece";
 
-export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+export type BoardStateValue = (Piece | null)[][];
 
+export type MarkBoardState = (Mark | null)[][];
+
+export interface BoardPosition {
+  row: number;
+  col: number;
+}
 export function isBoardPosition(object: object): object is BoardPosition {
   if (!("row" in object && "col" in object)) return false;
   return typeof object.row === "number" && typeof object.col === "number";
 }
+
+export interface BoardPieceProps extends BoardPosition {
+  piece: Piece;
+}
+
+export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 abstract class BoardManager {
   constructor() {}

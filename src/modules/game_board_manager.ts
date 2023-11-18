@@ -1,13 +1,12 @@
 import type { ComputedRef, Ref } from "vue";
-import BoardManager from "./board_manager";
-import type {
+import BoardManager, {
   BoardPieceProps,
-  MarkBoardState,
   BoardPosition,
-} from "../components/Board.vue";
+  BoardStateValue,
+  MarkBoardState,
+} from "./board_manager";
 import type { BooleanBoardState } from "./user_data/boolean_board_state";
-import type {
-  PiecesImportance} from "./pieces/piece";
+import type { PiecesImportance } from "./pieces/piece";
 import type Piece from "./pieces/piece";
 import {
   getTargetMatchingPaths,
@@ -15,7 +14,6 @@ import {
   type PieceId,
 } from "./pieces/piece";
 import { GameLogicError, type Winner, type PlayerColor } from "./game";
-import type { BoardStateValue } from "./user_data/board_state";
 import type Move from "./moves/move";
 import type SelectPieceDialog from "./dialogs/select_piece";
 import { isMoveShift } from "./moves/shift";

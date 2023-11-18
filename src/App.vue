@@ -17,7 +17,9 @@ import PieceSetData, {
   type PieceSetValue,
 } from "./modules/user_data/piece_set";
 import BoardStateData, {
+  MarkBoardState,
   type BoardStateValue,
+  BoardPosition,
 } from "./modules/user_data/board_state";
 import PiecePaddingData from "./modules/user_data/piece_padding";
 import PieceBorderData from "./modules/user_data/piece_border";
@@ -49,7 +51,6 @@ import {
 } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { BoardPosition, MarkBoardState } from "./components/Board.vue";
 import type { BooleanBoardState } from "./modules/user_data/boolean_board_state";
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
@@ -72,7 +73,6 @@ import Knight from "./modules/pieces/knight";
 import Pawn from "./modules/pieces/pawn";
 import Queen from "./modules/pieces/queen";
 import Rook from "./modules/pieces/rook";
-import { RawPiece } from "./modules/pieces/rawPiece";
 import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
@@ -96,6 +96,8 @@ import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
 import InfoCard from "./components/InfoCard.vue";
+import { opponentSelectedCells } from "./opponentSelectedCells";
+import { RawPiece } from "./modules/pieces/raw_piece";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -267,7 +269,6 @@ const statusText = computed(() => {
 const playerSelectedPieces = ref<BoardPosition[]>([]);
 const opponentSelectedPieces = ref<BoardPosition[]>([]);
 const playerSelectedCells = ref<BoardPosition[]>([]);
-const opponentSelectedCells = ref<BoardPosition[]>([]);
 const playerDraggingOverCells = ref<BoardPosition[]>([]);
 const opponentDraggingOverCells = ref<BoardPosition[]>([]);
 const defaultDraggingOverCells = ref<BoardPosition[]>([]);
