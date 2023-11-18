@@ -1,8 +1,11 @@
 import type { Ref } from "vue";
-import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+  MarkBoardState,
+} from "../../components/Board.vue";
 import {
   chooseBestPiece,
-  type BoardPositionValue,
   type PieceId,
   type PiecesImportance,
 } from "../pieces/piece";
@@ -28,7 +31,7 @@ class Promotion extends Move {
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
     private readonly transformOptions: [RawPiece, ...RawPiece[]],
-    private readonly captures?: BoardPositionValue
+    private readonly captures?: BoardPieceProps
   ) {
     super("promotion");
   }
@@ -60,6 +63,15 @@ class Promotion extends Move {
     reviveFromCapturedPieces: Ref<boolean>
   ): void {
     this.onPerformForward();
+
+    if (this.captures) {
+      capturePosition(
+        this.captures,
+        boardStateValue,
+        blackCapturedPieces,
+        whiteCapturedPieces
+      );
+    }
 
     const piece = getPositionPiece(this.origin, boardStateValue);
     movePositionValue(piece, this.origin, this.target, boardStateValue);
@@ -94,10 +106,6 @@ class Promotion extends Move {
     this.performed = true;
   }
 
-  private get oldPiece() {
-    return { pieceId: this.pieceId, color: this.pieceColor };
-  }
-
   public reverse(boardStateValue: BoardStateValue): void {
     this.onPerformReverse();
     if (!this.newPieceId) {
@@ -108,6 +116,17 @@ class Promotion extends Move {
     transformPiece(this.target, this.oldPiece, boardStateValue);
     const piece = getPositionPiece(this.target, boardStateValue);
     movePositionValue(piece, this.target, this.origin, boardStateValue);
+
+    if (this.captures) {
+      boardStateValue[this.captures.row][this.captures.col] =
+        this.captures.piece;
+    }
+
+    this.performed = false;
+  }
+
+  private get oldPiece() {
+    return { pieceId: this.pieceId, color: this.pieceColor };
   }
 
   public async perform(

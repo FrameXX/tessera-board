@@ -1,10 +1,13 @@
-import type { BoardPosition } from "../../components/Board.vue";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+} from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import { Bishop } from "./bishop";
-import Piece, { isFriendlyPiece, type BoardPositionValue } from "./piece";
+import Piece, { isFriendlyPiece } from "./piece";
 import Rook from "./rook";
 
 export class Queen extends Piece {
@@ -37,12 +40,12 @@ export class Queen extends Piece {
     );
 
     for (const target of capturingPositions) {
-      let captures: BoardPositionValue | undefined = undefined;
+      let captures: BoardPieceProps | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
-      if (piece) captures = { ...target, value: piece };
+      if (piece) captures = { ...target, piece: piece };
       moves.push(new Shift(this.pieceId, position, target, captures));
     }
 

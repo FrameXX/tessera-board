@@ -1,4 +1,7 @@
-import type { BoardPosition } from "../../components/Board.vue";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+} from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
@@ -6,7 +9,6 @@ import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import { isPieceKing } from "./king";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
-import type { BoardPositionValue } from "./piece";
 import { getDeltaPosition, isPositionOnBoard } from "./piece";
 import { getRawPiece, type RawPiece } from "./raw_piece";
 
@@ -91,12 +93,12 @@ export class Rook extends Piece {
     );
 
     for (const target of capturingPositions) {
-      let captures: BoardPositionValue | undefined = undefined;
+      let captures: BoardPieceProps | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
-      if (piece) captures = { ...target, value: piece };
+      if (piece) captures = { ...target, piece: piece };
       moves.push(
         new Shift(this.pieceId, position, target, captures, () => {
           this.hasMoved = true;

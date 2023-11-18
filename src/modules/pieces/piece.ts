@@ -41,10 +41,6 @@ export type PiecesImportance = {
   [key in PieceId]: Ref<number>;
 };
 
-export interface BoardPositionValue extends BoardPosition {
-  value: Piece | null;
-}
-
 export interface Path {
   origin: BoardPosition;
   target: BoardPosition;

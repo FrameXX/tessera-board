@@ -25,19 +25,27 @@ class Castling extends Move {
   }
 
   public forward(boardStateValue: BoardStateValue): void {
+    this.onPerformForward();
+
     const king = getPositionPiece(this.kingOrigin, boardStateValue);
     const rook = getPositionPiece(this.rookOrigin, boardStateValue);
 
     movePositionValue(king, this.kingOrigin, this.kingTarget, boardStateValue);
     movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
+
+    this.performed = true;
   }
 
   public reverse(boardStateValue: BoardStateValue): void {
+    this.onPerformReverse();
+
     const king = getPositionPiece(this.kingTarget, boardStateValue);
     const rook = getPositionPiece(this.rookTarget, boardStateValue);
 
     movePositionValue(king, this.kingOrigin, this.kingTarget, boardStateValue);
     movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
+
+    this.performed = false;
   }
 
   public async perform(
@@ -45,13 +53,15 @@ class Castling extends Move {
     audioEffects: boolean,
     moveAudioEffect: Howl
   ): Promise<void> {
+    this.onPerformForward();
+
     movePiece(this.kingOrigin, this.kingTarget, boardStateValue);
     await movePiece(this.rookOrigin, this.rookTarget, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
 
-    if (this.onPerform) this.onPerform(this);
-
     this.notation = this.kingSide ? "0-0" : "0-0-0";
+
+    if (this.onPerform) this.onPerform(this);
     this.performed = true;
   }
 

@@ -1,10 +1,12 @@
-import type { BoardPosition } from "../../components/Board.vue";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+} from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import type { BoardStateValue } from "../user_data/board_state";
 import Piece, { isFriendlyPiece } from "./piece";
-import type { BoardPositionValue } from "./piece";
 import { getDeltaPosition, isPositionOnBoard } from "./piece";
 
 export class Knight extends Piece {
@@ -40,13 +42,13 @@ export class Knight extends Piece {
     );
 
     for (const target of capturingPositions) {
-      let captures: BoardPositionValue | undefined = undefined;
+      let captures: BoardPieceProps | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
       if (piece) {
-        captures = { ...target, value: piece };
+        captures = { ...target, piece: piece };
       }
       moves.push(new Shift(this.pieceId, position, target, captures));
     }

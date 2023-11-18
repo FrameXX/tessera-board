@@ -1,4 +1,7 @@
-import type { BoardPosition } from "../../components/Board.vue";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+} from "../../components/Board.vue";
 import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
@@ -8,7 +11,6 @@ import Piece, {
   getDeltaPosition,
   isPositionOnBoard,
   isFriendlyPiece,
-  type BoardPositionValue,
   getBoardPositionPiece,
 } from "./piece";
 import { type RawPiece, getRawPiece } from "./raw_piece";
@@ -80,12 +82,12 @@ export class King extends Piece {
     const capturingPositions = this.getNewCapturingPositions(position);
 
     for (const target of capturingPositions) {
-      let captures: BoardPositionValue | undefined = undefined;
+      let captures: BoardPieceProps | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
-      if (piece) captures = { ...target, value: piece };
+      if (piece) captures = { ...target, piece: piece };
       moves.push(
         new Shift(
           this.pieceId,

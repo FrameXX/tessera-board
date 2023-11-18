@@ -1,6 +1,10 @@
 import type { Ref } from "vue";
-import type { BoardPosition, MarkBoardState } from "../../components/Board.vue";
-import type { BoardPositionValue, PieceId } from "../pieces/piece";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+  MarkBoardState,
+} from "../../components/Board.vue";
+import type { PieceId } from "../pieces/piece";
 import type { BoardStateValue } from "../user_data/board_state";
 import Move, { movePositionValue } from "./move";
 import { getPieceNotation, getPositionNotation } from "../board_manager";
@@ -16,7 +20,7 @@ class Shift extends Move {
     private readonly pieceId: PieceId,
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
-    public readonly captures?: BoardPositionValue,
+    public readonly captures?: BoardPieceProps,
     private readonly onPerform?: (move: Move) => void
   ) {
     super("shift");
@@ -27,13 +31,26 @@ class Shift extends Move {
   }
 
   public forward(boardStateValue: BoardStateValue): void {
+    this.onPerformForward();
+
     const piece = getPositionPiece(this.origin, boardStateValue);
     movePositionValue(piece, this.origin, this.target, boardStateValue);
+
+    this.performed = true;
   }
 
   public reverse(boardStateValue: BoardStateValue): void {
+    this.onPerformReverse();
+
     const piece = getPositionPiece(this.target, boardStateValue);
     movePositionValue(piece, this.target, this.origin, boardStateValue);
+
+    if (this.captures) {
+      boardStateValue[this.captures.row][this.captures.col] =
+        this.captures.piece;
+    }
+
+    this.performed = false;
   }
 
   public async perform(
@@ -45,6 +62,8 @@ class Shift extends Move {
     removeAudioEffect: Howl,
     useVibrations: boolean
   ): Promise<void> {
+    this.onPerformForward();
+
     if (this.captures) {
       capturePosition(
         this.captures,
@@ -57,13 +76,14 @@ class Shift extends Move {
     }
     await movePiece(this.origin, this.target, boardStateValue);
     if (audioEffects) moveAudioEffect.play();
-    if (this.onPerform) this.onPerform(this);
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
+
+    if (this.onPerform) this.onPerform(this);
     this.performed = true;
   }
 

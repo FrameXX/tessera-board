@@ -1,13 +1,12 @@
-import type { BoardPosition } from "../../components/Board.vue";
+import type {
+  BoardPieceProps,
+  BoardPosition,
+} from "../../components/Board.vue";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import Promotion from "../moves/promotion";
 import type { BoardStateValue } from "../user_data/board_state";
-import Piece, {
-  getBoardPositionPiece,
-  type BoardPositionValue,
-  isFriendlyPiece,
-} from "./piece";
+import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import { getDeltaPosition } from "./piece";
 import type { RawPiece } from "./raw_piece";
 import { getRawPiece } from "./raw_piece";
@@ -115,9 +114,9 @@ export class Pawn extends Piece {
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
-      const captures: BoardPositionValue = {
+      const captures: BoardPieceProps = {
         ...target,
-        value: piece,
+        piece: piece,
       };
       if (
         (target.row === 7 && this.color === "white") ||
