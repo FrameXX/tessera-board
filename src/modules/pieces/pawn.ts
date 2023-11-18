@@ -6,7 +6,7 @@ import { getDeltaPosition } from "./piece";
 import type { RawPiece } from "./raw_piece";
 import { getRawPiece } from "./raw_piece";
 import type { PlayerColor } from "../game";
-import {
+import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,

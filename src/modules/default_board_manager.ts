@@ -1,8 +1,9 @@
-import BoardManager, {
+import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
 } from "./board_manager";
+import BoardManager from "./board_manager";
 import type ConfigPieceDialog from "./dialogs/config_piece";
 import type { Ref } from "vue";
 import { isPositionOnBoard } from "./pieces/piece";

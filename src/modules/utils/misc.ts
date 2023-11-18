@@ -1,4 +1,4 @@
-import { BoardPosition } from "../board_manager";
+import type { BoardPosition } from "../board_manager";
 
 export function getRandomNumber(min: number, max: number) {
   const number = Math.round(Math.random() * (max + 1 - min) + (min - 0.5)) * 1;

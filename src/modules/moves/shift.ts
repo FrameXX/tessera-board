@@ -6,20 +6,21 @@ import Move, {
   movePositionValue,
   tellPieceItMoved,
 } from "./move";
-import {
+import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
+  MarkBoardState,
+  RawBoardPieceProps} from "../board_manager";
+import {
   getPieceNotation,
   getPositionNotation,
   isRawBoardPieceProps,
-  isBoardPosition,
-  MarkBoardState,
-  RawBoardPieceProps,
+  isBoardPosition
 } from "../board_manager";
 import { capturePosition, movePiece } from "./move";
 import { getPositionPiece } from "../game_board_manager";
-import { RawMove } from "./raw_move";
+import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
 
 export function isMoveShift(move: Move): move is Shift {
@@ -175,8 +176,8 @@ class Shift extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-          this.captures
-        )}`
+        this.captures
+      )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 

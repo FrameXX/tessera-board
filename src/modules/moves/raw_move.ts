@@ -1,4 +1,5 @@
-import { MoveId, isMoveId } from "./move";
+import type { MoveId} from "./move";
+import { isMoveId } from "./move";
 
 export interface RawMove {
   // Raw Move can possibly have extra custom properties

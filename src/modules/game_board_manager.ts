@@ -1,10 +1,11 @@
 import type { ComputedRef, Ref } from "vue";
-import BoardManager, {
+import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
   MarkBoardState,
 } from "./board_manager";
+import BoardManager from "./board_manager";
 import type { PiecesImportance } from "./pieces/piece";
 import type Piece from "./pieces/piece";
 import {

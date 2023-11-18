@@ -14,12 +14,12 @@ import {
   getTargetMatchingPaths,
 } from "./pieces/piece";
 import type { GamePaused } from "./user_data/game_paused";
-import {
+import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
 } from "./board_manager";
-import Move from "./moves/move";
+import type Move from "./moves/move";
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {

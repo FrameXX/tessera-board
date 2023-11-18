@@ -14,19 +14,20 @@ import Move, {
 } from "./move";
 import type SelectPieceDialog from "../dialogs/select_piece";
 import { capturePosition, movePiece, transformPiece } from "./move";
-import {
+import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
+  MarkBoardState,
+  RawBoardPieceProps} from "../board_manager";
+import {
   getPieceNotation,
   getPositionNotation,
-  isBoardPosition,
-  MarkBoardState,
-  RawBoardPieceProps,
+  isBoardPosition
 } from "../board_manager";
 import { isPlayerColor, type PlayerColor } from "../game";
 import { getPositionPiece } from "../game_board_manager";
-import { RawMove } from "./raw_move";
+import type { RawMove } from "./raw_move";
 
 export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";
@@ -286,11 +287,11 @@ class Promotion extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-          this.captures
-        )}=${getPieceNotation(newPiece.pieceId)}`
+        this.captures
+      )}=${getPieceNotation(newPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-          newPiece.pieceId
-        )}`;
+        newPiece.pieceId
+      )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

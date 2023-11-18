@@ -8,12 +8,12 @@ import {
 } from "../utils/elements";
 import { getPositionPiece } from "../game_board_manager";
 import { GameLogicError, getAllPieceProps } from "../game";
-import {
+import type {
   BoardPosition,
   BoardStateValue,
   MarkBoardState,
 } from "../board_manager";
-import { RawMove } from "./raw_move";
+import type { RawMove } from "./raw_move";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {

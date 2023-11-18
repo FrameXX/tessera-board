@@ -14,7 +14,7 @@ import { isMoveShift } from "../moves/shift";
 import { isMovePromotion } from "../moves/promotion";
 import { isMoveCastling } from "../moves/castling";
 import BoardStateData from "../user_data/board_state";
-import { BoardPosition, BoardStateValue } from "../board_manager";
+import type { BoardPosition, BoardStateValue } from "../board_manager";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",

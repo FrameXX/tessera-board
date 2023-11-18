@@ -1,7 +1,8 @@
-import {
+import type {
   BoardPosition,
   BoardStateValue,
-  MarkBoardState,
+  MarkBoardState} from "../board_manager";
+import {
   isBoardPosition,
 } from "../board_manager";
 import { getPositionPiece } from "../game_board_manager";
@@ -13,7 +14,7 @@ import Move, {
   tellPieceItCastled,
   tellPieceItMoved,
 } from "./move";
-import { RawMove } from "./raw_move";
+import type { RawMove } from "./raw_move";
 
 export function isMoveCastling(move: Move): move is Castling {
   return move.moveId == "castling";
