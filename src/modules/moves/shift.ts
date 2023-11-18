@@ -1,6 +1,7 @@
 import type { Ref } from "vue";
 import { isPieceId, type PieceId } from "../pieces/piece";
 import Move, {
+  getCleanBoardPosition,
   handleInvalidRawMove,
   movePositionValue,
   tellPieceItMoved,
@@ -59,6 +60,27 @@ class Shift extends Move {
     private readonly id?: string
   ) {
     super("shift");
+  }
+
+  public getRaw(): RawShift {
+    let captures: RawBoardPieceProps | undefined = undefined;
+    if (this.captures) {
+      const rawPiece = this.captures.piece.getRawPiece();
+      captures = {
+        row: this.captures.row,
+        col: this.captures.col,
+        piece: rawPiece,
+      };
+    }
+    return {
+      performed: this.performed,
+      moveId: this.moveId,
+      pieceId: this.pieceId,
+      origin: getCleanBoardPosition(this.origin),
+      target: getCleanBoardPosition(this.target),
+      captures,
+      id: this.id,
+    };
   }
 
   public static restore(rawMove: RawMove): Shift {

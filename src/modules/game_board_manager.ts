@@ -5,7 +5,6 @@ import BoardManager, {
   BoardStateValue,
   MarkBoardState,
 } from "./board_manager";
-import type { BooleanBoardState } from "./user_data/boolean_board_state";
 import type { PiecesImportance } from "./pieces/piece";
 import type Piece from "./pieces/piece";
 import {
@@ -44,7 +43,6 @@ class GameBoardManager extends BoardManager {
     private readonly selectedPieces: Ref<BoardPosition[]>,
     private readonly selectedCells: Ref<BoardPosition[]>,
     private readonly draggingOverCells: Ref<BoardPosition[]>,
-    private readonly higlightedCells: BooleanBoardState,
     private readonly selectPieceDialog: SelectPieceDialog,
     private readonly audioEffects: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
@@ -56,17 +54,10 @@ class GameBoardManager extends BoardManager {
     private readonly ignorePiecesProtections: Ref<boolean>,
     private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
     private readonly piecesImportance: PiecesImportance,
+    private readonly moveList: Ref<Move[]>,
     private readonly moveIndex: Ref<number>
   ) {
     super();
-  }
-
-  private clearHihlightedCellsPositions() {
-    for (const rowIndex in this.higlightedCells) {
-      for (const colIndex in this.higlightedCells[rowIndex]) {
-        this.higlightedCells[rowIndex][colIndex] = false;
-      }
-    }
   }
 
   private clearCellsMarks() {
@@ -175,12 +166,6 @@ class GameBoardManager extends BoardManager {
     return matchingMoves[0];
   }
 
-  private highlightBoardPositions(positions: BoardPosition[]) {
-    for (const position of positions) {
-      this.higlightedCells[position.row][position.col] = true;
-    }
-  }
-
   public performRandomMove(pieceColor?: PlayerColor) {
     let randomPiece: BoardPieceProps;
     let moves: Move[];
@@ -208,7 +193,6 @@ class GameBoardManager extends BoardManager {
 
   public async performMove(move: Move) {
     this.selectedPiece = null;
-    this.clearHihlightedCellsPositions();
     if (isMoveShift(move)) {
       await move.perform(
         this.boardStateValue,
@@ -238,8 +222,8 @@ class GameBoardManager extends BoardManager {
         this.pieceMoveAudioEffect
       );
     }
-    this.highlightBoardPositions(move.highlightedBoardPositions);
     this.moveIndex.value++;
+    this.moveList.value.push(move);
   }
 
   private get selectedCell(): BoardPosition | null {
@@ -275,7 +259,6 @@ class GameBoardManager extends BoardManager {
   public resetBoard() {
     this.selectedPiece = null;
     this.selectedCell = null;
-    this.clearHihlightedCellsPositions();
     this.clearCapturedPieces();
   }
 

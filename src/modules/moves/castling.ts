@@ -6,6 +6,7 @@ import {
 } from "../board_manager";
 import { getPositionPiece } from "../game_board_manager";
 import Move, {
+  getCleanBoardPosition,
   handleInvalidRawMove,
   movePiece,
   movePositionValue,
@@ -55,6 +56,20 @@ class Castling extends Move {
     private readonly id?: string
   ) {
     super("castling");
+  }
+
+  public getRaw(): RawCastling {
+    return {
+      performed: this.performed,
+      moveId: this.moveId,
+      king: this.king,
+      kingSide: this.kingSide,
+      kingOrigin: getCleanBoardPosition(this.kingOrigin),
+      kingTarget: getCleanBoardPosition(this.kingTarget),
+      rookOrigin: getCleanBoardPosition(this.rookOrigin),
+      rookTarget: getCleanBoardPosition(this.rookTarget),
+      id: this.id,
+    };
   }
 
   public static restore(rawMove: RawMove): Castling {

@@ -8,21 +8,20 @@ import {
   type Ref,
   watch,
 } from "vue";
-import type {
-  BoardPieceProps,
-  BoardPosition,
-  BoardStateValue,
-  MarkBoardState,
-} from "../modules/user_data/board_state";
 import { getDeltaPosition, type PieceId } from "../modules/pieces/piece";
 import Cell from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
-import type { BooleanBoardState } from "../modules/user_data/boolean_board_state";
 import { positionsEqual } from "../modules/game_board_manager";
 import type { PlayerColor } from "../modules/game";
 import { getElementSizes } from "../modules/utils/elements";
+import {
+  BoardPieceProps,
+  BoardPosition,
+  BoardStateValue,
+  MarkBoardState,
+} from "../modules/board_manager";
 
 interface Arrow {
   color: PlayerColor;
@@ -41,19 +40,19 @@ const props = defineProps({
   },
   selectedPieces: {
     type: Array as PropType<BoardPosition[]>,
-    default: Array(8).fill(Array(8).fill(false)),
+    default: [],
   },
   selectedCells: {
     type: Array as PropType<BoardPosition[]>,
-    default: Array(8).fill(Array(8).fill(false)),
+    default: [],
   },
   draggingOverCells: {
     type: Array as PropType<BoardPosition[]>,
-    default: Array(8).fill(Array(8).fill(false)),
+    default: [],
   },
-  highlightedCellsState: {
-    type: Array as PropType<BooleanBoardState>,
-    default: Array(8).fill(Array(8).fill(false)),
+  highlightedCells: {
+    type: Array as PropType<BoardPosition[]>,
+    default: [],
   },
   piecePadding: { type: Number, required: true },
   pieceBorder: { type: Number, required: true },
@@ -332,7 +331,12 @@ onMounted(() => {
           :row="9 - row"
           :col="col"
           :mark="props.marksState[8 - row][col - 1]"
-          :highlighted="props.highlightedCellsState[8 - row][col - 1]"
+          :highlighted="
+            isInArrayOfBoardPositions(
+              { row: 8 - row, col: col - 1 },
+              props.highlightedCells
+            )
+          "
           :selected="
             isInArrayOfBoardPositions(
               { row: 8 - row, col: col - 1 },

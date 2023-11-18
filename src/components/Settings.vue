@@ -8,6 +8,7 @@ import TimeDurationInput from "./TimeDurationInput.vue";
 import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
+import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
 import type { PieceSetValue } from "../modules/user_data/piece_set";
 import type {

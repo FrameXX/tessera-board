@@ -19,6 +19,7 @@ import {
   BoardPosition,
   BoardStateValue,
 } from "./board_manager";
+import Move from "./moves/move";
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
@@ -119,7 +120,6 @@ class Game {
     private readonly firstMoveColor: Ref<PlayerColor>,
     private readonly preferredFirstMoveColor: Ref<PlayerColorOptionValue>,
     private readonly playerPlaying: ComputedRef<boolean>,
-    private readonly moveIndex: Ref<number>,
     private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,
     playerMoveSecondsLimit: Ref<number>,
     opponentMoveSecondsLimit: Ref<number>,
@@ -137,6 +137,8 @@ class Game {
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly ignorePiecesProtections: Ref<boolean>,
+    private readonly moveIndex: Ref<number>,
+    private readonly moveList: Ref<Move[]>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
@@ -205,8 +207,8 @@ class Game {
         this.cancelWin();
     });
 
-    watch(moveIndex, () => {
-      this.onMove();
+    watch(moveIndex, (oldValue, newValue) => {
+      this.onMoveIndexChange(oldValue, newValue);
     });
   }
 
@@ -406,8 +408,9 @@ class Game {
     this.chooseFirstMoveColor();
     this.boardManager.resetBoard();
     this.toastManager.showToast("New match started.", "flag-checkered");
-    this.moveIndex.value = 0;
-    this.onMove();
+    this.moveIndex.value = -1;
+    this.moveList.value = [];
+    this.onMoveIndexChange(0, -1);
     this.clearTimers();
     this.updateTimerState();
     this.boardStateData.save();
@@ -428,7 +431,8 @@ class Game {
     }
   }
 
-  public onMove() {
+  public onMoveIndexChange(oldIndex: number, newIndex: number) {
+    console.log(oldIndex, newIndex);
     this.updateTimerState();
     this.resetMoveTimer();
     this.boardStateData.save();

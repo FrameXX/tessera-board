@@ -94,7 +94,7 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
     </div>
 
     <div id="status-text" :class="primaryClass">
-      <InfoText :name="`Move #${props.moveIndex + 1}`">{{
+      <InfoText :name="`Move #${props.moveIndex + 2}`">{{
         props.statusText
       }}</InfoText>
     </div>

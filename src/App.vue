@@ -3,7 +3,7 @@ import moveAudioEffectUrl from "./assets/audio/move.ogg";
 import removeAudioEffectUrl from "./assets/audio/remove.ogg";
 
 // Import from packages
-import { ref, reactive, onMounted, watch, computed, provide } from "vue";
+import { ref, reactive, onMounted, watch, computed, provide, Ref } from "vue";
 import { Howl } from "howler";
 
 // Import user data
@@ -27,8 +27,12 @@ import PlayerColorOptionData, {
 import SecondCheckboardData from "./modules/user_data/second_checkboard";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 import CapturedPiecesData from "./modules/user_data/captured_pieces";
-import BooleanBoardStateData from "./modules/user_data/boolean_board_state";
 import NumberUserData from "./modules/user_data/number_user_data";
+import GamePausedData, {
+  type GamePaused,
+} from "./modules/user_data/game_paused";
+import RawBoardStateData from "./modules/user_data/raw_board_state";
+import MoveListData from "./modules/user_data/move_list";
 
 // Import other classes and functions
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
@@ -47,7 +51,6 @@ import {
 } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
-import type { BooleanBoardState } from "./modules/user_data/boolean_board_state";
 import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import Game, {
@@ -61,7 +64,6 @@ import Game, {
   isWinReason,
   getAllPieceProps,
 } from "./modules/game";
-import RawBoardStateData from "./modules/user_data/raw_board_state";
 import { PieceId } from "./modules/pieces/piece";
 import Bishop from "./modules/pieces/bishop";
 import King from "./modules/pieces/king";
@@ -73,9 +75,13 @@ import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
 import InteractionManager from "./modules/interaction_manager";
-import GamePausedData, {
-  type GamePaused,
-} from "./modules/user_data/game_paused";
+import { RawPiece } from "./modules/pieces/raw_piece";
+import {
+  BoardPosition,
+  BoardStateValue,
+  MarkBoardState,
+} from "./modules/board_manager";
+import Move from "./modules/moves/move";
 
 // Import components
 import Board from "./components/Board.vue";
@@ -92,12 +98,6 @@ import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
 import InfoCard from "./components/InfoCard.vue";
-import { RawPiece } from "./modules/pieces/raw_piece";
-import {
-  BoardPosition,
-  BoardStateValue,
-  MarkBoardState,
-} from "./modules/board_manager";
 
 const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
   [
@@ -185,6 +185,8 @@ const DEFAULT_ROOK_IMPORTANCE_VALUE = 5;
 const DEFAULT_QUEEN_IMPORTANCE_VALUE = 9;
 const DEFAULT_KING_IMPORTANCE_VALUE = 18;
 const DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE = false;
+const DEFAULT_MOVE_LIST_VALUE: Move[] = [];
+const DEFAULT_MOVE_INDEX_VALUE = -1;
 
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
@@ -344,21 +346,17 @@ const kingImportance = ref(DEFAULT_KING_IMPORTANCE_VALUE);
 provide("kingImportance", kingImportance);
 const ignorePiecesProtections = ref(DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE);
 provide("ignorePiecesProtections", ignorePiecesProtections);
+const moveList = ref(DEFAULT_MOVE_LIST_VALUE) as Ref<Move[]>;
 
 // Game specific
 const winner = ref<Winner>("none");
 const winReason = ref<WinReason>(DEFAULT_WIN_REASON_VALUE);
-const moveIndex = ref(0);
+const moveIndex = ref(DEFAULT_MOVE_INDEX_VALUE);
 const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
 const gamePaused = ref<GamePaused>(DEFAULT_GAME_PAUSED_VALUE);
 const whiteCapturedPieces = ref<PieceId[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
 const blackCapturedPieces = ref<PieceId[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
-const highlightedCells: BooleanBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(false))
-);
 const playerMoveSeconds = ref(0);
 const opponentMoveSeconds = ref(0);
 const playerMatchSeconds = ref(0);
@@ -418,6 +416,12 @@ const gameBoardStateData = new BoardStateData(
   gameBoardState,
   toastManager,
   false
+);
+const moveListData = new MoveListData(
+  "move_list",
+  DEFAULT_MOVE_LIST_VALUE,
+  moveList,
+  toastManager
 );
 
 // NOTE: Most of the UserData instances use Ref but some of them may use reactive if their value is more complex. These classes are extending ComplexUserData class.
@@ -563,12 +567,11 @@ const userDataManager = new UserDataManager(
       "black",
       toastManager
     ),
-    new NumberUserData("move_index", 0, toastManager, moveIndex),
-    new BooleanBoardStateData(
-      "highlighted_cells",
-      highlightedCells,
-      highlightedCells,
-      toastManager
+    new NumberUserData(
+      "move_index",
+      DEFAULT_MOVE_INDEX_VALUE,
+      toastManager,
+      moveIndex
     ),
     new NumberUserData(
       "player_seconds_per_move",
@@ -668,10 +671,18 @@ const userDataManager = new UserDataManager(
     ),
     defaultBoardStateData,
     gameBoardStateData,
+    moveListData,
   ],
   confirmDialog,
   toastManager
 );
+
+const highlightedCells = computed(() => {
+  if (moveIndex.value === -1) {
+    return [];
+  }
+  return moveList.value[moveIndex.value].highlightedBoardPositions;
+});
 
 const screenRotated = computed(() => {
   let rotated: boolean;
@@ -789,7 +800,6 @@ const playerBoardManager = new GameBoardManager(
   playerSelectedPieces,
   playerSelectedCells,
   playerDraggingOverCells,
-  highlightedCells,
   selectPieceDialog,
   audioEffects,
   pieceMoveAudioEffect,
@@ -801,6 +811,7 @@ const playerBoardManager = new GameBoardManager(
   ignorePiecesProtections,
   gamePieceProps,
   piecesImportance,
+  moveList,
   moveIndex
 );
 const opponentBoardManager = new GameBoardManager(
@@ -819,7 +830,6 @@ const opponentBoardManager = new GameBoardManager(
   opponentSelectedPieces,
   opponentSelectedCells,
   opponentDraggingOverCells,
-  highlightedCells,
   selectPieceDialog,
   audioEffects,
   pieceMoveAudioEffect,
@@ -831,6 +841,7 @@ const opponentBoardManager = new GameBoardManager(
   ignorePiecesProtections,
   gamePieceProps,
   piecesImportance,
+  moveList,
   moveIndex
 );
 
@@ -847,7 +858,6 @@ const game = new Game(
   firstMoveColor,
   prefferedFirstMoveColor,
   playerPlaying,
-  moveIndex,
   preferredPlayerColor,
   playerMoveSecondsLimit,
   opponentMoveSecondsLimit,
@@ -865,6 +875,8 @@ const game = new Game(
   whiteCapturedPieces,
   reviveFromCapturedPieces,
   ignorePiecesProtections,
+  moveIndex,
+  moveList,
   confirmDialog,
   toastManager
 );
@@ -953,7 +965,7 @@ onMounted(() => {
       <Board
         :selected-pieces="playerSelectedPieces"
         :selected-cells="playerSelectedCells"
-        :highlighted-cells-state="highlightedCells"
+        :highlighted-cells="highlightedCells"
         :dragging-over-cells="playerDraggingOverCells"
         :marks-state="playerCellsMarks"
         :content-rotated="playerBoardContentRotated"
@@ -973,7 +985,7 @@ onMounted(() => {
         v-if="secondCheckboard"
         :selected-pieces="opponentSelectedPieces"
         :selected-cells="opponentSelectedCells"
-        :highlighted-cells-state="highlightedCells"
+        :highlighted-cells="highlightedCells"
         :dragging-over-cells="opponentDraggingOverCells"
         :marks-state="opponentCellsMarks"
         :content-rotated="opponentBoardContentRotated"

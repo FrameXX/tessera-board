@@ -11,14 +11,20 @@ class MoveListData extends UserData<Move[]> {
   constructor(
     id: string,
     value: Move[],
-    toastManager: ToastManager,
-    valueRef?: Ref<Move[]>
+    valueRef: Ref<Move[]>,
+    toastManager: ToastManager
   ) {
     super(id, value, toastManager, valueRef);
   }
 
+  get rawVersion() {
+    return this.value.map((move) => {
+      return move.getRaw();
+    });
+  }
+
   public dump(): string {
-    return JSON.stringify(this.value);
+    return JSON.stringify(this.rawVersion);
   }
 
   public load(dumped: string): void {

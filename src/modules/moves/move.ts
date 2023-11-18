@@ -30,6 +30,8 @@ abstract class Move {
   protected performed = false;
   constructor(public readonly moveId: MoveId) {}
 
+  public abstract getRaw(): RawMove;
+
   /**
    * Returns an array of board positions that should be highlighted after the move is performed to indicate what has happened in the last move
    */
@@ -181,6 +183,10 @@ export function tellPieceItMoved(
   const previousValue = piece.moved;
   piece.moved = newValue;
   return previousValue;
+}
+
+export function getCleanBoardPosition(position: BoardPosition) {
+  return { row: position.row, col: position.col };
 }
 
 export function tellPieceItCastled(

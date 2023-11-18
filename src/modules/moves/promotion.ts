@@ -7,6 +7,7 @@ import {
 } from "../pieces/piece";
 import { getPieceFromRaw, type RawPiece } from "../pieces/raw_piece";
 import Move, {
+  getCleanBoardPosition,
   handleInvalidRawMove,
   movePositionValue,
   tellPieceItMoved,
@@ -21,6 +22,7 @@ import {
   getPositionNotation,
   isBoardPosition,
   MarkBoardState,
+  RawBoardPieceProps,
 } from "../board_manager";
 import { isPlayerColor, type PlayerColor } from "../game";
 import { getPositionPiece } from "../game_board_manager";
@@ -36,7 +38,7 @@ export interface RawPromotion extends RawMove {
   origin: BoardPosition;
   target: BoardPosition;
   transformOptions: [RawPiece, ...RawPiece[]];
-  captures?: BoardPieceProps;
+  captures?: RawBoardPieceProps;
   id?: string;
 }
 
@@ -68,6 +70,29 @@ class Promotion extends Move {
     private readonly id?: string
   ) {
     super("promotion");
+  }
+
+  public getRaw(): RawPromotion {
+    let captures: RawBoardPieceProps | undefined = undefined;
+    if (this.captures) {
+      const rawPiece = this.captures.piece.getRawPiece();
+      captures = {
+        row: this.captures.row,
+        col: this.captures.col,
+        piece: rawPiece,
+      };
+    }
+    return {
+      performed: this.performed,
+      moveId: this.moveId,
+      pieceColor: this.pieceColor,
+      pieceId: this.pieceId,
+      origin: getCleanBoardPosition(this.origin),
+      target: getCleanBoardPosition(this.target),
+      transformOptions: this.transformOptions,
+      captures,
+      id: this.id,
+    };
   }
 
   public static restore(rawMove: RawMove): Promotion {

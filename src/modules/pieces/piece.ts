@@ -1,5 +1,4 @@
 import type { Ref } from "vue";
-import type { BoardPosition } from "../../components/Board.vue";
 import {
   getAllPieceProps,
   getGuardedPieces,
@@ -9,13 +8,13 @@ import {
 } from "../game";
 import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
-import type { BoardStateValue } from "../user_data/board_state";
 import { getRandomId, sumPositions } from "../utils/misc";
 import { type RawPiece, getRawPiece } from "./raw_piece";
 import { isMoveShift } from "../moves/shift";
 import { isMovePromotion } from "../moves/promotion";
 import { isMoveCastling } from "../moves/castling";
 import BoardStateData from "../user_data/board_state";
+import { BoardPosition, BoardStateValue } from "../board_manager";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",
