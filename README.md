@@ -54,4 +54,4 @@ Execute `npm run build` to run Vue and Vite build process.
 
 ## License
 
-This software is licensed under [General Public License v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+This software is licensed under [GNU Affero General Public License v3](https://www.gnu.org/licenses/agpl-3.0.en.html).

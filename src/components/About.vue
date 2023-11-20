@@ -23,8 +23,8 @@ const props = defineProps({ open: { type: Boolean, default: false } });
         </p>
         <p>
           This software is licensed under
-          <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"
-            >General Public License v3</a
+          <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank"
+            >GNU Affero General Public License v3</a
           >.
         </p>
         <div class="nav-placeholder"></div>
