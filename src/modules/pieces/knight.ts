@@ -1,3 +1,4 @@
+import { ComputedRef } from "vue";
 import type {
   BoardPieceProps,
   BoardPosition,
@@ -33,12 +34,14 @@ export class Knight extends Piece {
 
   public getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    lastMove: ComputedRef<Move>
   ): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getCapturingPositions(
       position,
-      boardStateValue
+      boardStateValue,
+      lastMove
     );
 
     for (const target of capturingPositions) {

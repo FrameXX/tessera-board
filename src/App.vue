@@ -677,11 +677,14 @@ const userDataManager = new UserDataManager(
   toastManager
 );
 
+const lastMove = computed(() => {
+  return moveList.value[moveIndex.value];
+});
 const highlightedCells = computed(() => {
   if (moveIndex.value === -1) {
     return [];
   }
-  return moveList.value[moveIndex.value].highlightedBoardPositions;
+  return lastMove.value.highlightedBoardPositions;
 });
 
 const screenRotated = computed(() => {
@@ -812,7 +815,8 @@ const playerBoardManager = new GameBoardManager(
   gamePieceProps,
   piecesImportance,
   moveList,
-  moveIndex
+  moveIndex,
+  lastMove
 );
 const opponentBoardManager = new GameBoardManager(
   whiteCapturingPaths,
@@ -842,7 +846,8 @@ const opponentBoardManager = new GameBoardManager(
   gamePieceProps,
   piecesImportance,
   moveList,
-  moveIndex
+  moveIndex,
+  lastMove
 );
 
 const game = new Game(
@@ -877,6 +882,7 @@ const game = new Game(
   ignorePiecesProtections,
   moveIndex,
   moveList,
+  lastMove,
   confirmDialog,
   toastManager
 );

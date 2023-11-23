@@ -1,3 +1,4 @@
+import { ComputedRef } from "vue";
 import type {
   BoardPieceProps,
   BoardPosition,
@@ -17,26 +18,29 @@ export class Queen extends Piece {
 
   public getNewCapturingPositions(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    lastMove: ComputedRef<Move>
   ): BoardPosition[] {
     // NOTE: Capturing positions of qeen are same as capturing positions of rook and bishop in same state joined together. There's no overlap between rook and bishop capturing positions which is also great.
     const rook = new Rook(this.color);
     const bishop = new Bishop(this.color);
     const capturingPositions: BoardPosition[] = [
-      ...rook.getCapturingPositions(position, boardStateValue),
-      ...bishop.getCapturingPositions(position, boardStateValue),
+      ...rook.getCapturingPositions(position, boardStateValue, lastMove),
+      ...bishop.getCapturingPositions(position, boardStateValue, lastMove),
     ];
     return capturingPositions;
   }
 
   public getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    lastMove: ComputedRef<Move>
   ): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getNewCapturingPositions(
       position,
-      boardStateValue
+      boardStateValue,
+      lastMove
     );
 
     for (const target of capturingPositions) {

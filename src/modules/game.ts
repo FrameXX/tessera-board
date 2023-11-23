@@ -139,6 +139,7 @@ class Game {
     private readonly ignorePiecesProtections: Ref<boolean>,
     private readonly moveIndex: Ref<number>,
     private readonly moveList: Ref<Move[]>,
+    private readonly lastMove: ComputedRef<Move>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
@@ -450,7 +451,8 @@ class Game {
       this.boardStateValue,
       this.playingColor,
       this.pieceProps.value,
-      guardedPieces
+      guardedPieces,
+      this.lastMove
     );
     if (checked) this.toastManager.showToast("Check!", "cross");
     const canPlayerMove = this.canPlayerMove(
@@ -481,7 +483,8 @@ class Game {
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
         this.reviveFromCapturedPieces,
-        this.ignorePiecesProtections
+        this.ignorePiecesProtections,
+        this.lastMove
       );
       if (moves.length !== 0) {
         return true;
@@ -503,7 +506,11 @@ class Game {
         whiteCapturingPaths = [
           ...whiteCapturingPaths,
           ...positionsToPath(
-            piece.getCapturingPositions(origin, this.boardStateValue),
+            piece.getCapturingPositions(
+              origin,
+              this.boardStateValue,
+              this.lastMove
+            ),
             origin
           ),
         ];
@@ -511,7 +518,11 @@ class Game {
         blackCapturingPaths = [
           ...blackCapturingPaths,
           ...positionsToPath(
-            piece.getCapturingPositions(origin, this.boardStateValue),
+            piece.getCapturingPositions(
+              origin,
+              this.boardStateValue,
+              this.lastMove
+            ),
             origin
           ),
         ];
@@ -556,7 +567,8 @@ export function isGuardedPieceChecked(
   boardStateValue: BoardStateValue,
   color: PlayerColor,
   allPieceProps: BoardPieceProps[],
-  guardedPieces: BoardPieceProps[]
+  guardedPieces: BoardPieceProps[],
+  lastMove: ComputedRef<Move>
 ) {
   let capturingPaths: Path[] = [];
 
@@ -569,7 +581,7 @@ export function isGuardedPieceChecked(
     capturingPaths = [
       ...capturingPaths,
       ...positionsToPath(
-        piece.getCapturingPositions(origin, boardStateValue),
+        piece.getCapturingPositions(origin, boardStateValue, lastMove),
         origin
       ),
     ];

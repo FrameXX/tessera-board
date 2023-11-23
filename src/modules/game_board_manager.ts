@@ -56,7 +56,8 @@ class GameBoardManager extends BoardManager {
     private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
     private readonly piecesImportance: PiecesImportance,
     private readonly moveList: Ref<Move[]>,
-    private readonly moveIndex: Ref<number>
+    private readonly moveIndex: Ref<number>,
+    private readonly lastMove: ComputedRef<Move>
   ) {
     super();
   }
@@ -134,7 +135,8 @@ class GameBoardManager extends BoardManager {
       this.blackCapturedPieces,
       this.whiteCapturedPieces,
       this.reviveFromCapturedPieces,
-      this.ignorePiecesProtections
+      this.ignorePiecesProtections,
+      this.lastMove
     );
     moves.forEach((move) =>
       move.showCellMarks(this.cellsMarks, this.boardStateValue)
@@ -185,7 +187,8 @@ class GameBoardManager extends BoardManager {
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
         this.reviveFromCapturedPieces,
-        this.ignorePiecesProtections
+        this.ignorePiecesProtections,
+        this.lastMove
       );
     } while (moves.length === 0);
     const chosenMove = getRandomArrayValue(moves);

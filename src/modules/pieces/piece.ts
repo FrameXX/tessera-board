@@ -1,4 +1,4 @@
-import type { Ref } from "vue";
+import type { ComputedRef, Ref } from "vue";
 import {
   getAllPieceProps,
   getGuardedPieces,
@@ -85,19 +85,22 @@ export abstract class Piece {
 
   public getCapturingPositions(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    lastMove: ComputedRef<Move>
   ): BoardPosition[] {
     if (!this.capturingPositionsCache)
       this.capturingPositionsCache = this.getNewCapturingPositions(
         position,
-        boardStateValue
+        boardStateValue,
+        lastMove
       );
     return this.capturingPositionsCache;
   }
 
   public abstract getNewCapturingPositions(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    lastMove: ComputedRef<Move>
   ): BoardPosition[];
 
   public getPossibleMoves(
@@ -108,10 +111,15 @@ export abstract class Piece {
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
     reviveFromCapturedPieces: Ref<boolean>,
-    ignorePiecesProtections: Ref<boolean>
+    ignorePiecesProtections: Ref<boolean>,
+    lastMove: ComputedRef<Move>
   ): Move[] {
     if (!this.possibleMovesCache) {
-      let possibleMoves = this.getNewPossibleMoves(position, boardStateValue);
+      let possibleMoves = this.getNewPossibleMoves(
+        position,
+        boardStateValue,
+        lastMove
+      );
 
       if (!ignorePiecesProtections.value) {
         const newBoardStateData = new BoardStateData([]);
@@ -126,7 +134,8 @@ export abstract class Piece {
             piecesImportance,
             blackCapturedPieces,
             whiteCapturedPieces,
-            reviveFromCapturedPieces
+            reviveFromCapturedPieces,
+            lastMove
           );
         });
       }
@@ -138,7 +147,8 @@ export abstract class Piece {
 
   public abstract getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    lastMove: ComputedRef<Move>
   ): Move[];
 }
 
@@ -149,7 +159,8 @@ function willMoveCheckGuardedPiece(
   piecesImportance: PiecesImportance,
   blackCapturedPieces: Ref<PieceId[]>,
   whiteCapturedPieces: Ref<PieceId[]>,
-  reviveFromCapturedPieces: Ref<boolean>
+  reviveFromCapturedPieces: Ref<boolean>,
+  lastMove: ComputedRef<Move>
 ) {
   if (isMoveShift(move)) {
     move.forward(newBoardStateValue);
@@ -172,7 +183,8 @@ function willMoveCheckGuardedPiece(
     newBoardStateValue,
     color,
     pieceProps,
-    guardedPieces
+    guardedPieces,
+    lastMove
   );
 
   move.reverse(newBoardStateValue);

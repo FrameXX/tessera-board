@@ -11,6 +11,8 @@ import type {
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
+import { ComputedRef } from "vue";
+import BoardManager from "../board_manager";
 
 interface RawPawn extends RawPiece {
   moved: boolean;
@@ -63,7 +65,8 @@ export class Pawn extends Piece {
 
   public getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardStateValue: BoardStateValue,
+    lastMove: ComputedRef<Move>
   ): Move[] {
     const moves: Move[] = [];
 
@@ -103,7 +106,8 @@ export class Pawn extends Piece {
     // Capture
     const capturingPositions = this.getCapturingPositions(
       position,
-      boardStateValue
+      boardStateValue,
+      lastMove
     );
     for (const target of capturingPositions) {
       const piece = getBoardPositionPiece(target, boardStateValue);

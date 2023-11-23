@@ -281,11 +281,11 @@ class Promotion extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.piece.pieceId)}x${getPositionNotation(
-          this.captures
-        )}=${getPieceNotation(newRawPiece.pieceId)}`
+        this.captures
+      )}=${getPieceNotation(newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-          newRawPiece.pieceId
-        )}`;
+        newRawPiece.pieceId
+      )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {
