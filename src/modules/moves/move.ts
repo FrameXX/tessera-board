@@ -60,7 +60,7 @@ abstract class Move {
    */
   public abstract reverse(...args: any): void;
 
-  protected onPerformReverse() {
+  protected beforePerformReverse() {
     if (!this.performed) {
       throw new GameLogicError(
         "A move that wasn't performed yet shouldn't be reversed already."
@@ -107,7 +107,7 @@ export function addCapturedPiece(
 
 export function transformPiece(
   position: BoardPosition,
-  newPiece: RawPiece,
+  newPiece: Piece,
   boardStateValue: BoardStateValue
 ) {
   const piece = boardStateValue[position.row][position.col];
@@ -118,7 +118,7 @@ export function transformPiece(
       )}`
     );
   }
-  boardStateValue[position.row][position.col] = getPieceFromRaw(newPiece);
+  boardStateValue[position.row][position.col] = newPiece;
 }
 
 export function handleInvalidRawMove(rawMove: RawMove): never {
@@ -204,6 +204,13 @@ export function tellPieceItCastled(
   const previousValue = piece.castled;
   piece.castled = newValue;
   return previousValue;
+}
+
+export function clearPositionValue(
+  position: BoardPosition,
+  boardStateValue: BoardStateValue
+) {
+  boardStateValue[position.row][position.col] = null;
 }
 
 export function capturePosition(

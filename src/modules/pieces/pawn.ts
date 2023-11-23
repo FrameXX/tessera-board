@@ -84,11 +84,12 @@ export class Pawn extends Piece {
       ) {
         moves.push(
           new Promotion(
-            this.pieceId,
-            this.color,
+            this,
             position,
             target,
-            this.transformOptions
+            this.transformOptions,
+            undefined,
+            this.id
           )
         );
         break;
@@ -122,8 +123,7 @@ export class Pawn extends Piece {
       ) {
         moves.push(
           new Promotion(
-            this.pieceId,
-            this.color,
+            this,
             position,
             target,
             this.transformOptions,

@@ -1,6 +1,7 @@
 import type { Ref } from "vue";
 import { isPieceId, type PieceId } from "../pieces/piece";
 import Move, {
+  clearPositionValue,
   getCleanBoardPosition,
   handleInvalidRawMove,
   movePositionValue,
@@ -11,12 +12,13 @@ import type {
   BoardPosition,
   BoardStateValue,
   MarkBoardState,
-  RawBoardPieceProps} from "../board_manager";
+  RawBoardPieceProps,
+} from "../board_manager";
 import {
   getPieceNotation,
   getPositionNotation,
   isRawBoardPieceProps,
-  isBoardPosition
+  isBoardPosition,
 } from "../board_manager";
 import { capturePosition, movePiece } from "./move";
 import { getPositionPiece } from "../game_board_manager";
@@ -127,12 +129,15 @@ class Shift extends Move {
   public forward(boardStateValue: BoardStateValue): void {
     this.onForward(boardStateValue);
 
+    if (this.captures) {
+      clearPositionValue(this.captures, boardStateValue);
+    }
     const piece = getPositionPiece(this.origin, boardStateValue);
     movePositionValue(piece, this.origin, this.target, boardStateValue);
   }
 
   private onReverse(boardStateValue: BoardStateValue) {
-    super.onPerformReverse();
+    super.beforePerformReverse();
     if (this.id) {
       tellPieceItMoved(this.id, boardStateValue, !this.firstMove);
     }
@@ -176,8 +181,8 @@ class Shift extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 

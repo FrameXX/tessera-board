@@ -29,31 +29,31 @@ export function getRawPiece(piece: Piece): RawPiece {
   return { color: piece.color, pieceId: piece.pieceId, id: piece.id };
 }
 
-export function getPieceFromRaw(genericPiece: RawPiece): Piece {
+export function getPieceFromRaw(rawPiece: RawPiece): Piece {
   let piece: Piece | null;
-  switch (genericPiece.pieceId) {
-  case "bishop":
-    piece = new Bishop(genericPiece.color, genericPiece.id);
-    break;
-  case "king":
-    piece = new King(genericPiece.color, genericPiece.id);
-    break;
-  case "knight":
-    piece = new Knight(genericPiece.color, genericPiece.id);
-    break;
-  case "pawn":
-    piece = new Pawn(genericPiece.color, genericPiece.id);
-    break;
-  case "queen":
-    piece = new Queen(genericPiece.color, genericPiece.id);
-    break;
-  case "rook":
-    piece = new Rook(genericPiece.color, genericPiece.id);
-    break;
-  default:
-    throw new UserDataError(
-      `Provided pieceId "${genericPiece.pieceId}" is invalid.`
-    );
+  switch (rawPiece.pieceId) {
+    case "bishop":
+      piece = new Bishop(rawPiece.color, rawPiece.id);
+      break;
+    case "king":
+      piece = new King(rawPiece.color, rawPiece.id);
+      break;
+    case "knight":
+      piece = new Knight(rawPiece.color, rawPiece.id);
+      break;
+    case "pawn":
+      piece = new Pawn(rawPiece.color, rawPiece.id);
+      break;
+    case "queen":
+      piece = new Queen(rawPiece.color, rawPiece.id);
+      break;
+    case "rook":
+      piece = new Rook(rawPiece.color, rawPiece.id);
+      break;
+    default:
+      throw new UserDataError(
+        `Provided pieceId "${rawPiece.pieceId}" is invalid.`
+      );
   }
   return piece;
 }

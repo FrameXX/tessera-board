@@ -1,10 +1,9 @@
 import type {
   BoardPosition,
   BoardStateValue,
-  MarkBoardState} from "../board_manager";
-import {
-  isBoardPosition,
+  MarkBoardState,
 } from "../board_manager";
+import { isBoardPosition } from "../board_manager";
 import { getPositionPiece } from "../game_board_manager";
 import Move, {
   getCleanBoardPosition,
@@ -115,7 +114,7 @@ class Castling extends Move {
   }
 
   private onReverse(boardStateValue: BoardStateValue) {
-    super.onPerformReverse();
+    super.beforePerformReverse();
     if (this.id) {
       tellPieceItMoved(this.id, boardStateValue, !this.firstMove);
       tellPieceItCastled(this.id, boardStateValue, !this.firstCastling);
