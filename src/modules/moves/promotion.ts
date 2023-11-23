@@ -1,5 +1,6 @@
 import type { Ref } from "vue";
-import Piece, {
+import type Piece from "../pieces/piece";
+import {
   chooseBestPiece,
   isPieceId,
   type PieceId,
@@ -129,7 +130,8 @@ class Promotion extends Move {
       rawMove.origin,
       rawMove.target,
       rawMove.transformOptions,
-      captures
+      captures,
+      id
     );
   }
 

@@ -1,7 +1,6 @@
 import type { Ref } from "vue";
 import type Piece from "../pieces/piece";
 import type { PieceId } from "../pieces/piece";
-import { type RawPiece, getPieceFromRaw } from "../pieces/raw_piece";
 import {
   getElementInstanceById,
   waitForTransitionEnd,
