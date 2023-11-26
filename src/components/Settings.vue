@@ -702,15 +702,27 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           </UserOption>
         </Category>
         <div class="action-buttons-drawer">
-          <button @click="userDataManager.requestImportData()">
+          <button
+            title="Import data"
+            aria-label="Import data"
+            @click="userDataManager.requestImportData()"
+          >
             <Icon icon-id="database-import-outline" side />
             Import data
           </button>
-          <button @click="userDataManager.requestExportData()">
+          <button
+            title="Export data"
+            aria-label="Import data"
+            @click="userDataManager.requestExportData()"
+          >
             <Icon icon-id="database-export-outline" side />
             Export data
           </button>
-          <button @click="userDataManager.requestClearData()">
+          <button
+            title="Clear all data"
+            aria-label="Clear all data"
+            @click="userDataManager.requestClearData()"
+          >
             <Icon icon-id="database-remove-outline" side />
             Clear all data
           </button>

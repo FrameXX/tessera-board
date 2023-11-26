@@ -20,6 +20,8 @@ export function isMoveCastling(move: Move): move is Castling {
 }
 
 export interface RawCastling extends RawMove {
+  firstMove: boolean;
+  firstCastling: boolean;
   king: boolean;
   kingSide: boolean;
   kingOrigin: BoardPosition;
@@ -29,6 +31,8 @@ export interface RawCastling extends RawMove {
 }
 
 export function isRawCastling(rawMove: RawMove): rawMove is RawCastling {
+  if (typeof rawMove.firstMove !== "boolean") return false;
+  if (typeof rawMove.firstCastling !== "boolean") return false;
   if (typeof rawMove.king !== "boolean") return false;
   if (typeof rawMove.kingSide !== "boolean") return false;
   if (typeof rawMove.kingOrigin !== "object") return false;
@@ -60,6 +64,8 @@ class Castling extends Move {
 
   public getRaw(): RawCastling {
     return {
+      firstMove: this.firstMove,
+      firstCastling: this.firstCastling,
       performed: this.performed,
       moveId: this.moveId,
       king: this.king,
@@ -89,6 +95,12 @@ class Castling extends Move {
       rawMove.rookTarget,
       id
     );
+  }
+
+  public loadCustomProps(rawMove: RawCastling): void {
+    super.loadCustomProps(rawMove);
+    this.firstMove = rawMove.firstMove;
+    this.firstCastling = rawMove.firstCastling;
   }
 
   get highlightedBoardPositions() {

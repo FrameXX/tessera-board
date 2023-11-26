@@ -22,8 +22,8 @@ const props = defineProps({
   selected: { type: Boolean, default: false },
   size: { type: Number, required: true },
   dragging: { type: Boolean, default: false },
-  dragXDelta: { type: Number, default: 0 },
-  dragYDelta: { type: Number, default: 0 },
+  dragXDiff: { type: Number, default: 0 },
+  dragYDiff: { type: Number, default: 0 },
 });
 
 const emit = defineEmits<{
@@ -37,11 +37,11 @@ const element = ref<null | ComponentPublicInstance>(null);
 
 // Values for translating pieces to their right position from the absolute position at top left corner of the board
 const translateX = computed(() => {
-  const offset = props.dragging ? props.dragXDelta : 0;
+  const offset = props.dragging ? props.dragXDiff : 0;
   return props.col * props.cellSize + offset;
 });
 const translateY = computed(() => {
-  const offset = props.dragging ? props.dragYDelta : 0;
+  const offset = props.dragging ? props.dragYDiff : 0;
   return (7 - props.row) * props.cellSize + offset;
 });
 

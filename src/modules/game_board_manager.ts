@@ -56,7 +56,6 @@ class GameBoardManager extends BoardManager {
     private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
     private readonly piecesImportance: PiecesImportance,
     private readonly moveList: Ref<Move[]>,
-    private readonly moveIndex: Ref<number>,
     private readonly lastMove: ComputedRef<Move | null>
   ) {
     super();
@@ -226,8 +225,8 @@ class GameBoardManager extends BoardManager {
         this.pieceMoveAudioEffect
       );
     }
-    this.moveIndex.value++;
     this.moveList.value.push(move);
+    this.dispatchEvent(new Event("move"));
   }
 
   private get selectedCell(): BoardPosition | null {

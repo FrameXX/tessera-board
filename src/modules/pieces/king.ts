@@ -8,7 +8,7 @@ import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import Piece, {
-  getDeltaPosition,
+  getDiffPosition,
   isPositionOnBoard,
   isFriendlyPiece,
   getBoardPositionPiece,
@@ -58,12 +58,12 @@ export class King extends Piece {
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
-    for (const colDelta of [-1, 0, 1]) {
-      for (const rowDelta of [-1, 0, 1]) {
-        if (colDelta === 0 && rowDelta === 0) {
+    for (const colDiff of [-1, 0, 1]) {
+      for (const rowDiff of [-1, 0, 1]) {
+        if (colDiff === 0 && rowDiff === 0) {
           continue;
         }
-        const target = getDeltaPosition(position, colDelta, rowDelta);
+        const target = getDiffPosition(position, colDiff, rowDiff);
         if (!isPositionOnBoard(target)) {
           continue;
         }
@@ -92,24 +92,24 @@ export class King extends Piece {
 
     // https://en.wikipedia.org/wiki/Castling
     if (!this.moved && !this.castled) {
-      for (const colDelta of [-1, 1]) {
+      for (const colDiff of [-1, 1]) {
         let kingTarget: BoardPosition | null = null;
         let rookTarget: BoardPosition | null = null;
-        let totalColDelta = 0;
+        let totalColDiff = 0;
         while (true) {
-          totalColDelta += colDelta;
-          const searchRookPosition = getDeltaPosition(
+          totalColDiff += colDiff;
+          const searchRookPosition = getDiffPosition(
             position,
-            totalColDelta,
+            totalColDiff,
             position.row
           );
           if (!isPositionOnBoard(searchRookPosition)) break;
           // Rook moves on the other side of the moved king
-          if (Math.abs(totalColDelta) === 1) {
+          if (Math.abs(totalColDiff) === 1) {
             rookTarget = searchRookPosition;
           }
           // King moves 2 cells in rook direction
-          if (Math.abs(totalColDelta) === 2) {
+          if (Math.abs(totalColDiff) === 2) {
             kingTarget = searchRookPosition;
           }
           const piece = getBoardPositionPiece(
@@ -129,7 +129,7 @@ export class King extends Piece {
           moves.push(
             new Castling(
               true,
-              colDelta === 1,
+              colDiff === 1,
               position,
               kingTarget,
               searchRookPosition,

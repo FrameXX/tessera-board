@@ -186,7 +186,7 @@ const DEFAULT_QUEEN_IMPORTANCE_VALUE = 9;
 const DEFAULT_KING_IMPORTANCE_VALUE = 18;
 const DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE = false;
 const DEFAULT_MOVE_LIST_VALUE: Move[] = [];
-const DEFAULT_MOVE_INDEX_VALUE = -1;
+const DEFAULT_MOVE_INDEX_VALUE = 0;
 
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
@@ -423,6 +423,15 @@ const moveListData = new MoveListData(
   moveList,
   toastManager
 );
+const moveIndexData = new NumberUserData(
+  "move_index",
+  DEFAULT_MOVE_INDEX_VALUE,
+  toastManager,
+  moveIndex,
+  undefined,
+  undefined,
+  false
+);
 
 // NOTE: Most of the UserData instances use Ref but some of them may use reactive if their value is more complex. These classes are extending ComplexUserData class.
 const userDataManager = new UserDataManager(
@@ -567,12 +576,7 @@ const userDataManager = new UserDataManager(
       "black",
       toastManager
     ),
-    new NumberUserData(
-      "move_index",
-      DEFAULT_MOVE_INDEX_VALUE,
-      toastManager,
-      moveIndex
-    ),
+    moveIndexData,
     new NumberUserData(
       "player_seconds_per_move",
       DEFAULT_PLAYER_SECONDS_PER_MOVE,
@@ -818,7 +822,6 @@ const playerBoardManager = new GameBoardManager(
   gamePieceProps,
   piecesImportance,
   moveList,
-  moveIndex,
   lastMove
 );
 const opponentBoardManager = new GameBoardManager(
@@ -849,7 +852,6 @@ const opponentBoardManager = new GameBoardManager(
   gamePieceProps,
   piecesImportance,
   moveList,
-  moveIndex,
   lastMove
 );
 
@@ -884,6 +886,7 @@ const game = new Game(
   reviveFromCapturedPieces,
   ignorePiecesProtections,
   moveIndex,
+  moveIndexData,
   moveList,
   lastMove,
   confirmDialog,
@@ -1053,11 +1056,15 @@ onMounted(() => {
   <!-- Primary buttons -->
   <div class="primary-buttons">
     <Transition name="counter">
-      <button aria-label="Previous move" title="Previous move">
+      <button
+        @click="game.reverseMove()"
+        aria-label="Previous move"
+        title="Previous move"
+      >
         <Icon icon-id="arrow-left"></Icon>
       </button>
     </Transition>
-    <Transition name="slide-up">
+    <Transition name="counter">
       <button aria-label="Cancel move" title="Cancel move" v-show="false">
         <Icon icon-id="close"></Icon>
       </button>
@@ -1077,11 +1084,15 @@ onMounted(() => {
       Actions
     </button>
     <Transition name="counter">
-      <button aria-label="Next move" title="Next move">
+      <button
+        @click="game.forwardMove()"
+        aria-label="Next move"
+        title="Next move"
+      >
         <Icon icon-id="arrow-right"></Icon>
       </button>
     </Transition>
-    <Transition name="slide-up">
+    <Transition name="counter">
       <button aria-label="Confirm move" title="Confirm move" v-show="false">
         <Icon icon-id="check"></Icon>
       </button>

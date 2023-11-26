@@ -8,7 +8,7 @@ import {
   type Ref,
   watch,
 } from "vue";
-import { getDeltaPosition, type PieceId } from "../modules/pieces/piece";
+import { getDiffPosition, type PieceId } from "../modules/pieces/piece";
 import Cell from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type BoardManager from "../modules/board_manager";
@@ -131,39 +131,39 @@ function isPieceDragged(position: BoardPosition) {
   return positionsEqual(draggingPiece.value, position);
 }
 
-function resetDragDelta() {
-  dragXDelta.value = 0;
-  dragYDelta.value = 0;
+function resetDragDiff() {
+  dragXDiff.value = 0;
+  dragYDiff.value = 0;
 }
 
-const shiftedDragYDelta = computed(() => {
-  return dragYDelta.value - inchPxOffset.value;
+const shiftedDragYDiff = computed(() => {
+  return dragYDiff.value - inchPxOffset.value;
 });
 
-const dragRowDelta = computed(() => {
-  let delta = Math.round(-shiftedDragYDelta.value / cellSize.value);
-  if (delta === -0) {
-    delta = 0;
+const dragRowDiff = computed(() => {
+  let diff = Math.round(-shiftedDragYDiff.value / cellSize.value);
+  if (diff === -0) {
+    diff = 0;
   }
-  return delta;
+  return diff;
 });
 
-const dragColDelta = computed(() => {
-  let delta = Math.round(dragXDelta.value / cellSize.value);
-  if (delta === -0) {
-    delta = 0;
+const dragColDiff = computed(() => {
+  let diff = Math.round(dragXDiff.value / cellSize.value);
+  if (diff === -0) {
+    diff = 0;
   }
-  return delta;
+  return diff;
 });
 
 const targetingDragPosition = computed(() => {
   if (!draggingPiece.value) {
     return { row: 0, col: 0 };
   }
-  const position = getDeltaPosition(
+  const position = getDiffPosition(
     { row: draggingPiece.value?.row, col: draggingPiece.value?.col },
-    dragColDelta.value,
-    dragRowDelta.value
+    dragColDiff.value,
+    dragRowDiff.value
   );
   return position;
 });
@@ -198,32 +198,32 @@ const inchPxOffset = computed(() => {
 let pressTimeout: number | null = null;
 let lastDragX = 0;
 let lastDragY = 0;
-const dragXDelta = ref(0);
-const dragYDelta = ref(0);
+const dragXDiff = ref(0);
+const dragYDiff = ref(0);
 
-watch(dragXDelta, dragDeltaChange);
-watch(dragYDelta, dragDeltaChange);
+watch(dragXDiff, dragDiffChange);
+watch(dragYDiff, dragDiffChange);
 
-function dragDeltaChange() {
+function dragDiffChange() {
   if (showDragging.value || !draggingPiece.value) return;
   if (
-    Math.abs(dragXDelta.value) / cellSize.value > 0.5 ||
-    Math.abs(dragYDelta.value) / cellSize.value > 0.5
+    Math.abs(dragXDiff.value) / cellSize.value > 0.5 ||
+    Math.abs(dragYDiff.value) / cellSize.value > 0.5
   ) {
     showDragging.value = true;
   }
 }
 
 function updatePointerPosition(x: number, y: number) {
-  let xDelta = x - lastDragX;
-  let yDelta = y - lastDragY;
+  let xDiff = x - lastDragX;
+  let yDiff = y - lastDragY;
   if (props.rotated) {
-    xDelta = -xDelta;
-    yDelta = -yDelta;
+    xDiff = -xDiff;
+    yDiff = -yDiff;
   }
 
-  dragXDelta.value = dragXDelta.value + xDelta;
-  dragYDelta.value = dragYDelta.value + yDelta;
+  dragXDiff.value = dragXDiff.value + xDiff;
+  dragYDiff.value = dragYDiff.value + yDiff;
 
   lastDragX = x;
   lastDragY = y;
@@ -282,7 +282,7 @@ function onPointerUp() {
     showDragging.value = false;
   }
   draggingPiece.value = null;
-  resetDragDelta();
+  resetDragDiff();
 }
 
 onMounted(() => {
@@ -373,8 +373,8 @@ onMounted(() => {
               col: pieceProps.col,
             })
           "
-          :drag-x-delta="dragXDelta"
-          :drag-y-delta="shiftedDragYDelta"
+          :drag-x-diff="dragXDiff"
+          :drag-y-diff="shiftedDragYDiff"
           :inch-offset="inchCmOffset"
           :row="pieceProps.row"
           :col="pieceProps.col"

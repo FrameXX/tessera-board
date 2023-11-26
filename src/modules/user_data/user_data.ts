@@ -22,12 +22,13 @@ abstract class UserData<ValueType> {
     public readonly id: string,
     public value: ValueType,
     private readonly toastManager?: ToastManager,
-    valueRef?: Ref<ValueType>
+    valueRef?: Ref<ValueType>,
+    autoSave: boolean = true
   ) {
     this.storageKey = `${UserData.BASE_STORAGE_KEY}-${this.id}`;
 
     // Watch ref for changes, update the original value and save changes.
-    if (valueRef) {
+    if (valueRef && autoSave) {
       this.valueRef = valueRef;
       watch(
         valueRef,

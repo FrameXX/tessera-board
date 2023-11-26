@@ -1,6 +1,6 @@
 import type { Mark } from "../components/Cell.vue";
 import type { Piece, PieceId } from "./pieces/piece";
-import type { RawPiece} from "./pieces/raw_piece";
+import type { RawPiece } from "./pieces/raw_piece";
 import { isRawPiece } from "./pieces/raw_piece";
 
 export type BoardStateValue = (Piece | null)[][];
@@ -36,8 +36,10 @@ export function isRawBoardPieceProps(
 
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-abstract class BoardManager {
-  constructor() {}
+abstract class BoardManager extends EventTarget {
+  constructor() {
+    super();
+  }
 
   public abstract onPieceClick(boardPiece: BoardPieceProps): void;
 

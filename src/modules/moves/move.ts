@@ -7,12 +7,9 @@ import {
 } from "../utils/elements";
 import { getPositionPiece } from "../game_board_manager";
 import { GameLogicError, getAllPieceProps } from "../game";
-import type {
-  BoardPosition,
-  BoardStateValue,
-  MarkBoardState,
-} from "../board_manager";
+import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
+import { BoardStateValue } from "../board_manager";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {
@@ -30,6 +27,10 @@ abstract class Move {
   constructor(public readonly moveId: MoveId) {}
 
   public abstract getRaw(): RawMove;
+
+  public loadCustomProps(rawMove: RawMove) {
+    this.performed = rawMove.performed;
+  }
 
   /**
    * Returns an array of board positions that should be highlighted after the move is performed to indicate what has happened in the last move
@@ -57,7 +58,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  public abstract reverse(...args: any): void;
+  public abstract reverse(BoardStateValue: BoardStateValue): void;
 
   protected beforePerformReverse() {
     if (!this.performed) {

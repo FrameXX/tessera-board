@@ -2,7 +2,7 @@ import type Move from "../moves/move";
 import Shift, { isMoveShift } from "../moves/shift";
 import Promotion from "../moves/promotion";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
-import { getDeltaPosition } from "./piece";
+import { getDiffPosition } from "./piece";
 import type { RawPiece } from "./raw_piece";
 import { getRawPiece } from "./raw_piece";
 import type { PlayerColor } from "../game";
@@ -52,10 +52,10 @@ export class Pawn extends Piece {
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
-    for (const colDelta of [1, -1]) {
-      const target = getDeltaPosition(
+    for (const colDiff of [1, -1]) {
+      const target = getDiffPosition(
         position,
-        colDelta,
+        colDiff,
         this.color === "white" ? 1 : -1
       );
       capturingPositions.push(target);
@@ -71,19 +71,19 @@ export class Pawn extends Piece {
     const moves: Move[] = [];
 
     // Move one cell forward
-    for (let rowDelta of [1, 2]) {
-      if (rowDelta === 2 && this.moved) {
+    for (let rowDiff of [1, 2]) {
+      if (rowDiff === 2 && this.moved) {
         break;
       }
-      if (this.color === "black") rowDelta = rowDelta * -1;
-      const target = getDeltaPosition(position, 0, rowDelta);
+      if (this.color === "black") rowDiff = rowDiff * -1;
+      const target = getDiffPosition(position, 0, rowDiff);
       if (getBoardPositionPiece(target, boardStateValue)) {
         break;
       }
       if (
         ((target.row === 7 && this.color === "white") ||
           (target.row === 0 && this.color === "black")) &&
-        Math.abs(rowDelta) === 1
+        Math.abs(rowDiff) === 1
       ) {
         moves.push(
           new Promotion(
@@ -146,14 +146,13 @@ export class Pawn extends Piece {
     if (!isMoveShift(lastMove.value)) return moves;
     const lastShift = lastMove.value;
 
-    const moveRowDelta = lastShift.target.row - lastShift.origin.row;
-    if (Math.abs(moveRowDelta) !== 2) return moves;
-    const targetPawnAbsColDelta = Math.abs(lastShift.target.col - position.col);
-    const targetPawnAbsRowDelta = Math.abs(lastShift.target.row - position.row);
-    if (targetPawnAbsColDelta !== 1 || targetPawnAbsRowDelta !== 0)
-      return moves;
+    const moveRowDiff = lastShift.target.row - lastShift.origin.row;
+    if (Math.abs(moveRowDiff) !== 2) return moves;
+    const targetPawnAbsColDiff = Math.abs(lastShift.target.col - position.col);
+    const targetPawnAbsRowDiff = Math.abs(lastShift.target.row - position.row);
+    if (targetPawnAbsColDiff !== 1 || targetPawnAbsRowDiff !== 0) return moves;
 
-    const targetRow = lastShift.target.row + (moveRowDelta === 2 ? -1 : 1);
+    const targetRow = lastShift.target.row + (moveRowDiff === 2 ? -1 : 1);
     const capturedPiece = getPositionPiece(lastShift.target, boardStateValue);
     moves.push(
       new Shift(
@@ -167,7 +166,8 @@ export class Pawn extends Piece {
           row: lastShift.target.row,
           col: lastShift.target.col,
           piece: capturedPiece,
-        }
+        },
+        this.id
       )
     );
 

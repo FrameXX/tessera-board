@@ -30,6 +30,7 @@ export function isMoveShift(move: Move): move is Shift {
 }
 
 export interface RawShift extends RawMove {
+  firstMove: boolean;
   pieceId: PieceId;
   origin: BoardPosition;
   target: BoardPosition;
@@ -38,6 +39,7 @@ export interface RawShift extends RawMove {
 }
 
 export function isRawShift(rawMove: RawMove): rawMove is RawShift {
+  if (typeof rawMove.firstMove !== "boolean") return false;
   if (typeof rawMove.pieceId !== "string") return false;
   if (typeof rawMove.origin !== "object") return false;
   if (typeof rawMove.target !== "object") return false;
@@ -76,6 +78,7 @@ class Shift extends Move {
       };
     }
     return {
+      firstMove: this.firstMove,
       performed: this.performed,
       moveId: this.moveId,
       pieceId: this.pieceId,
@@ -113,6 +116,11 @@ class Shift extends Move {
       captures,
       id
     );
+  }
+
+  public loadCustomProps(rawMove: RawShift): void {
+    super.loadCustomProps(rawMove);
+    this.firstMove = rawMove.firstMove;
   }
 
   get highlightedBoardPositions() {

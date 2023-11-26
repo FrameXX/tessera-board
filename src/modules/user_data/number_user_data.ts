@@ -9,9 +9,10 @@ class NumberUserData extends UserData<number> {
     toastManager: ToastManager,
     valueRef?: Ref<number>,
     private readonly minValue?: number,
-    private readonly maxValue?: number
+    private readonly maxValue?: number,
+    autoSave: boolean = true
   ) {
-    super(id, value, toastManager, valueRef);
+    super(id, value, toastManager, valueRef, autoSave);
   }
 
   public dump(): string {

@@ -10,7 +10,7 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { isPieceKing } from "./king";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
-import { getDeltaPosition, isPositionOnBoard } from "./piece";
+import { getDiffPosition, isPositionOnBoard } from "./piece";
 import { getRawPiece, type RawPiece } from "./raw_piece";
 
 interface RawRook extends RawPiece {
@@ -59,14 +59,14 @@ export class Rook extends Piece {
     const capturingPositions: BoardPosition[] = [];
 
     for (const axis of ["x", "y"]) {
-      for (const delta of [-1, 1]) {
-        let totalDelta = 0;
+      for (const diff of [-1, 1]) {
+        let totalDiff = 0;
         while (true) {
-          totalDelta += delta;
+          totalDiff += diff;
           let target: BoardPosition;
           axis === "x"
-            ? (target = getDeltaPosition(position, totalDelta, 0))
-            : (target = getDeltaPosition(position, 0, totalDelta));
+            ? (target = getDiffPosition(position, totalDiff, 0))
+            : (target = getDiffPosition(position, 0, totalDiff));
           if (!isPositionOnBoard(target)) {
             break;
           }
@@ -106,13 +106,13 @@ export class Rook extends Piece {
 
     // https://en.wikipedia.org/wiki/Castling
     if (!this.moved && !this.castled) {
-      for (const colDelta of [-1, 1]) {
-        let totalColDelta = 0;
+      for (const colDiff of [-1, 1]) {
+        let totalColDiff = 0;
         while (true) {
-          totalColDelta += colDelta;
-          const searchKingPosition = getDeltaPosition(
+          totalColDiff += colDiff;
+          const searchKingPosition = getDiffPosition(
             position,
-            totalColDelta,
+            totalColDiff,
             position.row
           );
           if (!isPositionOnBoard(searchKingPosition)) break;
@@ -126,16 +126,16 @@ export class Rook extends Piece {
           if (piece.castled || piece.moved) break;
           const kingTarget = {
             row: searchKingPosition.row,
-            col: searchKingPosition.col + colDelta * -2,
+            col: searchKingPosition.col + colDiff * -2,
           };
           const rookTarget = {
             row: kingTarget.row,
-            col: kingTarget.col + colDelta,
+            col: kingTarget.col + colDiff,
           };
           moves.push(
             new Castling(
               false,
-              colDelta === -1,
+              colDiff === -1,
               searchKingPosition,
               kingTarget,
               position,

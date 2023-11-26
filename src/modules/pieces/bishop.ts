@@ -8,7 +8,7 @@ import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
-import { getDeltaPosition, isPositionOnBoard } from "./piece";
+import { getDiffPosition, isPositionOnBoard } from "./piece";
 
 export class Bishop extends Piece {
   constructor(color: PlayerColor, id?: string) {
@@ -20,20 +20,16 @@ export class Bishop extends Piece {
     boardStateValue: BoardStateValue
   ): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
-    for (const colDelta of [-1, 1]) {
-      for (const rowDelta of [-1, 1]) {
-        let totalColDelta = 0;
-        let totalRowDelta = 0;
+    for (const colDiff of [-1, 1]) {
+      for (const rowDiff of [-1, 1]) {
+        let totalColDiff = 0;
+        let totalRowDiff = 0;
 
         let piece = null;
         do {
-          totalColDelta += colDelta;
-          totalRowDelta += rowDelta;
-          const target = getDeltaPosition(
-            position,
-            totalColDelta,
-            totalRowDelta
-          );
+          totalColDiff += colDiff;
+          totalRowDiff += rowDiff;
+          const target = getDiffPosition(position, totalColDiff, totalRowDiff);
           if (!isPositionOnBoard(target)) {
             break;
           }

@@ -192,12 +192,12 @@ function willMoveCheckGuardedPiece(
   return checksGuardedPiece;
 }
 
-export function getDeltaPosition(
+export function getDiffPosition(
   position: BoardPosition,
-  colDelta: number,
-  rowDelta: number
+  colDiff: number,
+  rowDiff: number
 ): BoardPosition {
-  return sumPositions(position, { row: rowDelta, col: colDelta });
+  return sumPositions(position, { row: rowDiff, col: colDiff });
 }
 
 export function getBoardPositionPiece(

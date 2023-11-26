@@ -41,6 +41,7 @@ export function isMovePromotion(move: Move): move is Promotion {
 }
 
 export interface RawPromotion extends RawMove {
+  firstMove: boolean;
   piece: RawPiece;
   origin: BoardPosition;
   target: BoardPosition;
@@ -50,6 +51,7 @@ export interface RawPromotion extends RawMove {
 }
 
 export function isRawPromotion(rawMove: RawMove): rawMove is RawPromotion {
+  if (typeof rawMove.firstMove !== "boolean") return false;
   if (typeof rawMove.piece !== "object") return false;
   if (typeof rawMove.origin !== "object") return false;
   if (typeof rawMove.target !== "object") return false;
@@ -89,6 +91,7 @@ class Promotion extends Move {
       };
     }
     return {
+      firstMove: this.firstMove,
       performed: this.performed,
       moveId: this.moveId,
       piece: this.piece.getRawPiece(),
@@ -98,6 +101,11 @@ class Promotion extends Move {
       captures,
       id: this.id,
     };
+  }
+
+  public loadCustomProps(rawMove: RawPromotion): void {
+    super.loadCustomProps(rawMove);
+    this.firstMove = rawMove.firstMove;
   }
 
   public static restore(rawMove: RawMove): Promotion {
@@ -281,11 +289,11 @@ class Promotion extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.piece.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(newRawPiece.pieceId)}`
+          this.captures
+        )}=${getPieceNotation(newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-        newRawPiece.pieceId
-      )}`;
+          newRawPiece.pieceId
+        )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

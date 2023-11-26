@@ -8,7 +8,7 @@ import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import Piece, { isFriendlyPiece } from "./piece";
-import { getDeltaPosition, isPositionOnBoard } from "./piece";
+import { getDiffPosition, isPositionOnBoard } from "./piece";
 
 export class Knight extends Piece {
   constructor(color: PlayerColor, id?: string) {
@@ -17,12 +17,12 @@ export class Knight extends Piece {
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
-    for (const colDelta of [-2, -1, 1, 2]) {
-      for (const rowDelta of [-2, -1, 1, 2]) {
-        if (Math.abs(colDelta) === Math.abs(rowDelta)) {
+    for (const colDiff of [-2, -1, 1, 2]) {
+      for (const rowDiff of [-2, -1, 1, 2]) {
+        if (Math.abs(colDiff) === Math.abs(rowDiff)) {
           continue;
         }
-        const target = getDeltaPosition(position, colDelta, rowDelta);
+        const target = getDiffPosition(position, colDiff, rowDiff);
         if (!isPositionOnBoard(target)) {
           continue;
         }

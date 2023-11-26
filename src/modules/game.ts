@@ -2,7 +2,7 @@ import { type ComputedRef, type Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
-import type GameBoardManager from "./game_board_manager";
+import GameBoardManager from "./game_board_manager";
 import type ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
@@ -20,6 +20,13 @@ import type {
   BoardStateValue,
 } from "./board_manager";
 import type Move from "./moves/move";
+import { isMoveShift } from "./moves/shift";
+import { isMovePromotion } from "./moves/promotion";
+import { isMoveCastling } from "./moves/castling";
+import NumberUserData from "./user_data/number_user_data";
+
+type MoveDirection = "forward" | "reverse";
+type MoveExecution = "perform" | MoveDirection;
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
@@ -138,6 +145,7 @@ class Game {
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly ignorePiecesProtections: Ref<boolean>,
     private readonly moveIndex: Ref<number>,
+    private readonly moveIndexData: NumberUserData,
     private readonly moveList: Ref<Move[]>,
     private readonly lastMove: ComputedRef<Move | null>,
     private readonly confirmDialog: ConfirmDialog,
@@ -208,9 +216,10 @@ class Game {
         this.cancelWin();
     });
 
-    watch(moveIndex, (oldValue, newValue) => {
-      this.onMoveIndexChange(oldValue, newValue);
-    });
+    this.boardManager.addEventListener(
+      "move",
+      this.onMove.bind(this, "perform")
+    );
   }
 
   private playerWin(reason: WinReason) {
@@ -330,14 +339,6 @@ class Game {
     }
   }
 
-  private resetMoveTimer() {
-    if (this.playerPlaying.value) {
-      this.opponentMoveSecondsTimer.reset();
-    } else {
-      this.playerMoveSecondsTimer.reset();
-    }
-  }
-
   private clearTimers() {
     this.playerMoveSecondsTimer.reset();
     this.opponentMoveSecondsTimer.reset();
@@ -410,13 +411,9 @@ class Game {
     this.boardManager.resetBoard();
     this.toastManager.showToast("New match started.", "flag-checkered");
     this.moveIndex.value = -1;
+    this.onMoveForward();
     this.moveList.value = [];
-    this.onMoveIndexChange(0, -1);
     this.clearTimers();
-    this.updateTimerState();
-    this.boardStateData.save();
-    invalidatePiecesCache(this.pieceProps.value);
-    this.updateCapturingPaths();
   }
 
   public restore() {
@@ -432,13 +429,91 @@ class Game {
     }
   }
 
-  public onMoveIndexChange(oldIndex: number, newIndex: number) {
-    console.log(oldIndex, newIndex);
+  private spliceFutureMoves(listIndexDiff: number) {
+    this.moveList.value.splice(this.moveIndex.value, listIndexDiff);
+  }
+
+  private performReverseMove() {
+    const reversedMove = this.moveList.value[this.moveIndex.value + 1];
+    reversedMove.reverse(this.boardStateValue);
+  }
+
+  private performForwardMove() {
+    const forwardedMove = this.moveList.value[this.moveIndex.value];
+    if (isMoveShift(forwardedMove)) {
+      forwardedMove.forward(this.boardStateValue);
+    } else if (isMovePromotion(forwardedMove)) {
+      forwardedMove.forward(
+        this.boardStateValue,
+        this.piecesImportance,
+        this.blackCapturedPieces,
+        this.whiteCapturedPieces,
+        this.reviveFromCapturedPieces
+      );
+    } else if (isMoveCastling(forwardedMove)) {
+      forwardedMove.forward(this.boardStateValue);
+    }
+  }
+
+  public forwardMove() {
+    this.onMove("forward");
+  }
+
+  public reverseMove() {
+    if (this.moveIndex.value === -1) {
+      this.toastManager.showToast(
+        "This is already a first move. You cannot go further back.",
+        "cancel",
+        "error"
+      );
+      return;
+    }
+    this.onMove("reverse");
+  }
+
+  public onMove(moveExecution: MoveExecution = "perform") {
+    if (moveExecution === "reverse") {
+      this.moveIndex.value--;
+    } else {
+      this.moveIndex.value++;
+      this.moveIndexData.save();
+    }
+
+    if (moveExecution === "perform") {
+      const listIndexDiff =
+        this.moveList.value.length - this.moveIndex.value - 1;
+      if (listIndexDiff > 0) {
+        this.spliceFutureMoves(listIndexDiff);
+      }
+      this.onMovePerform();
+    } else {
+      if (moveExecution === "reverse") {
+        this.performReverseMove();
+      } else {
+        this.performForwardMove();
+      }
+      this.onBoardStateChange();
+    }
+  }
+
+  private onBoardStateChange() {
     this.updateTimerState();
-    this.resetMoveTimer();
-    this.boardStateData.save();
+    if (this.playerPlaying.value) {
+      this.opponentMoveSecondsTimer.reset();
+    } else {
+      this.playerMoveSecondsTimer.reset();
+    }
     invalidatePiecesCache(this.pieceProps.value);
     this.updateCapturingPaths();
+  }
+
+  private onMoveForward() {
+    this.onBoardStateChange();
+    this.boardStateData.save();
+  }
+
+  private onMovePerform() {
+    this.onMoveForward();
     this.checkLoss();
   }
 
