@@ -86,7 +86,7 @@ export abstract class Piece {
   public getCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): BoardPosition[] {
     if (!this.capturingPositionsCache)
       this.capturingPositionsCache = this.getNewCapturingPositions(
@@ -100,7 +100,7 @@ export abstract class Piece {
   public abstract getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): BoardPosition[];
 
   public getPossibleMoves(
@@ -112,7 +112,7 @@ export abstract class Piece {
     whiteCapturedPieces: Ref<PieceId[]>,
     reviveFromCapturedPieces: Ref<boolean>,
     ignorePiecesProtections: Ref<boolean>,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): Move[] {
     if (!this.possibleMovesCache) {
       let possibleMoves = this.getNewPossibleMoves(
@@ -148,7 +148,7 @@ export abstract class Piece {
   public abstract getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): Move[];
 }
 
@@ -160,7 +160,7 @@ function willMoveCheckGuardedPiece(
   blackCapturedPieces: Ref<PieceId[]>,
   whiteCapturedPieces: Ref<PieceId[]>,
   reviveFromCapturedPieces: Ref<boolean>,
-  lastMove: ComputedRef<Move>
+  lastMove: ComputedRef<Move | null>
 ) {
   if (isMoveShift(move)) {
     move.forward(newBoardStateValue);

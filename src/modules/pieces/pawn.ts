@@ -1,5 +1,5 @@
 import type Move from "../moves/move";
-import Shift from "../moves/shift";
+import Shift, { isMoveShift } from "../moves/shift";
 import Promotion from "../moves/promotion";
 import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import { getDeltaPosition } from "./piece";
@@ -12,7 +12,7 @@ import type {
   BoardStateValue,
 } from "../board_manager";
 import { ComputedRef } from "vue";
-import BoardManager from "../board_manager";
+import { getPositionPiece } from "../game_board_manager";
 
 interface RawPawn extends RawPiece {
   moved: boolean;
@@ -66,7 +66,7 @@ export class Pawn extends Piece {
   public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): Move[] {
     const moves: Move[] = [];
 
@@ -141,6 +141,35 @@ export class Pawn extends Piece {
         );
       }
     }
+
+    if (!lastMove.value) return moves;
+    if (!isMoveShift(lastMove.value)) return moves;
+    const lastShift = lastMove.value;
+
+    const moveRowDelta = lastShift.target.row - lastShift.origin.row;
+    if (Math.abs(moveRowDelta) !== 2) return moves;
+    const targetPawnAbsColDelta = Math.abs(lastShift.target.col - position.col);
+    const targetPawnAbsRowDelta = Math.abs(lastShift.target.row - position.row);
+    if (targetPawnAbsColDelta !== 1 || targetPawnAbsRowDelta !== 0)
+      return moves;
+
+    const targetRow = lastShift.target.row + (moveRowDelta === 2 ? -1 : 1);
+    const capturedPiece = getPositionPiece(lastShift.target, boardStateValue);
+    moves.push(
+      new Shift(
+        this.pieceId,
+        position,
+        {
+          row: targetRow,
+          col: lastShift.target.col,
+        },
+        {
+          row: lastShift.target.row,
+          col: lastShift.target.col,
+          piece: capturedPiece,
+        }
+      )
+    );
 
     return moves;
   }

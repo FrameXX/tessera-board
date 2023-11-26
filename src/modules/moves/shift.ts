@@ -21,7 +21,7 @@ import {
   isBoardPosition,
 } from "../board_manager";
 import { capturePosition, movePiece } from "./move";
-import { getPositionPiece } from "../game_board_manager";
+import { getPositionPiece, positionsEqual } from "../game_board_manager";
 import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
 
@@ -56,9 +56,9 @@ class Shift extends Move {
   private firstMove = false;
 
   constructor(
-    private readonly pieceId: PieceId,
-    private readonly origin: BoardPosition,
-    private readonly target: BoardPosition,
+    public readonly pieceId: PieceId,
+    public readonly origin: BoardPosition,
+    public readonly target: BoardPosition,
     public readonly captures?: BoardPieceProps,
     private readonly id?: string
   ) {
@@ -181,13 +181,15 @@ class Shift extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 
   public get clickablePositions(): BoardPosition[] {
-    return [this.target];
+    if (!this.captures) return [this.target];
+    if (positionsEqual(this.target, this.captures)) return [this.target];
+    return [this.target, this.captures];
   }
 
   public showCellMarks(cellMarks: MarkBoardState): void {

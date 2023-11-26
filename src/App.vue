@@ -678,10 +678,13 @@ const userDataManager = new UserDataManager(
 );
 
 const lastMove = computed(() => {
+  if (moveIndex.value === -1) {
+    return null;
+  }
   return moveList.value[moveIndex.value];
 });
 const highlightedCells = computed(() => {
-  if (moveIndex.value === -1) {
+  if (!lastMove.value) {
     return [];
   }
   return lastMove.value.highlightedBoardPositions;

@@ -139,7 +139,7 @@ class Game {
     private readonly ignorePiecesProtections: Ref<boolean>,
     private readonly moveIndex: Ref<number>,
     private readonly moveList: Ref<Move[]>,
-    private readonly lastMove: ComputedRef<Move>,
+    private readonly lastMove: ComputedRef<Move | null>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
@@ -568,7 +568,7 @@ export function isGuardedPieceChecked(
   color: PlayerColor,
   allPieceProps: BoardPieceProps[],
   guardedPieces: BoardPieceProps[],
-  lastMove: ComputedRef<Move>
+  lastMove: ComputedRef<Move | null>
 ) {
   let capturingPaths: Path[] = [];
 

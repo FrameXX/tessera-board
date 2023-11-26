@@ -19,7 +19,7 @@ export class Queen extends Piece {
   public getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): BoardPosition[] {
     // NOTE: Capturing positions of qeen are same as capturing positions of rook and bishop in same state joined together. There's no overlap between rook and bishop capturing positions which is also great.
     const rook = new Rook(this.color);
@@ -34,7 +34,7 @@ export class Queen extends Piece {
   public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getNewCapturingPositions(

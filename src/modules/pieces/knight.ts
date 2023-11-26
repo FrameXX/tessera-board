@@ -35,7 +35,7 @@ export class Knight extends Piece {
   public getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move>
+    lastMove: ComputedRef<Move | null>
   ): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getCapturingPositions(
