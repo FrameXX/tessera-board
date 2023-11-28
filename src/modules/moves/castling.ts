@@ -145,14 +145,14 @@ class Castling extends Move {
 
   public async perform(
     boardStateValue: BoardStateValue,
-    audioEffects: boolean,
+    audioEffectsEnabled: boolean,
     moveAudioEffect: Howl
   ): Promise<void> {
     this.onForward(boardStateValue);
 
     movePiece(this.kingOrigin, this.kingTarget, boardStateValue);
     await movePiece(this.rookOrigin, this.rookTarget, boardStateValue);
-    if (audioEffects) moveAudioEffect.play();
+    if (audioEffectsEnabled) moveAudioEffect.play();
 
     this.notation = this.kingSide ? "0-0" : "0-0-0";
   }

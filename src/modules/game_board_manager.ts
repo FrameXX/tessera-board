@@ -45,14 +45,14 @@ class GameBoardManager extends BoardManager {
     private readonly selectedCells: Ref<BoardPosition[]>,
     private readonly draggingOverCells: Ref<BoardPosition[]>,
     private readonly selectPieceDialog: SelectPieceDialog,
-    private readonly audioEffects: Ref<boolean>,
+    private readonly audioEffectsEnabled: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
-    private readonly useVibrations: Ref<boolean>,
+    private readonly vibrationsEnabled: Ref<boolean>,
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
-    private readonly ignorePiecesProtections: Ref<boolean>,
+    private readonly ignorePiecesGuardedProperty: Ref<boolean>,
     private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
     private readonly piecesImportance: PiecesImportance,
     private readonly moveList: Ref<Move[]>,
@@ -134,7 +134,7 @@ class GameBoardManager extends BoardManager {
       this.blackCapturedPieces,
       this.whiteCapturedPieces,
       this.reviveFromCapturedPieces,
-      this.ignorePiecesProtections,
+      this.ignorePiecesGuardedProperty,
       this.lastMove
     );
     moves.forEach((move) =>
@@ -186,7 +186,7 @@ class GameBoardManager extends BoardManager {
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
         this.reviveFromCapturedPieces,
-        this.ignorePiecesProtections,
+        this.ignorePiecesGuardedProperty,
         this.lastMove
       );
     } while (moves.length === 0);
@@ -201,10 +201,10 @@ class GameBoardManager extends BoardManager {
         this.boardStateValue,
         this.blackCapturedPieces,
         this.whiteCapturedPieces,
-        this.audioEffects.value,
+        this.audioEffectsEnabled.value,
         this.pieceMoveAudioEffect,
         this.pieceRemoveAudioEffect,
-        this.useVibrations.value
+        this.vibrationsEnabled.value
       );
     } else if (isMovePromotion(move)) {
       await move.perform(
@@ -213,15 +213,15 @@ class GameBoardManager extends BoardManager {
         this.whiteCapturedPieces,
         this.selectPieceDialog,
         this.reviveFromCapturedPieces,
-        this.audioEffects.value,
+        this.audioEffectsEnabled.value,
         this.pieceMoveAudioEffect,
         this.pieceRemoveAudioEffect,
-        this.useVibrations.value
+        this.vibrationsEnabled.value
       );
     } else if (isMoveCastling(move)) {
       await move.perform(
         this.boardStateValue,
-        this.audioEffects.value,
+        this.audioEffectsEnabled.value,
         this.pieceMoveAudioEffect
       );
     }

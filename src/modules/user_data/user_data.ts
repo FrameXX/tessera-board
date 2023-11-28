@@ -23,21 +23,22 @@ abstract class UserData<ValueType> {
     public value: ValueType,
     private readonly toastManager?: ToastManager,
     valueRef?: Ref<ValueType>,
-    autoSave: boolean = true
+    private readonly autoSave: boolean = true
   ) {
     this.storageKey = `${UserData.BASE_STORAGE_KEY}-${this.id}`;
 
     // Watch ref for changes, update the original value and save changes.
-    if (valueRef && autoSave) {
-      this.valueRef = valueRef;
-      watch(
-        valueRef,
-        async (newValue) => {
-          this.onValueChange(newValue);
-        },
-        { deep: true }
-      );
+    if (!valueRef) {
+      return;
     }
+    this.valueRef = valueRef;
+    watch(
+      valueRef,
+      async (newValue) => {
+        this.onValueChange(newValue);
+      },
+      { deep: true }
+    );
   }
 
   protected get isSavedOnce() {
@@ -66,14 +67,20 @@ abstract class UserData<ValueType> {
   public onRecoverCheck() {}
 
   public save() {
+    this.updateValueFromRef();
     if (navigator.cookieEnabled)
       localStorage.setItem(this.storageKey, this.dump());
+  }
+
+  private updateValueFromRef() {
+    if (!this.valueRef) return;
+    this.value = this.valueRef.value;
   }
 
   protected onValueChange(newValue: ValueType) {
     this.value = newValue;
     this.apply();
-    this.save();
+    if (this.autoSave) this.save();
   }
 
   protected handleInvalidLoadValue(value: string) {

@@ -10,11 +10,8 @@ import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
-import type { PieceSetValue } from "../modules/user_data/piece_set";
-import type {
-  MoveSecondsLimitRunOutPunishment,
-  PlayerColor,
-} from "../modules/game";
+import type { pieceIconPackValue } from "../modules/user_data/piece_set";
+import type { SecondsPerMovePenalty, PlayerColor } from "../modules/game";
 import type ConfigsDialog from "../modules/dialogs/configs";
 import ConfigManager from "../modules/config_manager";
 import DefaultBoardManager from "../modules/default_board_manager";
@@ -59,7 +56,7 @@ const theme = inject("theme") as Ref<Theme>;
 const transitions = inject("transitions") as Ref<Transitions>;
 const playerHue = inject("playerHue") as Ref<number>;
 const opponentHue = inject("opponentHue") as Ref<number>;
-const pieceSet = inject("pieceSet") as Ref<PieceSetValue>;
+const pieceIconPack = inject("pieceIconPack") as Ref<pieceIconPackValue>;
 const piecePadding = inject("piecePadding") as Ref<number>;
 const pieceBorder = inject("pieceBorder") as Ref<number>;
 const transitionDuration = inject("transitionDuration") as Ref<number>;
@@ -68,39 +65,35 @@ const preferredPlayerColor = inject("preferredPlayerColor") as Ref<PlayerColor>;
 const secondCheckboard = inject("secondCheckboard") as Ref<boolean>;
 const tableMode = inject("tableMode") as Ref<boolean>;
 const requireMoveConfirm = inject("requireMoveConfirm") as Ref<boolean>;
-const audioEffects = inject("audioEffects") as Ref<boolean>;
+const audioEffectsEnabled = inject("audioEffectsEnabled") as Ref<boolean>;
 const showCapturingPieces = inject("showCapturingPieces") as Ref<boolean>;
 const reviveFromCapturedPieces = inject<boolean>("reviveFromCapturedPieces");
-const playerMoveSecondsLimit = inject("playerMoveSecondsLimit") as Ref<number>;
-const opponentMoveSecondsLimit = inject(
-  "opponentMoveSecondsLimit"
-) as Ref<number>;
-const playerMatchSecondsLimit = inject(
-  "playerMatchSecondsLimit"
-) as Ref<number>;
-const opponentMatchSecondsLimit = inject(
-  "opponentMatchSecondsLimit"
+const playerSecondsPerMove = inject("playerSecondsPerMove") as Ref<number>;
+const opponentSecondsPerMove = inject("opponentSecondsPerMove") as Ref<number>;
+const playerSecondsPerMatch = inject("playerSecondsPerMatch") as Ref<number>;
+const opponentSecondsPerMatch = inject(
+  "opponentSecondsPerMatch"
 ) as Ref<number>;
 const showOtherAvailibleMoves = inject(
   "showOtherAvailibleMoves"
 ) as Ref<boolean>;
-const secondsMoveLimitRunOutPunishment = inject(
-  "secondsMoveLimitRunOutPunishment"
-) as Ref<MoveSecondsLimitRunOutPunishment>;
-const prefferedFirstMoveColor = inject(
-  "prefferedFirstMoveColor"
+const secondsPerMovePenalty = inject(
+  "secondsPerMovePenalty"
+) as Ref<SecondsPerMovePenalty>;
+const preferredFirstMoveColor = inject(
+  "preferredFirstMoveColor"
 ) as Ref<PlayerColor>;
-const useVibrations = inject("useVibrations") as Ref<boolean>;
-const longPressTimeout = inject("longPressTimeout") as Ref<number>;
-const autoPause = inject("autoPause") as Ref<boolean>;
+const vibrationsEnabled = inject("vibrationsEnabled") as Ref<boolean>;
+const pieceLongPressTimeout = inject("pieceLongPressTimeout") as Ref<number>;
+const autoPauseGame = inject("autoPauseGame") as Ref<boolean>;
 const pawnImportance = inject("pawnImportance") as Ref<number>;
 const knightImportance = inject("knightImportance") as Ref<number>;
 const bishopImportance = inject("bishopImportance") as Ref<number>;
 const rookImportance = inject("rookImportance") as Ref<number>;
 const queenImportance = inject("queenImportance") as Ref<number>;
 const kingImportance = inject("kingImportance") as Ref<number>;
-const ignorePiecesProtections = inject(
-  "ignorePiecesProtections"
+const ignorePiecesGuardedProperty = inject(
+  "ignorePiecesGuardedProperty"
 ) as Ref<boolean>;
 
 const configsDialog = inject("configsDialog") as ConfigsDialog;
@@ -170,7 +163,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-player-seconds-per-move"
-              v-model="playerMoveSecondsLimit"
+              v-model="playerSecondsPerMove"
             />
             <template #description
               >Limits player's time per move. If the time runs out (expires) an
@@ -187,7 +180,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-opponent-seconds-per-move"
-              v-model="opponentMoveSecondsLimit"
+              v-model="opponentSecondsPerMove"
             />
             <template #description
               >Limits opponent's time per move. If the time runs out (expires)
@@ -204,7 +197,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-player-seconds-per-match"
-              v-model="playerMatchSecondsLimit"
+              v-model="playerSecondsPerMatch"
             />
             <template #description
               >Limits player's time for whole match (game). If the time runs out
@@ -221,7 +214,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-opponent-seconds-per-match"
-              v-model="opponentMatchSecondsLimit"
+              v-model="opponentSecondsPerMatch"
             />
             <template #description
               >Limits opponent's time for whole match (game). If the time runs
@@ -238,7 +231,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <select
               id="seconds-per-move-runout-punishment"
-              v-model="secondsMoveLimitRunOutPunishment"
+              v-model="secondsPerMovePenalty"
             >
               <option value="random_move">Random move</option>
               <option value="game_loss">Game loss</option>
@@ -290,7 +283,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="numeric-1-box-outline"
             option-id="first-move-color"
           >
-            <select id="first-move-color" v-model="prefferedFirstMoveColor">
+            <select id="first-move-color" v-model="preferredFirstMoveColor">
               <option value="random">Random</option>
               <option value="white">White</option>
               <option value="black">Black</option>
@@ -324,7 +317,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="ignore-pieces-protections"
-              v-model="ignorePiecesProtections"
+              v-model="ignorePiecesGuardedProperty"
             />
             <template #description>
               Some pieces like a king in chess are protected. That means that
@@ -354,7 +347,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               <Board
                 :manager="defaultBoardManager"
                 :state="defaultBoardState"
-                :piece-set="pieceSet"
+                :piece-set="pieceIconPack"
                 :piece-padding="piecePadding"
                 :piece-border="pieceBorder"
                 :dragging-over-cells="defaultDraggingOverCells"
@@ -461,7 +454,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="000"
               max="600"
               id="input-long-press-timeout"
-              v-model="longPressTimeout"
+              v-model="pieceLongPressTimeout"
             />
             <template #description
               >Changes duration of press/hold on a piece to be recognized as
@@ -498,7 +491,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="play-pause"
             option-id="check-auto-pause"
           >
-            <Checkbox id="check-auto-pause" v-model="autoPause" />
+            <Checkbox id="check-auto-pause" v-model="autoPauseGame" />
             <template #description>
               The game will be automatically paused when settings is opened,
               borwser tab is switched, browser window is not focused etc...
@@ -581,7 +574,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="package-variant-closed"
             option-id="select-piece-set"
           >
-            <select id="select-piece-set" v-model="pieceSet">
+            <select id="select-piece-set" v-model="pieceIconPack">
               <option value="material_design">Material Design</option>
               <option value="font_awesome">Font Awesome</option>
               <option value="tabler">Tabler</option>
@@ -649,7 +642,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="surround-sound"
             option-id="check-audio-effects"
           >
-            <Checkbox id="check-audio-effects" v-model="audioEffects" />
+            <Checkbox id="check-audio-effects" v-model="audioEffectsEnabled" />
             <template #description>
               Enables simple audio effects when a piece is moved, added etc...
             </template>
@@ -659,7 +652,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="vibrate"
             option-id="check-use-vibrations"
           >
-            <Checkbox id="check-use-vibrations" v-model="useVibrations" />
+            <Checkbox id="check-use-vibrations" v-model="vibrationsEnabled" />
             <template #description>
               Vibrations will be performed on devices that have a vibration
               motor when pieces is captured, removed, long-pressed etc...

@@ -167,10 +167,10 @@ class Shift extends Move {
     boardStateValue: BoardStateValue,
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
-    audioEffects: boolean,
+    audioEffectsEnabled: boolean,
     moveAudioEffect: Howl,
     removeAudioEffect: Howl,
-    useVibrations: boolean
+    vibrationsEnabled: boolean
   ): Promise<void> {
     this.onForward(boardStateValue);
 
@@ -181,11 +181,11 @@ class Shift extends Move {
         blackCapturedPieces,
         whiteCapturedPieces
       );
-      if (audioEffects) removeAudioEffect.play();
-      if (useVibrations) navigator.vibrate(30);
+      if (audioEffectsEnabled) removeAudioEffect.play();
+      if (vibrationsEnabled) navigator.vibrate(30);
     }
     await movePiece(this.origin, this.target, boardStateValue);
-    if (audioEffects) moveAudioEffect.play();
+    if (audioEffectsEnabled) moveAudioEffect.play();
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(

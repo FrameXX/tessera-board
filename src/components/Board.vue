@@ -72,8 +72,8 @@ const props = defineProps({
   },
 });
 
-const longPressTimeout = inject("longPressTimeout") as Ref<number>;
-const useVibrations = inject("useVibrations") as Ref<boolean>;
+const pieceLongPressTimeout = inject("pieceLongPressTimeout") as Ref<number>;
+const vibrationsEnabled = inject("vibrationsEnabled") as Ref<boolean>;
 const pixelsPerCm = inject("pixelsPerCm") as number;
 
 const container = ref<HTMLDivElement | null>(null);
@@ -184,7 +184,7 @@ watch(showDragging, (newValue) => {
     targetingDragPosition.value,
     draggingPiece.value
   );
-  if (useVibrations.value) navigator.vibrate(30);
+  if (vibrationsEnabled.value) navigator.vibrate(30);
 });
 
 const inchPxOffset = computed(() => {
@@ -257,7 +257,7 @@ function onPiecePointerStart(event: PointerEvent, pieceProps: BoardPieceProps) {
 
   pressTimeout = window.setTimeout(() => {
     initDrag(event, pieceProps);
-  }, longPressTimeout.value);
+  }, pieceLongPressTimeout.value);
 }
 
 function onPointerMove(event: PointerEvent) {

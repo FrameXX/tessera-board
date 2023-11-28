@@ -17,7 +17,7 @@ class DefaultBoardManager extends BoardManager {
     private readonly boardStateValue: BoardStateValue,
     private readonly configPieceDialog: ConfigPieceDialog,
     private readonly draggingOverCells: Ref<BoardPosition[]>,
-    private readonly audioEffects: Ref<boolean>,
+    private readonly audioEffectsEnabled: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly useVibratons: Ref<boolean>
@@ -75,7 +75,7 @@ class DefaultBoardManager extends BoardManager {
       this.boardStateValue,
       "default-board"
     );
-    if (this.audioEffects.value) this.pieceMoveAudioEffect.play();
+    if (this.audioEffectsEnabled.value) this.pieceMoveAudioEffect.play();
   }
 
   public onPieceClick(pieceProps: BoardPieceProps): void {
@@ -83,14 +83,14 @@ class DefaultBoardManager extends BoardManager {
       return;
     }
     this.boardStateValue[pieceProps.row][pieceProps.col] = null;
-    if (this.audioEffects.value) this.pieceRemoveAudioEffect.play();
+    if (this.audioEffectsEnabled.value) this.pieceRemoveAudioEffect.play();
     if (this.useVibratons.value) navigator.vibrate(30);
   }
 
   public async onCellClick(position: BoardPosition) {
     const piece = await this.configPieceDialog.open();
     this.boardStateValue[position.row][position.col] = piece;
-    if (this.audioEffects.value) this.pieceMoveAudioEffect.play();
+    if (this.audioEffectsEnabled.value) this.pieceMoveAudioEffect.play();
     if (this.useVibratons.value) navigator.vibrate(30);
   }
 }

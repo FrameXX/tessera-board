@@ -14,7 +14,7 @@ class MoveListData extends UserData<Move[]> {
     valueRef: Ref<Move[]>,
     toastManager: ToastManager
   ) {
-    super(id, value, toastManager, valueRef);
+    super(id, value, toastManager, valueRef, false);
   }
 
   get rawVersion() {

@@ -111,7 +111,7 @@ export abstract class Piece {
     blackCapturedPieces: Ref<PieceId[]>,
     whiteCapturedPieces: Ref<PieceId[]>,
     reviveFromCapturedPieces: Ref<boolean>,
-    ignorePiecesProtections: Ref<boolean>,
+    ignorePiecesGuardedProperty: Ref<boolean>,
     lastMove: ComputedRef<Move | null>
   ): Move[] {
     if (!this.possibleMovesCache) {
@@ -121,7 +121,7 @@ export abstract class Piece {
         lastMove
       );
 
-      if (!ignorePiecesProtections.value) {
+      if (!ignorePiecesGuardedProperty.value) {
         const newBoardStateData = new BoardStateData([]);
         newBoardStateData.load(boardStateData.dump());
         const newBoardStateValue = newBoardStateData.value;

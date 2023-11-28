@@ -16,10 +16,10 @@ const props = defineProps({
   playerSecsMatch: { type: Number, required: true },
   opponentSecsMove: { type: Number, required: true },
   opponentSecsMatch: { type: Number, required: true },
-  playerMoveSecondsLimitSet: { type: Boolean, required: true },
-  opponentMoveSecondsLimitSet: { type: Boolean, required: true },
-  playerMatchSecondsLimitSet: { type: Boolean, required: true },
-  opponentMatchSecondsLimitSet: { type: Boolean, required: true },
+  playerSecondsPerMoveSet: { type: Boolean, required: true },
+  opponentSecondsPerMoveSet: { type: Boolean, required: true },
+  playerSecondsPerMatchSet: { type: Boolean, required: true },
+  opponentSecondsPerMatchSet: { type: Boolean, required: true },
   playerPlaying: { type: Boolean, required: true },
   moveIndex: { type: Number, required: true },
   statusText: { type: String, required: true },
@@ -53,12 +53,10 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
   <div id="status">
     <div
       id="timers-player"
-      v-show="
-        props.playerMoveSecondsLimitSet || props.playerMatchSecondsLimitSet
-      "
+      v-show="props.playerSecondsPerMoveSet || props.playerSecondsPerMatchSet"
     >
       <InfoText
-        v-show="props.playerMoveSecondsLimitSet"
+        v-show="props.playerSecondsPerMoveSet"
         content-role="timer"
         :class="{
           pulsing:
@@ -75,7 +73,7 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
         }}</InfoText
       >
       <InfoText
-        v-show="props.playerMatchSecondsLimitSet"
+        v-show="props.playerSecondsPerMatchSet"
         content-role="timer"
         :class="{
           pulsing:
@@ -102,11 +100,11 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
     <div
       id="timers-opponent"
       v-show="
-        props.opponentMoveSecondsLimitSet || props.opponentMatchSecondsLimitSet
+        props.opponentSecondsPerMoveSet || props.opponentSecondsPerMatchSet
       "
     >
       <InfoText
-        v-show="props.opponentMoveSecondsLimitSet"
+        v-show="props.opponentSecondsPerMoveSet"
         content-role="timer"
         :class="{
           pulsing:
@@ -123,7 +121,7 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
         }}</InfoText
       >
       <InfoText
-        v-show="props.opponentMatchSecondsLimitSet"
+        v-show="props.opponentSecondsPerMatchSet"
         content-role="timer"
         :class="{
           pulsing:

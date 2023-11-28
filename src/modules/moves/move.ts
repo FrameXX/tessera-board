@@ -62,6 +62,7 @@ abstract class Move {
 
   protected beforePerformReverse() {
     if (!this.performed) {
+      console.error(this);
       throw new GameLogicError(
         "A move that wasn't performed yet shouldn't be reversed already."
       );

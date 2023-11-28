@@ -1,6 +1,6 @@
 import { type ComputedRef, type Ref, watch } from "vue";
 import type BoardStateData from "./user_data/board_state";
-import type { PlayerColorOptionValue } from "./user_data/preferred_player_color";
+import type { PreferredPlayerColor } from "./user_data/preferred_player_color";
 import { getRandomNumber } from "./utils/misc";
 import GameBoardManager from "./game_board_manager";
 import type ToastManager from "./toast_manager";
@@ -13,7 +13,7 @@ import {
   type Path,
   getTargetMatchingPaths,
 } from "./pieces/piece";
-import type { GamePaused } from "./user_data/game_paused";
+import type { GamePausedState } from "./user_data/game_paused";
 import type {
   BoardPieceProps,
   BoardPosition,
@@ -24,6 +24,7 @@ import { isMoveShift } from "./moves/shift";
 import { isMovePromotion } from "./moves/promotion";
 import { isMoveCastling } from "./moves/castling";
 import NumberUserData from "./user_data/number_user_data";
+import MoveListData from "./user_data/move_list";
 
 type MoveDirection = "forward" | "reverse";
 type MoveExecution = "perform" | MoveDirection;
@@ -73,7 +74,7 @@ export function isWinner(string: string): string is Winner {
   return isPlayer(string) || isUndecidedWinner(string);
 }
 
-export type WinReason =
+export type GameOverReason =
   | "none"
   | "move_timeout"
   | "match_timeout"
@@ -81,7 +82,9 @@ export type WinReason =
   | "checkmate"
   | "stalemate"
   | "block";
-export function isWinReason(string: string): string is WinReason {
+export function isGameOverReason(
+  string: string | null
+): string is GameOverReason {
   return (
     string === "none" ||
     string === "move_timeout" ||
@@ -93,10 +96,10 @@ export function isWinReason(string: string): string is WinReason {
   );
 }
 
-export type MoveSecondsLimitRunOutPunishment = "game_loss" | "random_move";
-export function isMoveSecondsLimitRunOutPunishment(
+export type SecondsPerMovePenalty = "game_loss" | "random_move";
+export function isSecondsPerMovePenalty(
   string: string
-): string is MoveSecondsLimitRunOutPunishment {
+): string is SecondsPerMovePenalty {
   return string === "game_loss" || string === "random_move";
 }
 
@@ -115,7 +118,7 @@ class Game {
   private readonly opponentMatchSecondsTimer: Timer;
 
   constructor(
-    private readonly paused: Ref<GamePaused>,
+    private readonly paused: Ref<GamePausedState>,
     private readonly boardManager: GameBoardManager,
     private readonly boardStateData: BoardStateData,
     private readonly boardStateValue: BoardStateValue,
@@ -125,20 +128,20 @@ class Game {
     private readonly defaultBoardStateData: RawBoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
     private readonly firstMoveColor: Ref<PlayerColor>,
-    private readonly preferredFirstMoveColor: Ref<PlayerColorOptionValue>,
+    private readonly preferredFirstMoveColor: Ref<PreferredPlayerColor>,
     private readonly playerPlaying: ComputedRef<boolean>,
-    private readonly preferredPlayerColor: Ref<PlayerColorOptionValue>,
-    playerMoveSecondsLimit: Ref<number>,
-    opponentMoveSecondsLimit: Ref<number>,
-    playerMatchSecondsLimit: Ref<number>,
-    opponentMatchSecondsLimit: Ref<number>,
+    private readonly preferredPlayerColor: Ref<PreferredPlayerColor>,
+    playerSecondsPerMove: Ref<number>,
+    opponentSecondsPerMove: Ref<number>,
+    playerSecondsPerMatch: Ref<number>,
+    opponentSecondsPerMatch: Ref<number>,
     playerMoveSeconds: Ref<number>,
     opponentMoveSeconds: Ref<number>,
     playerMatchSeconds: Ref<number>,
     opponentMatchSeconds: Ref<number>,
-    private readonly secondsMoveLimitRunOutPunishment: Ref<MoveSecondsLimitRunOutPunishment>,
+    private readonly secondsMoveLimitRunOutPunishment: Ref<SecondsPerMovePenalty>,
     private readonly winner: Ref<Winner>,
-    private readonly winReason: Ref<WinReason>,
+    private readonly winReason: Ref<GameOverReason>,
     private readonly piecesImportance: PiecesImportance,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
@@ -147,6 +150,7 @@ class Game {
     private readonly moveIndex: Ref<number>,
     private readonly moveIndexData: NumberUserData,
     private readonly moveList: Ref<Move[]>,
+    private readonly moveListData: MoveListData,
     private readonly lastMove: ComputedRef<Move | null>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
@@ -162,7 +166,7 @@ class Game {
 
     this.playerMoveSecondsTimer = new Timer(
       playerMoveSeconds,
-      playerMoveSecondsLimit
+      playerSecondsPerMove
     );
     watch(this.playerMoveSecondsTimer.beyondLimit, (newValue) => {
       if (newValue) {
@@ -176,7 +180,7 @@ class Game {
 
     this.opponentMoveSecondsTimer = new Timer(
       opponentMoveSeconds,
-      opponentMoveSecondsLimit
+      opponentSecondsPerMove
     );
     watch(this.opponentMoveSecondsTimer.beyondLimit, (newValue) => {
       if (newValue) {
@@ -190,7 +194,7 @@ class Game {
 
     this.playerMatchSecondsTimer = new Timer(
       playerMatchSeconds,
-      playerMatchSecondsLimit
+      playerSecondsPerMatch
     );
     watch(this.playerMatchSecondsTimer.beyondLimit, (newValue) => {
       if (newValue) {
@@ -204,7 +208,7 @@ class Game {
 
     this.opponentMatchSecondsTimer = new Timer(
       opponentMatchSeconds,
-      opponentMatchSecondsLimit
+      opponentSecondsPerMatch
     );
     watch(this.opponentMatchSecondsTimer.beyondLimit, (newValue) => {
       if (newValue) {
@@ -222,7 +226,7 @@ class Game {
     );
   }
 
-  private playerWin(reason: WinReason) {
+  private playerWin(reason: GameOverReason) {
     const winner: Winner = "player";
     this.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
@@ -234,7 +238,7 @@ class Game {
     this.updateTimerState();
   }
 
-  private opponentWin(reason: WinReason) {
+  private opponentWin(reason: GameOverReason) {
     const winner: Winner = "opponent";
     this.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
@@ -245,7 +249,7 @@ class Game {
     this.updateTimerState();
   }
 
-  private draw(reason: WinReason) {
+  private draw(reason: GameOverReason) {
     this.toastManager.showToast("Draw.", "sword-cross");
     this.winner.value = "draw";
     this.winReason.value = reason;
@@ -456,13 +460,21 @@ class Game {
   }
 
   public forwardMove() {
+    if (this.moveList.value.length - this.moveIndex.value < 2) {
+      this.toastManager.showToast(
+        "You reached the last move. You cannot go further.",
+        "cancel",
+        "error"
+      );
+      return;
+    }
     this.onMove("forward");
   }
 
   public reverseMove() {
     if (this.moveIndex.value === -1) {
       this.toastManager.showToast(
-        "This is already a first move. You cannot go further back.",
+        "You reached the first move. You cannot go further.",
         "cancel",
         "error"
       );
@@ -476,7 +488,6 @@ class Game {
       this.moveIndex.value--;
     } else {
       this.moveIndex.value++;
-      this.moveIndexData.save();
     }
 
     if (moveExecution === "perform") {
@@ -493,6 +504,11 @@ class Game {
         this.performForwardMove();
       }
       this.onBoardStateChange();
+    }
+
+    if (moveExecution !== "reverse") {
+      this.moveIndexData.save();
+      this.moveListData.save();
     }
   }
 
@@ -536,7 +552,7 @@ class Game {
     );
     if (!canPlayerMove) {
       if (checked || guardedPieces.length === 0) {
-        const winReason: WinReason =
+        const winReason: GameOverReason =
           guardedPieces.length !== 0 ? "block" : "checkmate";
         this.playerPlaying.value
           ? this.opponentWin(winReason)

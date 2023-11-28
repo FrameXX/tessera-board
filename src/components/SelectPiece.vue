@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, type PropType, watch } from "vue";
 import type { RawPiece } from "../modules/pieces/raw_piece";
-import { PieceSetValue } from "../modules/user_data/piece_set";
+import { pieceIconPackValue } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
 
 type SelectPieceValue = RawPiece | null;
@@ -9,7 +9,10 @@ type SelectPieceValue = RawPiece | null;
 const props = defineProps({
   pieces: { type: Object as PropType<RawPiece[]>, required: true },
   modelValue: { type: Object as PropType<SelectPieceValue>, default: null },
-  pieceSet: { type: String as PropType<PieceSetValue>, required: true },
+  pieceIconPack: {
+    type: String as PropType<pieceIconPackValue>,
+    required: true,
+  },
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -50,7 +53,7 @@ function selectPiece(piece: RawPiece) {
       role="option"
     >
       <PieceIcon
-        :piece-set="props.pieceSet"
+        :piece-set="props.pieceIconPack"
         :piece-id="piece.pieceId"
         :color="piece.color"
       />

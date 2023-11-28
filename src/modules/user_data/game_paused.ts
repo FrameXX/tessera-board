@@ -2,18 +2,18 @@ import type { Ref } from "vue";
 import SelectUserData from "./select_user_data";
 import type ToastManager from "../toast_manager";
 
-export type GamePaused = "not" | "auto" | "manual";
-export function isGamePaused(string: string): string is GamePaused {
+export type GamePausedState = "not" | "auto" | "manual";
+export function isGamePausedState(string: string): string is GamePausedState {
   return string === "not" || string === "auto" || string === "manual";
 }
 
-class GamePausedData extends SelectUserData<GamePaused> {
+class GamePausedData extends SelectUserData<GamePausedState> {
   constructor(
-    value: GamePaused,
+    value: GamePausedState,
     toastManager: ToastManager,
-    valueRef?: Ref<GamePaused>
+    valueRef?: Ref<GamePausedState>
   ) {
-    super("game_paused", value, isGamePaused, toastManager, valueRef);
+    super("game_paused", value, isGamePausedState, toastManager, valueRef);
   }
 
   public load(dumped: string): void {

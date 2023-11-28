@@ -10,34 +10,28 @@ import { Howl } from "howler";
 import SelectUserData from "./modules/user_data/select_user_data";
 import BooleanUserData from "./modules/user_data/boolean_user_data";
 import UserDataManager from "./modules/user_data_manager";
-import { type Theme, isTheme } from "./modules/theme_manager";
-import { type Transitions, isTransitions } from "./modules/transitions_manager";
 import HueData from "./modules/user_data/hue";
-import PieceSetData, {
-  type PieceSetValue,
-} from "./modules/user_data/piece_set";
+import PieceIconPackData from "./modules/user_data/piece_set";
 import BoardStateData from "./modules/user_data/board_state";
 import PiecePaddingData from "./modules/user_data/piece_padding";
 import PieceBorderData from "./modules/user_data/piece_border";
 import TransitionDurationData from "./modules/user_data/transition_duration";
 import CellIndexOpacityData from "./modules/user_data/cell_index_opacity";
-import PlayerColorOptionData, {
-  type PlayerColorOptionValue,
-} from "./modules/user_data/preferred_player_color";
-import SecondCheckboardData from "./modules/user_data/second_checkboard";
+import PlayerColorOptionData from "./modules/user_data/preferred_player_color";
 import RequireMoveConfirmData from "./modules/user_data/require_move_confirm";
 import CapturedPiecesData from "./modules/user_data/captured_pieces";
 import NumberUserData from "./modules/user_data/number_user_data";
-import GamePausedData, {
-  type GamePaused,
-} from "./modules/user_data/game_paused";
+import GamePausedData from "./modules/user_data/game_paused";
 import RawBoardStateData from "./modules/user_data/raw_board_state";
 import MoveListData from "./modules/user_data/move_list";
+import defaultUserDataValues from "./modules/user_data/default_user_data_values";
 
 // Import other classes and functions
 import ToastManager, { type ToastProps } from "./modules/toast_manager";
-import ThemeManager from "./modules/theme_manager";
-import TransitionsManager from "./modules/transitions_manager";
+import ThemeManager, { isTheme } from "./modules/theme_manager";
+import TransitionsManager, {
+  isTransitions,
+} from "./modules/transitions_manager";
 import ConfirmDialog from "./modules/dialogs/confirm";
 import DefaultBoardManager from "./modules/default_board_manager";
 import GameBoardManager from "./modules/game_board_manager";
@@ -55,22 +49,14 @@ import ConfigPrintDialog from "./modules/dialogs/config_print";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import Game, {
   isPlayerColor,
-  isMoveSecondsLimitRunOutPunishment,
+  isSecondsPerMovePenalty,
   isWinner,
   type PlayerColor,
-  type MoveSecondsLimitRunOutPunishment,
   type Winner,
-  type WinReason,
-  isWinReason,
+  type GameOverReason,
+  isGameOverReason,
   getAllPieceProps,
 } from "./modules/game";
-import { PieceId } from "./modules/pieces/piece";
-import Bishop from "./modules/pieces/bishop";
-import King from "./modules/pieces/king";
-import Knight from "./modules/pieces/knight";
-import Pawn from "./modules/pieces/pawn";
-import Queen from "./modules/pieces/queen";
-import Rook from "./modules/pieces/rook";
 import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
@@ -98,95 +84,6 @@ import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
 import InfoCard from "./components/InfoCard.vue";
-
-const DEFAULT_DEFAULT_BOARD_STATE_VALUE: BoardStateValue = [
-  [
-    new Rook("white"),
-    new Knight("white"),
-    new Bishop("white"),
-    new Queen("white"),
-    new King("white"),
-    new Bishop("white"),
-    new Knight("white"),
-    new Rook("white"),
-  ],
-  [
-    new Pawn("white"),
-    new Pawn("white"),
-    new Pawn("white"),
-    new Pawn("white"),
-    new Pawn("white"),
-    new Pawn("white"),
-    new Pawn("white"),
-    new Pawn("white"),
-  ],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [
-    new Pawn("black"),
-    new Pawn("black"),
-    new Pawn("black"),
-    new Pawn("black"),
-    new Pawn("black"),
-    new Pawn("black"),
-    new Pawn("black"),
-    new Pawn("black"),
-  ],
-  [
-    new Rook("black"),
-    new Knight("black"),
-    new Bishop("black"),
-    new Queen("black"),
-    new King("black"),
-    new Bishop("black"),
-    new Knight("black"),
-    new Rook("black"),
-  ],
-];
-const DEFAULT_GAME_BOARD_STATE_VALUE = Array(8).fill(Array(8).fill(null));
-const DEFAULT_CELL_INDEX_OPACITY_VALUE = 90;
-const DEFAULT_PLAYER_HUE_VALUE = 30;
-const DEFAULT_OPPONENT_HUE_VALUE = 198;
-const DEFAULT_PIECE_BORDER_VALUE = 1.1;
-const DEFAULT_PIECE_PADDING_VALUE = 10;
-const DEFAULT_PIECE_SET_VALUE: PieceSetValue = "font_awesome";
-const DEFAULT_PREFERRED_PLAYER_COLOR_VALUE: PlayerColorOptionValue = "random";
-const DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE = false;
-const DEFAULT_ROTATE_SCREEN_VALUE = false;
-const DEFAULT_SECOND_CHECKBOARD_VALUE = false;
-const DEFAULT_THEME_VALUE: Theme = "auto";
-const DEFAULT_TRANSITION_DURATION_VALUE = 100;
-const DEFAULT_TRANSITIONS_VALUE: Transitions = "auto";
-const DEFAULT_PLAYER_COLOR_VALUE: PlayerColor = "white";
-const DEFAULT_WHITE_CAPTURED_PIECES_VALUE: PieceId[] = [];
-const DEFAULT_BLACK_CAPTURED_PIECES_VALUE: PieceId[] = [];
-const DEFAULT_GAME_PAUSED_VALUE: GamePaused = "not";
-const DEFAULT_AUDIO_EFFECTS_VALUE = true;
-const DEFAULT_FIRST_MOVE_COLOR: PlayerColorOptionValue = "white";
-const DEFAULT_SHOW_CAPTURING_PIECES_VALUE = true;
-const DEFAULT_REVIVE_FROM_CAPTURED_PIECES_VALUE = false;
-const DEFAULT_PLAYER_SECONDS_PER_MOVE = 0;
-const DEFAULT_OPPONENT_SECONDS_PER_MOVE = 0;
-const DEFAULT_PLAYER_SECONDS_PER_MATCH = 0;
-const DEFAULT_OPPONENT_SECONDS_PER_MATCH = 0;
-const DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES = false;
-const DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT: MoveSecondsLimitRunOutPunishment =
-  "random_move";
-const DEFAULT_WIN_REASON_VALUE: WinReason = "none";
-const DEFAULT_USE_VIBRATIONS_VALUE: boolean = true;
-const DEFAULT_LONG_PRESS_TIMEOUT = 0;
-const DEFAULT_AUTO_PAUSE_VALUE = true;
-const DEFAULT_PAWN_IMPORTANCE_VALUE = 1;
-const DEFAULT_KNIGHT_IMPORTANCE_VALUE = 3;
-const DEFAULT_BISHOP_IMPORTANCE_VALUE = 3.25;
-const DEFAULT_ROOK_IMPORTANCE_VALUE = 5;
-const DEFAULT_QUEEN_IMPORTANCE_VALUE = 9;
-const DEFAULT_KING_IMPORTANCE_VALUE = 18;
-const DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE = false;
-const DEFAULT_MOVE_LIST_VALUE: Move[] = [];
-const DEFAULT_MOVE_INDEX_VALUE = 0;
 
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
@@ -225,8 +122,8 @@ const configPieceSelectOptions = computed(() => {
 });
 const playingColor = computed(() => {
   let color: PlayerColor =
-    (isEven(moveIndex.value) && firstMoveColor.value === "black") ||
-    (!isEven(moveIndex.value) && firstMoveColor.value === "white")
+    (isEven(moveIndex.value) && preferredFirstMoveColor.value === "black") ||
+    (!isEven(moveIndex.value) && preferredFirstMoveColor.value === "white")
       ? "white"
       : "black";
   return color;
@@ -234,17 +131,17 @@ const playingColor = computed(() => {
 const playerPlaying = computed(() => {
   return playerColor.value === playingColor.value;
 });
-const playerMoveSecondsLimitSet = computed(() => {
-  return playerMoveSecondsLimit.value !== 0;
+const playerSecondsPerMoveSet = computed(() => {
+  return playerSecondsPerMove.value !== 0;
 });
-const opponentMoveSecondsLimitSet = computed(() => {
-  return opponentMoveSecondsLimit.value !== 0;
+const opponentSecondsPerMoveSet = computed(() => {
+  return opponentSecondsPerMove.value !== 0;
 });
-const playerMatchSecondsLimitSet = computed(() => {
-  return playerMatchSecondsLimit.value !== 0;
+const playerSecondsPerMatchSet = computed(() => {
+  return playerSecondsPerMatch.value !== 0;
 });
-const opponentMatchSecondsLimitSet = computed(() => {
-  return opponentMatchSecondsLimit.value !== 0;
+const opponentSecondsPerMatchSet = computed(() => {
+  return opponentSecondsPerMatch.value !== 0;
 });
 const statusText = computed(() => {
   let text: string;
@@ -278,108 +175,122 @@ const defaultDraggingOverCells = ref<BoardPosition[]>([]);
 
 // User data refs
 // Simple values
-const theme = ref(DEFAULT_THEME_VALUE);
+const theme = ref(defaultUserDataValues.theme);
 provide("theme", theme);
-const transitions = ref(DEFAULT_TRANSITIONS_VALUE);
+const transitions = ref(defaultUserDataValues.transitions);
 provide("transitions", transitions);
-const playerHue = ref(DEFAULT_PLAYER_HUE_VALUE);
+const playerHue = ref(defaultUserDataValues.playerHue);
 provide("playerHue", playerHue);
-const opponentHue = ref(DEFAULT_OPPONENT_HUE_VALUE);
+const opponentHue = ref(defaultUserDataValues.opponentHue);
 provide("opponentHue", opponentHue);
-const pieceSet = ref(DEFAULT_PIECE_SET_VALUE);
-provide("pieceSet", pieceSet);
-const piecePadding = ref(DEFAULT_PIECE_PADDING_VALUE);
+const pieceIconPack = ref(defaultUserDataValues.pieceIconPack);
+provide("pieceIconPack", pieceIconPack);
+const piecePadding = ref(defaultUserDataValues.piecePadding);
 provide("piecePadding", piecePadding);
-const pieceBorder = ref(DEFAULT_PIECE_BORDER_VALUE);
+const pieceBorder = ref(defaultUserDataValues.pieceBorder);
 provide("pieceBorder", pieceBorder);
-const transitionDuration = ref(DEFAULT_TRANSITION_DURATION_VALUE);
+const transitionDuration = ref(defaultUserDataValues.transitionDuration);
 provide("transitionDuration", transitionDuration);
-const cellIndexOpacity = ref(DEFAULT_CELL_INDEX_OPACITY_VALUE);
+const cellIndexOpacity = ref(defaultUserDataValues.cellIndexOpacity);
 provide("cellIndexOpacity", cellIndexOpacity);
-const preferredPlayerColor = ref(DEFAULT_PREFERRED_PLAYER_COLOR_VALUE);
+const preferredPlayerColor = ref(defaultUserDataValues.preferredPlayerColor);
 provide("preferredPlayerColor", preferredPlayerColor);
-const secondCheckboard = ref(DEFAULT_SECOND_CHECKBOARD_VALUE);
-provide("secondCheckboard", secondCheckboard);
-const tableMode = ref(DEFAULT_ROTATE_SCREEN_VALUE);
-provide("tableMode", tableMode);
-const requireMoveConfirm = ref(DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE);
-provide("requireMoveConfirm", requireMoveConfirm);
-const audioEffects = ref(DEFAULT_AUDIO_EFFECTS_VALUE);
-provide("audioEffects", audioEffects);
-const showCapturingPieces = ref(DEFAULT_SHOW_CAPTURING_PIECES_VALUE);
-provide("showCapturingPieces", showCapturingPieces);
-const reviveFromCapturedPieces = ref(DEFAULT_REVIVE_FROM_CAPTURED_PIECES_VALUE);
-provide("reviveFromCapturedPieces", reviveFromCapturedPieces);
-const playerMoveSecondsLimit = ref(DEFAULT_PLAYER_SECONDS_PER_MOVE);
-provide("playerMoveSecondsLimit", playerMoveSecondsLimit);
-const opponentMoveSecondsLimit = ref(DEFAULT_OPPONENT_SECONDS_PER_MOVE);
-provide("opponentMoveSecondsLimit", opponentMoveSecondsLimit);
-const playerMatchSecondsLimit = ref(DEFAULT_PLAYER_SECONDS_PER_MATCH);
-provide("playerMatchSecondsLimit", playerMatchSecondsLimit);
-const opponentMatchSecondsLimit = ref(DEFAULT_OPPONENT_SECONDS_PER_MATCH);
-provide("opponentMatchSecondsLimit", opponentMatchSecondsLimit);
-const showOtherAvailibleMoves = ref(DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES);
-provide("showOtherAvailibleMoves", showOtherAvailibleMoves);
-const secondsMoveLimitRunOutPunishment = ref(
-  DEFAULT_SECONDS_PER_MOVE_RUNOUT_PUNISHMENT
+const secondCheckboardEnabled = ref(
+  defaultUserDataValues.secondCheckboardEnabled
 );
-provide("secondsMoveLimitRunOutPunishment", secondsMoveLimitRunOutPunishment);
-const prefferedFirstMoveColor = ref(DEFAULT_FIRST_MOVE_COLOR);
-provide("prefferedFirstMoveColor", prefferedFirstMoveColor);
-const useVibrations = ref(DEFAULT_USE_VIBRATIONS_VALUE);
-provide("useVibrations", useVibrations);
-const longPressTimeout = ref(DEFAULT_LONG_PRESS_TIMEOUT);
-provide("longPressTimeout", longPressTimeout);
-const autoPause = ref(DEFAULT_AUTO_PAUSE_VALUE);
-provide("autoPause", autoPause);
-const pawnImportance = ref(DEFAULT_PAWN_IMPORTANCE_VALUE);
+provide("secondCheckboard", secondCheckboardEnabled);
+const tableMode = ref(defaultUserDataValues.tableMode);
+provide("tableMode", tableMode);
+const requireMoveConfirm = ref(defaultUserDataValues.requireMoveConfirm);
+provide("requireMoveConfirm", requireMoveConfirm);
+const audioEffectsEnabled = ref(defaultUserDataValues.audioEffectsEnabled);
+provide("audioEffectsEnabled", audioEffectsEnabled);
+const showCapturingPieces = ref(defaultUserDataValues.showCapturingPieces);
+provide("showCapturingPieces", showCapturingPieces);
+const reviveFromCapturedPieces = ref(
+  defaultUserDataValues.reviveFromCapturedPieces
+);
+provide("reviveFromCapturedPieces", reviveFromCapturedPieces);
+const playerSecondsPerMove = ref(defaultUserDataValues.playerSecondsPerMove);
+provide("playerSecondsPerMove", playerSecondsPerMove);
+const opponentSecondsPerMove = ref(
+  defaultUserDataValues.opponentSecondsPerMove
+);
+provide("opponentSecondsPerMove", opponentSecondsPerMove);
+const playerSecondsPerMatch = ref(defaultUserDataValues.playerSecondsPerMatch);
+provide("playerSecondsPerMatch", defaultUserDataValues.playerSecondsPerMatch);
+const opponentSecondsPerMatch = ref(
+  defaultUserDataValues.opponentSecondsPerMatch
+);
+provide("opponentSecondsPerMatch", opponentSecondsPerMatch);
+const showOtherAvailibleMoves = ref(
+  defaultUserDataValues.showOtherAvailibleMoves
+);
+provide("showOtherAvailibleMoves", showOtherAvailibleMoves);
+const secondsPerMovePenalty = ref(defaultUserDataValues.secondsPerMovePenalty);
+provide("secondsPerMovePenalty", secondsPerMovePenalty);
+const preferredFirstMoveColor = ref(
+  defaultUserDataValues.preferredFirstMoveColor
+);
+provide("preferredFirstMoveColor", preferredFirstMoveColor);
+const vibrationsEnabled = ref(defaultUserDataValues.vibrationsEnabled);
+provide("vibrationsEnabled", vibrationsEnabled);
+const pieceLongPressTimeout = ref(defaultUserDataValues.pieceLongPressTimeout);
+provide("pieceLongPressTimeout", pieceLongPressTimeout);
+const autoPauseGame = ref(defaultUserDataValues.autoPauseGame);
+provide("autoPauseGame", autoPauseGame);
+const pawnImportance = ref(defaultUserDataValues.pawnImportance);
 provide("pawnImportance", pawnImportance);
-const knightImportance = ref(DEFAULT_KNIGHT_IMPORTANCE_VALUE);
+const knightImportance = ref(defaultUserDataValues.kingImportance);
 provide("knightImportance", knightImportance);
-const bishopImportance = ref(DEFAULT_BISHOP_IMPORTANCE_VALUE);
+const bishopImportance = ref(defaultUserDataValues.bishopImportance);
 provide("bishopImportance", bishopImportance);
-const rookImportance = ref(DEFAULT_ROOK_IMPORTANCE_VALUE);
+const rookImportance = ref(defaultUserDataValues.bishopImportance);
 provide("rookImportance", rookImportance);
-const queenImportance = ref(DEFAULT_QUEEN_IMPORTANCE_VALUE);
+const queenImportance = ref(defaultUserDataValues.rookImportance);
 provide("queenImportance", queenImportance);
-const kingImportance = ref(DEFAULT_KING_IMPORTANCE_VALUE);
+const kingImportance = ref(defaultUserDataValues.kingImportance);
 provide("kingImportance", kingImportance);
-const ignorePiecesProtections = ref(DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE);
-provide("ignorePiecesProtections", ignorePiecesProtections);
-const moveList = ref(DEFAULT_MOVE_LIST_VALUE) as Ref<Move[]>;
+const ignorePiecesGuardedProperty = ref(
+  defaultUserDataValues.ignorePiecesGuardedProperty
+);
+provide("ignorePiecesGuardedProperty", ignorePiecesGuardedProperty);
+const moveList = ref(defaultUserDataValues.moveList) as Ref<Move[]>;
 
 // Game specific
-const winner = ref<Winner>("none");
-const winReason = ref<WinReason>(DEFAULT_WIN_REASON_VALUE);
-const moveIndex = ref(DEFAULT_MOVE_INDEX_VALUE);
-const firstMoveColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
-const playerColor = ref<PlayerColor>(DEFAULT_PLAYER_COLOR_VALUE);
-const gamePaused = ref<GamePaused>(DEFAULT_GAME_PAUSED_VALUE);
-const whiteCapturedPieces = ref<PieceId[]>(DEFAULT_WHITE_CAPTURED_PIECES_VALUE);
-const blackCapturedPieces = ref<PieceId[]>(DEFAULT_BLACK_CAPTURED_PIECES_VALUE);
+const winner = ref<Winner>(defaultUserDataValues.winner);
+const gameOverReason = ref<GameOverReason>(
+  defaultUserDataValues.gameOverReason
+);
+const moveIndex = ref(defaultUserDataValues.moveIndex);
+const firstMoveColor = ref<PlayerColor>(defaultUserDataValues.firstMoveColor);
+const playerColor = ref(defaultUserDataValues.playerColor);
+const gamePaused = ref(defaultUserDataValues.gamePaused);
+const whiteCapturedPieces = ref(defaultUserDataValues.whiteCapturedPieces);
+const blackCapturedPieces = ref(defaultUserDataValues.blackCapturedPieces);
 const playerMoveSeconds = ref(0);
 const opponentMoveSeconds = ref(0);
 const playerMatchSeconds = ref(0);
 const opponentMatchSeconds = ref(0);
 const playerRemainingMoveSeconds = computed(() => {
-  return playerMoveSecondsLimit.value - playerMoveSeconds.value;
+  return playerSecondsPerMove.value - playerMoveSeconds.value;
 });
 const opponentRemainingMoveSeconds = computed(() => {
-  return opponentMoveSecondsLimit.value - opponentMoveSeconds.value;
+  return opponentSecondsPerMove.value - opponentMoveSeconds.value;
 });
 const playerRemainingMatchSeconds = computed(() => {
-  return playerMatchSecondsLimit.value - playerMatchSeconds.value;
+  return playerSecondsPerMatch.value - playerMatchSeconds.value;
 });
 const opponentRemainingMatchSeconds = computed(() => {
-  return opponentMatchSecondsLimit.value - opponentMatchSeconds.value;
+  return opponentSecondsPerMatch.value - opponentMatchSeconds.value;
 });
 
 // Complex values (reactive)
 const defaultBoardState: BoardStateValue = reactive(
-  DEFAULT_DEFAULT_BOARD_STATE_VALUE
+  defaultUserDataValues.defaultBoardState
 );
 const gameBoardState: BoardStateValue = reactive(
-  DEFAULT_GAME_BOARD_STATE_VALUE
+  defaultUserDataValues.gameBoardState
 );
 
 const durationDialog = new DurationDialog();
@@ -407,25 +318,25 @@ const transitionsManager = new TransitionsManager(transitions);
 
 // Data
 const defaultBoardStateData = new RawBoardStateData(
-  DEFAULT_DEFAULT_BOARD_STATE_VALUE,
+  defaultUserDataValues.defaultBoardState,
   defaultBoardState,
   toastManager
 );
 const gameBoardStateData = new BoardStateData(
-  DEFAULT_GAME_BOARD_STATE_VALUE,
+  defaultUserDataValues.gameBoardState,
   gameBoardState,
   toastManager,
   false
 );
 const moveListData = new MoveListData(
   "move_list",
-  DEFAULT_MOVE_LIST_VALUE,
+  defaultUserDataValues.moveList,
   moveList,
   toastManager
 );
 const moveIndexData = new NumberUserData(
   "move_index",
-  DEFAULT_MOVE_INDEX_VALUE,
+  defaultUserDataValues.moveIndex,
   toastManager,
   moveIndex,
   undefined,
@@ -437,141 +348,170 @@ const moveIndexData = new NumberUserData(
 const userDataManager = new UserDataManager(
   [
     new BooleanUserData(
-      "use_vibrations",
-      DEFAULT_USE_VIBRATIONS_VALUE,
+      "vibrations_enabled",
+      defaultUserDataValues.vibrationsEnabled,
       toastManager,
-      useVibrations
+      vibrationsEnabled
     ),
     new BooleanUserData(
       "auto_pause",
-      DEFAULT_AUTO_PAUSE_VALUE,
+      defaultUserDataValues.autoPauseGame,
       toastManager,
-      autoPause
+      autoPauseGame
     ),
-    new HueData(DEFAULT_PLAYER_HUE_VALUE, playerHue, false, toastManager),
-    new HueData(DEFAULT_OPPONENT_HUE_VALUE, opponentHue, true, toastManager),
-    new PieceSetData(DEFAULT_PIECE_SET_VALUE, pieceSet, toastManager),
+    new HueData(
+      defaultUserDataValues.playerHue,
+      playerHue,
+      false,
+      toastManager
+    ),
+    new HueData(
+      defaultUserDataValues.opponentHue,
+      opponentHue,
+      true,
+      toastManager
+    ),
+    new PieceIconPackData(
+      defaultUserDataValues.pieceIconPack,
+      pieceIconPack,
+      toastManager
+    ),
     new PiecePaddingData(
-      DEFAULT_PIECE_PADDING_VALUE,
+      defaultUserDataValues.piecePadding,
       piecePadding,
       toastManager
     ),
-    new PieceBorderData(DEFAULT_PIECE_BORDER_VALUE, pieceBorder, toastManager),
+    new PieceBorderData(
+      defaultUserDataValues.pieceBorder,
+      pieceBorder,
+      toastManager
+    ),
     new TransitionDurationData(
-      DEFAULT_TRANSITION_DURATION_VALUE,
+      defaultUserDataValues.transitionDuration,
       transitionDuration,
       toastManager
     ),
     new CellIndexOpacityData(
-      DEFAULT_CELL_INDEX_OPACITY_VALUE,
+      defaultUserDataValues.cellIndexOpacity,
       cellIndexOpacity,
       toastManager
     ),
     new PlayerColorOptionData(
       "preferred_player_color",
-      DEFAULT_PREFERRED_PLAYER_COLOR_VALUE,
+      defaultUserDataValues.preferredPlayerColor,
       preferredPlayerColor,
       toastManager
     ),
     new PlayerColorOptionData(
       "preferred_first_move_color",
-      DEFAULT_FIRST_MOVE_COLOR,
-      prefferedFirstMoveColor,
+      defaultUserDataValues.preferredFirstMoveColor,
+      preferredFirstMoveColor,
       toastManager
     ),
     new BooleanUserData(
       "show_capturing_pieces",
-      DEFAULT_SHOW_CAPTURING_PIECES_VALUE,
+      defaultUserDataValues.showCapturingPieces,
       toastManager,
       showCapturingPieces
     ),
-    new SecondCheckboardData(
-      DEFAULT_SECOND_CHECKBOARD_VALUE,
-      secondCheckboard,
-      toastManager
+    new BooleanUserData(
+      "second_checkboard",
+      defaultUserDataValues.secondCheckboardEnabled,
+      toastManager,
+      secondCheckboardEnabled
     ),
     new NumberUserData(
-      "long_press_timeout",
-      DEFAULT_LONG_PRESS_TIMEOUT,
+      "piece_long_press_timeout",
+      defaultUserDataValues.pieceLongPressTimeout,
       toastManager,
-      longPressTimeout,
+      pieceLongPressTimeout,
       0,
       600
     ),
     new BooleanUserData(
-      "rotate_screen",
-      DEFAULT_ROTATE_SCREEN_VALUE,
+      "table_mode",
+      defaultUserDataValues.tableMode,
       toastManager,
       tableMode
     ),
     new BooleanUserData(
-      "ignore_pieces_protections",
-      DEFAULT_IGNORE_PIECES_PROTECTIONS_VALUE,
+      "ignore_pieces_guarded_property",
+      defaultUserDataValues.ignorePiecesGuardedProperty,
       toastManager,
-      ignorePiecesProtections
+      ignorePiecesGuardedProperty
     ),
     new RequireMoveConfirmData(
-      DEFAULT_REQUIRE_MOVE_CONFIRM_VALUE,
+      defaultUserDataValues.requireMoveConfirm,
       requireMoveConfirm,
       toastManager
     ),
     new SelectUserData(
       "player_color",
-      DEFAULT_PLAYER_COLOR_VALUE,
+      defaultUserDataValues.playerColor,
       isPlayerColor,
       toastManager,
       playerColor
     ),
     new SelectUserData(
       "theme",
-      DEFAULT_THEME_VALUE,
+      defaultUserDataValues.theme,
       isTheme,
       toastManager,
       theme
     ),
     new SelectUserData(
-      "transitions",
-      DEFAULT_TRANSITIONS_VALUE,
+      "transitions_enabled",
+      defaultUserDataValues.transitions,
       isTransitions,
       toastManager,
       transitions
     ),
     new SelectUserData(
-      "win_reason",
-      DEFAULT_WIN_REASON_VALUE,
-      isWinReason,
+      "game_over_reason",
+      defaultUserDataValues.gameOverReason,
+      isGameOverReason,
       toastManager,
-      winReason
+      gameOverReason
     ),
-    new SelectUserData("winner", "none", isWinner, toastManager, winner),
+    new SelectUserData(
+      "winner",
+      defaultUserDataValues.winner,
+      isWinner,
+      toastManager,
+      winner
+    ),
     new SelectUserData(
       "seconds_per_move_runout_punishment",
       "random_move",
-      isMoveSecondsLimitRunOutPunishment,
+      isSecondsPerMovePenalty,
       toastManager,
-      secondsMoveLimitRunOutPunishment
+      secondsPerMovePenalty
     ),
-    new GamePausedData(DEFAULT_GAME_PAUSED_VALUE, toastManager, gamePaused),
+    new GamePausedData(
+      defaultUserDataValues.gamePaused,
+      toastManager,
+      gamePaused
+    ),
     new BooleanUserData(
-      "ban_promotion_to_uncaptured_pieces",
-      DEFAULT_REVIVE_FROM_CAPTURED_PIECES_VALUE,
+      "revive_from_captured_pieces",
+      defaultUserDataValues.reviveFromCapturedPieces,
       toastManager,
       reviveFromCapturedPieces
     ),
     new BooleanUserData(
-      "audio_effects",
-      DEFAULT_AUDIO_EFFECTS_VALUE,
+      "audio_effects_enabled",
+      defaultUserDataValues.audioEffectsEnabled,
       toastManager,
-      audioEffects
+      audioEffectsEnabled
     ),
     new CapturedPiecesData(
-      DEFAULT_WHITE_CAPTURED_PIECES_VALUE,
+      defaultUserDataValues.whiteCapturedPieces,
       whiteCapturedPieces,
       "white",
       toastManager
     ),
     new CapturedPiecesData(
-      DEFAULT_BLACK_CAPTURED_PIECES_VALUE,
+      defaultUserDataValues.blackCapturedPieces,
       blackCapturedPieces,
       "black",
       toastManager
@@ -579,27 +519,27 @@ const userDataManager = new UserDataManager(
     moveIndexData,
     new NumberUserData(
       "player_seconds_per_move",
-      DEFAULT_PLAYER_SECONDS_PER_MOVE,
+      defaultUserDataValues.playerSecondsPerMove,
       toastManager,
-      playerMoveSecondsLimit
+      playerSecondsPerMove
     ),
     new NumberUserData(
       "opponent_seconds_per_move",
-      DEFAULT_OPPONENT_SECONDS_PER_MOVE,
+      defaultUserDataValues.opponentSecondsPerMove,
       toastManager,
-      opponentMoveSecondsLimit
+      opponentSecondsPerMove
     ),
     new NumberUserData(
       "player_seconds_per_match",
-      DEFAULT_PLAYER_SECONDS_PER_MATCH,
+      defaultUserDataValues.playerSecondsPerMatch,
       toastManager,
-      playerMatchSecondsLimit
+      playerSecondsPerMatch
     ),
     new NumberUserData(
       "opponent_seconds_per_match",
-      DEFAULT_OPPONENT_SECONDS_PER_MATCH,
+      defaultUserDataValues.opponentSecondsPerMatch,
       toastManager,
-      opponentMatchSecondsLimit
+      opponentSecondsPerMatch
     ),
     new NumberUserData(
       "player_move_seconds",
@@ -627,49 +567,49 @@ const userDataManager = new UserDataManager(
     ),
     new NumberUserData(
       "pawn_importance",
-      DEFAULT_PAWN_IMPORTANCE_VALUE,
+      defaultUserDataValues.pawnImportance,
       toastManager,
       pawnImportance
     ),
     new NumberUserData(
       "knight_importance",
-      DEFAULT_KNIGHT_IMPORTANCE_VALUE,
+      defaultUserDataValues.knightImportance,
       toastManager,
       knightImportance
     ),
     new NumberUserData(
       "bishop_importance",
-      DEFAULT_BISHOP_IMPORTANCE_VALUE,
+      defaultUserDataValues.bishopImportance,
       toastManager,
       bishopImportance
     ),
     new NumberUserData(
       "rook_importance",
-      DEFAULT_ROOK_IMPORTANCE_VALUE,
+      defaultUserDataValues.rookImportance,
       toastManager,
       rookImportance
     ),
     new NumberUserData(
       "queen_importance",
-      DEFAULT_QUEEN_IMPORTANCE_VALUE,
+      defaultUserDataValues.queenImportance,
       toastManager,
       queenImportance
     ),
     new NumberUserData(
       "king_importance",
-      DEFAULT_KING_IMPORTANCE_VALUE,
+      defaultUserDataValues.kingImportance,
       toastManager,
       kingImportance
     ),
     new NumberUserData(
-      "kinght_importance",
-      DEFAULT_KNIGHT_IMPORTANCE_VALUE,
+      "knight_importance",
+      defaultUserDataValues.knightImportance,
       toastManager,
       knightImportance
     ),
     new BooleanUserData(
       "show_other_availible_moves",
-      DEFAULT_SHOW_OTHER_AVAILIBLE_MOVES,
+      defaultUserDataValues.showOtherAvailibleMoves,
       toastManager,
       showOtherAvailibleMoves
     ),
@@ -704,7 +644,7 @@ const screenRotated = computed(() => {
 });
 
 const playerBoardContentRotated = computed(() => {
-  if (!secondCheckboard.value) {
+  if (!secondCheckboardEnabled.value) {
     return screenRotated.value;
   }
   if (!tableMode.value) {
@@ -714,7 +654,7 @@ const playerBoardContentRotated = computed(() => {
 });
 
 const opponentBoardContentRotated = computed(() => {
-  if (!secondCheckboard.value) {
+  if (!secondCheckboardEnabled.value) {
     return !screenRotated.value;
   }
   if (!tableMode.value) {
@@ -724,7 +664,7 @@ const opponentBoardContentRotated = computed(() => {
 });
 
 const playerBoardRotated = computed(() => {
-  if (tableMode.value || !secondCheckboard.value) {
+  if (tableMode.value || !secondCheckboardEnabled.value) {
     return false;
   }
   return playerColor.value === "black";
@@ -776,10 +716,10 @@ const defaultBoardManager = new DefaultBoardManager(
   defaultBoardState,
   configPieceDialog,
   defaultDraggingOverCells,
-  audioEffects,
+  audioEffectsEnabled,
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
-  useVibrations
+  vibrationsEnabled
 );
 
 const whiteCapturingPaths = ref<Path[]>([]);
@@ -799,7 +739,7 @@ const playerBoardManager = new GameBoardManager(
   blackCapturingPaths,
   playerColor,
   winner,
-  secondCheckboard,
+  secondCheckboardEnabled,
   true,
   playingColor,
   gameBoardState,
@@ -811,14 +751,14 @@ const playerBoardManager = new GameBoardManager(
   playerSelectedCells,
   playerDraggingOverCells,
   selectPieceDialog,
-  audioEffects,
+  audioEffectsEnabled,
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
-  useVibrations,
+  vibrationsEnabled,
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
-  ignorePiecesProtections,
+  ignorePiecesGuardedProperty,
   gamePieceProps,
   piecesImportance,
   moveList,
@@ -829,7 +769,7 @@ const opponentBoardManager = new GameBoardManager(
   blackCapturingPaths,
   playerColor,
   winner,
-  secondCheckboard,
+  secondCheckboardEnabled,
   false,
   playingColor,
   gameBoardState,
@@ -841,14 +781,14 @@ const opponentBoardManager = new GameBoardManager(
   opponentSelectedCells,
   opponentDraggingOverCells,
   selectPieceDialog,
-  audioEffects,
+  audioEffectsEnabled,
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
-  useVibrations,
+  vibrationsEnabled,
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
-  ignorePiecesProtections,
+  ignorePiecesGuardedProperty,
   gamePieceProps,
   piecesImportance,
   moveList,
@@ -866,28 +806,29 @@ const game = new Game(
   defaultBoardStateData,
   playerColor,
   firstMoveColor,
-  prefferedFirstMoveColor,
+  preferredFirstMoveColor,
   playerPlaying,
   preferredPlayerColor,
-  playerMoveSecondsLimit,
-  opponentMoveSecondsLimit,
-  playerMatchSecondsLimit,
-  opponentMatchSecondsLimit,
+  playerSecondsPerMove,
+  opponentSecondsPerMove,
+  playerSecondsPerMatch,
+  opponentSecondsPerMatch,
   playerMoveSeconds,
   opponentMoveSeconds,
   playerMatchSeconds,
   opponentMatchSeconds,
-  secondsMoveLimitRunOutPunishment,
+  secondsPerMovePenalty,
   winner,
-  winReason,
+  gameOverReason,
   piecesImportance,
   blackCapturedPieces,
   whiteCapturedPieces,
   reviveFromCapturedPieces,
-  ignorePiecesProtections,
+  ignorePiecesGuardedProperty,
   moveIndex,
   moveIndexData,
   moveList,
+  moveListData,
   lastMove,
   confirmDialog,
   toastManager
@@ -901,7 +842,7 @@ const interactionManager = new InteractionManager(
   settingsOpen,
   aboutOpen,
   gamePaused,
-  autoPause
+  autoPauseGame
 );
 
 const visited = localStorage.getItem("tessera_board-visited");
@@ -963,10 +904,10 @@ onMounted(() => {
       :opponent-secs-move="opponentRemainingMoveSeconds"
       :player-secs-match="playerRemainingMatchSeconds"
       :opponent-secs-match="opponentRemainingMatchSeconds"
-      :player-move-seconds-limit-set="playerMoveSecondsLimitSet"
-      :player-match-seconds-limit-set="playerMatchSecondsLimitSet"
-      :opponent-move-seconds-limit-set="opponentMoveSecondsLimitSet"
-      :opponent-match-seconds-limit-set="opponentMatchSecondsLimitSet"
+      :player-seconds-per-move-set="playerSecondsPerMoveSet"
+      :player-seconds-per-match-set="playerSecondsPerMatchSet"
+      :opponent-seconds-per-move-set="opponentSecondsPerMoveSet"
+      :opponent-seconds-per-match-set="opponentSecondsPerMatchSet"
       :player-playing="playerPlaying"
       :move-index="moveIndex"
       :status-text="statusText"
@@ -984,7 +925,7 @@ onMounted(() => {
         :rotated="playerBoardRotated"
         :manager="playerBoardManager"
         :state="gameBoardState"
-        :piece-set="pieceSet"
+        :piece-set="pieceIconPack"
         :piece-padding="piecePadding"
         :piece-border="pieceBorder"
         :white-captured-pieces="whiteCapturedPieces"
@@ -994,7 +935,7 @@ onMounted(() => {
         id="player-board"
       />
       <Board
-        v-if="secondCheckboard"
+        v-if="secondCheckboardEnabled"
         :selected-pieces="opponentSelectedPieces"
         :selected-cells="opponentSelectedCells"
         :highlighted-cells="highlightedCells"
@@ -1004,7 +945,7 @@ onMounted(() => {
         :rotated="opponentBoardRotated"
         :manager="opponentBoardManager"
         :state="gameBoardState"
-        :piece-set="pieceSet"
+        :piece-set="pieceIconPack"
         :piece-padding="piecePadding"
         :piece-border="pieceBorder"
         :white-captured-pieces="whiteCapturedPieces"
@@ -1111,7 +1052,7 @@ onMounted(() => {
   >
     <SelectPiece
       :pieces="selectPieceDialog.props.pieceOptions"
-      :piece-set="pieceSet"
+      :piece-icon-pack="pieceIconPack"
       v-model="selectPieceDialog.props.selectedPiece"
     />
     <template #action-buttons>
@@ -1133,7 +1074,7 @@ onMounted(() => {
   >
     <SelectPiece
       :pieces="configPieceSelectOptions"
-      :piece-set="pieceSet"
+      :piece-icon-pack="pieceIconPack"
       v-model="configPieceDialog.props.selectedPiece"
     />
     <div class="config">

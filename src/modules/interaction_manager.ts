@@ -9,7 +9,7 @@ import type ToastManager from "./toast_manager";
 import type UserDataManager from "./user_data_manager";
 import type ConfirmDialog from "./dialogs/confirm";
 import type Game from "./game";
-import type { GamePaused } from "./user_data/game_paused";
+import type { GamePausedState } from "./user_data/game_paused";
 import type { Winner } from "./game";
 
 class InteractionManager {
@@ -23,8 +23,8 @@ class InteractionManager {
     private readonly actionPanelOpen: Ref<boolean>,
     private readonly settingsOpen: Ref<boolean>,
     private readonly aboutOpen: Ref<boolean>,
-    private readonly gamePaused: Ref<GamePaused>,
-    private readonly autoPause: Ref<boolean>
+    private readonly gamePaused: Ref<GamePausedState>,
+    private readonly autoPauseGame: Ref<boolean>
   ) {
     this.escapeManager = new EscapeManager(this.toggleActionsPanel);
     watch(settingsOpen, () => {
@@ -37,20 +37,20 @@ class InteractionManager {
 
   public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(playerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "player":
-      setPrimaryHue(true);
-      break;
-    case "opponent":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(playerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "player":
+        setPrimaryHue(true);
+        break;
+      case "opponent":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
@@ -132,7 +132,11 @@ class InteractionManager {
       this.settingsOpen.value ||
       this.aboutOpen.value;
 
-    if (distracted && this.autoPause.value && this.gamePaused.value === "not") {
+    if (
+      distracted &&
+      this.autoPauseGame.value &&
+      this.gamePaused.value === "not"
+    ) {
       this.gamePaused.value = "auto";
     }
     if (!distracted && this.gamePaused.value === "auto") {

@@ -2,7 +2,6 @@ import type { Ref } from "vue";
 import type Piece from "../pieces/piece";
 import {
   chooseBestPiece,
-  isPieceId,
   type PieceId,
   type PiecesImportance,
 } from "../pieces/piece";
@@ -32,7 +31,6 @@ import {
   getPositionNotation,
   isBoardPosition,
 } from "../board_manager";
-import { isPlayerColor } from "../game";
 import { getPositionPiece } from "../game_board_manager";
 import type { RawMove } from "./raw_move";
 
@@ -46,6 +44,7 @@ export interface RawPromotion extends RawMove {
   origin: BoardPosition;
   target: BoardPosition;
   transformOptions: [RawPiece, ...RawPiece[]];
+  newRawPiece: RawPiece | null;
   captures?: RawBoardPieceProps;
   id?: string;
 }
@@ -58,8 +57,6 @@ export function isRawPromotion(rawMove: RawMove): rawMove is RawPromotion {
   if (typeof rawMove.transformOptions !== "object") return false;
 
   if (!isRawPiece(rawMove.piece)) return false;
-  if (!isPieceId(rawMove.pieceId)) return false;
-  if (!isPlayerColor(rawMove.pieceColor)) return false;
   if (!isBoardPosition(rawMove.origin)) return false;
   if (!isBoardPosition(rawMove.target)) return false;
   if (!Array.isArray(rawMove.transformOptions)) return false;
@@ -68,6 +65,7 @@ export function isRawPromotion(rawMove: RawMove): rawMove is RawPromotion {
 
 class Promotion extends Move {
   private firstMove = false;
+  private newRawPiece: RawPiece | null = null;
 
   constructor(
     private readonly piece: Piece,
@@ -98,6 +96,7 @@ class Promotion extends Move {
       origin: getCleanBoardPosition(this.origin),
       target: getCleanBoardPosition(this.target),
       transformOptions: this.allTransformOptions,
+      newRawPiece: this.newRawPiece,
       captures,
       id: this.id,
     };
@@ -106,6 +105,8 @@ class Promotion extends Move {
   public loadCustomProps(rawMove: RawPromotion): void {
     super.loadCustomProps(rawMove);
     this.firstMove = rawMove.firstMove;
+    if (typeof rawMove.newRawPiece !== "object") return;
+    this.newRawPiece = rawMove.newRawPiece;
   }
 
   public static restore(rawMove: RawMove): Promotion {
@@ -208,11 +209,13 @@ class Promotion extends Move {
       reviveFromCapturedPieces,
       capturedPieces
     );
-    const newRawPiece =
-      transformOptions.length === 1
-        ? transformOptions[0]
-        : chooseBestPiece(transformOptions, piecesImportance);
-    const newPiece = getPieceFromRaw(newRawPiece);
+    if (!this.newRawPiece) {
+      this.newRawPiece =
+        transformOptions.length === 1
+          ? transformOptions[0]
+          : chooseBestPiece(transformOptions, piecesImportance);
+    }
+    const newPiece = getPieceFromRaw(this.newRawPiece);
 
     transformPiece(this.target, newPiece, boardStateValue);
   }
@@ -242,10 +245,10 @@ class Promotion extends Move {
     whiteCapturedPieces: Ref<PieceId[]>,
     selectPieceDialog: SelectPieceDialog,
     reviveFromCapturedPieces: Ref<boolean>,
-    audioEffects: boolean,
+    audioEffectsEnabled: boolean,
     moveAudioEffect: Howl,
     removeAudioEffect: Howl,
-    useVibrations: boolean
+    vibrationsEnabled: boolean
   ): Promise<void> {
     this.onForward(boardStateValue);
 
@@ -256,11 +259,11 @@ class Promotion extends Move {
         blackCapturedPieces,
         whiteCapturedPieces
       );
-      if (audioEffects) removeAudioEffect.play();
-      if (useVibrations) navigator.vibrate(30);
+      if (audioEffectsEnabled) removeAudioEffect.play();
+      if (vibrationsEnabled) navigator.vibrate(30);
     }
     await movePiece(this.origin, this.target, boardStateValue);
-    if (audioEffects) moveAudioEffect.play();
+    if (audioEffectsEnabled) moveAudioEffect.play();
 
     const capturedPieces = this.getRelevantCapturedPieces(
       blackCapturedPieces,
@@ -270,11 +273,11 @@ class Promotion extends Move {
       reviveFromCapturedPieces,
       capturedPieces
     );
-    const newRawPiece =
+    this.newRawPiece =
       transformOptions.length === 1
         ? transformOptions[0]
         : await selectPieceDialog.open(transformOptions);
-    const newPiece = getPieceFromRaw(newRawPiece);
+    const newPiece = getPieceFromRaw(this.newRawPiece);
 
     if (reviveFromCapturedPieces.value) {
       capturedPieces.value.splice(
@@ -285,14 +288,14 @@ class Promotion extends Move {
     }
 
     transformPiece(this.target, newPiece, boardStateValue);
-    if (useVibrations) navigator.vibrate([40, 60, 20]);
+    if (vibrationsEnabled) navigator.vibrate([40, 60, 20]);
 
     this.notation = this.captures
       ? `${getPieceNotation(this.piece.pieceId)}x${getPositionNotation(
           this.captures
-        )}=${getPieceNotation(newRawPiece.pieceId)}`
+        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-          newRawPiece.pieceId
+          this.newRawPiece.pieceId
         )}`;
   }
 

@@ -2,8 +2,8 @@ import type { Ref } from "vue";
 import SelectUserData from "./select_user_data";
 import type ToastManager from "../toast_manager";
 
-export type PieceSetValue = "material_design" | "font_awesome" | "tabler";
-function isPieceSetValue(string: string): string is PieceSetValue {
+export type PieceIconPack = "material_design" | "font_awesome" | "tabler";
+function ispieceIconPackValue(string: string): string is PieceIconPack {
   return (
     string === "material_design" ||
     string === "font_awesome" ||
@@ -11,16 +11,16 @@ function isPieceSetValue(string: string): string is PieceSetValue {
   );
 }
 
-class PieceSetData extends SelectUserData<PieceSetValue> {
+class PieceIconPackData extends SelectUserData<PieceIconPack> {
   constructor(
-    value: PieceSetValue,
-    valueRef: Ref<PieceSetValue>,
+    value: PieceIconPack,
+    valueRef: Ref<PieceIconPack>,
     toastManager: ToastManager
   ) {
-    super("piece_set", value, isPieceSetValue, toastManager, valueRef);
+    super("piece_set", value, ispieceIconPackValue, toastManager, valueRef);
   }
 
   public apply(): void {}
 }
 
-export default PieceSetData;
+export default PieceIconPackData;

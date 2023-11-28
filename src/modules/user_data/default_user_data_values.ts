@@ -1,22 +1,25 @@
 import { BoardStateValue } from "../board_manager";
+import {
+  SecondsPerMovePenalty,
+  PlayerColor,
+  GameOverReason,
+  Winner,
+} from "../game";
+import Move from "../moves/move";
 import Bishop from "../pieces/bishop";
 import King from "../pieces/king";
 import Knight from "../pieces/knight";
 import Pawn from "../pieces/pawn";
+import { PieceId } from "../pieces/piece";
 import Queen from "../pieces/queen";
 import Rook from "../pieces/rook";
+import { Theme } from "../theme_manager";
+import { Transitions } from "../transitions_manager";
+import { GamePausedState } from "./game_paused";
+import { PieceIconPack } from "./piece_set";
+import { PreferredPlayerColor } from "./preferred_player_color";
 
-interface DefaultUserDataValues {
-  defaultBoardState: BoardStateValue;
-  gameBoardState: BoardStateValue;
-  cellIndexOpacity: number;
-  playerHue: number;
-  opponentHue: number;
-  pieceBorder: number;
-  piecePadding: number;
-}
-
-const defaultUserDataValues: DefaultUserDataValues = {
+const defaultUserDataValues = {
   defaultBoardState: [
     [
       new Rook("white"),
@@ -62,12 +65,59 @@ const defaultUserDataValues: DefaultUserDataValues = {
       new Knight("black"),
       new Rook("black"),
     ],
-  ],
-  gameBoardState: Array(8).fill(Array(8).fill(null)),
+  ] as BoardStateValue,
+  gameBoardState: [
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+  ] as BoardStateValue,
   cellIndexOpacity: 90,
   playerHue: 30,
   opponentHue: 198,
   pieceBorder: 1.1,
+  piecePadding: 10,
+  pieceIconPack: "font_awesome" as PieceIconPack,
+  preferredPlayerColor: "random" as PreferredPlayerColor,
+  requireMoveConfirm: false,
+  tableMode: false,
+  secondCheckboardEnabled: false,
+  theme: "auto" as Theme,
+  transitionDuration: 100,
+  transitions: "auto" as Transitions,
+  playerColor: "white" as PlayerColor,
+  whiteCapturedPieces: [] as PieceId[],
+  blackCapturedPieces: [] as PieceId[],
+  gamePaused: "not" as GamePausedState,
+  audioEffectsEnabled: true,
+  firstMoveColor: "white" as PlayerColor,
+  preferredFirstMoveColor: "white" as PreferredPlayerColor,
+  showCapturingPieces: false,
+  reviveFromCapturedPieces: false,
+  playerSecondsPerMove: 0,
+  opponentSecondsPerMove: 0,
+  playerSecondsPerMatch: 0,
+  opponentSecondsPerMatch: 0,
+  showOtherAvailibleMoves: false,
+  secondsPerMovePenalty: "random_move" as SecondsPerMovePenalty,
+  gameOverReason: "none" as GameOverReason,
+  vibrationsEnabled: true,
+  pieceLongPressTimeout: 0,
+  autoPauseGame: true,
+  pawnImportance: 1,
+  knightImportance: 3,
+  bishopImportance: 3.25,
+  rookImportance: 5,
+  queenImportance: 9,
+  kingImportance: 25,
+  ignorePiecesGuardedProperty: false,
+  moveList: [] as Move[],
+  moveIndex: 0,
+  winner: "none" as Winner,
 };
 
 export default defaultUserDataValues;

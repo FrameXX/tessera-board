@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { PropType, inject } from "vue";
-import type { PieceSetValue } from "../modules/user_data/piece_set";
+import type { pieceIconPackValue } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
 import type { PieceId } from "../modules/pieces/piece";
 import { getRandomId } from "../modules/utils/misc";
@@ -11,7 +11,7 @@ const props = defineProps({
   color: { type: String as PropType<PlayerColor>, required: true },
 });
 
-const pieceSet = inject<PieceSetValue>("pieceSet");
+const pieceIconPack = inject<pieceIconPackValue>("pieceIconPack");
 </script>
 
 <template>
@@ -21,7 +21,7 @@ const pieceSet = inject<PieceSetValue>("pieceSet");
         v-for="pieceId in props.pieceIds"
         :key="getRandomId()"
         :color="props.color"
-        :piece-set="pieceSet"
+        :piece-set="pieceIconPack"
         :piece-id="pieceId"
       ></PieceIcon>
     </TransitionGroup>
