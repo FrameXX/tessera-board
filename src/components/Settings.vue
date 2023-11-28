@@ -10,7 +10,6 @@ import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
-import type { pieceIconPackValue } from "../modules/user_data/piece_set";
 import type { SecondsPerMovePenalty, PlayerColor } from "../modules/game";
 import type ConfigsDialog from "../modules/dialogs/configs";
 import ConfigManager from "../modules/config_manager";
@@ -23,6 +22,7 @@ import {
   BoardPosition,
   BoardStateValue,
 } from "../modules/board_manager";
+import { PieceIconPack } from "../modules/user_data/piece_set";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -56,7 +56,7 @@ const theme = inject("theme") as Ref<Theme>;
 const transitions = inject("transitions") as Ref<Transitions>;
 const playerHue = inject("playerHue") as Ref<number>;
 const opponentHue = inject("opponentHue") as Ref<number>;
-const pieceIconPack = inject("pieceIconPack") as Ref<pieceIconPackValue>;
+const pieceIconPack = inject("pieceIconPack") as Ref<PieceIconPack>;
 const piecePadding = inject("piecePadding") as Ref<number>;
 const pieceBorder = inject("pieceBorder") as Ref<number>;
 const transitionDuration = inject("transitionDuration") as Ref<number>;

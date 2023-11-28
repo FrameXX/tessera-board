@@ -189,8 +189,8 @@ class Shift extends Move {
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-          this.captures
-        )}`
+        this.captures
+      )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 

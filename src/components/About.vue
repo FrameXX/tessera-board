@@ -12,7 +12,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
         <img id="logo" src="../assets/img/favicon.svg" />
         <header>
           <h1>Tessera board</h1>
-          <small class="version">v0.0.0 (16)</small>
+          <small class="version">v0.0.0 (17)</small>
         </header>
         <p>Made with ❤️ by Jiří Král.</p>
         <p>
@@ -23,7 +23,9 @@ const props = defineProps({ open: { type: Boolean, default: false } });
         </p>
         <p>
           This software is licensed under
-          <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank"
+          <a
+            href="https://www.gnu.org/licenses/agpl-3.0.en.html"
+            target="_blank"
             >GNU Affero General Public License v3</a
           >.
         </p>

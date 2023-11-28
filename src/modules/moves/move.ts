@@ -9,7 +9,7 @@ import { getPositionPiece } from "../game_board_manager";
 import { GameLogicError, getAllPieceProps } from "../game";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
-import { BoardStateValue } from "../board_manager";
+import type { BoardStateValue } from "../board_manager";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {

@@ -1,23 +1,23 @@
-import { BoardStateValue } from "../board_manager";
-import {
+import type { BoardStateValue } from "../board_manager";
+import type {
   SecondsPerMovePenalty,
   PlayerColor,
   GameOverReason,
   Winner,
 } from "../game";
-import Move from "../moves/move";
+import type Move from "../moves/move";
 import Bishop from "../pieces/bishop";
 import King from "../pieces/king";
 import Knight from "../pieces/knight";
 import Pawn from "../pieces/pawn";
-import { PieceId } from "../pieces/piece";
+import type { PieceId } from "../pieces/piece";
 import Queen from "../pieces/queen";
 import Rook from "../pieces/rook";
-import { Theme } from "../theme_manager";
-import { Transitions } from "../transitions_manager";
-import { GamePausedState } from "./game_paused";
-import { PieceIconPack } from "./piece_set";
-import { PreferredPlayerColor } from "./preferred_player_color";
+import type { Theme } from "../theme_manager";
+import type { Transitions } from "../transitions_manager";
+import type { GamePausedState } from "./game_paused";
+import type { PieceIconPack } from "./piece_set";
+import type { PreferredPlayerColor } from "./preferred_player_color";
 
 const defaultUserDataValues = {
   defaultBoardState: [

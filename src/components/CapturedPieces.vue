@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { PropType, inject } from "vue";
-import type { pieceIconPackValue } from "../modules/user_data/piece_set";
+import type { PieceIconPack } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
 import type { PieceId } from "../modules/pieces/piece";
 import { getRandomId } from "../modules/utils/misc";
@@ -11,7 +11,7 @@ const props = defineProps({
   color: { type: String as PropType<PlayerColor>, required: true },
 });
 
-const pieceIconPack = inject<pieceIconPackValue>("pieceIconPack");
+const pieceIconPack = inject<PieceIconPack>("pieceIconPack");
 </script>
 
 <template>

@@ -46,17 +46,17 @@ class MoveListData extends UserData<Move[]> {
       }
       let move: Move;
       switch (rawMove.moveId) {
-        case "shift":
-          move = Shift.restore(rawMove);
-          break;
-        case "promotion":
-          move = Promotion.restore(rawMove);
-          break;
-        case "castling":
-          move = Castling.restore(rawMove);
-          break;
-        default:
-          return;
+      case "shift":
+        move = Shift.restore(rawMove);
+        break;
+      case "promotion":
+        move = Promotion.restore(rawMove);
+        break;
+      case "castling":
+        move = Castling.restore(rawMove);
+        break;
+      default:
+        return;
       }
       move.loadCustomProps(rawMove);
       moves.push(move);

@@ -11,7 +11,7 @@ import type {
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
-import { ComputedRef } from "vue";
+import type { ComputedRef } from "vue";
 import { getPositionPiece } from "../game_board_manager";
 
 interface RawPawn extends RawPiece {
