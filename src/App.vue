@@ -830,6 +830,7 @@ const game = new Game(
   moveList,
   moveListData,
   lastMove,
+  vibrationsEnabled,
   confirmDialog,
   toastManager
 );

@@ -152,6 +152,7 @@ class Game {
     private readonly moveList: Ref<Move[]>,
     private readonly moveListData: MoveListData,
     private readonly lastMove: ComputedRef<Move | null>,
+    private readonly vibrationsEnabled: Ref<boolean>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
   ) {
@@ -466,6 +467,7 @@ class Game {
         "cancel",
         "error"
       );
+      if (this.vibrationsEnabled) navigator.vibrate(30);
       return;
     }
     this.onMove("forward");
@@ -478,6 +480,7 @@ class Game {
         "cancel",
         "error"
       );
+      if (this.vibrationsEnabled) navigator.vibrate(30);
       return;
     }
     this.onMove("reverse");
