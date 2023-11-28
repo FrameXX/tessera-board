@@ -218,7 +218,7 @@ const opponentSecondsPerMove = ref(
 );
 provide("opponentSecondsPerMove", opponentSecondsPerMove);
 const playerSecondsPerMatch = ref(defaultUserDataValues.playerSecondsPerMatch);
-provide("playerSecondsPerMatch", defaultUserDataValues.playerSecondsPerMatch);
+provide("playerSecondsPerMatch", playerSecondsPerMatch);
 const opponentSecondsPerMatch = ref(
   defaultUserDataValues.opponentSecondsPerMatch
 );

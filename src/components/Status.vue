@@ -52,43 +52,45 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
 <template>
   <div id="status">
     <div
-      id="timers-player"
+      id="timers-player-wrapper"
       v-show="props.playerSecondsPerMoveSet || props.playerSecondsPerMatchSet"
     >
-      <InfoText
-        v-show="props.playerSecondsPerMoveSet"
-        content-role="timer"
-        :class="{
-          pulsing:
-            props.playerSecsMove < TOO_FEW_MOVE_SECONDS &&
-            props.playerSecsMove > 0 &&
-            props.playerPlaying &&
-            winner === 'none',
-        }"
-        name="move"
-        >{{
-          getDigitStr(playerTimeMove.mins) +
-          ":" +
-          getDigitStr(playerTimeMove.secs)
-        }}</InfoText
-      >
-      <InfoText
-        v-show="props.playerSecondsPerMatchSet"
-        content-role="timer"
-        :class="{
-          pulsing:
-            props.playerSecsMatch < TOO_FEW_MATCH_SECONDS &&
-            props.playerSecsMatch > 0 &&
-            props.playerPlaying &&
-            winner === 'none',
-        }"
-        name="match"
-        >{{
-          getDigitStr(playerTimeMatch.mins) +
-          ":" +
-          getDigitStr(playerTimeMatch.secs)
-        }}</InfoText
-      >
+      <div id="timers-player">
+        <InfoText
+          v-show="props.playerSecondsPerMoveSet"
+          content-role="timer"
+          :class="{
+            pulsing:
+              props.playerSecsMove < TOO_FEW_MOVE_SECONDS &&
+              props.playerSecsMove > 0 &&
+              props.playerPlaying &&
+              winner === 'none',
+          }"
+          name="move"
+          >{{
+            getDigitStr(playerTimeMove.mins) +
+            ":" +
+            getDigitStr(playerTimeMove.secs)
+          }}</InfoText
+        >
+        <InfoText
+          v-show="props.playerSecondsPerMatchSet"
+          content-role="timer"
+          :class="{
+            pulsing:
+              props.playerSecsMatch < TOO_FEW_MATCH_SECONDS &&
+              props.playerSecsMatch > 0 &&
+              props.playerPlaying &&
+              winner === 'none',
+          }"
+          name="match"
+          >{{
+            getDigitStr(playerTimeMatch.mins) +
+            ":" +
+            getDigitStr(playerTimeMatch.secs)
+          }}</InfoText
+        >
+      </div>
     </div>
 
     <div id="status-text" :class="primaryClass">
@@ -98,45 +100,47 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
     </div>
 
     <div
-      id="timers-opponent"
+      id="timers-opponent-wrapper"
       v-show="
         props.opponentSecondsPerMoveSet || props.opponentSecondsPerMatchSet
       "
     >
-      <InfoText
-        v-show="props.opponentSecondsPerMoveSet"
-        content-role="timer"
-        :class="{
-          pulsing:
-            props.opponentSecsMove < TOO_FEW_MOVE_SECONDS &&
-            props.opponentSecsMove > 0 &&
-            !props.playerPlaying &&
-            winner === 'none',
-        }"
-        name="move"
-        >{{
-          getDigitStr(opponentTimeMove.mins) +
-          ":" +
-          getDigitStr(opponentTimeMove.secs)
-        }}</InfoText
-      >
-      <InfoText
-        v-show="props.opponentSecondsPerMatchSet"
-        content-role="timer"
-        :class="{
-          pulsing:
-            props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS &&
-            props.opponentSecsMatch > 0 &&
-            !props.playerPlaying &&
-            winner === 'none',
-        }"
-        name="match"
-        >{{
-          getDigitStr(opponentTimeMatch.mins) +
-          ":" +
-          getDigitStr(opponentTimeMatch.secs)
-        }}</InfoText
-      >
+      <div id="timers-opponent">
+        <InfoText
+          v-show="props.opponentSecondsPerMoveSet"
+          content-role="timer"
+          :class="{
+            pulsing:
+              props.opponentSecsMove < TOO_FEW_MOVE_SECONDS &&
+              props.opponentSecsMove > 0 &&
+              !props.playerPlaying &&
+              winner === 'none',
+          }"
+          name="move"
+          >{{
+            getDigitStr(opponentTimeMove.mins) +
+            ":" +
+            getDigitStr(opponentTimeMove.secs)
+          }}</InfoText
+        >
+        <InfoText
+          v-show="props.opponentSecondsPerMatchSet"
+          content-role="timer"
+          :class="{
+            pulsing:
+              props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS &&
+              props.opponentSecsMatch > 0 &&
+              !props.playerPlaying &&
+              winner === 'none',
+          }"
+          name="match"
+          >{{
+            getDigitStr(opponentTimeMatch.mins) +
+            ":" +
+            getDigitStr(opponentTimeMatch.secs)
+          }}</InfoText
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -152,6 +156,13 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
   .info-text {
     display: inline-flex;
   }
+}
+
+#timers-player-wrapper,
+#timers-opponent-wrapper {
+  @include flex-center;
+  width: 100%;
+  height: 100%;
 }
 
 #timers-player,
@@ -170,7 +181,7 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
   width: 100%;
 }
 
-#timers-player {
+#timers-player-wrapper {
   background-color: var(--color-player-surface-accent);
 }
 
@@ -199,7 +210,7 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
   }
 }
 
-#timers-opponent {
+#timers-opponent-wrapper {
   background-color: var(--color-opponent-surface-accent);
 }
 
