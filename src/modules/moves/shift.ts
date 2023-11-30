@@ -1,9 +1,9 @@
-import type { Ref } from "vue";
 import { isPieceId, type PieceId } from "../pieces/piece";
 import Move, {
   clearPositionValue,
   getCleanBoardPosition,
   handleInvalidRawMove,
+  MovePerformContext,
   movePositionValue,
   tellPieceItMoved,
 } from "./move";
@@ -134,14 +134,14 @@ class Shift extends Move {
     }
   }
 
-  public forward(boardStateValue: BoardStateValue): void {
-    this.onForward(boardStateValue);
+  public forward(context: MovePerformContext): void {
+    this.onForward(context.boardStateValue);
 
     if (this.captures) {
-      clearPositionValue(this.captures, boardStateValue);
+      clearPositionValue(this.captures, context.boardStateValue);
     }
-    const piece = getPositionPiece(this.origin, boardStateValue);
-    movePositionValue(piece, this.origin, this.target, boardStateValue);
+    const piece = getPositionPiece(this.origin, context.boardStateValue);
+    movePositionValue(piece, this.origin, this.target, context.boardStateValue);
   }
 
   private onReverse(boardStateValue: BoardStateValue) {
@@ -163,34 +163,26 @@ class Shift extends Move {
     }
   }
 
-  public async perform(
-    boardStateValue: BoardStateValue,
-    blackCapturedPieces: Ref<PieceId[]>,
-    whiteCapturedPieces: Ref<PieceId[]>,
-    audioEffectsEnabled: boolean,
-    moveAudioEffect: Howl,
-    removeAudioEffect: Howl,
-    vibrationsEnabled: boolean
-  ): Promise<void> {
-    this.onForward(boardStateValue);
+  public async perform(context: MovePerformContext): Promise<void> {
+    this.onForward(context.boardStateValue);
 
     if (this.captures) {
       capturePosition(
         this.captures,
-        boardStateValue,
-        blackCapturedPieces,
-        whiteCapturedPieces
+        context.boardStateValue,
+        context.blackCapturedPieces,
+        context.whiteCapturedPieces
       );
-      if (audioEffectsEnabled) removeAudioEffect.play();
-      if (vibrationsEnabled) navigator.vibrate(30);
+      if (context.audioEffectsEnabled.value) context.removeAudioEffect.play();
+      if (context.vibrationsEnabled.value) navigator.vibrate(30);
     }
-    await movePiece(this.origin, this.target, boardStateValue);
-    if (audioEffectsEnabled) moveAudioEffect.play();
+    await movePiece(this.origin, this.target, context.boardStateValue);
+    if (context.audioEffectsEnabled.value) context.moveAudioEffect.play();
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 

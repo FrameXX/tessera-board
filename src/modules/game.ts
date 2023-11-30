@@ -20,11 +20,10 @@ import type {
   BoardStateValue,
 } from "./board_manager";
 import type Move from "./moves/move";
-import { isMoveShift } from "./moves/shift";
-import { isMovePromotion } from "./moves/promotion";
-import { isMoveCastling } from "./moves/castling";
 import type NumberUserData from "./user_data/number_user_data";
 import type MoveListData from "./user_data/move_list";
+import { MovePerformContext } from "./moves/move";
+import SelectPieceDialog from "./dialogs/select_piece";
 
 type MoveDirection = "forward" | "reverse";
 type MoveExecution = "perform" | MoveDirection;
@@ -152,6 +151,10 @@ class Game {
     private readonly moveList: Ref<Move[]>,
     private readonly moveListData: MoveListData,
     private readonly lastMove: ComputedRef<Move | null>,
+    private readonly selectPieceDialog: SelectPieceDialog,
+    private readonly audioEffectsEnabled: Ref<boolean>,
+    private readonly pieceMoveAudioEffect: Howl,
+    private readonly pieceRemoveAudioEffect: Howl,
     private readonly vibrationsEnabled: Ref<boolean>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly toastManager: ToastManager
@@ -221,11 +224,21 @@ class Game {
         this.cancelWin();
     });
 
-    this.boardManager.addEventListener(
-      "move",
-      this.onMove.bind(this, "perform")
-    );
+    this.boardManager.addEventListener("move", this.performMove);
   }
+
+  private performMove = (event: Event) => {
+    if (!(event instanceof CustomEvent)) {
+      throw new GameLogicError(
+        "The game received a move event that was not an instance of custom event containing move in its detail."
+      );
+    }
+    const move = event.detail;
+    move.perform(this.movePerformContext);
+    console.log(this.moveList);
+    this.moveList.value.push(move);
+    this.onMove("perform");
+  };
 
   private playerWin(reason: GameOverReason) {
     const winner: Winner = "player";
@@ -443,21 +456,24 @@ class Game {
     reversedMove.reverse(this.boardStateValue);
   }
 
+  private get movePerformContext(): MovePerformContext {
+    return {
+      boardStateValue: this.boardStateValue,
+      blackCapturedPieces: this.blackCapturedPieces,
+      whiteCapturedPieces: this.whiteCapturedPieces,
+      selectPieceDialog: this.selectPieceDialog,
+      reviveFromCapturedPieces: this.reviveFromCapturedPieces,
+      audioEffectsEnabled: this.audioEffectsEnabled,
+      moveAudioEffect: this.pieceMoveAudioEffect,
+      removeAudioEffect: this.pieceRemoveAudioEffect,
+      vibrationsEnabled: this.vibrationsEnabled,
+      piecesImportance: this.piecesImportance,
+    };
+  }
+
   private performForwardMove() {
     const forwardedMove = this.moveList.value[this.moveIndex.value];
-    if (isMoveShift(forwardedMove)) {
-      forwardedMove.forward(this.boardStateValue);
-    } else if (isMovePromotion(forwardedMove)) {
-      forwardedMove.forward(
-        this.boardStateValue,
-        this.piecesImportance,
-        this.blackCapturedPieces,
-        this.whiteCapturedPieces,
-        this.reviveFromCapturedPieces
-      );
-    } else if (isMoveCastling(forwardedMove)) {
-      forwardedMove.forward(this.boardStateValue);
-    }
+    forwardedMove.forward(this.movePerformContext);
   }
 
   public forwardMove() {
@@ -549,6 +565,7 @@ class Game {
       this.lastMove
     );
     if (checked) this.toastManager.showToast("Check!", "cross");
+
     const canPlayerMove = this.canPlayerMove(
       this.playingColor,
       this.pieceProps.value
@@ -573,10 +590,7 @@ class Game {
         props,
         this.boardStateValue,
         this.boardStateData,
-        this.piecesImportance,
-        this.blackCapturedPieces,
-        this.whiteCapturedPieces,
-        this.reviveFromCapturedPieces,
+        this.movePerformContext,
         this.ignorePiecesProtections,
         this.lastMove
       );

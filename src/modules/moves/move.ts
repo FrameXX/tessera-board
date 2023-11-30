@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import type Piece from "../pieces/piece";
-import type { PieceId } from "../pieces/piece";
+import type { PieceId, PiecesImportance } from "../pieces/piece";
 import {
   getElementInstanceById,
   waitForTransitionEnd,
@@ -10,10 +10,27 @@ import { GameLogicError, getAllPieceProps } from "../game";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
+import SelectPieceDialog from "../dialogs/select_piece";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {
   return string === "shift" || string === "castling" || string === "promotion";
+}
+
+export interface MoveForwardContext {
+  boardStateValue: BoardStateValue;
+  piecesImportance: PiecesImportance;
+  blackCapturedPieces: Ref<PieceId[]>;
+  whiteCapturedPieces: Ref<PieceId[]>;
+  reviveFromCapturedPieces: Ref<boolean>;
+}
+
+export interface MovePerformContext extends MoveForwardContext {
+  selectPieceDialog: SelectPieceDialog;
+  audioEffectsEnabled: Ref<boolean>;
+  moveAudioEffect: Howl;
+  removeAudioEffect: Howl;
+  vibrationsEnabled: Ref<boolean>;
 }
 
 /**
@@ -42,7 +59,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  public abstract forward(...args: any): void;
+  public abstract forward(context: MoveForwardContext): void;
 
   protected onPerformForward() {
     if (this.performed) {
@@ -75,7 +92,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  public abstract perform(...args: any): Promise<void>;
+  public abstract perform(context: MovePerformContext): Promise<void>;
 
   /**
    * Returns an array of board positions that after click should perform this move.

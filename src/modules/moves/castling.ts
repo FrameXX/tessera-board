@@ -6,6 +6,7 @@ import type {
 import { isBoardPosition } from "../board_manager";
 import { getPositionPiece } from "../game_board_manager";
 import Move, {
+  MovePerformContext,
   getCleanBoardPosition,
   handleInvalidRawMove,
   movePiece,
@@ -115,14 +116,24 @@ class Castling extends Move {
     }
   }
 
-  public forward(boardStateValue: BoardStateValue): void {
-    this.onForward(boardStateValue);
+  public forward(context: MovePerformContext): void {
+    this.onForward(context.boardStateValue);
 
-    const king = getPositionPiece(this.kingOrigin, boardStateValue);
-    const rook = getPositionPiece(this.rookOrigin, boardStateValue);
+    const king = getPositionPiece(this.kingOrigin, context.boardStateValue);
+    const rook = getPositionPiece(this.rookOrigin, context.boardStateValue);
 
-    movePositionValue(king, this.kingOrigin, this.kingTarget, boardStateValue);
-    movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
+    movePositionValue(
+      king,
+      this.kingOrigin,
+      this.kingTarget,
+      context.boardStateValue
+    );
+    movePositionValue(
+      rook,
+      this.rookOrigin,
+      this.rookTarget,
+      context.boardStateValue
+    );
   }
 
   private onReverse(boardStateValue: BoardStateValue) {
@@ -143,16 +154,12 @@ class Castling extends Move {
     movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
   }
 
-  public async perform(
-    boardStateValue: BoardStateValue,
-    audioEffectsEnabled: boolean,
-    moveAudioEffect: Howl
-  ): Promise<void> {
-    this.onForward(boardStateValue);
+  public async perform(context: MovePerformContext): Promise<void> {
+    this.onForward(context.boardStateValue);
 
-    movePiece(this.kingOrigin, this.kingTarget, boardStateValue);
-    await movePiece(this.rookOrigin, this.rookTarget, boardStateValue);
-    if (audioEffectsEnabled) moveAudioEffect.play();
+    movePiece(this.kingOrigin, this.kingTarget, context.boardStateValue);
+    await movePiece(this.rookOrigin, this.rookTarget, context.boardStateValue);
+    if (context.audioEffectsEnabled.value) context.moveAudioEffect.play();
 
     this.notation = this.kingSide ? "0-0" : "0-0-0";
   }

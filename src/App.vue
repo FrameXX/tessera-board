@@ -750,18 +750,12 @@ const playerBoardManager = new GameBoardManager(
   playerSelectedPieces,
   playerSelectedCells,
   playerDraggingOverCells,
-  selectPieceDialog,
-  audioEffectsEnabled,
-  pieceMoveAudioEffect,
-  pieceRemoveAudioEffect,
-  vibrationsEnabled,
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
   ignorePiecesGuardedProperty,
   gamePieceProps,
   piecesImportance,
-  moveList,
   lastMove
 );
 const opponentBoardManager = new GameBoardManager(
@@ -780,18 +774,12 @@ const opponentBoardManager = new GameBoardManager(
   opponentSelectedPieces,
   opponentSelectedCells,
   opponentDraggingOverCells,
-  selectPieceDialog,
-  audioEffectsEnabled,
-  pieceMoveAudioEffect,
-  pieceRemoveAudioEffect,
-  vibrationsEnabled,
   showCapturingPieces,
   reviveFromCapturedPieces,
   showOtherAvailibleMoves,
   ignorePiecesGuardedProperty,
   gamePieceProps,
   piecesImportance,
-  moveList,
   lastMove
 );
 
@@ -830,6 +818,10 @@ const game = new Game(
   moveList,
   moveListData,
   lastMove,
+  selectPieceDialog,
+  audioEffectsEnabled,
+  pieceMoveAudioEffect,
+  pieceRemoveAudioEffect,
   vibrationsEnabled,
   confirmDialog,
   toastManager

@@ -1,10 +1,6 @@
 import type { Ref } from "vue";
 import type Piece from "../pieces/piece";
-import {
-  chooseBestPiece,
-  type PieceId,
-  type PiecesImportance,
-} from "../pieces/piece";
+import { chooseBestPiece, type PieceId } from "../pieces/piece";
 import {
   getPieceFromRaw,
   isRawPiece,
@@ -14,10 +10,11 @@ import Move, {
   clearPositionValue,
   getCleanBoardPosition,
   handleInvalidRawMove,
+  MoveForwardContext,
+  MovePerformContext,
   movePositionValue,
   tellPieceItMoved,
 } from "./move";
-import type SelectPieceDialog from "../dialogs/select_piece";
 import { capturePosition, movePiece, transformPiece } from "./move";
 import type {
   BoardPieceProps,
@@ -186,38 +183,37 @@ class Promotion extends Move {
     }
   }
 
-  public forward(
-    boardStateValue: BoardStateValue,
-    piecesImportance: PiecesImportance,
-    blackCapturedPieces: Ref<PieceId[]>,
-    whiteCapturedPieces: Ref<PieceId[]>,
-    reviveFromCapturedPieces: Ref<boolean>
-  ): void {
-    this.onForward(boardStateValue);
+  public forward(context: MoveForwardContext): void {
+    this.onForward(context.boardStateValue);
 
     if (this.captures) {
-      clearPositionValue(this.captures, boardStateValue);
+      clearPositionValue(this.captures, context.boardStateValue);
     }
 
-    movePositionValue(this.piece, this.origin, this.target, boardStateValue);
+    movePositionValue(
+      this.piece,
+      this.origin,
+      this.target,
+      context.boardStateValue
+    );
 
     const capturedPieces = this.getRelevantCapturedPieces(
-      blackCapturedPieces,
-      whiteCapturedPieces
+      context.blackCapturedPieces,
+      context.whiteCapturedPieces
     );
     const transformOptions = this.getTransformOptions(
-      reviveFromCapturedPieces,
+      context.reviveFromCapturedPieces,
       capturedPieces
     );
     if (!this.newRawPiece) {
       this.newRawPiece =
         transformOptions.length === 1
           ? transformOptions[0]
-          : chooseBestPiece(transformOptions, piecesImportance);
+          : chooseBestPiece(transformOptions, context.piecesImportance);
     }
     const newPiece = getPieceFromRaw(this.newRawPiece);
 
-    transformPiece(this.target, newPiece, boardStateValue);
+    transformPiece(this.target, newPiece, context.boardStateValue);
   }
 
   private onReverse(boardStateValue: BoardStateValue) {
@@ -239,47 +235,37 @@ class Promotion extends Move {
     }
   }
 
-  public async perform(
-    boardStateValue: BoardStateValue,
-    blackCapturedPieces: Ref<PieceId[]>,
-    whiteCapturedPieces: Ref<PieceId[]>,
-    selectPieceDialog: SelectPieceDialog,
-    reviveFromCapturedPieces: Ref<boolean>,
-    audioEffectsEnabled: boolean,
-    moveAudioEffect: Howl,
-    removeAudioEffect: Howl,
-    vibrationsEnabled: boolean
-  ): Promise<void> {
-    this.onForward(boardStateValue);
+  public async perform(context: MovePerformContext): Promise<void> {
+    this.onForward(context.boardStateValue);
 
     if (this.captures) {
       capturePosition(
         this.captures,
-        boardStateValue,
-        blackCapturedPieces,
-        whiteCapturedPieces
+        context.boardStateValue,
+        context.blackCapturedPieces,
+        context.whiteCapturedPieces
       );
-      if (audioEffectsEnabled) removeAudioEffect.play();
-      if (vibrationsEnabled) navigator.vibrate(30);
+      if (context.audioEffectsEnabled.value) context.removeAudioEffect.play();
+      if (context.vibrationsEnabled.value) navigator.vibrate(30);
     }
-    await movePiece(this.origin, this.target, boardStateValue);
-    if (audioEffectsEnabled) moveAudioEffect.play();
+    await movePiece(this.origin, this.target, context.boardStateValue);
+    if (context.audioEffectsEnabled.value) context.moveAudioEffect.play();
 
     const capturedPieces = this.getRelevantCapturedPieces(
-      blackCapturedPieces,
-      whiteCapturedPieces
+      context.blackCapturedPieces,
+      context.whiteCapturedPieces
     );
     const transformOptions = this.getTransformOptions(
-      reviveFromCapturedPieces,
+      context.reviveFromCapturedPieces,
       capturedPieces
     );
     this.newRawPiece =
       transformOptions.length === 1
         ? transformOptions[0]
-        : await selectPieceDialog.open(transformOptions);
+        : await context.selectPieceDialog.open(transformOptions);
     const newPiece = getPieceFromRaw(this.newRawPiece);
 
-    if (reviveFromCapturedPieces.value) {
+    if (context.reviveFromCapturedPieces.value) {
       capturedPieces.value.splice(
         capturedPieces.value.indexOf(newPiece.pieceId),
         1
@@ -287,16 +273,16 @@ class Promotion extends Move {
       capturedPieces.value.push(this.piece.pieceId);
     }
 
-    transformPiece(this.target, newPiece, boardStateValue);
-    if (vibrationsEnabled) navigator.vibrate([40, 60, 20]);
+    transformPiece(this.target, newPiece, context.boardStateValue);
+    if (context.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
 
     this.notation = this.captures
       ? `${getPieceNotation(this.piece.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(this.newRawPiece.pieceId)}`
+          this.captures
+        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-        this.newRawPiece.pieceId
-      )}`;
+          this.newRawPiece.pieceId
+        )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

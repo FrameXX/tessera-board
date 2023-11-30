@@ -15,12 +15,9 @@ import {
 } from "./pieces/piece";
 import { GameLogicError, type Winner, type PlayerColor } from "./game";
 import type Move from "./moves/move";
-import type SelectPieceDialog from "./dialogs/select_piece";
-import { isMoveShift } from "./moves/shift";
-import { isMovePromotion } from "./moves/promotion";
-import { isMoveCastling } from "./moves/castling";
 import { getRandomArrayValue } from "./utils/misc";
 import type BoardStateData from "./user_data/board_state";
+import { MoveForwardContext } from "./moves/move";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
@@ -44,18 +41,12 @@ class GameBoardManager extends BoardManager {
     private readonly selectedPieces: Ref<BoardPosition[]>,
     private readonly selectedCells: Ref<BoardPosition[]>,
     private readonly draggingOverCells: Ref<BoardPosition[]>,
-    private readonly selectPieceDialog: SelectPieceDialog,
-    private readonly audioEffectsEnabled: Ref<boolean>,
-    private readonly pieceMoveAudioEffect: Howl,
-    private readonly pieceRemoveAudioEffect: Howl,
-    private readonly vibrationsEnabled: Ref<boolean>,
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
     private readonly ignorePiecesGuardedProperty: Ref<boolean>,
     private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
     private readonly piecesImportance: PiecesImportance,
-    private readonly moveList: Ref<Move[]>,
     private readonly lastMove: ComputedRef<Move | null>
   ) {
     super();
@@ -110,6 +101,16 @@ class GameBoardManager extends BoardManager {
     return true;
   }
 
+  private get moveForwardContext(): MoveForwardContext {
+    return {
+      boardStateValue: this.boardStateValue,
+      piecesImportance: this.piecesImportance,
+      blackCapturedPieces: this.blackCapturedPieces,
+      whiteCapturedPieces: this.whiteCapturedPieces,
+      reviveFromCapturedPieces: this.reviveFromCapturedPieces,
+    };
+  }
+
   private set selectedPiece(pieceProps: BoardPieceProps | null) {
     this.clearCellsMarks();
     this.clearSelectedPiece();
@@ -130,10 +131,7 @@ class GameBoardManager extends BoardManager {
       pieceProps,
       this.boardStateValue,
       this.boardStateData,
-      this.piecesImportance,
-      this.blackCapturedPieces,
-      this.whiteCapturedPieces,
-      this.reviveFromCapturedPieces,
+      this.moveForwardContext,
       this.ignorePiecesGuardedProperty,
       this.lastMove
     );
@@ -182,51 +180,18 @@ class GameBoardManager extends BoardManager {
         randomPiece,
         this.boardStateValue,
         this.boardStateData,
-        this.piecesImportance,
-        this.blackCapturedPieces,
-        this.whiteCapturedPieces,
-        this.reviveFromCapturedPieces,
+        this.moveForwardContext,
         this.ignorePiecesGuardedProperty,
         this.lastMove
       );
     } while (moves.length === 0);
     const chosenMove = getRandomArrayValue(moves);
-    this.performMove(chosenMove);
+    this.triggerMove(chosenMove);
   }
 
-  public async performMove(move: Move) {
+  public async triggerMove(move: Move) {
     this.selectedPiece = null;
-    if (isMoveShift(move)) {
-      await move.perform(
-        this.boardStateValue,
-        this.blackCapturedPieces,
-        this.whiteCapturedPieces,
-        this.audioEffectsEnabled.value,
-        this.pieceMoveAudioEffect,
-        this.pieceRemoveAudioEffect,
-        this.vibrationsEnabled.value
-      );
-    } else if (isMovePromotion(move)) {
-      await move.perform(
-        this.boardStateValue,
-        this.blackCapturedPieces,
-        this.whiteCapturedPieces,
-        this.selectPieceDialog,
-        this.reviveFromCapturedPieces,
-        this.audioEffectsEnabled.value,
-        this.pieceMoveAudioEffect,
-        this.pieceRemoveAudioEffect,
-        this.vibrationsEnabled.value
-      );
-    } else if (isMoveCastling(move)) {
-      await move.perform(
-        this.boardStateValue,
-        this.audioEffectsEnabled.value,
-        this.pieceMoveAudioEffect
-      );
-    }
-    this.moveList.value.push(move);
-    this.dispatchEvent(new Event("move"));
+    this.dispatchEvent(new CustomEvent("move", { detail: move }));
   }
 
   private get selectedCell(): BoardPosition | null {
@@ -293,7 +258,7 @@ class GameBoardManager extends BoardManager {
     if (!matchingMove) {
       return false;
     }
-    this.performMove(matchingMove);
+    this.triggerMove(matchingMove);
     return true;
   }
 
@@ -331,7 +296,7 @@ class GameBoardManager extends BoardManager {
     this.clearDraggingOverCells();
     const matchingMove = this.getMoveIfPossible(targetPosition);
     if (matchingMove !== null) {
-      this.performMove(matchingMove);
+      this.triggerMove(matchingMove);
     }
   }
 

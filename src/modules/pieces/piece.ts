@@ -10,11 +10,9 @@ import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import { getRandomId, sumPositions } from "../utils/misc";
 import { type RawPiece, getRawPiece } from "./raw_piece";
-import { isMoveShift } from "../moves/shift";
-import { isMovePromotion } from "../moves/promotion";
-import { isMoveCastling } from "../moves/castling";
 import BoardStateData from "../user_data/board_state";
 import type { BoardPosition, BoardStateValue } from "../board_manager";
+import { MoveForwardContext } from "../moves/move";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",
@@ -107,10 +105,7 @@ export abstract class Piece {
     position: BoardPosition,
     boardStateValue: BoardStateValue,
     boardStateData: BoardStateData,
-    piecesImportance: PiecesImportance,
-    blackCapturedPieces: Ref<PieceId[]>,
-    whiteCapturedPieces: Ref<PieceId[]>,
-    reviveFromCapturedPieces: Ref<boolean>,
+    moveForwardContext: MoveForwardContext,
     ignorePiecesGuardedProperty: Ref<boolean>,
     lastMove: ComputedRef<Move | null>
   ): Move[] {
@@ -126,15 +121,14 @@ export abstract class Piece {
         newBoardStateData.load(boardStateData.dump());
         const newBoardStateValue = newBoardStateData.value;
 
+        moveForwardContext.boardStateValue = newBoardStateValue;
+
         possibleMoves = possibleMoves.filter((move) => {
           return !willMoveCheckGuardedPiece(
             move,
             this.color,
             newBoardStateValue,
-            piecesImportance,
-            blackCapturedPieces,
-            whiteCapturedPieces,
-            reviveFromCapturedPieces,
+            moveForwardContext,
             lastMove
           );
         });
@@ -156,25 +150,10 @@ function willMoveCheckGuardedPiece(
   move: Move,
   color: PlayerColor,
   newBoardStateValue: BoardStateValue,
-  piecesImportance: PiecesImportance,
-  blackCapturedPieces: Ref<PieceId[]>,
-  whiteCapturedPieces: Ref<PieceId[]>,
-  reviveFromCapturedPieces: Ref<boolean>,
+  moveForwardContext: MoveForwardContext,
   lastMove: ComputedRef<Move | null>
 ) {
-  if (isMoveShift(move)) {
-    move.forward(newBoardStateValue);
-  } else if (isMovePromotion(move)) {
-    move.forward(
-      newBoardStateValue,
-      piecesImportance,
-      blackCapturedPieces,
-      whiteCapturedPieces,
-      reviveFromCapturedPieces
-    );
-  } else if (isMoveCastling(move)) {
-    move.forward(newBoardStateValue);
-  }
+  move.forward(moveForwardContext);
 
   const pieceProps = getAllPieceProps(newBoardStateValue);
   invalidatePiecesCache(pieceProps);
