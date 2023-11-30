@@ -735,58 +735,8 @@ const piecesImportance: PiecesImportance = {
   king: kingImportance,
 };
 
-const playerBoardManager = new GameBoardManager(
-  whiteCapturingPaths,
-  blackCapturingPaths,
-  playerColor,
-  winner,
-  secondCheckboardEnabled,
-  true,
-  playingColor,
-  gameBoardState,
-  gameBoardStateData,
-  whiteCapturedPieces,
-  blackCapturedPieces,
-  playerCellsMarks,
-  playerSelectedPieces,
-  playerSelectedCells,
-  playerDraggingOverCells,
-  showCapturingPieces,
-  reviveFromCapturedPieces,
-  showOtherAvailibleMoves,
-  ignorePiecesGuardedProperty,
-  gamePieceProps,
-  piecesImportance,
-  lastMove
-);
-const opponentBoardManager = new GameBoardManager(
-  whiteCapturingPaths,
-  blackCapturingPaths,
-  playerColor,
-  winner,
-  secondCheckboardEnabled,
-  false,
-  playingColor,
-  gameBoardState,
-  gameBoardStateData,
-  whiteCapturedPieces,
-  blackCapturedPieces,
-  opponentCellsMarks,
-  opponentSelectedPieces,
-  opponentSelectedCells,
-  opponentDraggingOverCells,
-  showCapturingPieces,
-  reviveFromCapturedPieces,
-  showOtherAvailibleMoves,
-  ignorePiecesGuardedProperty,
-  gamePieceProps,
-  piecesImportance,
-  lastMove
-);
-
 const game = new Game(
   gamePaused,
-  playerBoardManager,
   gameBoardStateData,
   gameBoardState,
   gamePieceProps,
@@ -813,7 +763,6 @@ const game = new Game(
   blackCapturedPieces,
   whiteCapturedPieces,
   reviveFromCapturedPieces,
-  ignorePiecesGuardedProperty,
   lastMoveIndex,
   lastMoveIndexData,
   moveList,
@@ -824,9 +773,61 @@ const game = new Game(
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
   vibrationsEnabled,
+  ignorePiecesGuardedProperty,
   confirmDialog,
   toastManager
 );
+
+const playerBoardManager = new GameBoardManager(
+  game,
+  whiteCapturingPaths,
+  blackCapturingPaths,
+  playerColor,
+  winner,
+  secondCheckboardEnabled,
+  true,
+  playingColor,
+  gameBoardState,
+  gameBoardStateData,
+  whiteCapturedPieces,
+  blackCapturedPieces,
+  playerCellsMarks,
+  playerSelectedPieces,
+  playerSelectedCells,
+  playerDraggingOverCells,
+  showCapturingPieces,
+  reviveFromCapturedPieces,
+  showOtherAvailibleMoves,
+  ignorePiecesGuardedProperty,
+  piecesImportance,
+  lastMove
+);
+
+const opponentBoardManager = new GameBoardManager(
+  game,
+  whiteCapturingPaths,
+  blackCapturingPaths,
+  playerColor,
+  winner,
+  secondCheckboardEnabled,
+  false,
+  playingColor,
+  gameBoardState,
+  gameBoardStateData,
+  whiteCapturedPieces,
+  blackCapturedPieces,
+  opponentCellsMarks,
+  opponentSelectedPieces,
+  opponentSelectedCells,
+  opponentDraggingOverCells,
+  showCapturingPieces,
+  reviveFromCapturedPieces,
+  showOtherAvailibleMoves,
+  ignorePiecesGuardedProperty,
+  piecesImportance,
+  lastMove
+);
+
 const interactionManager = new InteractionManager(
   toastManager,
   userDataManager,

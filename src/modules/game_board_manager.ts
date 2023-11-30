@@ -13,9 +13,8 @@ import {
   type Path,
   type PieceId,
 } from "./pieces/piece";
-import { GameLogicError, type Winner, type PlayerColor } from "./game";
+import Game, { GameLogicError, type Winner, type PlayerColor } from "./game";
 import type Move from "./moves/move";
-import { getRandomArrayValue } from "./utils/misc";
 import type BoardStateData from "./user_data/board_state";
 import { MoveForwardContext } from "./moves/move";
 
@@ -26,8 +25,9 @@ class GameBoardManager extends BoardManager {
   private dragEndTimeout: boolean = false;
 
   constructor(
-    private whiteCapturingPaths: Ref<Path[]>,
-    private blackCapturingPaths: Ref<Path[]>,
+    private readonly game: Game,
+    private readonly whiteCapturingPaths: Ref<Path[]>,
+    private readonly blackCapturingPaths: Ref<Path[]>,
     private readonly playerColor: Ref<PlayerColor>,
     private readonly winner: Ref<Winner>,
     private readonly secondCheckboard: Ref<boolean>,
@@ -45,11 +45,11 @@ class GameBoardManager extends BoardManager {
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,
     private readonly ignorePiecesGuardedProperty: Ref<boolean>,
-    private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
     private readonly piecesImportance: PiecesImportance,
     private readonly lastMove: ComputedRef<Move | null>
   ) {
     super();
+    this.game.addEventListener("restart", this.resetBoard.bind(this));
   }
 
   private clearCellsMarks() {
@@ -117,7 +117,6 @@ class GameBoardManager extends BoardManager {
     this.clearAvailibleMoves();
     this._selectedPiece = null;
 
-    // Player unselected
     if (!pieceProps) return;
 
     this._selectedPiece = pieceProps;
@@ -135,9 +134,9 @@ class GameBoardManager extends BoardManager {
       this.ignorePiecesGuardedProperty,
       this.lastMove
     );
-    moves.forEach((move) =>
-      move.showCellMarks(this.cellsMarks, this.boardStateValue)
-    );
+    for (const move of moves) {
+      move.showCellMarks(this.cellsMarks, this.boardStateValue);
+    }
     this.availibleMoves = moves;
   }
 
@@ -166,32 +165,9 @@ class GameBoardManager extends BoardManager {
     return matchingMoves[0];
   }
 
-  public performRandomMove(pieceColor?: PlayerColor) {
-    let randomPiece: BoardPieceProps;
-    let moves: Move[];
-    do {
-      do {
-        randomPiece = getRandomArrayValue(this.pieceProps.value);
-      } while (
-        typeof pieceColor === "undefined" ||
-        randomPiece.piece.color !== pieceColor
-      );
-      moves = randomPiece.piece.getPossibleMoves(
-        randomPiece,
-        this.boardStateValue,
-        this.boardStateData,
-        this.moveForwardContext,
-        this.ignorePiecesGuardedProperty,
-        this.lastMove
-      );
-    } while (moves.length === 0);
-    const chosenMove = getRandomArrayValue(moves);
-    this.triggerMove(chosenMove);
-  }
-
-  public async triggerMove(move: Move) {
+  public async performMove(move: Move) {
     this.selectedPiece = null;
-    this.dispatchEvent(new CustomEvent("move", { detail: move }));
+    this.game.performMove(move);
   }
 
   private get selectedCell(): BoardPosition | null {
@@ -258,7 +234,7 @@ class GameBoardManager extends BoardManager {
     if (!matchingMove) {
       return false;
     }
-    this.triggerMove(matchingMove);
+    this.performMove(matchingMove);
     return true;
   }
 
@@ -296,7 +272,7 @@ class GameBoardManager extends BoardManager {
     this.clearDraggingOverCells();
     const matchingMove = this.getMoveIfPossible(targetPosition);
     if (matchingMove !== null) {
-      this.triggerMove(matchingMove);
+      this.performMove(matchingMove);
     }
   }
 

@@ -36,10 +36,8 @@ export function isRawBoardPieceProps(
 
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-abstract class BoardManager extends EventTarget {
-  constructor() {
-    super();
-  }
+abstract class BoardManager {
+  constructor() {}
 
   public abstract onPieceClick(boardPiece: BoardPieceProps): void;
 
