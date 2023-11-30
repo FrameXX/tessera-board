@@ -116,7 +116,7 @@ const defaultUserDataValues = {
   kingImportance: 25,
   ignorePiecesGuardedProperty: false,
   moveList: [] as Move[],
-  moveIndex: 0,
+  lastMoveIndex: 0,
   winner: "none" as Winner,
 };
 

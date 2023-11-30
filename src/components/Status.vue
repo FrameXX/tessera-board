@@ -21,7 +21,7 @@ const props = defineProps({
   playerSecondsPerMatchSet: { type: Boolean, required: true },
   opponentSecondsPerMatchSet: { type: Boolean, required: true },
   playerPlaying: { type: Boolean, required: true },
-  moveIndex: { type: Number, required: true },
+  lastMoveIndex: { type: Number, required: true },
   statusText: { type: String, required: true },
   winner: { type: String as PropType<Winner>, required: true },
 });
@@ -94,7 +94,7 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
     </div>
 
     <div id="status-text" :class="primaryClass">
-      <InfoText :name="`Move #${props.moveIndex + 2}`">{{
+      <InfoText :name="`Move #${props.lastMoveIndex + 2}`">{{
         props.statusText
       }}</InfoText>
     </div>

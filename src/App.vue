@@ -122,8 +122,9 @@ const configPieceSelectOptions = computed(() => {
 });
 const playingColor = computed(() => {
   let color: PlayerColor =
-    (isEven(moveIndex.value) && preferredFirstMoveColor.value === "black") ||
-    (!isEven(moveIndex.value) && preferredFirstMoveColor.value === "white")
+    (isEven(lastMoveIndex.value) &&
+      preferredFirstMoveColor.value === "black") ||
+    (!isEven(lastMoveIndex.value) && preferredFirstMoveColor.value === "white")
       ? "white"
       : "black";
   return color;
@@ -262,7 +263,7 @@ const winner = ref<Winner>(defaultUserDataValues.winner);
 const gameOverReason = ref<GameOverReason>(
   defaultUserDataValues.gameOverReason
 );
-const moveIndex = ref(defaultUserDataValues.moveIndex);
+const lastMoveIndex = ref(defaultUserDataValues.lastMoveIndex);
 const firstMoveColor = ref<PlayerColor>(defaultUserDataValues.firstMoveColor);
 const playerColor = ref(defaultUserDataValues.playerColor);
 const gamePaused = ref(defaultUserDataValues.gamePaused);
@@ -334,11 +335,11 @@ const moveListData = new MoveListData(
   moveList,
   toastManager
 );
-const moveIndexData = new NumberUserData(
+const lastMoveIndexData = new NumberUserData(
   "move_index",
-  defaultUserDataValues.moveIndex,
+  defaultUserDataValues.lastMoveIndex,
   toastManager,
-  moveIndex,
+  lastMoveIndex,
   undefined,
   undefined,
   false
@@ -516,7 +517,7 @@ const userDataManager = new UserDataManager(
       "black",
       toastManager
     ),
-    moveIndexData,
+    lastMoveIndexData,
     new NumberUserData(
       "player_seconds_per_move",
       defaultUserDataValues.playerSecondsPerMove,
@@ -622,10 +623,10 @@ const userDataManager = new UserDataManager(
 );
 
 const lastMove = computed(() => {
-  if (moveIndex.value === -1) {
+  if (lastMoveIndex.value === -1) {
     return null;
   }
-  return moveList.value[moveIndex.value];
+  return moveList.value[lastMoveIndex.value];
 });
 const highlightedCells = computed(() => {
   if (!lastMove.value) {
@@ -813,8 +814,8 @@ const game = new Game(
   whiteCapturedPieces,
   reviveFromCapturedPieces,
   ignorePiecesGuardedProperty,
-  moveIndex,
-  moveIndexData,
+  lastMoveIndex,
+  lastMoveIndexData,
   moveList,
   moveListData,
   lastMove,
@@ -902,7 +903,7 @@ onMounted(() => {
       :opponent-seconds-per-move-set="opponentSecondsPerMoveSet"
       :opponent-seconds-per-match-set="opponentSecondsPerMatchSet"
       :player-playing="playerPlaying"
-      :move-index="moveIndex"
+      :last-move-index="lastMoveIndex"
       :status-text="statusText"
       :winner="winner"
     />

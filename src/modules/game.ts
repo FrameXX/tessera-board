@@ -146,8 +146,8 @@ class Game {
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly ignorePiecesProtections: Ref<boolean>,
-    private readonly moveIndex: Ref<number>,
-    private readonly moveIndexData: NumberUserData,
+    private readonly lastMoveIndex: Ref<number>,
+    private readonly lastMoveIndexData: NumberUserData,
     private readonly moveList: Ref<Move[]>,
     private readonly moveListData: MoveListData,
     private readonly lastMove: ComputedRef<Move | null>,
@@ -235,7 +235,6 @@ class Game {
     }
     const move = event.detail;
     move.perform(this.movePerformContext);
-    console.log(this.moveList);
     this.moveList.value.push(move);
     this.onMove("perform");
   };
@@ -428,7 +427,7 @@ class Game {
     this.chooseFirstMoveColor();
     this.boardManager.resetBoard();
     this.toastManager.showToast("New match started.", "flag-checkered");
-    this.moveIndex.value = -1;
+    this.lastMoveIndex.value = -1;
     this.onMoveForward();
     this.moveList.value = [];
     this.clearTimers();
@@ -448,11 +447,11 @@ class Game {
   }
 
   private spliceFutureMoves(listIndexDiff: number) {
-    this.moveList.value.splice(this.moveIndex.value, listIndexDiff);
+    this.moveList.value.splice(this.lastMoveIndex.value, listIndexDiff);
   }
 
   private performReverseMove() {
-    const reversedMove = this.moveList.value[this.moveIndex.value + 1];
+    const reversedMove = this.moveList.value[this.lastMoveIndex.value + 1];
     reversedMove.reverse(this.boardStateValue);
   }
 
@@ -472,12 +471,12 @@ class Game {
   }
 
   private performForwardMove() {
-    const forwardedMove = this.moveList.value[this.moveIndex.value];
+    const forwardedMove = this.moveList.value[this.lastMoveIndex.value];
     forwardedMove.forward(this.movePerformContext);
   }
 
   public forwardMove() {
-    if (this.moveList.value.length - this.moveIndex.value < 2) {
+    if (this.moveList.value.length - this.lastMoveIndex.value < 2) {
       this.toastManager.showToast(
         "You reached the last move. You cannot go further.",
         "cancel",
@@ -490,7 +489,7 @@ class Game {
   }
 
   public reverseMove() {
-    if (this.moveIndex.value === -1) {
+    if (this.lastMoveIndex.value === -1) {
       this.toastManager.showToast(
         "You reached the first move. You cannot go further.",
         "cancel",
@@ -504,14 +503,14 @@ class Game {
 
   public onMove(moveExecution: MoveExecution = "perform") {
     if (moveExecution === "reverse") {
-      this.moveIndex.value--;
+      this.lastMoveIndex.value--;
     } else {
-      this.moveIndex.value++;
+      this.lastMoveIndex.value++;
     }
 
     if (moveExecution === "perform") {
       const listIndexDiff =
-        this.moveList.value.length - this.moveIndex.value - 1;
+        this.moveList.value.length - this.lastMoveIndex.value - 1;
       if (listIndexDiff > 0) {
         this.spliceFutureMoves(listIndexDiff);
       }
@@ -526,7 +525,7 @@ class Game {
     }
 
     if (moveExecution !== "reverse") {
-      this.moveIndexData.save();
+      this.lastMoveIndexData.save();
       this.moveListData.save();
     }
   }
