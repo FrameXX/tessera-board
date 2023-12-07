@@ -5,22 +5,22 @@ import type {
 } from "./board_manager";
 import BoardManager from "./board_manager";
 import type ConfigPieceDialog from "./dialogs/config_piece";
-import type { Ref } from "vue";
+import { ref, type Ref } from "vue";
 import { isPositionOnBoard } from "./pieces/piece";
 import { movePiece } from "./moves/move";
 import { positionsEqual } from "./game_board_manager";
 
 class DefaultBoardManager extends BoardManager {
   private dragEndTimeout: boolean = false;
+  public readonly draggingOverCells = ref<BoardPosition[]>([]);
 
   constructor(
     private readonly boardStateValue: BoardStateValue,
     private readonly configPieceDialog: ConfigPieceDialog,
-    private readonly draggingOverCells: Ref<BoardPosition[]>,
     private readonly audioEffectsEnabled: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
-    private readonly useVibratons: Ref<boolean>
+    private readonly vibrationsEnabled: Ref<boolean>
   ) {
     super();
   }
@@ -84,14 +84,14 @@ class DefaultBoardManager extends BoardManager {
     }
     this.boardStateValue[pieceProps.row][pieceProps.col] = null;
     if (this.audioEffectsEnabled.value) this.pieceRemoveAudioEffect.play();
-    if (this.useVibratons.value) navigator.vibrate(30);
+    if (this.vibrationsEnabled.value) navigator.vibrate(30);
   }
 
   public async onCellClick(position: BoardPosition) {
     const piece = await this.configPieceDialog.open();
     this.boardStateValue[position.row][position.col] = piece;
     if (this.audioEffectsEnabled.value) this.pieceMoveAudioEffect.play();
-    if (this.useVibratons.value) navigator.vibrate(30);
+    if (this.vibrationsEnabled.value) navigator.vibrate(30);
   }
 }
 

@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref } from "vue";
+import { reactive, type ComputedRef, type Ref, ref, computed } from "vue";
 import type {
   BoardPieceProps,
   BoardPosition,
@@ -23,6 +23,29 @@ class GameBoardManager extends BoardManager {
   private _selectedCell: BoardPosition | null = null;
   private availibleMoves: Move[] = [];
   private dragEndTimeout: boolean = false;
+  public cellsMarks: MarkBoardState = reactive(
+    Array(8)
+      .fill(null)
+      .map(() => new Array(8).fill(null))
+  );
+  public readonly selectedCells = ref<BoardPosition[]>([]);
+  public readonly selectedPieces = ref<BoardPosition[]>([]);
+  public readonly draggingOverCells = ref<BoardPosition[]>([]);
+  public readonly rotated = computed(() => {
+    if (this.game.tableMode.value || !this.game.secondCheckboardEnabled.value) {
+      return false;
+    }
+    return this.game.playerColor.value === "black";
+  });
+  public readonly contentRotated = computed(() => {
+    if (!this.game.secondCheckboardEnabled.value) {
+      return this.game.screenRotated.value;
+    }
+    if (!this.game.tableMode.value) {
+      return this.game.playerColor.value === "black";
+    }
+    return this.game.playerColor.value === "black";
+  });
 
   constructor(
     private readonly game: Game,
@@ -37,10 +60,6 @@ class GameBoardManager extends BoardManager {
     private readonly boardStateData: BoardStateData,
     private readonly whiteCapturedPieces: Ref<PieceId[]>,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
-    private readonly cellsMarks: MarkBoardState,
-    private readonly selectedPieces: Ref<BoardPosition[]>,
-    private readonly selectedCells: Ref<BoardPosition[]>,
-    private readonly draggingOverCells: Ref<BoardPosition[]>,
     private readonly showCapturingPieces: Ref<boolean>,
     private readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly showOtherAvailibleMoves: Ref<boolean>,

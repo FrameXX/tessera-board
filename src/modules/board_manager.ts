@@ -1,4 +1,3 @@
-import { Ref } from "vue";
 import type { Mark } from "../components/Cell.vue";
 import type { Piece, PieceId } from "./pieces/piece";
 import type { RawPiece } from "./pieces/raw_piece";

@@ -33,8 +33,6 @@ import TransitionsManager, {
   isTransitions,
 } from "./modules/transitions_manager";
 import ConfirmDialog from "./modules/dialogs/confirm";
-import DefaultBoardManager from "./modules/default_board_manager";
-import GameBoardManager from "./modules/game_board_manager";
 import ConfigPieceDialog from "./modules/dialogs/config_piece";
 import SelectPieceDilog from "./modules/dialogs/select_piece";
 import { PIECE_IDS, PiecesImportance, type Path } from "./modules/pieces/piece";
@@ -58,11 +56,7 @@ import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import DurationDialog from "./modules/dialogs/duration";
 import InteractionManager from "./modules/interaction_manager";
 import { RawPiece } from "./modules/pieces/raw_piece";
-import {
-  BoardPosition,
-  BoardStateValue,
-  MarkBoardState,
-} from "./modules/board_manager";
+import { BoardStateValue } from "./modules/board_manager";
 import Move from "./modules/moves/move";
 
 // Import components
@@ -99,16 +93,6 @@ const filteredConfigsPrints = computed(() => {
     print.name.toLowerCase().includes(configsNameFilter.value.toLowerCase())
   );
 });
-const playerCellsMarks: MarkBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(null))
-);
-const opponentCellsMarks: MarkBoardState = reactive(
-  Array(8)
-    .fill(null)
-    .map(() => new Array(8).fill(null))
-);
 const configPieceSelectOptions = computed(() => {
   const pieces: RawPiece[] = [];
   for (const pieceId of PIECE_IDS) {
@@ -137,13 +121,6 @@ const playerSecondsPerMatchSet = computed(() => {
 const opponentSecondsPerMatchSet = computed(() => {
   return opponentSecondsPerMatch.value !== 0;
 });
-const playerSelectedPieces = ref<BoardPosition[]>([]);
-const opponentSelectedPieces = ref<BoardPosition[]>([]);
-const playerSelectedCells = ref<BoardPosition[]>([]);
-const opponentSelectedCells = ref<BoardPosition[]>([]);
-const playerDraggingOverCells = ref<BoardPosition[]>([]);
-const opponentDraggingOverCells = ref<BoardPosition[]>([]);
-const defaultDraggingOverCells = ref<BoardPosition[]>([]);
 
 // User data refs
 // Simple values
@@ -588,12 +565,6 @@ const lastMove = computed(() => {
   }
   return moveList.value[lastMoveIndex.value];
 });
-const highlightedCells = computed(() => {
-  if (!lastMove.value) {
-    return [];
-  }
-  return lastMove.value.highlightedBoardPositions;
-});
 
 const screenRotated = computed(() => {
   let rotated: boolean;
@@ -602,40 +573,6 @@ const screenRotated = computed(() => {
   }
   rotated = playingColor.value === "black";
   return rotated;
-});
-
-const playerBoardContentRotated = computed(() => {
-  if (!secondCheckboardEnabled.value) {
-    return screenRotated.value;
-  }
-  if (!tableMode.value) {
-    return playerColor.value === "black";
-  }
-  return playerColor.value === "black";
-});
-
-const opponentBoardContentRotated = computed(() => {
-  if (!secondCheckboardEnabled.value) {
-    return !screenRotated.value;
-  }
-  if (!tableMode.value) {
-    return playerColor.value === "white";
-  }
-  return playerColor.value === "white";
-});
-
-const playerBoardRotated = computed(() => {
-  if (tableMode.value || !secondCheckboardEnabled.value) {
-    return false;
-  }
-  return playerColor.value === "black";
-});
-
-const opponentBoardRotated = computed(() => {
-  if (tableMode.value) {
-    return false;
-  }
-  return playerColor.value === "white";
 });
 
 /**
@@ -651,16 +588,6 @@ const defaultBoardConfigManager = new ConfigManager(
   defaultBoardConfigInventory,
   [defaultBoardStateData],
   toastManager
-);
-
-const defaultBoardManager = new DefaultBoardManager(
-  defaultBoardState,
-  configPieceDialog,
-  defaultDraggingOverCells,
-  audioEffectsEnabled,
-  pieceMoveAudioEffect,
-  pieceRemoveAudioEffect,
-  vibrationsEnabled
 );
 
 const whiteCapturingPaths = ref<Path[]>([]);
@@ -679,9 +606,10 @@ const game = new Game(
   gamePaused,
   gameBoardStateData,
   gameBoardState,
+  defaultBoardStateData,
+  defaultBoardState,
   whiteCapturingPaths,
   blackCapturingPaths,
-  defaultBoardStateData,
   playerColor,
   preferredFirstMoveColor,
   preferredPlayerColor,
@@ -709,59 +637,15 @@ const game = new Game(
   pieceMoveAudioEffect,
   pieceRemoveAudioEffect,
   vibrationsEnabled,
+  secondCheckboardEnabled,
   ignorePiecesGuardedProperty,
+  showCapturingPieces,
+  showOtherAvailibleMoves,
+  tableMode,
+  screenRotated,
   confirmDialog,
+  configPieceDialog,
   toastManager
-);
-
-const playerBoardManager = new GameBoardManager(
-  game,
-  whiteCapturingPaths,
-  blackCapturingPaths,
-  playerColor,
-  game.winner,
-  secondCheckboardEnabled,
-  true,
-  playingColor,
-  gameBoardState,
-  gameBoardStateData,
-  whiteCapturedPieces,
-  blackCapturedPieces,
-  playerCellsMarks,
-  playerSelectedPieces,
-  playerSelectedCells,
-  playerDraggingOverCells,
-  showCapturingPieces,
-  reviveFromCapturedPieces,
-  showOtherAvailibleMoves,
-  ignorePiecesGuardedProperty,
-  piecesImportance,
-  lastMove
-);
-
-const opponentBoardManager = new GameBoardManager(
-  game,
-  whiteCapturingPaths,
-  blackCapturingPaths,
-  playerColor,
-  game.winner,
-  secondCheckboardEnabled,
-  false,
-  playingColor,
-  gameBoardState,
-  gameBoardStateData,
-  whiteCapturedPieces,
-  blackCapturedPieces,
-  opponentCellsMarks,
-  opponentSelectedPieces,
-  opponentSelectedCells,
-  opponentDraggingOverCells,
-  showCapturingPieces,
-  reviveFromCapturedPieces,
-  showOtherAvailibleMoves,
-  ignorePiecesGuardedProperty,
-  piecesImportance,
-  lastMove
 );
 
 const interactionManager = new InteractionManager(
@@ -863,14 +747,14 @@ onMounted(() => {
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area" :class="{ rotated: screenRotated }">
       <Board
-        :selected-pieces="playerSelectedPieces"
-        :selected-cells="playerSelectedCells"
-        :highlighted-cells="highlightedCells"
-        :dragging-over-cells="playerDraggingOverCells"
-        :marks-state="playerCellsMarks"
-        :content-rotated="playerBoardContentRotated"
-        :rotated="playerBoardRotated"
-        :manager="playerBoardManager"
+        :selected-pieces="game.playerBoardManager.selectedPieces.value"
+        :selected-cells="game.playerBoardManager.selectedCells.value"
+        :highlighted-cells="game.highlightedCells.value"
+        :dragging-over-cells="game.playerBoardManager.draggingOverCells.value"
+        :marks-state="game.playerBoardManager.cellsMarks"
+        :content-rotated="game.playerBoardManager.contentRotated.value"
+        :rotated="game.playerBoardManager.rotated.value"
+        :manager="game.playerBoardManager"
         :state="gameBoardState"
         :piece-set="pieceIconPack"
         :piece-padding="piecePadding"
@@ -883,14 +767,14 @@ onMounted(() => {
       />
       <Board
         v-if="secondCheckboardEnabled"
-        :selected-pieces="opponentSelectedPieces"
-        :selected-cells="opponentSelectedCells"
-        :highlighted-cells="highlightedCells"
-        :dragging-over-cells="opponentDraggingOverCells"
-        :marks-state="opponentCellsMarks"
-        :content-rotated="opponentBoardContentRotated"
-        :rotated="opponentBoardRotated"
-        :manager="opponentBoardManager"
+        :selected-pieces="game.opponentBoardManager.selectedPieces.value"
+        :selected-cells="game.opponentBoardManager.selectedCells.value"
+        :highlighted-cells="game.highlightedCells.value"
+        :dragging-over-cells="game.opponentBoardManager.draggingOverCells.value"
+        :marks-state="game.opponentBoardManager.cellsMarks"
+        :content-rotated="game.opponentBoardManager.contentRotated.value"
+        :rotated="game.opponentBoardManager.rotated.value"
+        :manager="game.opponentBoardManager"
         :state="gameBoardState"
         :piece-set="pieceIconPack"
         :piece-padding="piecePadding"
@@ -931,10 +815,12 @@ onMounted(() => {
   <Settings
     :open="settingsOpen"
     :default-board-config-manager="defaultBoardConfigManager"
-    :default-board-manager="defaultBoardManager"
+    :default-board-manager="game.defaultBoardManager"
     :default-board-state="defaultBoardState"
     :user-data-manager="userDataManager"
-    :default-dragging-over-cells="defaultDraggingOverCells"
+    :default-dragging-over-cells="
+      game.defaultBoardManager.draggingOverCells.value
+    "
     :default-board-all-piece-props="game.defaultBoardPieceProps.value"
   />
   <About :open="aboutOpen" />

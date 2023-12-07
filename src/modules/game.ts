@@ -25,6 +25,8 @@ import { MovePerformContext } from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
+import DefaultBoardManager from "./default_board_manager";
+import ConfigPieceDialog from "./dialogs/config_piece";
 
 type MoveDirection = "forward" | "reverse";
 type MoveExecution = "perform" | MoveDirection;
@@ -111,7 +113,7 @@ export class GameLogicError extends Error {
   }
 }
 
-class Game extends EventTarget {
+class Game {
   private readonly playerMoveSecondsTimer: Timer;
   private readonly opponentMoveSecondsTimer: Timer;
   private readonly playerMatchSecondsTimer: Timer;
@@ -153,17 +155,34 @@ class Game extends EventTarget {
     }
     return text;
   });
+  public readonly highlightedCells = computed(() => {
+    if (!this.lastMove.value) {
+      return [];
+    }
+    return this.lastMove.value.highlightedBoardPositions;
+  });
   public readonly gameBoardPieceProps: Ref<BoardPieceProps[]>;
   public readonly defaultBoardPieceProps: Ref<BoardPieceProps[]>;
+  public readonly playerBoardManager: GameBoardManager;
+  public readonly opponentBoardManager: GameBoardManager;
+  public readonly defaultBoardManager = new DefaultBoardManager(
+    this.defaultBoardState,
+    this.configPieceDialog,
+    this.audioEffectsEnabled,
+    this.pieceMoveAudioEffect,
+    this.pieceRemoveAudioEffect,
+    this.vibrationsEnabled
+  );
 
   constructor(
     private readonly paused: Ref<GamePausedState>,
     private readonly boardStateData: BoardStateData,
     private readonly gameBoardState: BoardStateValue,
+    private readonly defaultBoardStateData: RawBoardStateData,
+    private readonly defaultBoardState: BoardStateValue,
     private whiteCapturingPaths: Ref<Path[]>,
     private blackCapturingPaths: Ref<Path[]>,
-    private readonly defaultBoardStateData: RawBoardStateData,
-    private readonly playerColor: Ref<PlayerColor>,
+    public readonly playerColor: Ref<PlayerColor>,
     private readonly preferredFirstMoveColor: Ref<PreferredPlayerColor>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColor>,
     playerSecondsPerMove: Ref<number>,
@@ -190,14 +209,63 @@ class Game extends EventTarget {
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly vibrationsEnabled: Ref<boolean>,
+    public readonly secondCheckboardEnabled: Ref<boolean>,
     private readonly ignorePiecesGuardedProperty: Ref<boolean>,
+    private readonly showCapturingPieces: Ref<boolean>,
+    private readonly showOtherAvailibleMoves: Ref<boolean>,
+    public readonly tableMode: Ref<boolean>,
+    public readonly screenRotated: Ref<boolean>,
     private readonly confirmDialog: ConfirmDialog,
+    private readonly configPieceDialog: ConfigPieceDialog,
     private readonly toastManager: ToastManager
   ) {
-    super();
-
     this.gameBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
     this.defaultBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
+    this.playerBoardManager = new GameBoardManager(
+      this,
+      this.whiteCapturingPaths,
+      this.blackCapturingPaths,
+      this.playerColor,
+      this.winner,
+      this.secondCheckboardEnabled,
+      true,
+      this.playingColor,
+      this.gameBoardState,
+      this.boardStateData,
+      this.whiteCapturedPieces,
+      this.blackCapturedPieces,
+      this.showCapturingPieces,
+      this.reviveFromCapturedPieces,
+      this.showOtherAvailibleMoves,
+      this.ignorePiecesGuardedProperty,
+      this.piecesImportance,
+      this.lastMove
+    );
+    this.opponentBoardManager = new GameBoardManager(
+      this,
+      this.whiteCapturingPaths,
+      this.blackCapturingPaths,
+      this.playerColor,
+      this.winner,
+      this.secondCheckboardEnabled,
+      true,
+      this.playingColor,
+      this.gameBoardState,
+      this.boardStateData,
+      this.whiteCapturedPieces,
+      this.blackCapturedPieces,
+      this.showCapturingPieces,
+      this.reviveFromCapturedPieces,
+      this.showOtherAvailibleMoves,
+      this.ignorePiecesGuardedProperty,
+      this.piecesImportance,
+      this.lastMove
+    );
+    watch(this.defaultBoardState, () => {
+      this.defaultBoardPieceProps.value = getAllPieceProps(
+        this.defaultBoardState
+      );
+    });
 
     watch(this.paused, (newValue) => {
       this.updateTimerState();
@@ -471,7 +539,6 @@ class Game extends EventTarget {
     this.setupDefaultBoardState();
     this.onBoardStateChange();
     this.playerColor.value = this.getFirstPlayerColor();
-    this.dispatchEvent(new Event("restart"));
     this.clearCapturedPieces();
     this.toastManager.showToast("New match started.", "flag-checkered");
     this.lastMoveIndex.value = -1;
