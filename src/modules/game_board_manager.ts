@@ -49,7 +49,6 @@ class GameBoardManager extends BoardManager {
     private readonly lastMove: ComputedRef<Move | null>
   ) {
     super();
-    this.game.addEventListener("restart", this.resetBoard.bind(this));
   }
 
   private clearCellsMarks() {
@@ -58,11 +57,6 @@ class GameBoardManager extends BoardManager {
         this.cellsMarks[rowIndex][colIndex] = null;
       }
     }
-  }
-
-  private clearCapturedPieces() {
-    this.whiteCapturedPieces.value = [];
-    this.blackCapturedPieces.value = [];
   }
 
   private clearAvailibleMoves() {
@@ -200,10 +194,9 @@ class GameBoardManager extends BoardManager {
     this._selectedCell = position;
   }
 
-  public resetBoard() {
+  public unselectContent() {
     this.selectedPiece = null;
     this.selectedCell = null;
-    this.clearCapturedPieces();
   }
 
   private getMoveIfPossible(position: BoardPosition): Move | null {

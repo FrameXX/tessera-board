@@ -50,15 +50,12 @@ import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import Game, {
   isPlayerColor,
   isSecondsPerMovePenalty,
-  isWinner,
   type PlayerColor,
-  type Winner,
   type GameOverReason,
   isGameOverReason,
   getAllPieceProps,
 } from "./modules/game";
 import { getPixelsPerCm, isEven } from "./modules/utils/misc";
-import { UserDataError } from "./modules/user_data/user_data";
 import DurationDialog from "./modules/dialogs/duration";
 import InteractionManager from "./modules/interaction_manager";
 import { RawPiece } from "./modules/pieces/raw_piece";
@@ -129,9 +126,6 @@ const playingColor = computed(() => {
       : "black";
   return color;
 });
-const playerPlaying = computed(() => {
-  return playerColor.value === playingColor.value;
-});
 const playerSecondsPerMoveSet = computed(() => {
   return playerSecondsPerMove.value !== 0;
 });
@@ -143,28 +137,6 @@ const playerSecondsPerMatchSet = computed(() => {
 });
 const opponentSecondsPerMatchSet = computed(() => {
   return opponentSecondsPerMatch.value !== 0;
-});
-const statusText = computed(() => {
-  let text: string;
-  switch (winner.value) {
-    case "none":
-      text = playingColor.value === "white" ? "White plays" : "Black plays";
-      break;
-    case "draw":
-      text = "Draw";
-      break;
-    case "opponent":
-      text = playerColor.value === "white" ? "Black won" : "White won";
-      break;
-    case "player":
-      text = playerColor.value === "white" ? "White won" : "Black won";
-      break;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${winner.value}`
-      );
-  }
-  return text;
 });
 const playerSelectedPieces = ref<BoardPosition[]>([]);
 const opponentSelectedPieces = ref<BoardPosition[]>([]);
@@ -258,8 +230,6 @@ const ignorePiecesGuardedProperty = ref(
 provide("ignorePiecesGuardedProperty", ignorePiecesGuardedProperty);
 const moveList = ref(defaultUserDataValues.moveList) as Ref<Move[]>;
 
-// Game specific
-const winner = ref<Winner>(defaultUserDataValues.winner);
 const gameOverReason = ref<GameOverReason>(
   defaultUserDataValues.gameOverReason
 );
@@ -475,13 +445,6 @@ const userDataManager = new UserDataManager(
       gameOverReason
     ),
     new SelectUserData(
-      "winner",
-      defaultUserDataValues.winner,
-      isWinner,
-      toastManager,
-      winner
-    ),
-    new SelectUserData(
       "seconds_per_move_runout_punishment",
       "random_move",
       isSecondsPerMovePenalty,
@@ -689,19 +652,6 @@ const defaultPieceProps = computed(() => {
   return getAllPieceProps(defaultBoardState);
 });
 
-watch(screenRotated, (newValue) => {
-  interactionManager.updateScreenRotation(newValue);
-});
-watch(playerPlaying, (newValue) => {
-  interactionManager.updatePrimaryHue(newValue, winner.value);
-});
-watch(winner, (newValue) => {
-  interactionManager.updatePrimaryHue(playerPlaying.value, newValue);
-});
-watch(playerColor, (newValue) => {
-  updatePieceColors(newValue);
-});
-
 const defaultBoardConfigInventory = new ConfigInventory(
   "default-board",
   PREDEFINED_DEFAULT_BOARD_CONFIGS,
@@ -746,7 +696,6 @@ const game = new Game(
   playerColor,
   firstMoveColor,
   preferredFirstMoveColor,
-  playerPlaying,
   preferredPlayerColor,
   playerSecondsPerMove,
   opponentSecondsPerMove,
@@ -757,7 +706,6 @@ const game = new Game(
   playerMatchSeconds,
   opponentMatchSeconds,
   secondsPerMovePenalty,
-  winner,
   gameOverReason,
   piecesImportance,
   blackCapturedPieces,
@@ -783,7 +731,7 @@ const playerBoardManager = new GameBoardManager(
   whiteCapturingPaths,
   blackCapturingPaths,
   playerColor,
-  winner,
+  game.winner,
   secondCheckboardEnabled,
   true,
   playingColor,
@@ -808,7 +756,7 @@ const opponentBoardManager = new GameBoardManager(
   whiteCapturingPaths,
   blackCapturingPaths,
   playerColor,
-  winner,
+  game.winner,
   secondCheckboardEnabled,
   false,
   playingColor,
@@ -840,6 +788,19 @@ const interactionManager = new InteractionManager(
   autoPauseGame
 );
 
+watch(screenRotated, (newValue) => {
+  interactionManager.updateScreenRotation(newValue);
+});
+watch(game.playerPlaying, (newValue) => {
+  interactionManager.updatePrimaryHue(newValue, game.winner.value);
+});
+watch(game.winner, (newValue) => {
+  interactionManager.updatePrimaryHue(game.playerPlaying.value, newValue);
+});
+watch(playerColor, (newValue) => {
+  updatePieceColors(newValue);
+});
+
 const visited = localStorage.getItem("tessera_board-visited");
 if (visited === null) {
   localStorage.setItem("tessera_board-visited", "1");
@@ -853,7 +814,10 @@ userDataManager.updateReferences();
 onMounted(() => {
   // Sets CSS Saturation variables from 0 to their appropriate user configured values
   setSaturationMultiplier(1);
-  interactionManager.updatePrimaryHue(playerPlaying.value, winner.value);
+  interactionManager.updatePrimaryHue(
+    game.playerPlaying.value,
+    game.winner.value
+  );
 
   addEventListener("keydown", (event: KeyboardEvent) => {
     if (event.key === "Escape") interactionManager.escapeManager.escape();
@@ -903,10 +867,10 @@ onMounted(() => {
       :player-seconds-per-match-set="playerSecondsPerMatchSet"
       :opponent-seconds-per-move-set="opponentSecondsPerMoveSet"
       :opponent-seconds-per-match-set="opponentSecondsPerMatchSet"
-      :player-playing="playerPlaying"
+      :player-playing="game.playerPlaying.value"
       :last-move-index="lastMoveIndex"
-      :status-text="statusText"
-      :winner="winner"
+      :status-text="game.status.value"
+      :winner="game.winner.value"
     />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area" :class="{ rotated: screenRotated }">
@@ -973,7 +937,7 @@ onMounted(() => {
     @pause="interactionManager.manuallyTogglePause()"
     @resign="game.resign()"
     :open="actionPanelOpen"
-    :status-text="statusText"
+    :status-text="game.status.value"
     :game-paused="gamePaused"
   />
 

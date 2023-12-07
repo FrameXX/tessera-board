@@ -3,7 +3,6 @@ import type {
   SecondsPerMovePenalty,
   PlayerColor,
   GameOverReason,
-  Winner,
 } from "../game";
 import type Move from "../moves/move";
 import Bishop from "../pieces/bishop";
@@ -117,7 +116,6 @@ const defaultUserDataValues = {
   ignorePiecesGuardedProperty: false,
   moveList: [] as Move[],
   lastMoveIndex: 0,
-  winner: "none" as Winner,
 };
 
 export default defaultUserDataValues;

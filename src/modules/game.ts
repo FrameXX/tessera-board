@@ -1,7 +1,7 @@
-import { type ComputedRef, type Ref, watch } from "vue";
+import { type ComputedRef, type Ref, watch, ref, computed } from "vue";
 import type BoardStateData from "./user_data/board_state";
 import type { PreferredPlayerColor } from "./user_data/preferred_player_color";
-import { getRandomArrayValue, getRandomNumber } from "./utils/misc";
+import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import type ToastManager from "./toast_manager";
 import type RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
@@ -23,6 +23,8 @@ import type NumberUserData from "./user_data/number_user_data";
 import type MoveListData from "./user_data/move_list";
 import { MovePerformContext } from "./moves/move";
 import SelectPieceDialog from "./dialogs/select_piece";
+import GameBoardManager from "./game_board_manager";
+import { UserDataError } from "./user_data/user_data";
 
 type MoveDirection = "forward" | "reverse";
 type MoveExecution = "perform" | MoveDirection;
@@ -114,6 +116,43 @@ class Game extends EventTarget {
   private readonly opponentMoveSecondsTimer: Timer;
   private readonly playerMatchSecondsTimer: Timer;
   private readonly opponentMatchSecondsTimer: Timer;
+  public readonly winner = ref<Winner>("none");
+  public readonly playingColor = computed(() => {
+    let color: PlayerColor =
+      (isEven(this.lastMoveIndex.value) &&
+        this.preferredFirstMoveColor.value === "black") ||
+      (!isEven(this.lastMoveIndex.value) &&
+        this.preferredFirstMoveColor.value === "white")
+        ? "white"
+        : "black";
+    return color;
+  });
+  public readonly playerPlaying = computed(() => {
+    return this.playerColor.value === this.playingColor.value;
+  });
+  public readonly status = computed(() => {
+    let text: string;
+    switch (this.winner.value) {
+      case "none":
+        text =
+          this.playerColor.value === "white" ? "White plays" : "Black plays";
+        break;
+      case "draw":
+        text = "Draw";
+        break;
+      case "opponent":
+        text = this.playerColor.value === "white" ? "Black won" : "White won";
+        break;
+      case "player":
+        text = this.playerColor.value === "white" ? "White won" : "Black won";
+        break;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
+    }
+    return text;
+  });
 
   constructor(
     private readonly paused: Ref<GamePausedState>,
@@ -126,7 +165,6 @@ class Game extends EventTarget {
     private readonly playerColor: Ref<PlayerColor>,
     private readonly firstMoveColor: Ref<PlayerColor>,
     private readonly preferredFirstMoveColor: Ref<PreferredPlayerColor>,
-    private readonly playerPlaying: ComputedRef<boolean>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColor>,
     playerSecondsPerMove: Ref<number>,
     opponentSecondsPerMove: Ref<number>,
@@ -137,7 +175,6 @@ class Game extends EventTarget {
     playerMatchSeconds: Ref<number>,
     opponentMatchSeconds: Ref<number>,
     private readonly secondsMoveLimitRunOutPunishment: Ref<SecondsPerMovePenalty>,
-    private readonly winner: Ref<Winner>,
     private readonly winReason: Ref<GameOverReason>,
     private readonly piecesImportance: PiecesImportance,
     private readonly blackCapturedPieces: Ref<PieceId[]>,
@@ -241,6 +278,11 @@ class Game extends EventTarget {
     this.winner.value = winner;
     this.winReason.value = reason;
     this.updateTimerState();
+  }
+
+  private clearCapturedPieces() {
+    this.whiteCapturedPieces.value = [];
+    this.blackCapturedPieces.value = [];
   }
 
   private opponentWin(reason: GameOverReason) {
@@ -439,6 +481,7 @@ class Game extends EventTarget {
     this.choosePlayerColor();
     this.chooseFirstMoveColor();
     this.dispatchEvent(new Event("restart"));
+    this.clearCapturedPieces();
     this.toastManager.showToast("New match started.", "flag-checkered");
     this.lastMoveIndex.value = -1;
     this.onMoveForward();
@@ -449,14 +492,6 @@ class Game extends EventTarget {
   public restore() {
     this.updateTimerState();
     this.updateCapturingPaths();
-  }
-
-  private get playingColor() {
-    if (this.playerPlaying.value) {
-      return this.playerColor.value;
-    } else {
-      return getOpossitePlayerColor(this.playerColor.value);
-    }
   }
 
   private spliceFutureMoves(listIndexDiff: number) {
@@ -567,11 +602,11 @@ class Game extends EventTarget {
   private checkLoss() {
     const guardedPieces = getGuardedPieces(
       this.pieceProps.value,
-      this.playingColor
+      this.playingColor.value
     );
     const checked = isGuardedPieceChecked(
       this.boardStateValue,
-      this.playingColor,
+      this.playingColor.value,
       this.pieceProps.value,
       guardedPieces,
       this.lastMove
@@ -579,7 +614,7 @@ class Game extends EventTarget {
     if (checked) this.toastManager.showToast("Check!", "cross");
 
     const canPlayerMove = this.canPlayerMove(
-      this.playingColor,
+      this.playingColor.value,
       this.pieceProps.value
     );
     if (!canPlayerMove) {
