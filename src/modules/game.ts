@@ -153,17 +153,17 @@ class Game extends EventTarget {
     }
     return text;
   });
+  public readonly gameBoardPieceProps: Ref<BoardPieceProps[]>;
+  public readonly defaultBoardPieceProps: Ref<BoardPieceProps[]>;
 
   constructor(
     private readonly paused: Ref<GamePausedState>,
     private readonly boardStateData: BoardStateData,
-    private readonly boardStateValue: BoardStateValue,
-    private readonly pieceProps: ComputedRef<BoardPieceProps[]>,
+    private readonly gameBoardState: BoardStateValue,
     private whiteCapturingPaths: Ref<Path[]>,
     private blackCapturingPaths: Ref<Path[]>,
     private readonly defaultBoardStateData: RawBoardStateData,
     private readonly playerColor: Ref<PlayerColor>,
-    private readonly firstMoveColor: Ref<PlayerColor>,
     private readonly preferredFirstMoveColor: Ref<PreferredPlayerColor>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColor>,
     playerSecondsPerMove: Ref<number>,
@@ -195,6 +195,9 @@ class Game extends EventTarget {
     private readonly toastManager: ToastManager
   ) {
     super();
+
+    this.gameBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
+    this.defaultBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
 
     watch(this.paused, (newValue) => {
       this.updateTimerState();
@@ -308,14 +311,14 @@ class Game extends EventTarget {
     let moves: Move[];
     do {
       do {
-        randomPiece = getRandomArrayValue(this.pieceProps.value);
+        randomPiece = getRandomArrayValue(this.gameBoardPieceProps.value);
       } while (
         typeof pieceColor === "undefined" ||
         randomPiece.piece.color !== pieceColor
       );
       moves = randomPiece.piece.getPossibleMoves(
         randomPiece,
-        this.boardStateValue,
+        this.gameBoardState,
         this.boardStateData,
         this.movePerformContext,
         this.ignorePiecesGuardedProperty,
@@ -391,23 +394,11 @@ class Game extends EventTarget {
     this.boardStateData.updateReference();
   }
 
-  private choosePlayerColor() {
+  private getFirstPlayerColor(): PlayerColor {
     if (this.preferredPlayerColor.value === "random") {
-      getRandomNumber(0, 1)
-        ? (this.playerColor.value = "white")
-        : (this.playerColor.value = "black");
+      return getRandomNumber(0, 1) ? "white" : "black";
     } else {
-      this.playerColor.value = this.preferredPlayerColor.value;
-    }
-  }
-
-  private chooseFirstMoveColor() {
-    if (this.preferredFirstMoveColor.value === "random") {
-      getRandomNumber(0, 1)
-        ? (this.firstMoveColor.value = "white")
-        : (this.firstMoveColor.value = "black");
-    } else {
-      this.firstMoveColor.value = this.preferredFirstMoveColor.value;
+      return this.preferredPlayerColor.value;
     }
   }
 
@@ -478,8 +469,8 @@ class Game extends EventTarget {
   public restart() {
     this.winner.value = "none";
     this.setupDefaultBoardState();
-    this.choosePlayerColor();
-    this.chooseFirstMoveColor();
+    this.onBoardStateChange();
+    this.playerColor.value = this.getFirstPlayerColor();
     this.dispatchEvent(new Event("restart"));
     this.clearCapturedPieces();
     this.toastManager.showToast("New match started.", "flag-checkered");
@@ -500,12 +491,12 @@ class Game extends EventTarget {
 
   private performReverseMove() {
     const reversedMove = this.moveList.value[this.lastMoveIndex.value + 1];
-    reversedMove.reverse(this.boardStateValue);
+    reversedMove.reverse(this.gameBoardState);
   }
 
   private get movePerformContext(): MovePerformContext {
     return {
-      boardStateValue: this.boardStateValue,
+      boardStateValue: this.gameBoardState,
       blackCapturedPieces: this.blackCapturedPieces,
       whiteCapturedPieces: this.whiteCapturedPieces,
       selectPieceDialog: this.selectPieceDialog,
@@ -579,13 +570,14 @@ class Game extends EventTarget {
   }
 
   private onBoardStateChange() {
+    this.gameBoardPieceProps.value = getAllPieceProps(this.gameBoardState);
     this.updateTimerState();
     if (this.playerPlaying.value) {
       this.opponentMoveSecondsTimer.reset();
     } else {
       this.playerMoveSecondsTimer.reset();
     }
-    invalidatePiecesCache(this.pieceProps.value);
+    invalidatePiecesCache(this.gameBoardPieceProps.value);
     this.updateCapturingPaths();
   }
 
@@ -601,13 +593,13 @@ class Game extends EventTarget {
 
   private checkLoss() {
     const guardedPieces = getGuardedPieces(
-      this.pieceProps.value,
+      this.gameBoardPieceProps.value,
       this.playingColor.value
     );
     const checked = isGuardedPieceChecked(
-      this.boardStateValue,
+      this.gameBoardState,
       this.playingColor.value,
-      this.pieceProps.value,
+      this.gameBoardPieceProps.value,
       guardedPieces,
       this.lastMove
     );
@@ -615,7 +607,7 @@ class Game extends EventTarget {
 
     const canPlayerMove = this.canPlayerMove(
       this.playingColor.value,
-      this.pieceProps.value
+      this.gameBoardPieceProps.value
     );
     if (!canPlayerMove) {
       if (checked || guardedPieces.length === 0) {
@@ -635,7 +627,7 @@ class Game extends EventTarget {
       if (props.piece.color !== color) continue;
       const moves = props.piece.getPossibleMoves(
         props,
-        this.boardStateValue,
+        this.gameBoardState,
         this.boardStateData,
         this.movePerformContext,
         this.ignorePiecesGuardedProperty,
@@ -651,7 +643,7 @@ class Game extends EventTarget {
   public updateCapturingPaths() {
     let whiteCapturingPaths: Path[] = [];
     let blackCapturingPaths: Path[] = [];
-    for (const pieceProps of this.pieceProps.value) {
+    for (const pieceProps of this.gameBoardPieceProps.value) {
       const piece = pieceProps.piece;
       const origin: BoardPosition = {
         row: +pieceProps.row,
@@ -663,7 +655,7 @@ class Game extends EventTarget {
           ...positionsToPath(
             piece.getCapturingPositions(
               origin,
-              this.boardStateValue,
+              this.gameBoardState,
               this.lastMove
             ),
             origin
@@ -675,7 +667,7 @@ class Game extends EventTarget {
           ...positionsToPath(
             piece.getCapturingPositions(
               origin,
-              this.boardStateValue,
+              this.gameBoardState,
               this.lastMove
             ),
             origin

@@ -53,7 +53,6 @@ import Game, {
   type PlayerColor,
   type GameOverReason,
   isGameOverReason,
-  getAllPieceProps,
 } from "./modules/game";
 import { getPixelsPerCm, isEven } from "./modules/utils/misc";
 import DurationDialog from "./modules/dialogs/duration";
@@ -234,7 +233,6 @@ const gameOverReason = ref<GameOverReason>(
   defaultUserDataValues.gameOverReason
 );
 const lastMoveIndex = ref(defaultUserDataValues.lastMoveIndex);
-const firstMoveColor = ref<PlayerColor>(defaultUserDataValues.firstMoveColor);
 const playerColor = ref(defaultUserDataValues.playerColor);
 const gamePaused = ref(defaultUserDataValues.gamePaused);
 const whiteCapturedPieces = ref(defaultUserDataValues.whiteCapturedPieces);
@@ -283,8 +281,7 @@ const configsDialog = new ConfigsDialog(
 );
 provide("configsDialog", configsDialog);
 
-// @ts-ignore
-const themeManger = new ThemeManager(theme);
+new ThemeManager(theme);
 const transitionsManager = new TransitionsManager(transitions);
 
 // Data
@@ -644,13 +641,6 @@ const opponentBoardRotated = computed(() => {
 /**
  * All pieces are extracted from the boardStateValue 2D array into a list of objects with row and col attached. They are simpler too loop through and therefore also simpler to render using v-for in this form. They are sorted according to their unique id so, Vue transitions them smoothly as they appear and disappear from the checkboard.
  */
-const gamePieceProps = computed(() => {
-  return getAllPieceProps(gameBoardState);
-});
-
-const defaultPieceProps = computed(() => {
-  return getAllPieceProps(defaultBoardState);
-});
 
 const defaultBoardConfigInventory = new ConfigInventory(
   "default-board",
@@ -689,12 +679,10 @@ const game = new Game(
   gamePaused,
   gameBoardStateData,
   gameBoardState,
-  gamePieceProps,
   whiteCapturingPaths,
   blackCapturingPaths,
   defaultBoardStateData,
   playerColor,
-  firstMoveColor,
   preferredFirstMoveColor,
   preferredPlayerColor,
   playerSecondsPerMove,
@@ -890,7 +878,7 @@ onMounted(() => {
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         primary
-        :all-piece-props="gamePieceProps"
+        :all-piece-props="game.gameBoardPieceProps.value"
         id="player-board"
       />
       <Board
@@ -910,7 +898,7 @@ onMounted(() => {
         :white-captured-pieces="whiteCapturedPieces"
         :black-captured-pieces="blackCapturedPieces"
         primary
-        :all-piece-props="gamePieceProps"
+        :all-piece-props="game.gameBoardPieceProps.value"
         id="opponent-board"
       />
       <Transition name="slide-side">
@@ -940,7 +928,6 @@ onMounted(() => {
     :status-text="game.status.value"
     :game-paused="gamePaused"
   />
-
   <Settings
     :open="settingsOpen"
     :default-board-config-manager="defaultBoardConfigManager"
@@ -948,7 +935,7 @@ onMounted(() => {
     :default-board-state="defaultBoardState"
     :user-data-manager="userDataManager"
     :default-dragging-over-cells="defaultDraggingOverCells"
-    :default-board-all-piece-props="defaultPieceProps"
+    :default-board-all-piece-props="game.defaultBoardPieceProps.value"
   />
   <About :open="aboutOpen" />
 
