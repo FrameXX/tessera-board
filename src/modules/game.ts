@@ -176,12 +176,12 @@ class Game {
 
   constructor(
     private readonly paused: Ref<GamePausedState>,
-    private readonly boardStateData: BoardStateData,
-    private readonly gameBoardState: BoardStateValue,
+    public readonly gameBoardStateData: BoardStateData,
+    public readonly gameBoardState: BoardStateValue,
     private readonly defaultBoardStateData: RawBoardStateData,
     private readonly defaultBoardState: BoardStateValue,
-    private whiteCapturingPaths: Ref<Path[]>,
-    private blackCapturingPaths: Ref<Path[]>,
+    public readonly whiteCapturingPaths: Ref<Path[]>,
+    public readonly blackCapturingPaths: Ref<Path[]>,
     public readonly playerColor: Ref<PlayerColor>,
     private readonly preferredFirstMoveColor: Ref<PreferredPlayerColor>,
     private readonly preferredPlayerColor: Ref<PreferredPlayerColor>,
@@ -196,23 +196,23 @@ class Game {
     private readonly secondsMoveLimitRunOutPunishment: Ref<SecondsPerMovePenalty>,
     private readonly winReason: Ref<GameOverReason>,
     private readonly piecesImportance: PiecesImportance,
-    private readonly blackCapturedPieces: Ref<PieceId[]>,
-    private readonly whiteCapturedPieces: Ref<PieceId[]>,
-    private readonly reviveFromCapturedPieces: Ref<boolean>,
+    public readonly blackCapturedPieces: Ref<PieceId[]>,
+    public readonly whiteCapturedPieces: Ref<PieceId[]>,
+    public readonly reviveFromCapturedPieces: Ref<boolean>,
     private readonly lastMoveIndex: Ref<number>,
     private readonly lastMoveIndexData: NumberUserData,
     private readonly moveList: Ref<Move[]>,
     private readonly moveListData: MoveListData,
-    private readonly lastMove: ComputedRef<Move | null>,
+    public readonly lastMove: ComputedRef<Move | null>,
     private readonly selectPieceDialog: SelectPieceDialog,
     private readonly audioEffectsEnabled: Ref<boolean>,
     private readonly pieceMoveAudioEffect: Howl,
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly vibrationsEnabled: Ref<boolean>,
     public readonly secondCheckboardEnabled: Ref<boolean>,
-    private readonly ignorePiecesGuardedProperty: Ref<boolean>,
-    private readonly showCapturingPieces: Ref<boolean>,
-    private readonly showOtherAvailibleMoves: Ref<boolean>,
+    public readonly ignorePiecesGuardedProperty: Ref<boolean>,
+    public readonly showCapturingPieces: Ref<boolean>,
+    public readonly showOtherAvailibleMoves: Ref<boolean>,
     public readonly tableMode: Ref<boolean>,
     public readonly screenRotated: Ref<boolean>,
     private readonly confirmDialog: ConfirmDialog,
@@ -223,43 +223,13 @@ class Game {
     this.defaultBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
     this.playerBoardManager = new GameBoardManager(
       this,
-      this.whiteCapturingPaths,
-      this.blackCapturingPaths,
-      this.playerColor,
-      this.winner,
-      this.secondCheckboardEnabled,
       true,
-      this.playingColor,
-      this.gameBoardState,
-      this.boardStateData,
-      this.whiteCapturedPieces,
-      this.blackCapturedPieces,
-      this.showCapturingPieces,
-      this.reviveFromCapturedPieces,
-      this.showOtherAvailibleMoves,
-      this.ignorePiecesGuardedProperty,
-      this.piecesImportance,
-      this.lastMove
+      piecesImportance
     );
     this.opponentBoardManager = new GameBoardManager(
       this,
-      this.whiteCapturingPaths,
-      this.blackCapturingPaths,
-      this.playerColor,
-      this.winner,
-      this.secondCheckboardEnabled,
-      true,
-      this.playingColor,
-      this.gameBoardState,
-      this.boardStateData,
-      this.whiteCapturedPieces,
-      this.blackCapturedPieces,
-      this.showCapturingPieces,
-      this.reviveFromCapturedPieces,
-      this.showOtherAvailibleMoves,
-      this.ignorePiecesGuardedProperty,
-      this.piecesImportance,
-      this.lastMove
+      false,
+      piecesImportance
     );
     watch(this.defaultBoardState, () => {
       this.defaultBoardPieceProps.value = getAllPieceProps(
@@ -387,7 +357,7 @@ class Game {
       moves = randomPiece.piece.getPossibleMoves(
         randomPiece,
         this.gameBoardState,
-        this.boardStateData,
+        this.gameBoardStateData,
         this.movePerformContext,
         this.ignorePiecesGuardedProperty,
         this.lastMove
@@ -458,8 +428,8 @@ class Game {
   }
 
   private setupDefaultBoardState() {
-    this.boardStateData.load(this.defaultBoardStateData.dump(), true);
-    this.boardStateData.updateReference();
+    this.gameBoardStateData.load(this.defaultBoardStateData.dump(), true);
+    this.gameBoardStateData.updateReference();
   }
 
   private getFirstPlayerColor(): PlayerColor {
@@ -650,7 +620,7 @@ class Game {
 
   private onMoveForward() {
     this.onBoardStateChange();
-    this.boardStateData.save();
+    this.gameBoardStateData.save();
   }
 
   private onMovePerform() {
@@ -695,7 +665,7 @@ class Game {
       const moves = props.piece.getPossibleMoves(
         props,
         this.gameBoardState,
-        this.boardStateData,
+        this.gameBoardStateData,
         this.movePerformContext,
         this.ignorePiecesGuardedProperty,
         this.lastMove

@@ -1,4 +1,4 @@
-import { reactive, type ComputedRef, type Ref, ref, computed } from "vue";
+import { reactive, ref, computed } from "vue";
 import type {
   BoardPieceProps,
   BoardPosition,
@@ -8,14 +8,9 @@ import type {
 import BoardManager from "./board_manager";
 import type { PiecesImportance } from "./pieces/piece";
 import type Piece from "./pieces/piece";
-import {
-  getTargetMatchingPaths,
-  type Path,
-  type PieceId,
-} from "./pieces/piece";
-import Game, { GameLogicError, type Winner, type PlayerColor } from "./game";
+import { getTargetMatchingPaths } from "./pieces/piece";
+import Game, { GameLogicError, type PlayerColor } from "./game";
 import type Move from "./moves/move";
-import type BoardStateData from "./user_data/board_state";
 import { MoveForwardContext } from "./moves/move";
 
 class GameBoardManager extends BoardManager {
@@ -49,23 +44,8 @@ class GameBoardManager extends BoardManager {
 
   constructor(
     private readonly game: Game,
-    private readonly whiteCapturingPaths: Ref<Path[]>,
-    private readonly blackCapturingPaths: Ref<Path[]>,
-    private readonly playerColor: Ref<PlayerColor>,
-    private readonly winner: Ref<Winner>,
-    private readonly secondCheckboard: Ref<boolean>,
     private readonly playerBoard: boolean,
-    private readonly playingColor: Ref<PlayerColor>,
-    private readonly boardStateValue: BoardStateValue,
-    private readonly boardStateData: BoardStateData,
-    private readonly whiteCapturedPieces: Ref<PieceId[]>,
-    private readonly blackCapturedPieces: Ref<PieceId[]>,
-    private readonly showCapturingPieces: Ref<boolean>,
-    private readonly reviveFromCapturedPieces: Ref<boolean>,
-    private readonly showOtherAvailibleMoves: Ref<boolean>,
-    private readonly ignorePiecesGuardedProperty: Ref<boolean>,
-    private readonly piecesImportance: PiecesImportance,
-    private readonly lastMove: ComputedRef<Move | null>
+    private readonly piecesImportance: PiecesImportance
   ) {
     super();
   }
@@ -99,14 +79,20 @@ class GameBoardManager extends BoardManager {
   }
 
   private shouldShowMoves(pieceColor: PlayerColor) {
-    if (this.showOtherAvailibleMoves.value || this.winner.value !== "none")
+    if (
+      this.game.showOtherAvailibleMoves.value ||
+      this.game.winner.value !== "none"
+    )
       return true;
-    if (!this.secondCheckboard.value && pieceColor !== this.playingColor.value)
+    if (
+      !this.game.secondCheckboardEnabled.value &&
+      pieceColor !== this.game.playingColor.value
+    )
       return false;
-    if (this.secondCheckboard.value) {
+    if (this.game.secondCheckboardEnabled.value) {
       if (
-        (this.playerBoard && pieceColor !== this.playerColor.value) ||
-        (!this.playerBoard && pieceColor === this.playerColor.value)
+        (this.playerBoard && pieceColor !== this.game.playerColor.value) ||
+        (!this.playerBoard && pieceColor === this.game.playerColor.value)
       ) {
         return false;
       }
@@ -116,11 +102,11 @@ class GameBoardManager extends BoardManager {
 
   private get moveForwardContext(): MoveForwardContext {
     return {
-      boardStateValue: this.boardStateValue,
+      boardStateValue: this.game.gameBoardState,
       piecesImportance: this.piecesImportance,
-      blackCapturedPieces: this.blackCapturedPieces,
-      whiteCapturedPieces: this.whiteCapturedPieces,
-      reviveFromCapturedPieces: this.reviveFromCapturedPieces,
+      blackCapturedPieces: this.game.blackCapturedPieces,
+      whiteCapturedPieces: this.game.whiteCapturedPieces,
+      reviveFromCapturedPieces: this.game.reviveFromCapturedPieces,
     };
   }
 
@@ -141,14 +127,14 @@ class GameBoardManager extends BoardManager {
 
     const moves = pieceProps.piece.getPossibleMoves(
       pieceProps,
-      this.boardStateValue,
-      this.boardStateData,
+      this.game.gameBoardState,
+      this.game.gameBoardStateData,
       this.moveForwardContext,
-      this.ignorePiecesGuardedProperty,
-      this.lastMove
+      this.game.ignorePiecesGuardedProperty,
+      this.game.lastMove
     );
     for (const move of moves) {
-      move.showCellMarks(this.cellsMarks, this.boardStateValue);
+      move.showCellMarks(this.cellsMarks, this.game.gameBoardState);
     }
     this.availibleMoves = moves;
   }
@@ -189,8 +175,8 @@ class GameBoardManager extends BoardManager {
 
   private showCellCapturingPieces(position: BoardPosition) {
     const paths = getTargetMatchingPaths(position, [
-      ...this.whiteCapturingPaths.value,
-      ...this.blackCapturingPaths.value,
+      ...this.game.whiteCapturingPaths.value,
+      ...this.game.blackCapturingPaths.value,
     ]);
     for (const path of paths) {
       const origin = path.origin;
@@ -208,7 +194,8 @@ class GameBoardManager extends BoardManager {
     }
 
     this.selectedCells.value.push(position);
-    if (this.showCapturingPieces.value) this.showCellCapturingPieces(position);
+    if (this.game.showCapturingPieces.value)
+      this.showCellCapturingPieces(position);
 
     this._selectedCell = position;
   }
@@ -219,21 +206,22 @@ class GameBoardManager extends BoardManager {
   }
 
   private getMoveIfPossible(position: BoardPosition): Move | null {
-    if (this.winner.value !== "none") return null;
+    if (this.game.winner.value !== "none") return null;
     if (!this.availibleMoves || !this.selectedPiece) return null;
-    if (this.secondCheckboard.value) {
+    if (this.game.secondCheckboardEnabled.value) {
       if (
-        this.selectedPiece.piece.color !== this.playerColor.value &&
+        this.selectedPiece.piece.color !== this.game.playerColor.value &&
         this.playerBoard
       )
         return null;
       if (
-        this.selectedPiece.piece.color === this.playerColor.value &&
+        this.selectedPiece.piece.color === this.game.playerColor.value &&
         !this.playerBoard
       )
         return null;
     }
-    if (this.selectedPiece.piece.color !== this.playingColor.value) return null;
+    if (this.selectedPiece.piece.color !== this.game.playingColor.value)
+      return null;
     const matchingMove = this.getPositionMatchingMove(position);
     if (!matchingMove) {
       return null;
@@ -314,7 +302,7 @@ class GameBoardManager extends BoardManager {
     if (moved) return;
 
     // Take the cell click as a piece click if no move was performed on that position. This is useful if the cells with pieces are selected using tabindex.
-    const piece = this.boardStateValue[position.row][position.col];
+    const piece = this.game.gameBoardState[position.row][position.col];
     if (piece) {
       this.onPieceClick({ ...position, piece });
       return;
