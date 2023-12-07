@@ -34,7 +34,7 @@ class GameBoardManager extends BoardManager {
   });
   public readonly contentRotated = computed(() => {
     if (!this.game.secondCheckboardEnabled.value) {
-      return this.game.screenRotated.value;
+      return this.game.rotated.value;
     }
     if (!this.game.tableMode.value) {
       return this.game.playerColor.value === "black";

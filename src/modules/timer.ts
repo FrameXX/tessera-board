@@ -1,19 +1,32 @@
-import { type Ref, type ComputedRef, computed } from "vue";
+import { watch, type Ref } from "vue";
 
 class Timer {
   private interval: number | null = null;
-  public beyondLimit: ComputedRef<boolean>;
+  private timeOut: boolean;
 
   constructor(
     private readonly seconds: Ref<number>,
-    private readonly secondsLimit: Ref<number>
+    private readonly secondsLimit: Ref<number>,
+    private readonly timeOutCallback: () => any,
+    private readonly timeInCallBack: () => any
   ) {
-    this.beyondLimit = computed(() => {
-      if (this.secondsLimit.value === 0) {
-        return false;
-      }
-      return seconds.value >= secondsLimit.value;
-    });
+    this.timeOut = this.isTimeOut();
+    watch(this.seconds, this.checkTimeOut);
+    watch(this.secondsLimit, this.checkTimeOut);
+  }
+
+  private checkTimeOut = () => {
+    const timeOut = this.isTimeOut();
+    if (timeOut === this.timeOut) return;
+    timeOut ? this.timeOutCallback() : this.timeInCallBack();
+    this.timeOut = timeOut;
+  };
+
+  private isTimeOut() {
+    if (this.secondsLimit.value === 0) {
+      return false;
+    }
+    return this.seconds.value >= this.secondsLimit.value;
   }
 
   private setInterval() {

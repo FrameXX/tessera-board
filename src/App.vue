@@ -48,11 +48,10 @@ import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import Game, {
   isPlayerColor,
   isSecondsPerMovePenalty,
-  type PlayerColor,
   type GameOverReason,
   isGameOverReason,
 } from "./modules/game";
-import { getPixelsPerCm, isEven } from "./modules/utils/misc";
+import { getPixelsPerCm } from "./modules/utils/misc";
 import DurationDialog from "./modules/dialogs/duration";
 import InteractionManager from "./modules/interaction_manager";
 import { RawPiece } from "./modules/pieces/raw_piece";
@@ -99,15 +98,6 @@ const configPieceSelectOptions = computed(() => {
     pieces.push({ pieceId, color: configPieceDialog.props.color });
   }
   return pieces;
-});
-const playingColor = computed(() => {
-  let color: PlayerColor =
-    (isEven(lastMoveIndex.value) &&
-      preferredFirstMoveColor.value === "black") ||
-    (!isEven(lastMoveIndex.value) && preferredFirstMoveColor.value === "white")
-      ? "white"
-      : "black";
-  return color;
 });
 const playerSecondsPerMoveSet = computed(() => {
   return playerSecondsPerMove.value !== 0;
@@ -566,15 +556,6 @@ const lastMove = computed(() => {
   return moveList.value[lastMoveIndex.value];
 });
 
-const screenRotated = computed(() => {
-  let rotated: boolean;
-  if (!tableMode.value) {
-    return false;
-  }
-  rotated = playingColor.value === "black";
-  return rotated;
-});
-
 /**
  * All pieces are extracted from the boardStateValue 2D array into a list of objects with row and col attached. They are simpler too loop through and therefore also simpler to render using v-for in this form. They are sorted according to their unique id so, Vue transitions them smoothly as they appear and disappear from the checkboard.
  */
@@ -642,7 +623,6 @@ const game = new Game(
   showCapturingPieces,
   showOtherAvailibleMoves,
   tableMode,
-  screenRotated,
   confirmDialog,
   configPieceDialog,
   toastManager
@@ -660,7 +640,7 @@ const interactionManager = new InteractionManager(
   autoPauseGame
 );
 
-watch(screenRotated, (newValue) => {
+watch(game.rotated, (newValue) => {
   interactionManager.updateScreenRotation(newValue);
 });
 watch(game.playerPlaying, (newValue) => {
@@ -745,7 +725,7 @@ onMounted(() => {
       :winner="game.winner.value"
     />
     <div class="captured-pieces-placeholder"></div>
-    <div id="boards-area" :class="{ rotated: screenRotated }">
+    <div id="boards-area" :class="{ rotated: game.rotated.value }">
       <Board
         :selected-pieces="game.playerBoardManager.selectedPieces.value"
         :selected-cells="game.playerBoardManager.selectedCells.value"

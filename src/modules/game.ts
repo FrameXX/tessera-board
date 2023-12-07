@@ -173,6 +173,14 @@ class Game {
     this.pieceRemoveAudioEffect,
     this.vibrationsEnabled
   );
+  public readonly rotated = computed(() => {
+    let rotated: boolean;
+    if (!this.tableMode.value) {
+      return false;
+    }
+    rotated = this.playingColor.value === "black";
+    return rotated;
+  });
 
   constructor(
     private readonly paused: Ref<GamePausedState>,
@@ -214,7 +222,6 @@ class Game {
     public readonly showCapturingPieces: Ref<boolean>,
     public readonly showOtherAvailibleMoves: Ref<boolean>,
     public readonly tableMode: Ref<boolean>,
-    public readonly screenRotated: Ref<boolean>,
     private readonly confirmDialog: ConfirmDialog,
     private readonly configPieceDialog: ConfigPieceDialog,
     private readonly toastManager: ToastManager
@@ -248,59 +255,53 @@ class Game {
 
     this.playerMoveSecondsTimer = new Timer(
       playerMoveSeconds,
-      playerSecondsPerMove
+      playerSecondsPerMove,
+      this.onPlayerMoveSecsOut.bind(this),
+      () => {
+        if (
+          this.winReason.value === "move_timeout" &&
+          this.winner.value === "opponent"
+        )
+          this.cancelWin();
+      }
     );
-    watch(this.playerMoveSecondsTimer.beyondLimit, (newValue) => {
-      if (newValue) {
-        this.onPlayerMoveSecondsBeyondLimit();
-      } else if (
-        this.winReason.value === "move_timeout" &&
-        this.winner.value === "opponent"
-      )
-        this.cancelWin();
-    });
-
     this.opponentMoveSecondsTimer = new Timer(
       opponentMoveSeconds,
-      opponentSecondsPerMove
+      opponentSecondsPerMove,
+      this.onOpponentMoveSecsOut.bind(this),
+      () => {
+        if (
+          this.winReason.value === "move_timeout" &&
+          this.winner.value === "player"
+        )
+          this.cancelWin();
+      }
     );
-    watch(this.opponentMoveSecondsTimer.beyondLimit, (newValue) => {
-      if (newValue) {
-        this.onOpponentMoveSecondsBeyondLimit();
-      } else if (
-        this.winReason.value === "move_timeout" &&
-        this.winner.value === "player"
-      )
-        this.cancelWin();
-    });
-
     this.playerMatchSecondsTimer = new Timer(
       playerMatchSeconds,
-      playerSecondsPerMatch
+      playerSecondsPerMatch,
+      this.onPlayerMatchSecsOut.bind(this),
+      () => {
+        if (
+          this.winReason.value === "match_timeout" &&
+          this.winner.value === "opponent"
+        )
+          this.cancelWin();
+      }
     );
-    watch(this.playerMatchSecondsTimer.beyondLimit, (newValue) => {
-      if (newValue) {
-        this.onPlayerMatchSecondsBeyondLimit();
-      } else if (
-        this.winReason.value === "match_timeout" &&
-        this.winner.value === "opponent"
-      )
-        this.cancelWin();
-    });
 
     this.opponentMatchSecondsTimer = new Timer(
       opponentMatchSeconds,
-      opponentSecondsPerMatch
+      opponentSecondsPerMatch,
+      this.onOpponentMatchSecsOut.bind(this),
+      () => {
+        if (
+          this.winReason.value === "match_timeout" &&
+          this.winner.value === "player"
+        )
+          this.cancelWin();
+      }
     );
-    watch(this.opponentMatchSecondsTimer.beyondLimit, (newValue) => {
-      if (newValue) {
-        this.onOpponentMatchSecondsBeyondLimit();
-      } else if (
-        this.winReason.value === "match_timeout" &&
-        this.winner.value === "player"
-      )
-        this.cancelWin();
-    });
   }
 
   public performMove(move: Move) {
@@ -367,7 +368,7 @@ class Game {
     this.performMove(chosenMove);
   }
 
-  private onPlayerMoveSecondsBeyondLimit() {
+  private onPlayerMoveSecsOut() {
     this.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of move time!`,
       "timer-alert-outline"
@@ -379,7 +380,7 @@ class Game {
     }
   }
 
-  private onOpponentMoveSecondsBeyondLimit() {
+  private onOpponentMoveSecsOut() {
     this.toastManager.showToast(
       `${getColorTeamName(
         getOpossitePlayerColor(this.playerColor.value)
@@ -393,7 +394,7 @@ class Game {
     }
   }
 
-  private onPlayerMatchSecondsBeyondLimit() {
+  private onPlayerMatchSecsOut() {
     this.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of match time!`,
       "timer-alert-outline"
@@ -401,7 +402,7 @@ class Game {
     this.opponentWin("match_timeout");
   }
 
-  private onOpponentMatchSecondsBeyondLimit() {
+  private onOpponentMatchSecsOut() {
     this.toastManager.showToast(
       `${getColorTeamName(
         getOpossitePlayerColor(this.playerColor.value)
@@ -518,6 +519,7 @@ class Game {
   }
 
   public restore() {
+    this.onBoardStateChange();
     this.updateTimerState();
     this.updateCapturingPaths();
   }
