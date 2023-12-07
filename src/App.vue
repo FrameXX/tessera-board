@@ -53,7 +53,7 @@ import Game, {
 } from "./modules/game";
 import { getPixelsPerCm } from "./modules/utils/misc";
 import DurationDialog from "./modules/dialogs/duration";
-import InteractionManager from "./modules/interaction_manager";
+import InteractionManager from "./modules/ui";
 import { RawPiece } from "./modules/pieces/raw_piece";
 import { BoardStateValue } from "./modules/board_manager";
 import Move from "./modules/moves/move";
@@ -80,9 +80,6 @@ provide("pixelsPerCm", pixelsPerCm);
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const pieceMoveAudioEffect = new Howl({ src: [moveAudioEffectUrl] });
 const pieceRemoveAudioEffect = new Howl({ src: [removeAudioEffectUrl] });
-const settingsOpen = ref(false);
-const aboutOpen = ref(false);
-const actionPanelOpen = ref(false);
 const toasts = ref<ToastProps[]>([]);
 const configNameInput = ref<HTMLElement | null>(null);
 const minutesDurationInput = ref<HTMLElement | null>(null);
@@ -628,26 +625,23 @@ const game = new Game(
   toastManager
 );
 
-const interactionManager = new InteractionManager(
+const ui = new InteractionManager(
   toastManager,
   userDataManager,
   game,
   confirmDialog,
-  actionPanelOpen,
-  settingsOpen,
-  aboutOpen,
   gamePaused,
   autoPauseGame
 );
 
 watch(game.rotated, (newValue) => {
-  interactionManager.updateScreenRotation(newValue);
+  ui.updateScreenRotation(newValue);
 });
 watch(game.playerPlaying, (newValue) => {
-  interactionManager.updatePrimaryHue(newValue, game.winner.value);
+  ui.updatePrimaryHue(newValue, game.winner.value);
 });
 watch(game.winner, (newValue) => {
-  interactionManager.updatePrimaryHue(game.playerPlaying.value, newValue);
+  ui.updatePrimaryHue(game.playerPlaying.value, newValue);
 });
 watch(playerColor, (newValue) => {
   updatePieceColors(newValue);
@@ -657,7 +651,7 @@ const visited = localStorage.getItem("tessera_board-visited");
 if (visited === null) {
   localStorage.setItem("tessera_board-visited", "1");
 } else {
-  interactionManager.tryRecoverData();
+  ui.tryRecoverData();
 }
 userDataManager.onRecoverCheck();
 userDataManager.applyData();
@@ -666,24 +660,21 @@ userDataManager.updateReferences();
 onMounted(() => {
   // Sets CSS Saturation variables from 0 to their appropriate user configured values
   setSaturationMultiplier(1);
-  interactionManager.updatePrimaryHue(
-    game.playerPlaying.value,
-    game.winner.value
-  );
+  ui.updatePrimaryHue(game.playerPlaying.value, game.winner.value);
 
   addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape") interactionManager.escapeManager.escape();
+    if (event.key === "Escape") ui.escapeManager.escape();
     if (event.key === "R" && event.shiftKey) game.restart();
     if (event.key === "C" && event.shiftKey) {
-      interactionManager.toggleActionsPanel();
-      if (actionPanelOpen.value) {
-        interactionManager.toggleSettings();
+      ui.toggleActionsPanel();
+      if (ui.actionPanelOpen.value) {
+        ui.toggleSettings();
       }
     }
   });
 
   addEventListener("visibilitychange", () => {
-    interactionManager.onDistractionChange();
+    ui.onDistractionChange();
   });
 
   // Let the app wait another 600ms to make sure its fully loaded.
@@ -782,18 +773,18 @@ onMounted(() => {
 
   <!-- Fixed -->
   <ActionPanel
-    @about-game="interactionManager.toggleAbout()"
-    @backdrop-click="interactionManager.toggleActionsPanel()"
-    @configure-game="interactionManager.toggleSettings()"
-    @restart-game="interactionManager.onGameRestart()"
-    @pause="interactionManager.manuallyTogglePause()"
+    @about-game="ui.toggleAbout()"
+    @backdrop-click="ui.toggleActionsPanel()"
+    @configure-game="ui.toggleSettings()"
+    @restart-game="ui.onGameRestart()"
+    @pause="ui.manuallyTogglePause()"
     @resign="game.resign()"
-    :open="actionPanelOpen"
+    :open="ui.actionPanelOpen.value"
     :status-text="game.status.value"
     :game-paused="gamePaused"
   />
   <Settings
-    :open="settingsOpen"
+    :open="ui.settingsOpen.value"
     :default-board-config-manager="defaultBoardConfigManager"
     :default-board-manager="game.defaultBoardManager"
     :default-board-state="defaultBoardState"
@@ -803,7 +794,7 @@ onMounted(() => {
     "
     :default-board-all-piece-props="game.defaultBoardPieceProps.value"
   />
-  <About :open="aboutOpen" />
+  <About :open="ui.aboutOpen.value" />
 
   <!-- Relative -->
   <!-- Primary buttons -->
@@ -824,14 +815,14 @@ onMounted(() => {
     </Transition>
     <button
       id="action-button"
-      @click="interactionManager.toggleActionsPanel"
+      @click="ui.toggleActionsPanel"
       aria-label="Actions"
       title="Actions"
     >
       <Icon
         icon-id="plus"
         id="action-icon"
-        :class="{ close: actionPanelOpen }"
+        :class="{ close: ui.actionPanelOpen.value }"
         side
       />
       Actions
@@ -859,8 +850,8 @@ onMounted(() => {
     title="Select promotion piece"
     title-icon-id="arrow-up-bold-box-outline"
     :open="selectPieceDialog.props.open"
-    @open="interactionManager.escapeManager.addLayer(selectPieceDialog.cancel)"
-    @close="interactionManager.escapeManager.removeLayer()"
+    @open="ui.escapeManager.addLayer(selectPieceDialog.cancel)"
+    @close="ui.escapeManager.removeLayer()"
   >
     <SelectPiece
       :pieces="selectPieceDialog.props.pieceOptions"
@@ -880,8 +871,8 @@ onMounted(() => {
     title="Configure new piece"
     title-icon-id="plus"
     :open="configPieceDialog.props.open"
-    @open="interactionManager.escapeManager.addLayer(configPieceDialog.cancel)"
-    @close="interactionManager.escapeManager.removeLayer()"
+    @open="ui.escapeManager.addLayer(configPieceDialog.cancel)"
+    @close="ui.escapeManager.removeLayer()"
     @backdrop-click="configPieceDialog.cancel()"
   >
     <SelectPiece
@@ -918,8 +909,8 @@ onMounted(() => {
     title="Manage configurations"
     title-icon-id="folder-outline"
     :open="configsDialog.props.open"
-    @open="interactionManager.escapeManager.addLayer(configsDialog.cancel)"
-    @close="interactionManager.escapeManager.removeLayer()"
+    @open="ui.escapeManager.addLayer(configsDialog.cancel)"
+    @close="ui.escapeManager.removeLayer()"
     @backdrop-click="configsDialog.cancel()"
   >
     <input
@@ -970,8 +961,8 @@ onMounted(() => {
     :open="configPrintDialog.props.open"
     :focus-on-open="configNameInput"
     title-icon-id="folder-plus-outline"
-    @open="interactionManager.escapeManager.addLayer(configPrintDialog.cancel)"
-    @close="interactionManager.escapeManager.removeLayer()"
+    @open="ui.escapeManager.addLayer(configPrintDialog.cancel)"
+    @close="ui.escapeManager.removeLayer()"
     @backdrop-click="configPrintDialog.cancel()"
   >
     <input
@@ -1013,8 +1004,8 @@ onMounted(() => {
     title-icon-id="clock-outline"
     :open="durationDialog.props.open"
     :focus-on-open="minutesDurationInput"
-    @open="interactionManager.escapeManager.addLayer(durationDialog.cancel)"
-    @close="interactionManager.escapeManager.removeLayer()"
+    @open="ui.escapeManager.addLayer(durationDialog.cancel)"
+    @close="ui.escapeManager.removeLayer()"
     @backdrop-click="durationDialog.cancel"
   >
     <div class="duration-inputs">
@@ -1055,8 +1046,8 @@ onMounted(() => {
     title="Confirm"
     :open="confirmDialog.props.open"
     title-icon-id="check-all"
-    @open="interactionManager.escapeManager.addLayer(confirmDialog.cancel)"
-    @close="interactionManager.escapeManager.removeLayer()"
+    @open="ui.escapeManager.addLayer(confirmDialog.cancel)"
+    @close="ui.escapeManager.removeLayer()"
   >
     <p class="message">{{ confirmDialog.props.message }}</p>
     <InfoCard v-show="confirmDialog.props.showHint">{{
@@ -1176,4 +1167,4 @@ onMounted(() => {
   height: 90px;
 }
 </style>
-./modules/pieces/raw_piece
+./modules/pieces/raw_piece ./modules/ui

@@ -1,4 +1,4 @@
-import { watch, type Ref } from "vue";
+import { watch, type Ref, ref } from "vue";
 import EscapeManager from "./escape_manager";
 import {
   setCSSVariable,
@@ -12,45 +12,49 @@ import type Game from "./game";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { Winner } from "./game";
 
-class InteractionManager {
+/**
+ * UI stands for User Interface. The class takes care of all the props and functions related to user interface.
+ * @class
+ */
+class UI {
   public readonly escapeManager: EscapeManager;
+  public readonly actionPanelOpen: Ref<boolean> = ref(false);
+  public readonly settingsOpen: Ref<boolean> = ref(false);
+  public readonly aboutOpen: Ref<boolean> = ref(false);
 
   constructor(
     private readonly toastManager: ToastManager,
     private readonly userDataManager: UserDataManager,
     private readonly game: Game,
     private readonly confirmDialog: ConfirmDialog,
-    private readonly actionPanelOpen: Ref<boolean>,
-    private readonly settingsOpen: Ref<boolean>,
-    private readonly aboutOpen: Ref<boolean>,
     private readonly gamePaused: Ref<GamePausedState>,
     private readonly autoPauseGame: Ref<boolean>
   ) {
     this.escapeManager = new EscapeManager(this.toggleActionsPanel);
-    watch(settingsOpen, () => {
+    watch(this.settingsOpen, () => {
       this.onDistractionChange();
     });
-    watch(aboutOpen, () => {
+    watch(this.aboutOpen, () => {
       this.onDistractionChange();
     });
   }
 
   public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(playerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "player":
-      setPrimaryHue(true);
-      break;
-    case "opponent":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(playerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "player":
+        setPrimaryHue(true);
+        break;
+      case "opponent":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
@@ -145,4 +149,4 @@ class InteractionManager {
   }
 }
 
-export default InteractionManager;
+export default UI;
