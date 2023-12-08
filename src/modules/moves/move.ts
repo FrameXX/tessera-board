@@ -6,11 +6,12 @@ import {
   waitForTransitionEnd,
 } from "../utils/elements";
 import { getPositionPiece } from "../game_board_manager";
-import { GameLogicError, getAllPieceProps } from "../game";
+import { GameLogicError } from "../game";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
 import SelectPieceDialog from "../dialogs/select_piece";
+import { getAllPieceProps } from "../utils/game";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {

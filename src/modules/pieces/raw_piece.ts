@@ -1,11 +1,11 @@
 import { type PlayerColor, isPlayerColor } from "../game";
 import { UserDataError } from "../user_data/user_data";
+import type Piece from "./piece";
+import { type PieceId, isPieceId } from "./piece";
 import Bishop from "./bishop";
 import King from "./king";
 import Knight from "./knight";
 import Pawn from "./pawn";
-import type Piece from "./piece";
-import { type PieceId, isPieceId } from "./piece";
 import Queen from "./queen";
 import Rook from "./rook";
 

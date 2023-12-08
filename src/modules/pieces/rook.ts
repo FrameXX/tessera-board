@@ -1,3 +1,4 @@
+import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import type { ComputedRef } from "vue";
 import type {
   BoardPieceProps,
@@ -9,7 +10,6 @@ import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { isPieceKing } from "./king";
-import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import { getDiffPosition, isPositionOnBoard } from "./piece";
 import { getRawPiece, type RawPiece } from "./raw_piece";
 

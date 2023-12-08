@@ -1,23 +1,14 @@
 import moveAudioEffectUrl from "../assets/audio/move.ogg";
 import removeAudioEffectUrl from "../assets/audio/remove.ogg";
-import { type ComputedRef, type Ref, watch, ref, computed } from "vue";
+import { type Ref, watch, ref, computed } from "vue";
 import BoardStateData from "./user_data/board_state";
-import type { PreferredPlayerColor } from "./user_data/preferred_player_color";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 import type { PieceId, PiecesImportance } from "./pieces/piece";
-import {
-  positionsToPath,
-  type Path,
-  getTargetMatchingPaths,
-} from "./pieces/piece";
+import { positionsToPath, type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
-import type {
-  BoardPieceProps,
-  BoardPosition,
-  BoardStateValue,
-} from "./board_manager";
+import type { BoardPieceProps, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
 import NumberUserData from "./user_data/number_user_data";
 import MoveListData from "./user_data/move_list";
@@ -25,18 +16,9 @@ import { MovePerformContext } from "./moves/move";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
-import Knight from "./pieces/knight";
-import Rook from "./pieces/rook";
-import Bishop from "./pieces/bishop";
-import Queen from "./pieces/queen";
-import King from "./pieces/king";
-import Pawn from "./pieces/pawn";
-import ThemeManager, { Theme, isTheme } from "./theme_manager";
-import TransitionsManager, {
-  Transitions,
-  isTransitions,
-} from "./transitions_manager";
-import PieceIconPackData, { PieceIconPack } from "./user_data/piece_set";
+import ThemeManager, { isTheme } from "./theme_manager";
+import TransitionsManager, { isTransitions } from "./transitions_manager";
+import PieceIconPackData from "./user_data/piece_set";
 import UI from "./ui";
 import UserDataManager from "./user_data_manager";
 import BooleanUserData from "./user_data/boolean_user_data";
@@ -51,9 +33,18 @@ import CellIndexOpacityData from "./user_data/cell_index_opacity";
 import TransitionDurationData from "./user_data/transition_duration";
 import CapturedPiecesData from "./user_data/captured_pieces";
 import { hideSplashscreen, setSaturationMultiplier } from "./utils/elements";
+import defualtSettings from "./user_data/default_settings";
+import {
+  getAllPieceProps,
+  getGuardedPieces,
+  invalidatePiecesCache,
+  isGuardedPieceChecked,
+} from "./utils/game";
 
 type MoveDirection = "forward" | "reverse";
 type MoveExecution = "perform" | MoveDirection;
+
+export type GameSettings = typeof defualtSettings;
 
 export type Player = "player" | "opponent";
 export function isPlayer(string: string): string is Player {
@@ -143,87 +134,7 @@ class Game {
     src: [removeAudioEffectUrl],
   });
   public readonly ui = new UI(this);
-  public readonly settings = {
-    preferredFirstMoveColor: ref<PreferredPlayerColor>("white"),
-    preferredPlayerColor: ref<PreferredPlayerColor>("random"),
-    playerSecondsPerMove: ref<number>(0),
-    opponentSecondsPerMove: ref<number>(0),
-    playerSecondsPerMatch: ref<number>(0),
-    opponentSecondsPerMatch: ref<number>(0),
-    secondsMoveLimitRunOutPunishment: ref<SecondsPerMovePenalty>("random_move"),
-    reviveFromCapturedPieces: ref(false),
-    audioEffectsEnabled: ref(true),
-    vibrationsEnabled: ref(true),
-    secondCheckboardEnabled: ref(false),
-    ignorePiecesGuardedProperty: ref(false),
-    showCapturingPieces: ref(true),
-    autoPauseGame: ref(true),
-    showOtherAvailibleMoves: ref(false),
-    tableModeEnabled: ref(false),
-    pawnImportance: ref(1),
-    knightImportance: ref(3),
-    bishopImportance: ref(3.25),
-    rookImportance: ref(5),
-    queenImportance: ref(9),
-    kingImportance: ref(25),
-    theme: ref<Theme>("auto"),
-    transitions: ref<Transitions>("auto"),
-    playerHue: ref(37),
-    opponentHue: ref(200),
-    pieceIconPack: ref<PieceIconPack>("font_awesome"),
-    piecePadding: ref(10),
-    pieceBorder: ref(1.1),
-    transitionDuration: ref(100),
-    cellIndexOpacity: ref(90),
-    pieceLongPressTimeout: ref(0),
-    requireMoveConfirm: ref(false),
-    defaultBoardState: [
-      [
-        new Rook("white"),
-        new Knight("white"),
-        new Bishop("white"),
-        new Queen("white"),
-        new King("white"),
-        new Bishop("white"),
-        new Knight("white"),
-        new Rook("white"),
-      ],
-      [
-        new Pawn("white"),
-        new Pawn("white"),
-        new Pawn("white"),
-        new Pawn("white"),
-        new Pawn("white"),
-        new Pawn("white"),
-        new Pawn("white"),
-        new Pawn("white"),
-      ],
-      [null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null],
-      [
-        new Pawn("black"),
-        new Pawn("black"),
-        new Pawn("black"),
-        new Pawn("black"),
-        new Pawn("black"),
-        new Pawn("black"),
-        new Pawn("black"),
-        new Pawn("black"),
-      ],
-      [
-        new Rook("black"),
-        new Knight("black"),
-        new Bishop("black"),
-        new Queen("black"),
-        new King("black"),
-        new Bishop("black"),
-        new Knight("black"),
-        new Rook("black"),
-      ],
-    ],
-  };
+  public readonly settings = defualtSettings;
   public readonly gameBoardState = [
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
@@ -1165,78 +1076,6 @@ class Game {
     }
     this.whiteCapturingPaths.value = whiteCapturingPaths;
     this.blackCapturingPaths.value = blackCapturingPaths;
-  }
-}
-
-export function getAllPieceProps(boardStateValue: BoardStateValue) {
-  const allPieceProps: BoardPieceProps[] = [];
-  for (const [rowIndex, row] of boardStateValue.entries()) {
-    for (const [colIndex, piece] of row.entries()) {
-      if (!piece) {
-        continue;
-      }
-      allPieceProps.push({
-        row: rowIndex,
-        col: colIndex,
-        piece: piece,
-      });
-    }
-  }
-  allPieceProps.sort((a, b) => {
-    return a.piece.id.localeCompare(b.piece.id);
-  });
-  return allPieceProps;
-}
-
-export function getGuardedPieces(
-  pieceProps: BoardPieceProps[],
-  color: PlayerColor
-) {
-  return pieceProps.filter((props) => {
-    if (props.piece.color !== color) return false;
-    return props.piece.guarded;
-  });
-}
-
-export function isGuardedPieceChecked(
-  boardStateValue: BoardStateValue,
-  color: PlayerColor,
-  allPieceProps: BoardPieceProps[],
-  guardedPieces: BoardPieceProps[],
-  lastMove: ComputedRef<Move | null>
-) {
-  let capturingPaths: Path[] = [];
-
-  for (const pieceProps of allPieceProps) {
-    const piece = pieceProps.piece;
-    if (piece.color === color) {
-      continue;
-    }
-    const origin: BoardPosition = pieceProps;
-    capturingPaths = [
-      ...capturingPaths,
-      ...positionsToPath(
-        piece.getCapturingPositions(origin, boardStateValue, lastMove),
-        origin
-      ),
-    ];
-  }
-
-  for (const piece of guardedPieces) {
-    const paths = getTargetMatchingPaths(
-      { row: piece.row, col: piece.col },
-      capturingPaths
-    );
-    if (paths.length !== 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
-export function invalidatePiecesCache(allPieceProps: BoardPieceProps[]) {
-  for (const pieceProps of allPieceProps) {
-    pieceProps.piece.invalidateCache();
   }
 }
 

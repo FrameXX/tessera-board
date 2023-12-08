@@ -26,5 +26,8 @@ dist-ssr
 # Firebase hosting
 .firebaserc
 firebase.json
-
 .firebase
+
+# Other
+.dependency-cruiser.*
+.eslintrc.json

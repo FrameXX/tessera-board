@@ -19,9 +19,11 @@ import {
   BoardPosition,
   BoardStateValue,
 } from "../modules/board_manager";
+import { GameSettings } from "../modules/game";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
+  modelValue: { type: Object as PropType<GameSettings>, required: true },
   defaultBoardConfigManager: {
     type: Object as PropType<ConfigManager>,
     required: true,
@@ -67,7 +69,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="invert-colors"
             option-id="select-player-color"
           >
-            <select id="select-player-color" v-model="preferredPlayerColor">
+            <select
+              id="select-player-color"
+              v-model="props.modelValue.preferredPlayerColor.value"
+            >
               <option value="random">Random</option>
               <option value="white">White</option>
               <option value="black">Black</option>
@@ -115,7 +120,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-player-seconds-per-move"
-              v-model="playerSecondsPerMove"
+              v-model="props.modelValue.playerSecondsPerMove.value"
             />
             <template #description
               >Limits player's time per move. If the time runs out (expires) an
@@ -132,7 +137,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-opponent-seconds-per-move"
-              v-model="opponentSecondsPerMove"
+              v-model="props.modelValue.opponentSecondsPerMove.value"
             />
             <template #description
               >Limits opponent's time per move. If the time runs out (expires)
@@ -149,7 +154,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-player-seconds-per-match"
-              v-model="playerSecondsPerMatch"
+              v-model="props.modelValue.playerSecondsPerMatch.value"
             />
             <template #description
               >Limits player's time for whole match (game). If the time runs out
@@ -166,7 +171,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <TimeDurationInput
               id="input-opponent-seconds-per-match"
-              v-model="opponentSecondsPerMatch"
+              v-model="props.modelValue.opponentSecondsPerMatch.value"
             />
             <template #description
               >Limits opponent's time for whole match (game). If the time runs
@@ -179,11 +184,11 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           <UserOption
             name="Time per move expiration punishment"
             icon-id="timer-alert-outline"
-            option-id="seconds-per-move-runout-punishment"
+            option-id="seconds-move-limit-run-out-punishment"
           >
             <select
-              id="seconds-per-move-runout-punishment"
-              v-model="secondsPerMovePenalty"
+              id="seconds-move-limit-run-out-punishment"
+              v-model="props.modelValue.secondsMoveLimitRunOutPunishment.value"
             >
               <option value="random_move">Random move</option>
               <option value="game_loss">Game loss</option>
@@ -202,7 +207,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="check-show-capturing-pieces"
-              v-model="showCapturingPieces"
+              v-model="props.modelValue.showCapturingPieces.value"
             />
             <template #description>
               When a cell on the game board is selected, the pieces that are
@@ -220,7 +225,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="show-other-availible-moves"
-              v-model="showOtherAvailibleMoves"
+              v-model="props.modelValue.showOtherAvailibleMoves.value"
             />
             <template #description>
               The player will be able to display the possible moves and board
@@ -235,7 +240,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="numeric-1-box-outline"
             option-id="first-move-color"
           >
-            <select id="first-move-color" v-model="preferredFirstMoveColor">
+            <select
+              id="first-move-color"
+              v-model="props.modelValue.preferredFirstMoveColor.value"
+            >
               <option value="random">Random</option>
               <option value="white">White</option>
               <option value="black">Black</option>
@@ -252,7 +260,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="revive-from-captured-pieces"
-              v-model="reviveFromCapturedPieces"
+              v-model="props.modelValue.reviveFromCapturedPieces.value"
             />
             <template #description>
               If enabled pieces that promote (for example when pawn promotes
@@ -269,7 +277,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="ignore-pieces-protections"
-              v-model="ignorePiecesGuardedProperty"
+              v-model="props.modelValue.ignorePiecesGuardedProperty.value"
             />
             <template #description>
               Some pieces like a king in chess are protected. That means that
@@ -299,9 +307,9 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               <Board
                 :manager="defaultBoardManager"
                 :state="defaultBoardState"
-                :piece-set="pieceIconPack"
-                :piece-padding="piecePadding"
-                :piece-border="pieceBorder"
+                :piece-set="props.modelValue.pieceIconPack.value"
+                :piece-padding="props.modelValue.piecePadding.value"
+                :piece-border="props.modelValue.pieceBorder.value"
                 :dragging-over-cells="defaultDraggingOverCells"
                 board-id="default"
                 id="default-board"
@@ -328,7 +336,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <input
               type="number"
               id="input-pawn-importance"
-              v-model="pawnImportance"
+              v-model="props.modelValue.pawnImportance.value"
             />
           </UserOption>
           <UserOption
@@ -340,7 +348,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <input
               type="number"
               id="input-knight-importance"
-              v-model="knightImportance"
+              v-model="props.modelValue.knightImportance.value"
             />
           </UserOption>
           <UserOption
@@ -352,7 +360,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <input
               type="number"
               id="input-bishop-importance"
-              v-model="bishopImportance"
+              v-model="props.modelValue.bishopImportance.value"
             />
           </UserOption>
           <UserOption
@@ -364,7 +372,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <input
               type="number"
               id="input-rook-importance"
-              v-model="rookImportance"
+              v-model="props.modelValue.rookImportance.value"
             />
           </UserOption>
           <UserOption
@@ -376,7 +384,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <input
               type="number"
               id="input-queen-importance"
-              v-model="queenImportance"
+              v-model="props.modelValue.queenImportance.value"
             />
           </UserOption>
           <UserOption
@@ -388,7 +396,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             <input
               type="number"
               id="input-king-importance"
-              v-model="kingImportance"
+              v-model="props.modelValue.kingImportance.value"
             />
           </UserOption>
         </Category>
@@ -406,7 +414,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="000"
               max="600"
               id="input-long-press-timeout"
-              v-model="pieceLongPressTimeout"
+              v-model="props.modelValue.pieceLongPressTimeout.value"
             />
             <template #description
               >Changes duration of press/hold on a piece to be recognized as
@@ -418,7 +426,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="table-furniture"
             option-id="check-table-mode"
           >
-            <Checkbox id="check-table-mode" v-model="tableMode" />
+            <Checkbox
+              id="check-table-mode"
+              v-model="props.modelValue.tableModeEnabled.value"
+            />
             <template #description>
               The game will behave as if the screen was a table and both players
               were sitting opossite of each other. If only 1 board is enabled
@@ -430,7 +441,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="checkerboard-plus"
             option-id="check-second-checkboard"
           >
-            <Checkbox id="check-second-checkboard" v-model="secondCheckboard" />
+            <Checkbox
+              id="check-second-checkboard"
+              v-model="props.modelValue.secondCheckboardEnabled.value"
+            />
             <template #description>
               Shows second checkboard on the screen rotated for the second
               player. This option is great for separating player zone for each
@@ -443,7 +457,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="play-pause"
             option-id="check-auto-pause"
           >
-            <Checkbox id="check-auto-pause" v-model="autoPauseGame" />
+            <Checkbox
+              id="check-auto-pause"
+              v-model="props.modelValue.autoPauseGame.value"
+            />
             <template #description>
               The game will be automatically paused when settings is opened,
               borwser tab is switched, browser window is not focused etc...
@@ -456,7 +473,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="check-require-move-confirm"
-              v-model="requireMoveConfirm"
+              v-model="props.modelValue.requireMoveConfirm.value"
             />
             <template #description>
               Requires player to confirm move using buttons that appear next to
@@ -471,7 +488,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="brightness-6"
             option-id="select-ui-mode"
           >
-            <select id="select-ui-mode" v-model="theme">
+            <select id="select-ui-mode" v-model="props.modelValue.theme.value">
               <option value="auto">Auto</option>
               <option value="light">Light</option>
               <option value="dark">Dark</option>
@@ -493,7 +510,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="0"
               max="360"
               id="input-hue-player"
-              v-model="playerHue"
+              v-model="props.modelValue.playerHue.value"
             />
             <template #description
               >The UI transitions the overall hue of the app to this hue when
@@ -511,7 +528,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="0"
               max="360"
               id="input-hue-opponent"
-              v-model="opponentHue"
+              v-model="props.modelValue.opponentHue.value"
             />
             <template #description
               >The UI transitions the overall hue of the app to this hue when
@@ -526,7 +543,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="package-variant-closed"
             option-id="select-piece-set"
           >
-            <select id="select-piece-set" v-model="pieceIconPack">
+            <select
+              id="select-piece-set"
+              v-model="props.modelValue.pieceIconPack.value"
+            >
               <option value="material_design">Material Design</option>
               <option value="font_awesome">Font Awesome</option>
               <option value="tabler">Tabler</option>
@@ -546,7 +566,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="0"
               max="30"
               id="input-piece-padding"
-              v-model="piecePadding"
+              v-model="props.modelValue.piecePadding.value"
             />
             <template #description
               >Increases padding of the pieces relative to its cell, but that
@@ -563,7 +583,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="0"
               max="3"
               id="input-piece-border"
-              v-model="pieceBorder"
+              v-model="props.modelValue.pieceBorder.value"
             />
             <template #description
               >Increases border/stroke width of the pieces vector, which can
@@ -580,7 +600,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="0"
               max="100"
               id="input-cell-index-opacity"
-              v-model="cellIndexOpacity"
+              v-model="props.modelValue.cellIndexOpacity.value"
             />
             <template #description
               >Opacity of the cell indexes (numbers and letters) written on
@@ -594,7 +614,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="surround-sound"
             option-id="check-audio-effects"
           >
-            <Checkbox id="check-audio-effects" v-model="audioEffectsEnabled" />
+            <Checkbox
+              id="check-audio-effects"
+              v-model="props.modelValue.audioEffectsEnabled.value"
+            />
             <template #description>
               Enables simple audio effects when a piece is moved, added etc...
             </template>
@@ -604,7 +627,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="vibrate"
             option-id="check-use-vibrations"
           >
-            <Checkbox id="check-use-vibrations" v-model="vibrationsEnabled" />
+            <Checkbox
+              id="check-use-vibrations"
+              v-model="props.modelValue.vibrationsEnabled.value"
+            />
             <template #description>
               Vibrations will be performed on devices that have a vibration
               motor when pieces is captured, removed, long-pressed etc...
@@ -615,7 +641,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             icon-id="transition"
             option-id="select-transitions"
           >
-            <select id="select-transitions" v-model="transitions">
+            <select
+              id="select-transitions"
+              v-model="props.modelValue.transitions.value"
+            >
               <option value="auto">Auto</option>
               <option value="enabled">Enabled</option>
               <option value="disabled">Disabled</option>
@@ -638,7 +667,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
               min="0"
               max="300"
               id="input-transition-duration"
-              v-model="transitionDuration"
+              v-model="props.modelValue.transitionDuration.value"
             />
             <template #description
               >Changes duration of all the transitions and animations (except

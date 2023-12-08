@@ -1,13 +1,5 @@
-console.log("piece");
-
 import type { ComputedRef, Ref } from "vue";
-import {
-  getAllPieceProps,
-  getGuardedPieces,
-  invalidatePiecesCache,
-  isGuardedPieceChecked,
-  type PlayerColor,
-} from "../game";
+import { type PlayerColor } from "../game";
 import { positionsEqual } from "../game_board_manager";
 import type Move from "../moves/move";
 import { getRandomId, sumPositions } from "../utils/misc";
@@ -15,6 +7,12 @@ import { type RawPiece, getRawPiece } from "./raw_piece";
 import BoardStateData from "../user_data/board_state";
 import type { BoardPosition, BoardStateValue } from "../board_manager";
 import { MoveForwardContext } from "../moves/move";
+import {
+  getAllPieceProps,
+  getGuardedPieces,
+  invalidatePiecesCache,
+  isGuardedPieceChecked,
+} from "../utils/game";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",
