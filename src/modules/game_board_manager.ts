@@ -27,16 +27,19 @@ class GameBoardManager extends BoardManager {
   public readonly selectedPieces = ref<BoardPosition[]>([]);
   public readonly draggingOverCells = ref<BoardPosition[]>([]);
   public readonly rotated = computed(() => {
-    if (this.game.tableMode.value || !this.game.secondCheckboardEnabled.value) {
+    if (
+      this.game.settings.tableModeEnabled.value ||
+      !this.game.settings.secondCheckboardEnabled.value
+    ) {
       return false;
     }
     return this.game.playerColor.value === "black";
   });
   public readonly contentRotated = computed(() => {
-    if (!this.game.secondCheckboardEnabled.value) {
+    if (!this.game.settings.secondCheckboardEnabled.value) {
       return this.game.rotated.value;
     }
-    if (!this.game.tableMode.value) {
+    if (!this.game.settings.tableModeEnabled.value) {
       return this.game.playerColor.value === "black";
     }
     return this.game.playerColor.value === "black";
@@ -80,16 +83,16 @@ class GameBoardManager extends BoardManager {
 
   private shouldShowMoves(pieceColor: PlayerColor) {
     if (
-      this.game.showOtherAvailibleMoves.value ||
+      this.game.settings.showOtherAvailibleMoves.value ||
       this.game.winner.value !== "none"
     )
       return true;
     if (
-      !this.game.secondCheckboardEnabled.value &&
+      !this.game.settings.secondCheckboardEnabled.value &&
       pieceColor !== this.game.playingColor.value
     )
       return false;
-    if (this.game.secondCheckboardEnabled.value) {
+    if (this.game.settings.secondCheckboardEnabled.value) {
       if (
         (this.playerBoard && pieceColor !== this.game.playerColor.value) ||
         (!this.playerBoard && pieceColor === this.game.playerColor.value)
@@ -106,7 +109,7 @@ class GameBoardManager extends BoardManager {
       piecesImportance: this.piecesImportance,
       blackCapturedPieces: this.game.blackCapturedPieces,
       whiteCapturedPieces: this.game.whiteCapturedPieces,
-      reviveFromCapturedPieces: this.game.reviveFromCapturedPieces,
+      reviveFromCapturedPieces: this.game.settings.reviveFromCapturedPieces,
     };
   }
 
@@ -130,7 +133,7 @@ class GameBoardManager extends BoardManager {
       this.game.gameBoardState,
       this.game.gameBoardStateData,
       this.moveForwardContext,
-      this.game.ignorePiecesGuardedProperty,
+      this.game.settings.ignorePiecesGuardedProperty,
       this.game.lastMove
     );
     for (const move of moves) {
@@ -194,7 +197,7 @@ class GameBoardManager extends BoardManager {
     }
 
     this.selectedCells.value.push(position);
-    if (this.game.showCapturingPieces.value)
+    if (this.game.settings.showCapturingPieces.value)
       this.showCellCapturingPieces(position);
 
     this._selectedCell = position;
@@ -208,7 +211,7 @@ class GameBoardManager extends BoardManager {
   private getMoveIfPossible(position: BoardPosition): Move | null {
     if (this.game.winner.value !== "none") return null;
     if (!this.availibleMoves || !this.selectedPiece) return null;
-    if (this.game.secondCheckboardEnabled.value) {
+    if (this.game.settings.secondCheckboardEnabled.value) {
       if (
         this.selectedPiece.piece.color !== this.game.playerColor.value &&
         this.playerBoard

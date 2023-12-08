@@ -24,6 +24,8 @@ class GamePausedData extends SelectUserData<GamePausedState> {
       this.handleInvalidLoadValue(dumped);
       return;
     }
+
+    // Do not recover the game as paused if it was paused automatically.
     if (dumped === "manual") {
       this.value = "manual";
     } else {

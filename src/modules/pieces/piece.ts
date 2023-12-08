@@ -1,3 +1,5 @@
+console.log("piece");
+
 import type { ComputedRef, Ref } from "vue";
 import {
   getAllPieceProps,

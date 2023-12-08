@@ -1,11 +1,11 @@
+import moveAudioEffectUrl from "../assets/audio/move.ogg";
+import removeAudioEffectUrl from "../assets/audio/remove.ogg";
 import { type ComputedRef, type Ref, watch, ref, computed } from "vue";
-import type BoardStateData from "./user_data/board_state";
+import BoardStateData from "./user_data/board_state";
 import type { PreferredPlayerColor } from "./user_data/preferred_player_color";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
-import type ToastManager from "./toast_manager";
-import type RawBoardStateData from "./user_data/raw_board_state";
+import RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
-import type ConfirmDialog from "./dialogs/confirm";
 import type { PieceId, PiecesImportance } from "./pieces/piece";
 import {
   positionsToPath,
@@ -19,14 +19,38 @@ import type {
   BoardStateValue,
 } from "./board_manager";
 import type Move from "./moves/move";
-import type NumberUserData from "./user_data/number_user_data";
-import type MoveListData from "./user_data/move_list";
+import NumberUserData from "./user_data/number_user_data";
+import MoveListData from "./user_data/move_list";
 import { MovePerformContext } from "./moves/move";
-import SelectPieceDialog from "./dialogs/select_piece";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
-import ConfigPieceDialog from "./dialogs/config_piece";
+import Knight from "./pieces/knight";
+import Rook from "./pieces/rook";
+import Bishop from "./pieces/bishop";
+import Queen from "./pieces/queen";
+import King from "./pieces/king";
+import Pawn from "./pieces/pawn";
+import ThemeManager, { Theme, isTheme } from "./theme_manager";
+import TransitionsManager, {
+  Transitions,
+  isTransitions,
+} from "./transitions_manager";
+import PieceIconPackData, { PieceIconPack } from "./user_data/piece_set";
+import UI from "./ui";
+import UserDataManager from "./user_data_manager";
+import BooleanUserData from "./user_data/boolean_user_data";
+import HueData from "./user_data/hue";
+import RequireMoveConfirmData from "./user_data/require_move_confirm";
+import SelectUserData from "./user_data/select_user_data";
+import GamePausedData from "./user_data/game_paused";
+import PieceBorderData from "./user_data/piece_border";
+import PiecePaddingData from "./user_data/piece_padding";
+import PlayerColorOptionData from "./user_data/preferred_player_color";
+import CellIndexOpacityData from "./user_data/cell_index_opacity";
+import TransitionDurationData from "./user_data/transition_duration";
+import CapturedPiecesData from "./user_data/captured_pieces";
+import { hideSplashscreen, setSaturationMultiplier } from "./utils/elements";
 
 type MoveDirection = "forward" | "reverse";
 type MoveExecution = "perform" | MoveDirection;
@@ -76,7 +100,7 @@ export function isWinner(string: string): string is Winner {
   return isPlayer(string) || isUndecidedWinner(string);
 }
 
-export type GameOverReason =
+export type WinReason =
   | "none"
   | "move_timeout"
   | "match_timeout"
@@ -84,9 +108,7 @@ export type GameOverReason =
   | "checkmate"
   | "stalemate"
   | "block";
-export function isGameOverReason(
-  string: string | null
-): string is GameOverReason {
+export function isWinReason(string: string | null): string is WinReason {
   return (
     string === "none" ||
     string === "move_timeout" ||
@@ -114,17 +136,432 @@ export class GameLogicError extends Error {
 }
 
 class Game {
-  private readonly playerMoveSecondsTimer: Timer;
-  private readonly opponentMoveSecondsTimer: Timer;
-  private readonly playerMatchSecondsTimer: Timer;
-  private readonly opponentMatchSecondsTimer: Timer;
+  public readonly pieceMoveAudioEffect = new Howl({
+    src: [moveAudioEffectUrl],
+  });
+  public readonly pieceRemoveAudioEffect = new Howl({
+    src: [removeAudioEffectUrl],
+  });
+  public readonly ui = new UI(this);
+  public readonly settings = {
+    preferredFirstMoveColor: ref<PreferredPlayerColor>("white"),
+    preferredPlayerColor: ref<PreferredPlayerColor>("random"),
+    playerSecondsPerMove: ref<number>(0),
+    opponentSecondsPerMove: ref<number>(0),
+    playerSecondsPerMatch: ref<number>(0),
+    opponentSecondsPerMatch: ref<number>(0),
+    secondsMoveLimitRunOutPunishment: ref<SecondsPerMovePenalty>("random_move"),
+    reviveFromCapturedPieces: ref(false),
+    audioEffectsEnabled: ref(true),
+    vibrationsEnabled: ref(true),
+    secondCheckboardEnabled: ref(false),
+    ignorePiecesGuardedProperty: ref(false),
+    showCapturingPieces: ref(true),
+    autoPauseGame: ref(true),
+    showOtherAvailibleMoves: ref(false),
+    tableModeEnabled: ref(false),
+    pawnImportance: ref(1),
+    knightImportance: ref(3),
+    bishopImportance: ref(3.25),
+    rookImportance: ref(5),
+    queenImportance: ref(9),
+    kingImportance: ref(25),
+    theme: ref<Theme>("auto"),
+    transitions: ref<Transitions>("auto"),
+    playerHue: ref(37),
+    opponentHue: ref(200),
+    pieceIconPack: ref<PieceIconPack>("font_awesome"),
+    piecePadding: ref(10),
+    pieceBorder: ref(1.1),
+    transitionDuration: ref(100),
+    cellIndexOpacity: ref(90),
+    pieceLongPressTimeout: ref(0),
+    requireMoveConfirm: ref(false),
+    defaultBoardState: [
+      [
+        new Rook("white"),
+        new Knight("white"),
+        new Bishop("white"),
+        new Queen("white"),
+        new King("white"),
+        new Bishop("white"),
+        new Knight("white"),
+        new Rook("white"),
+      ],
+      [
+        new Pawn("white"),
+        new Pawn("white"),
+        new Pawn("white"),
+        new Pawn("white"),
+        new Pawn("white"),
+        new Pawn("white"),
+        new Pawn("white"),
+        new Pawn("white"),
+      ],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [
+        new Pawn("black"),
+        new Pawn("black"),
+        new Pawn("black"),
+        new Pawn("black"),
+        new Pawn("black"),
+        new Pawn("black"),
+        new Pawn("black"),
+        new Pawn("black"),
+      ],
+      [
+        new Rook("black"),
+        new Knight("black"),
+        new Bishop("black"),
+        new Queen("black"),
+        new King("black"),
+        new Bishop("black"),
+        new Knight("black"),
+        new Rook("black"),
+      ],
+    ],
+  };
+  public readonly gameBoardState = [
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+  ];
+  public readonly gameBoardStateData = new BoardStateData(
+    this.gameBoardState,
+    this.gameBoardState,
+    this.ui.toastManager,
+    false
+  );
+  public readonly defaultBoardStateData = new RawBoardStateData(
+    this.settings.defaultBoardState,
+    this.settings.defaultBoardState,
+    this.ui.toastManager
+  );
+  public readonly whiteCapturingPaths = ref<Path[]>([]);
+  public readonly blackCapturingPaths = ref<Path[]>([]);
+  public readonly playerColor = ref<PlayerColor>("white");
+  public readonly playerMoveSeconds = ref(0);
+  public readonly opponentMoveSeconds = ref(0);
+  public readonly playerMatchSeconds = ref(0);
+  public readonly opponentMatchSeconds = ref(0);
+  public readonly winReason = ref<WinReason>("none");
+  public readonly blackCapturedPieces = ref<PieceId[]>([]);
+  public readonly whiteCapturedPieces = ref<PieceId[]>([]);
+  public readonly lastMoveIndex = ref(0);
+  public readonly paused = ref<GamePausedState>("not");
+  public readonly lastMoveIndexData = new NumberUserData(
+    "move_index",
+    this.lastMoveIndex.value,
+    this.ui.toastManager,
+    this.lastMoveIndex,
+    undefined,
+    undefined,
+    false
+  );
+  public readonly moveList = ref([]) as Ref<Move[]>;
+  public readonly moveListData = new MoveListData(
+    "move_list",
+    this.moveList.value,
+    this.moveList,
+    this.ui.toastManager
+  );
+  public readonly lastMove = computed(() => {
+    if (this.lastMoveIndex.value === -1) {
+      return null;
+    }
+    return this.moveList.value[this.lastMoveIndex.value];
+  });
+  userDataManager = new UserDataManager(
+    [
+      new BooleanUserData(
+        "vibrations_enabled",
+        this.settings.vibrationsEnabled.value,
+        this.ui.toastManager,
+        this.settings.vibrationsEnabled
+      ),
+      new BooleanUserData(
+        "auto_pause",
+        this.settings.autoPauseGame.value,
+        this.ui.toastManager,
+        this.settings.autoPauseGame
+      ),
+      new HueData(
+        this.settings.playerHue.value,
+        this.settings.playerHue,
+        false,
+        this.ui.toastManager
+      ),
+      new HueData(
+        this.settings.opponentHue.value,
+        this.settings.opponentHue,
+        true,
+        this.ui.toastManager
+      ),
+      new PieceIconPackData(
+        this.settings.pieceIconPack.value,
+        this.settings.pieceIconPack,
+        this.ui.toastManager
+      ),
+      new PiecePaddingData(
+        this.settings.piecePadding.value,
+        this.settings.piecePadding,
+        this.ui.toastManager
+      ),
+      new PieceBorderData(
+        this.settings.pieceBorder.value,
+        this.settings.pieceBorder,
+        this.ui.toastManager
+      ),
+      new TransitionDurationData(
+        this.settings.transitionDuration.value,
+        this.settings.transitionDuration,
+        this.ui.toastManager
+      ),
+      new CellIndexOpacityData(
+        this.settings.cellIndexOpacity.value,
+        this.settings.cellIndexOpacity,
+        this.ui.toastManager
+      ),
+      new PlayerColorOptionData(
+        "preferred_player_color",
+        this.settings.preferredPlayerColor.value,
+        this.settings.preferredPlayerColor,
+        this.ui.toastManager
+      ),
+      new PlayerColorOptionData(
+        "preferred_first_move_color",
+        this.settings.preferredFirstMoveColor.value,
+        this.settings.preferredFirstMoveColor,
+        this.ui.toastManager
+      ),
+      new BooleanUserData(
+        "show_capturing_pieces",
+        this.settings.showCapturingPieces.value,
+        this.ui.toastManager,
+        this.settings.showCapturingPieces
+      ),
+      new BooleanUserData(
+        "second_checkboard",
+        this.settings.secondCheckboardEnabled.value,
+        this.ui.toastManager,
+        this.settings.secondCheckboardEnabled
+      ),
+      new NumberUserData(
+        "piece_long_press_timeout",
+        this.settings.pieceLongPressTimeout.value,
+        this.ui.toastManager,
+        this.settings.pieceLongPressTimeout,
+        0,
+        600
+      ),
+      new BooleanUserData(
+        "table_mode",
+        this.settings.tableModeEnabled.value,
+        this.ui.toastManager,
+        this.settings.tableModeEnabled
+      ),
+      new BooleanUserData(
+        "ignore_pieces_guarded_property",
+        this.settings.ignorePiecesGuardedProperty.value,
+        this.ui.toastManager,
+        this.settings.ignorePiecesGuardedProperty
+      ),
+      new RequireMoveConfirmData(
+        this.settings.requireMoveConfirm.value,
+        this.settings.requireMoveConfirm,
+        this.ui.toastManager
+      ),
+      new SelectUserData(
+        "player_color",
+        this.playerColor.value,
+        isPlayerColor,
+        this.ui.toastManager,
+        this.playerColor
+      ),
+      new SelectUserData(
+        "theme",
+        this.settings.theme.value,
+        isTheme,
+        this.ui.toastManager,
+        this.settings.theme
+      ),
+      new SelectUserData(
+        "transitions_enabled",
+        this.settings.transitions.value,
+        isTransitions,
+        this.ui.toastManager,
+        this.settings.transitions
+      ),
+      new SelectUserData(
+        "game_over_reason",
+        this.winReason.value,
+        isWinReason,
+        this.ui.toastManager,
+        this.winReason
+      ),
+      new SelectUserData(
+        "seconds_per_move_runout_punishment",
+        "random_move",
+        isSecondsPerMovePenalty,
+        this.ui.toastManager,
+        this.settings.secondsMoveLimitRunOutPunishment
+      ),
+      new GamePausedData(this.paused.value, this.ui.toastManager, this.paused),
+      new BooleanUserData(
+        "revive_from_captured_pieces",
+        this.settings.reviveFromCapturedPieces.value,
+        this.ui.toastManager,
+        this.settings.reviveFromCapturedPieces
+      ),
+      new BooleanUserData(
+        "audio_effects_enabled",
+        this.settings.audioEffectsEnabled.value,
+        this.ui.toastManager,
+        this.settings.audioEffectsEnabled
+      ),
+      new CapturedPiecesData(
+        this.whiteCapturedPieces.value,
+        this.whiteCapturedPieces,
+        "white",
+        this.ui.toastManager
+      ),
+      new CapturedPiecesData(
+        this.blackCapturedPieces.value,
+        this.blackCapturedPieces,
+        "black",
+        this.ui.toastManager
+      ),
+      new NumberUserData(
+        "player_seconds_per_move",
+        this.settings.playerSecondsPerMove.value,
+        this.ui.toastManager,
+        this.settings.playerSecondsPerMove
+      ),
+      new NumberUserData(
+        "opponent_seconds_per_move",
+        this.settings.opponentSecondsPerMove.value,
+        this.ui.toastManager,
+        this.settings.opponentSecondsPerMove
+      ),
+      new NumberUserData(
+        "player_seconds_per_match",
+        this.settings.playerSecondsPerMatch.value,
+        this.ui.toastManager,
+        this.settings.playerSecondsPerMatch
+      ),
+      new NumberUserData(
+        "opponent_seconds_per_match",
+        this.settings.opponentSecondsPerMatch.value,
+        this.ui.toastManager,
+        this.settings.opponentSecondsPerMatch
+      ),
+      new NumberUserData(
+        "player_move_seconds",
+        0,
+        this.ui.toastManager,
+        this.playerMoveSeconds
+      ),
+      new NumberUserData(
+        "opponent_move_seconds",
+        0,
+        this.ui.toastManager,
+        this.opponentMoveSeconds
+      ),
+      new NumberUserData(
+        "player_match_seconds",
+        0,
+        this.ui.toastManager,
+        this.playerMatchSeconds
+      ),
+      new NumberUserData(
+        "opponent_match_seconds",
+        0,
+        this.ui.toastManager,
+        this.opponentMatchSeconds
+      ),
+      new NumberUserData(
+        "pawn_importance",
+        this.settings.pawnImportance.value,
+        this.ui.toastManager,
+        this.settings.pawnImportance
+      ),
+      new NumberUserData(
+        "knight_importance",
+        this.settings.knightImportance.value,
+        this.ui.toastManager,
+        this.settings.knightImportance
+      ),
+      new NumberUserData(
+        "bishop_importance",
+        this.settings.bishopImportance.value,
+        this.ui.toastManager,
+        this.settings.bishopImportance
+      ),
+      new NumberUserData(
+        "rook_importance",
+        this.settings.rookImportance.value,
+        this.ui.toastManager,
+        this.settings.rookImportance
+      ),
+      new NumberUserData(
+        "queen_importance",
+        this.settings.queenImportance.value,
+        this.ui.toastManager,
+        this.settings.queenImportance
+      ),
+      new NumberUserData(
+        "king_importance",
+        this.settings.kingImportance.value,
+        this.ui.toastManager,
+        this.settings.kingImportance
+      ),
+      new NumberUserData(
+        "knight_importance",
+        this.settings.knightImportance.value,
+        this.ui.toastManager,
+        this.settings.knightImportance
+      ),
+      new BooleanUserData(
+        "show_other_availible_moves",
+        this.settings.showOtherAvailibleMoves.value,
+        this.ui.toastManager,
+        this.settings.showOtherAvailibleMoves
+      ),
+      this.defaultBoardStateData,
+      this.gameBoardStateData,
+      this.lastMoveIndexData,
+      this.moveListData,
+    ],
+    this.ui.confirmDialog,
+    this.ui.toastManager
+  );
+  public readonly piecesImportance: PiecesImportance = {
+    rook: this.settings.rookImportance,
+    knight: this.settings.knightImportance,
+    bishop: this.settings.bishopImportance,
+    pawn: this.settings.pawnImportance,
+    queen: this.settings.queenImportance,
+    king: this.settings.kingImportance,
+  };
+  public readonly playerMoveSecondsTimer: Timer;
+  public readonly opponentMoveSecondsTimer: Timer;
+  public readonly playerMatchSecondsTimer: Timer;
+  public readonly opponentMatchSecondsTimer: Timer;
   public readonly winner = ref<Winner>("none");
   public readonly playingColor = computed(() => {
     let color: PlayerColor =
       (isEven(this.lastMoveIndex.value) &&
-        this.preferredFirstMoveColor.value === "black") ||
+        this.settings.preferredFirstMoveColor.value === "black") ||
       (!isEven(this.lastMoveIndex.value) &&
-        this.preferredFirstMoveColor.value === "white")
+        this.settings.preferredFirstMoveColor.value === "white")
         ? "white"
         : "black";
     return color;
@@ -166,96 +603,69 @@ class Game {
   public readonly playerBoardManager: GameBoardManager;
   public readonly opponentBoardManager: GameBoardManager;
   public readonly defaultBoardManager = new DefaultBoardManager(
-    this.defaultBoardState,
-    this.configPieceDialog,
-    this.audioEffectsEnabled,
+    this.settings.defaultBoardState,
+    this.ui.configPieceDialog,
+    this.settings.audioEffectsEnabled,
     this.pieceMoveAudioEffect,
     this.pieceRemoveAudioEffect,
-    this.vibrationsEnabled
+    this.settings.vibrationsEnabled
   );
   public readonly rotated = computed(() => {
     let rotated: boolean;
-    if (!this.tableMode.value) {
+    if (!this.settings.tableModeEnabled.value) {
       return false;
     }
     rotated = this.playingColor.value === "black";
     return rotated;
   });
+  private readonly transitionsManager = new TransitionsManager(
+    this.settings.transitions
+  );
+  private visited: string | null;
 
-  constructor(
-    private readonly paused: Ref<GamePausedState>,
-    public readonly gameBoardStateData: BoardStateData,
-    public readonly gameBoardState: BoardStateValue,
-    private readonly defaultBoardStateData: RawBoardStateData,
-    private readonly defaultBoardState: BoardStateValue,
-    public readonly whiteCapturingPaths: Ref<Path[]>,
-    public readonly blackCapturingPaths: Ref<Path[]>,
-    public readonly playerColor: Ref<PlayerColor>,
-    private readonly preferredFirstMoveColor: Ref<PreferredPlayerColor>,
-    private readonly preferredPlayerColor: Ref<PreferredPlayerColor>,
-    playerSecondsPerMove: Ref<number>,
-    opponentSecondsPerMove: Ref<number>,
-    playerSecondsPerMatch: Ref<number>,
-    opponentSecondsPerMatch: Ref<number>,
-    playerMoveSeconds: Ref<number>,
-    opponentMoveSeconds: Ref<number>,
-    playerMatchSeconds: Ref<number>,
-    opponentMatchSeconds: Ref<number>,
-    private readonly secondsMoveLimitRunOutPunishment: Ref<SecondsPerMovePenalty>,
-    private readonly winReason: Ref<GameOverReason>,
-    private readonly piecesImportance: PiecesImportance,
-    public readonly blackCapturedPieces: Ref<PieceId[]>,
-    public readonly whiteCapturedPieces: Ref<PieceId[]>,
-    public readonly reviveFromCapturedPieces: Ref<boolean>,
-    private readonly lastMoveIndex: Ref<number>,
-    private readonly lastMoveIndexData: NumberUserData,
-    private readonly moveList: Ref<Move[]>,
-    private readonly moveListData: MoveListData,
-    public readonly lastMove: ComputedRef<Move | null>,
-    private readonly selectPieceDialog: SelectPieceDialog,
-    private readonly audioEffectsEnabled: Ref<boolean>,
-    private readonly pieceMoveAudioEffect: Howl,
-    private readonly pieceRemoveAudioEffect: Howl,
-    private readonly vibrationsEnabled: Ref<boolean>,
-    public readonly secondCheckboardEnabled: Ref<boolean>,
-    public readonly ignorePiecesGuardedProperty: Ref<boolean>,
-    public readonly showCapturingPieces: Ref<boolean>,
-    public readonly showOtherAvailibleMoves: Ref<boolean>,
-    public readonly tableMode: Ref<boolean>,
-    private readonly confirmDialog: ConfirmDialog,
-    private readonly configPieceDialog: ConfigPieceDialog,
-    private readonly toastManager: ToastManager
-  ) {
+  constructor() {
+    new ThemeManager(this.settings.theme);
     this.gameBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
     this.defaultBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
     this.playerBoardManager = new GameBoardManager(
       this,
       true,
-      piecesImportance
+      this.piecesImportance
     );
     this.opponentBoardManager = new GameBoardManager(
       this,
       false,
-      piecesImportance
+      this.piecesImportance
     );
-    watch(this.defaultBoardState, () => {
+
+    this.visited = localStorage.getItem("tessera_board-visited");
+    if (this.visited === null) {
+      localStorage.setItem("tessera_board-visited", "1");
+    } else {
+      this.ui.tryRecoverData();
+    }
+    this.userDataManager.onRecoverCheck();
+    this.userDataManager.applyData();
+    this.userDataManager.updateReferences();
+
+    watch(this.settings.defaultBoardState, () => {
       this.defaultBoardPieceProps.value = getAllPieceProps(
-        this.defaultBoardState
+        this.settings.defaultBoardState
       );
     });
 
     watch(this.paused, (newValue) => {
       this.updateTimerState();
       if (newValue !== "not") {
-        this.toastManager.showToast("Game paused", "pause");
+        this.ui.toastManager.showToast("Game paused", "pause");
       } else {
-        this.toastManager.showToast("Game resumed", "play-outline");
+        this.ui.toastManager.showToast("Game resumed", "play-outline");
       }
     });
 
     this.playerMoveSecondsTimer = new Timer(
-      playerMoveSeconds,
-      playerSecondsPerMove,
+      this.playerMoveSeconds,
+      this.settings.playerSecondsPerMove,
       this.onPlayerMoveSecsOut.bind(this),
       () => {
         if (
@@ -266,8 +676,8 @@ class Game {
       }
     );
     this.opponentMoveSecondsTimer = new Timer(
-      opponentMoveSeconds,
-      opponentSecondsPerMove,
+      this.opponentMoveSeconds,
+      this.settings.opponentSecondsPerMove,
       this.onOpponentMoveSecsOut.bind(this),
       () => {
         if (
@@ -278,8 +688,8 @@ class Game {
       }
     );
     this.playerMatchSecondsTimer = new Timer(
-      playerMatchSeconds,
-      playerSecondsPerMatch,
+      this.playerMatchSeconds,
+      this.settings.playerSecondsPerMatch,
       this.onPlayerMatchSecsOut.bind(this),
       () => {
         if (
@@ -291,8 +701,8 @@ class Game {
     );
 
     this.opponentMatchSecondsTimer = new Timer(
-      opponentMatchSeconds,
-      opponentSecondsPerMatch,
+      this.opponentMatchSeconds,
+      this.settings.opponentSecondsPerMatch,
       this.onOpponentMatchSecsOut.bind(this),
       () => {
         if (
@@ -304,15 +714,50 @@ class Game {
     );
   }
 
+  public mount = () => {
+    // Sets CSS Saturation variables from 0 to their appropriate user configured values
+    setSaturationMultiplier(1);
+    this.ui.updatePrimaryHue(this.playerPlaying.value, this.winner.value);
+
+    addEventListener("keydown", (event: KeyboardEvent) => {
+      if (event.key === "Escape") this.ui.escapeManager.escape();
+      if (event.key === "R" && event.shiftKey) this.restart();
+      if (event.key === "C" && event.shiftKey) {
+        this.ui.toggleActionsPanel();
+        if (this.ui.actionPanelOpen.value) {
+          this.ui.toggleSettings();
+        }
+      }
+    });
+
+    addEventListener("visibilitychange", () => {
+      this.ui.onDistractionChange();
+    });
+
+    // Let the app wait another 600ms to make sure its fully loaded.
+    setTimeout(() => {
+      if (this.visited === null) {
+        this.restart();
+      } else {
+        this.restore();
+      }
+      hideSplashscreen(
+        this.transitionsManager.getApplyedTransitions(
+          this.settings.transitions.value
+        )
+      );
+    }, 600);
+  };
+
   public performMove(move: Move) {
     move.perform(this.movePerformContext);
     this.moveList.value.push(move);
     this.onMove("perform");
   }
 
-  private playerWin(reason: GameOverReason) {
+  private playerWin(reason: WinReason) {
     const winner: Winner = "player";
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
 
       "crown-outline"
@@ -327,9 +772,9 @@ class Game {
     this.blackCapturedPieces.value = [];
   }
 
-  private opponentWin(reason: GameOverReason) {
+  private opponentWin(reason: WinReason) {
     const winner: Winner = "opponent";
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getPlayerTeamName(winner, this.playerColor.value)} won.`,
       "crown-outline"
     );
@@ -338,8 +783,8 @@ class Game {
     this.updateTimerState();
   }
 
-  private draw(reason: GameOverReason) {
-    this.toastManager.showToast("Draw.", "sword-cross");
+  private draw(reason: WinReason) {
+    this.ui.toastManager.showToast("Draw.", "sword-cross");
     this.winner.value = "draw";
     this.winReason.value = reason;
     this.updateTimerState();
@@ -360,7 +805,7 @@ class Game {
         this.gameBoardState,
         this.gameBoardStateData,
         this.movePerformContext,
-        this.ignorePiecesGuardedProperty,
+        this.settings.ignorePiecesGuardedProperty,
         this.lastMove
       );
     } while (moves.length === 0);
@@ -369,33 +814,37 @@ class Game {
   }
 
   private onPlayerMoveSecsOut() {
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of move time!`,
       "timer-alert-outline"
     );
-    if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
+    if (this.settings.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.opponentWin("move_timeout");
-    } else if (this.secondsMoveLimitRunOutPunishment.value === "random_move") {
+    } else if (
+      this.settings.secondsMoveLimitRunOutPunishment.value === "random_move"
+    ) {
       this.performRandomMove(this.playerColor.value);
     }
   }
 
   private onOpponentMoveSecsOut() {
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getColorTeamName(
         getOpossitePlayerColor(this.playerColor.value)
       )} run out of move time!`,
       "timer-alert-outline"
     );
-    if (this.secondsMoveLimitRunOutPunishment.value === "game_loss") {
+    if (this.settings.secondsMoveLimitRunOutPunishment.value === "game_loss") {
       this.playerWin("move_timeout");
-    } else if (this.secondsMoveLimitRunOutPunishment.value === "random_move") {
+    } else if (
+      this.settings.secondsMoveLimitRunOutPunishment.value === "random_move"
+    ) {
       this.performRandomMove(getOpossitePlayerColor(this.playerColor.value));
     }
   }
 
   private onPlayerMatchSecsOut() {
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getColorTeamName(this.playerColor.value)} run out of match time!`,
       "timer-alert-outline"
     );
@@ -403,7 +852,7 @@ class Game {
   }
 
   private onOpponentMatchSecsOut() {
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getColorTeamName(
         getOpossitePlayerColor(this.playerColor.value)
       )} run out of match time!`,
@@ -417,7 +866,7 @@ class Game {
       console.error("Winner value is not of Player type.");
       return;
     }
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getOpossiteTeamName(
         getPlayerTeamName(this.winner.value, this.playerColor.value)
       )} is back in the game.`,
@@ -433,11 +882,11 @@ class Game {
     this.gameBoardStateData.updateReference();
   }
 
-  private getFirstPlayerColor(): PlayerColor {
-    if (this.preferredPlayerColor.value === "random") {
+  private getPlayerColor(): PlayerColor {
+    if (this.settings.preferredPlayerColor.value === "random") {
       return getRandomNumber(0, 1) ? "white" : "black";
     } else {
-      return this.preferredPlayerColor.value;
+      return this.settings.preferredPlayerColor.value;
     }
   }
 
@@ -479,20 +928,20 @@ class Game {
 
   public async resign() {
     if (this.winner.value !== "none") {
-      this.toastManager.showToast(
+      this.ui.toastManager.showToast(
         "You cannot resign. The game ending was already decided.",
         "flag-off",
         "error"
       );
       return;
     }
-    const confirmed = await this.confirmDialog.show(
+    const confirmed = await this.ui.confirmDialog.show(
       "Do you really want to give up this match? You are responsible for your decisions and this cannot be undone."
     );
     if (!confirmed) {
       return;
     }
-    this.toastManager.showToast(
+    this.ui.toastManager.showToast(
       `${getPlayerTeamName(
         this.playerPlaying.value ? "player" : "opponent",
         this.playerColor.value
@@ -509,9 +958,9 @@ class Game {
     this.winner.value = "none";
     this.setupDefaultBoardState();
     this.onBoardStateChange();
-    this.playerColor.value = this.getFirstPlayerColor();
+    this.playerColor.value = this.getPlayerColor();
     this.clearCapturedPieces();
-    this.toastManager.showToast("New match started.", "flag-checkered");
+    this.ui.toastManager.showToast("New match started.", "flag-checkered");
     this.lastMoveIndex.value = -1;
     this.onMoveForward();
     this.moveList.value = [];
@@ -538,12 +987,12 @@ class Game {
       boardStateValue: this.gameBoardState,
       blackCapturedPieces: this.blackCapturedPieces,
       whiteCapturedPieces: this.whiteCapturedPieces,
-      selectPieceDialog: this.selectPieceDialog,
-      reviveFromCapturedPieces: this.reviveFromCapturedPieces,
-      audioEffectsEnabled: this.audioEffectsEnabled,
+      selectPieceDialog: this.ui.selectPieceDialog,
+      reviveFromCapturedPieces: this.settings.reviveFromCapturedPieces,
+      audioEffectsEnabled: this.settings.audioEffectsEnabled,
       moveAudioEffect: this.pieceMoveAudioEffect,
       removeAudioEffect: this.pieceRemoveAudioEffect,
-      vibrationsEnabled: this.vibrationsEnabled,
+      vibrationsEnabled: this.settings.vibrationsEnabled,
       piecesImportance: this.piecesImportance,
     };
   }
@@ -555,12 +1004,12 @@ class Game {
 
   public forwardMove() {
     if (this.moveList.value.length - this.lastMoveIndex.value < 2) {
-      this.toastManager.showToast(
+      this.ui.toastManager.showToast(
         "You reached the last move. You cannot go further.",
         "cancel",
         "error"
       );
-      if (this.vibrationsEnabled) navigator.vibrate(30);
+      if (this.settings.vibrationsEnabled) navigator.vibrate(30);
       return;
     }
     this.onMove("forward");
@@ -568,12 +1017,12 @@ class Game {
 
   public reverseMove() {
     if (this.lastMoveIndex.value === -1) {
-      this.toastManager.showToast(
+      this.ui.toastManager.showToast(
         "You reached the first move. You cannot go further.",
         "cancel",
         "error"
       );
-      if (this.vibrationsEnabled) navigator.vibrate(30);
+      if (this.settings.vibrationsEnabled) navigator.vibrate(30);
       return;
     }
     this.onMove("reverse");
@@ -642,7 +1091,7 @@ class Game {
       guardedPieces,
       this.lastMove
     );
-    if (checked) this.toastManager.showToast("Check!", "cross");
+    if (checked) this.ui.toastManager.showToast("Check!", "cross");
 
     const canPlayerMove = this.canPlayerMove(
       this.playingColor.value,
@@ -650,7 +1099,7 @@ class Game {
     );
     if (!canPlayerMove) {
       if (checked || guardedPieces.length === 0) {
-        const winReason: GameOverReason =
+        const winReason: WinReason =
           guardedPieces.length !== 0 ? "block" : "checkmate";
         this.playerPlaying.value
           ? this.opponentWin(winReason)
@@ -669,7 +1118,7 @@ class Game {
         this.gameBoardState,
         this.gameBoardStateData,
         this.movePerformContext,
-        this.ignorePiecesGuardedProperty,
+        this.settings.ignorePiecesGuardedProperty,
         this.lastMove
       );
       if (moves.length !== 0) {

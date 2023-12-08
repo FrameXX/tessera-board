@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type PropType, inject, type Ref } from "vue";
+import { type PropType, inject } from "vue";
 import Backdrop from "./Backdrop.vue";
 import UserOption from "./UserOption.vue";
 import Category from "./Category.vue";
@@ -10,19 +10,15 @@ import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
-import type { SecondsPerMovePenalty, PlayerColor } from "../modules/game";
 import type ConfigsDialog from "../modules/dialogs/configs";
 import ConfigManager from "../modules/config_manager";
 import DefaultBoardManager from "../modules/default_board_manager";
 import UserDataManager from "../modules/user_data_manager";
-import { type Theme } from "../modules/theme_manager";
-import { type Transitions } from "../modules/transitions_manager";
 import {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
 } from "../modules/board_manager";
-import { PieceIconPack } from "../modules/user_data/piece_set";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -51,50 +47,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-const theme = inject("theme") as Ref<Theme>;
-const transitions = inject("transitions") as Ref<Transitions>;
-const playerHue = inject("playerHue") as Ref<number>;
-const opponentHue = inject("opponentHue") as Ref<number>;
-const pieceIconPack = inject("pieceIconPack") as Ref<PieceIconPack>;
-const piecePadding = inject("piecePadding") as Ref<number>;
-const pieceBorder = inject("pieceBorder") as Ref<number>;
-const transitionDuration = inject("transitionDuration") as Ref<number>;
-const cellIndexOpacity = inject("cellIndexOpacity") as Ref<number>;
-const preferredPlayerColor = inject("preferredPlayerColor") as Ref<PlayerColor>;
-const secondCheckboard = inject("secondCheckboard") as Ref<boolean>;
-const tableMode = inject("tableMode") as Ref<boolean>;
-const requireMoveConfirm = inject("requireMoveConfirm") as Ref<boolean>;
-const audioEffectsEnabled = inject("audioEffectsEnabled") as Ref<boolean>;
-const showCapturingPieces = inject("showCapturingPieces") as Ref<boolean>;
-const reviveFromCapturedPieces = inject<boolean>("reviveFromCapturedPieces");
-const playerSecondsPerMove = inject("playerSecondsPerMove") as Ref<number>;
-const opponentSecondsPerMove = inject("opponentSecondsPerMove") as Ref<number>;
-const playerSecondsPerMatch = inject("playerSecondsPerMatch") as Ref<number>;
-const opponentSecondsPerMatch = inject(
-  "opponentSecondsPerMatch"
-) as Ref<number>;
-const showOtherAvailibleMoves = inject(
-  "showOtherAvailibleMoves"
-) as Ref<boolean>;
-const secondsPerMovePenalty = inject(
-  "secondsPerMovePenalty"
-) as Ref<SecondsPerMovePenalty>;
-const preferredFirstMoveColor = inject(
-  "preferredFirstMoveColor"
-) as Ref<PlayerColor>;
-const vibrationsEnabled = inject("vibrationsEnabled") as Ref<boolean>;
-const pieceLongPressTimeout = inject("pieceLongPressTimeout") as Ref<number>;
-const autoPauseGame = inject("autoPauseGame") as Ref<boolean>;
-const pawnImportance = inject("pawnImportance") as Ref<number>;
-const knightImportance = inject("knightImportance") as Ref<number>;
-const bishopImportance = inject("bishopImportance") as Ref<number>;
-const rookImportance = inject("rookImportance") as Ref<number>;
-const queenImportance = inject("queenImportance") as Ref<number>;
-const kingImportance = inject("kingImportance") as Ref<number>;
-const ignorePiecesGuardedProperty = inject(
-  "ignorePiecesGuardedProperty"
-) as Ref<boolean>;
 
 const configsDialog = inject("configsDialog") as ConfigsDialog;
 </script>

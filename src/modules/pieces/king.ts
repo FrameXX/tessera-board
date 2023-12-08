@@ -14,7 +14,7 @@ import Piece, {
   getBoardPositionPiece,
 } from "./piece";
 import { type RawPiece, getRawPiece } from "./raw_piece";
-import { isPieceRook } from "./rook";
+// import { isPieceRook } from "./rook";
 
 interface RawKing extends RawPiece {
   moved: boolean;

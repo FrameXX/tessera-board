@@ -1,4 +1,4 @@
-import type { Ref } from "vue";
+import { ref } from "vue";
 import { getRandomId } from "./utils/misc";
 
 export type ToastCase = "info" | "error";
@@ -14,8 +14,9 @@ class ToastManager {
   private readonly durationPerCharacter = 70;
   private readonly initialDurationMs = 1200;
   private readonly maxStackSize = 3;
+  public readonly toasts = ref<ToastProps[]>([]);
 
-  constructor(private toasts: Ref<ToastProps[]>) {}
+  constructor() {}
 
   private get stackSize() {
     return this.toasts.value.length;

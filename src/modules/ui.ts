@@ -5,12 +5,15 @@ import {
   setPrimaryHue,
   setSaturationMultiplier,
 } from "./utils/elements";
-import type ToastManager from "./toast_manager";
-import type UserDataManager from "./user_data_manager";
-import type ConfirmDialog from "./dialogs/confirm";
+import ToastManager from "./toast_manager";
 import type Game from "./game";
-import type { GamePausedState } from "./user_data/game_paused";
 import type { Winner } from "./game";
+import DurationDialog from "./dialogs/duration";
+import ConfirmDialog from "./dialogs/confirm";
+import ConfigPieceDialog from "./dialogs/config_piece";
+import SelectPieceDialog from "./dialogs/select_piece";
+import ConfigPrintDialog from "./dialogs/config_print";
+import ConfigsDialog from "./dialogs/configs";
 
 /**
  * UI stands for User Interface. The class takes care of all the props and functions related to user interface.
@@ -21,15 +24,19 @@ class UI {
   public readonly actionPanelOpen: Ref<boolean> = ref(false);
   public readonly settingsOpen: Ref<boolean> = ref(false);
   public readonly aboutOpen: Ref<boolean> = ref(false);
+  public readonly toastManager = new ToastManager();
+  public readonly durationDialog = new DurationDialog();
+  public readonly confirmDialog = new ConfirmDialog();
+  public readonly configPieceDialog = new ConfigPieceDialog();
+  public readonly selectPieceDialog = new SelectPieceDialog(this.toastManager);
+  public readonly configPrintDialog = new ConfigPrintDialog(this.toastManager);
+  public readonly configsDialog = new ConfigsDialog(
+    this.confirmDialog,
+    this.configPrintDialog,
+    this.toastManager
+  );
 
-  constructor(
-    private readonly toastManager: ToastManager,
-    private readonly userDataManager: UserDataManager,
-    private readonly game: Game,
-    private readonly confirmDialog: ConfirmDialog,
-    private readonly gamePaused: Ref<GamePausedState>,
-    private readonly autoPauseGame: Ref<boolean>
-  ) {
+  constructor(private readonly game: Game) {
     this.escapeManager = new EscapeManager(this.toggleActionsPanel);
     watch(this.settingsOpen, () => {
       this.onDistractionChange();
@@ -106,7 +113,7 @@ class UI {
       );
       return false;
     }
-    this.userDataManager.recoverData();
+    this.game.userDataManager.recoverData();
     return true;
   }
 
@@ -123,10 +130,10 @@ class UI {
   }
 
   public manuallyTogglePause() {
-    if (this.gamePaused.value === "not") {
-      this.gamePaused.value = "manual";
+    if (this.game.paused.value === "not") {
+      this.game.paused.value = "manual";
     } else {
-      this.gamePaused.value = "not";
+      this.game.paused.value = "not";
     }
   }
 
@@ -138,13 +145,13 @@ class UI {
 
     if (
       distracted &&
-      this.autoPauseGame.value &&
-      this.gamePaused.value === "not"
+      this.game.settings.autoPauseGame.value &&
+      this.game.paused.value === "not"
     ) {
-      this.gamePaused.value = "auto";
+      this.game.paused.value = "auto";
     }
-    if (!distracted && this.gamePaused.value === "auto") {
-      this.gamePaused.value = "not";
+    if (!distracted && this.game.paused.value === "auto") {
+      this.game.paused.value = "not";
     }
   }
 }

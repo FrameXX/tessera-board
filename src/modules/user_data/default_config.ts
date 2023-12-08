@@ -1,22 +1,20 @@
+import { ref } from "vue";
 import type { BoardStateValue } from "../board_manager";
-import type {
-  SecondsPerMovePenalty,
-  PlayerColor,
-  GameOverReason,
-} from "../game";
+import type { SecondsPerMovePenalty, PlayerColor, WinReason } from "../game";
 import type Move from "../moves/move";
-import Bishop from "../pieces/bishop";
 import King from "../pieces/king";
+import Bishop from "../pieces/bishop";
 import Knight from "../pieces/knight";
 import Pawn from "../pieces/pawn";
 import type { PieceId } from "../pieces/piece";
 import Queen from "../pieces/queen";
-import Rook from "../pieces/rook";
+// import Rook from "../pieces/rook";
 import type { Theme } from "../theme_manager";
 import type { Transitions } from "../transitions_manager";
 import type { GamePausedState } from "./game_paused";
 import type { PieceIconPack } from "./piece_set";
 import type { PreferredPlayerColor } from "./preferred_player_color";
+import Rook from "../pieces/rook";
 
 const defaultUserDataValues = {
   defaultBoardState: [
@@ -75,7 +73,7 @@ const defaultUserDataValues = {
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
   ] as BoardStateValue,
-  cellIndexOpacity: 90,
+  cellIndexOpacity: ref(90),
   playerHue: 30,
   opponentHue: 198,
   pieceBorder: 1.1,
@@ -103,7 +101,7 @@ const defaultUserDataValues = {
   opponentSecondsPerMatch: 0,
   showOtherAvailibleMoves: false,
   secondsPerMovePenalty: "random_move" as SecondsPerMovePenalty,
-  gameOverReason: "none" as GameOverReason,
+  gameOverReason: "none" as WinReason,
   vibrationsEnabled: true,
   pieceLongPressTimeout: 0,
   autoPauseGame: true,
