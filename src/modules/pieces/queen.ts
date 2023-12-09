@@ -4,12 +4,12 @@ import type {
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
-import type { PlayerColor } from "../game";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { Bishop } from "./bishop";
-import Piece, { isFriendlyPiece } from "./piece";
+import Piece from "./piece";
 import Rook from "./rook";
+import { isFriendlyPiece, type PlayerColor } from "../utils/game";
 
 export class Queen extends Piece {
   constructor(color: PlayerColor, id?: string) {

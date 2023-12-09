@@ -1,27 +1,21 @@
 <script lang="ts" setup>
-import {
-  computed,
-  type PropType,
-  ref,
-  onMounted,
-  inject,
-  type Ref,
-  watch,
-} from "vue";
-import { getDiffPosition, type PieceId } from "../modules/pieces/piece";
+import { computed, type PropType, ref, onMounted, watch, inject } from "vue";
 import Cell from "./Cell.vue";
 import BoardPiece from "./BoardPiece.vue";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
-import { positionsEqual } from "../modules/game_board_manager";
-import type { PlayerColor } from "../modules/game";
 import { getElementSizes } from "../modules/utils/elements";
 import {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
-  MarkBoardState,
 } from "../modules/board_manager";
+import {
+  PlayerColor,
+  getDiffPosition,
+  positionsEqual,
+} from "../modules/utils/game";
+import Game from "../modules/game";
 
 interface Arrow {
   color: PlayerColor;
@@ -29,52 +23,21 @@ interface Arrow {
   target: BoardPosition;
 }
 
-const BORDER_PERCENT_DELTA = 100 / 7;
-const CELL_PERCENT_DELTA = (100 - BORDER_PERCENT_DELTA) / 7;
+const pixelsPerCm = inject("pixelsPerCm") as number;
+
+const borderPercentDelta = 100 / 7;
+const cellPercentDelta = (100 - borderPercentDelta) / 7;
 
 const props = defineProps({
+  game: { type: Object as PropType<Game>, required: true },
   state: { type: Object as PropType<BoardStateValue>, required: true },
-  marksState: {
-    type: Array as PropType<MarkBoardState>,
-    default: Array(8).fill(Array(8).fill(null)),
-  },
-  selectedPieces: {
-    type: Array as PropType<BoardPosition[]>,
-    default: [],
-  },
-  selectedCells: {
-    type: Array as PropType<BoardPosition[]>,
-    default: [],
-  },
-  draggingOverCells: {
-    type: Array as PropType<BoardPosition[]>,
-    default: [],
-  },
-  highlightedCells: {
-    type: Array as PropType<BoardPosition[]>,
-    default: [],
-  },
-  piecePadding: { type: Number, required: true },
-  pieceBorder: { type: Number, required: true },
   manager: { type: Object as PropType<BoardManager>, required: true },
-  whiteCapturedPieces: { type: Array as PropType<PieceId[]> },
-  blackCapturedPieces: { type: Array as PropType<PieceId[]> },
-  contentRotated: { type: Boolean, default: false },
-  rotated: { type: Boolean, default: false },
   arrows: {
     type: Array as PropType<Arrow[]>,
     default: [],
   },
   primary: { type: Boolean, default: false },
-  allPieceProps: {
-    type: Object as PropType<BoardPieceProps[]>,
-    required: true,
-  },
 });
-
-const pieceLongPressTimeout = inject("pieceLongPressTimeout") as Ref<number>;
-const vibrationsEnabled = inject("vibrationsEnabled") as Ref<boolean>;
-const pixelsPerCm = inject("pixelsPerCm") as number;
 
 const container = ref<HTMLDivElement | null>(null);
 const containerSize = ref<number>(0);
@@ -86,7 +49,10 @@ const cellSize = computed(() => {
   return containerSize.value / 8;
 });
 const pieceSize = computed(() => {
-  return cellSize.value - (props.piecePadding / 50) * cellSize.value;
+  return (
+    cellSize.value -
+    (props.game.settings.piecePadding.value / 50) * cellSize.value
+  );
 });
 
 function updateContainerSize() {
@@ -184,12 +150,12 @@ watch(showDragging, (newValue) => {
     targetingDragPosition.value,
     draggingPiece.value
   );
-  if (vibrationsEnabled.value) navigator.vibrate(30);
+  if (props.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
 });
 
 const inchPxOffset = computed(() => {
   let offset = inchCmOffset.value * pixelsPerCm;
-  if (props.contentRotated !== props.rotated) {
+  if (props.manager.contentRotated.value !== props.game.rotated.value) {
     offset *= -1;
   }
   return offset;
@@ -217,7 +183,7 @@ function dragDiffChange() {
 function updatePointerPosition(x: number, y: number) {
   let xDiff = x - lastDragX;
   let yDiff = y - lastDragY;
-  if (props.rotated) {
+  if (props.game.rotated.value) {
     xDiff = -xDiff;
     yDiff = -yDiff;
   }
@@ -257,7 +223,7 @@ function onPiecePointerStart(event: PointerEvent, pieceProps: BoardPieceProps) {
 
   pressTimeout = window.setTimeout(() => {
     initDrag(event, pieceProps);
-  }, pieceLongPressTimeout.value);
+  }, props.game.settings.pieceLongPressTimeout.value);
 }
 
 function onPointerMove(event: PointerEvent) {
@@ -310,17 +276,23 @@ onMounted(() => {
       role="grid"
       class="board"
       :class="{
-        rotated: props.rotated,
-        contentRotated: props.contentRotated,
+        rotated: props.game.rotated.value,
+        contentRotated: props.manager.contentRotated.value,
         active: draggingPiece,
       }"
       :style="`--board-size: ${containerSize}px;`"
     >
       <div v-if="primary" class="black captured-pieces">
-        <CapturedPieces :piece-ids="blackCapturedPieces" color="white" />
+        <CapturedPieces
+          :piece-ids="props.game.blackCapturedPieces.value"
+          color="white"
+        />
       </div>
       <div v-if="primary" class="white captured-pieces">
-        <CapturedPieces :piece-ids="whiteCapturedPieces" color="black" />
+        <CapturedPieces
+          :piece-ids="props.game.whiteCapturedPieces.value"
+          color="black"
+        />
       </div>
       <tr class="row" v-for="row in 8" :key="`row-${row}`">
         <Cell
@@ -330,17 +302,17 @@ onMounted(() => {
           :key="`cell-${row}-${col}`"
           :row="9 - row"
           :col="col"
-          :mark="props.marksState[8 - row][col - 1]"
+          :mark="props.manager.cellMarks[8 - row][col - 1]"
           :highlighted="
             isInArrayOfBoardPositions(
               { row: 8 - row, col: col - 1 },
-              props.highlightedCells
+              props.game.highlightedCells.value
             )
           "
           :selected="
             isInArrayOfBoardPositions(
               { row: 8 - row, col: col - 1 },
-              props.selectedCells
+              props.manager.selectedCells
             )
           "
           :drag-over="
@@ -391,16 +363,16 @@ onMounted(() => {
         <line
           v-for="arrow in props.arrows"
           :x1="`${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.col
+            borderPercentDelta / 2 + cellPercentDelta * arrow.origin.col
           }%`"
           :y1="`${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.row
+            borderPercentDelta / 2 + cellPercentDelta * arrow.origin.row
           }%`"
           :x2="`calc(${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+            borderPercentDelta / 2 + cellPercentDelta * arrow.target.col
           }% + ${props.pieceBorder * 4}px)`"
           :y2="`calc(${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+            borderPercentDelta / 2 + cellPercentDelta * arrow.target.col
           }% + ${props.pieceBorder * 4}px)`"
           :stroke="`var(--color-piece-stroke-${arrow.color})`"
           :stroke-width="`calc(1% + ${props.pieceBorder * 8}px)`"
@@ -408,16 +380,16 @@ onMounted(() => {
         <line
           v-for="arrow in props.arrows"
           :x1="`${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.col
+            borderPercentDelta / 2 + cellPercentDelta * arrow.origin.col
           }%`"
           :y1="`${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.origin.row
+            borderPercentDelta / 2 + cellPercentDelta * arrow.origin.row
           }%`"
           :x2="`${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+            borderPercentDelta / 2 + cellPercentDelta * arrow.target.col
           }%`"
           :y2="`${
-            BORDER_PERCENT_DELTA / 2 + CELL_PERCENT_DELTA * arrow.target.col
+            borderPercentDelta / 2 + cellPercentDelta * arrow.target.col
           }%`"
           :stroke="`var(--color-piece-fill-${arrow.color})`"
           stroke-width="1%"
@@ -429,6 +401,7 @@ onMounted(() => {
 
 <style lang="scss">
 @import "../partials/mixins";
+import Game from '../modules/game';
 
 .board-container {
   @include stretch;

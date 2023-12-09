@@ -4,9 +4,9 @@ import type {
   MarkBoardState,
 } from "../board_manager";
 import { isBoardPosition } from "../board_manager";
-import { getPositionPiece } from "../game_board_manager";
+import { getPositionPiece } from "../utils/game";
+import type { MovePerformContext } from "./move";
 import Move, {
-  MovePerformContext,
   getCleanBoardPosition,
   handleInvalidRawMove,
   movePiece,

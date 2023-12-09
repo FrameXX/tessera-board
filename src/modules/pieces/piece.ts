@@ -1,18 +1,15 @@
-import type { ComputedRef, Ref } from "vue";
-import { type PlayerColor } from "../game";
-import { positionsEqual } from "../game_board_manager";
-import type Move from "../moves/move";
-import { getRandomId, sumPositions } from "../utils/misc";
-import { type RawPiece, getRawPiece } from "./raw_piece";
-import BoardStateData from "../user_data/board_state";
-import type { BoardPosition, BoardStateValue } from "../board_manager";
-import { MoveForwardContext } from "../moves/move";
+import { getRandomId } from "../utils/misc";
+import type BoardStateData from "../user_data/board_state";
 import {
-  getAllPieceProps,
-  getGuardedPieces,
-  invalidatePiecesCache,
-  isGuardedPieceChecked,
+  PlayerColor,
+  getRawPiece,
+  willMoveCheckGuardedPiece,
 } from "../utils/game";
+import type { ComputedRef, Ref } from "vue";
+import type Move from "../moves/move";
+import type { RawPiece } from "./raw_piece";
+import type { BoardPosition, BoardStateValue } from "../board_manager";
+import type { MoveForwardContext } from "../moves/move";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",
@@ -44,7 +41,7 @@ export interface Path {
 }
 
 /**
- * Represent a generic piece
+ * The class represent a generic piece.
  * @class
  * @abstract
  */
@@ -117,17 +114,17 @@ export abstract class Piece {
       );
 
       if (!ignorePiecesGuardedProperty.value) {
-        const newBoardStateData = new BoardStateData([]);
-        newBoardStateData.load(boardStateData.dump());
-        const newBoardStateValue = newBoardStateData.value;
+        // const newBoardStateData = new BoardStateData([]);
+        // newBoardStateData.load(boardStateData.dump());
+        // const newBoardStateValue = newBoardStateData.value;
 
-        moveForwardContext.boardStateValue = newBoardStateValue;
+        // moveForwardContext.boardStateValue = newBoardStateValue;
 
         possibleMoves = possibleMoves.filter((move) => {
           return !willMoveCheckGuardedPiece(
             move,
             this.color,
-            newBoardStateValue,
+            boardStateValue,
             moveForwardContext,
             lastMove
           );
@@ -144,109 +141,6 @@ export abstract class Piece {
     boardStateValue: BoardStateValue,
     lastMove: ComputedRef<Move | null>
   ): Move[];
-}
-
-function willMoveCheckGuardedPiece(
-  move: Move,
-  color: PlayerColor,
-  newBoardStateValue: BoardStateValue,
-  moveForwardContext: MoveForwardContext,
-  lastMove: ComputedRef<Move | null>
-) {
-  move.forward(moveForwardContext);
-
-  const pieceProps = getAllPieceProps(newBoardStateValue);
-  invalidatePiecesCache(pieceProps);
-  const guardedPieces = getGuardedPieces(pieceProps, color);
-  const checksGuardedPiece = isGuardedPieceChecked(
-    newBoardStateValue,
-    color,
-    pieceProps,
-    guardedPieces,
-    lastMove
-  );
-
-  move.reverse(newBoardStateValue);
-
-  return checksGuardedPiece;
-}
-
-export function getDiffPosition(
-  position: BoardPosition,
-  colDiff: number,
-  rowDiff: number
-): BoardPosition {
-  return sumPositions(position, { row: rowDiff, col: colDiff });
-}
-
-export function getBoardPositionPiece(
-  position: BoardPosition,
-  boardStateValue: BoardStateValue
-) {
-  return boardStateValue[position.row][position.col];
-}
-
-export function isFriendlyPiece(
-  piece: Piece | null,
-  friendlyColor: PlayerColor
-) {
-  if (!piece) {
-    return false;
-  }
-  return piece.color === friendlyColor;
-}
-
-export function isPositionOnBoard(target: BoardPosition) {
-  return (
-    target.row >= 0 && target.row <= 7 && target.col >= 0 && target.col <= 7
-  );
-}
-
-export function getTargetMatchingPaths(
-  target: BoardPosition,
-  capturingPaths: Path[]
-) {
-  return capturingPaths.filter((path) => positionsEqual(path.target, target));
-}
-
-export function positionWillBeCaptured(
-  target: BoardPosition,
-  capturingPaths: Path[]
-): boolean {
-  const matchingPositions = getTargetMatchingPaths(target, capturingPaths);
-  return matchingPositions.length !== 0;
-}
-
-export function getCapturingPositionPath(
-  target: BoardPosition,
-  origin: BoardPosition
-): Path {
-  return { origin: origin, target: target };
-}
-
-export function positionsToPath(
-  boardPositions: BoardPosition[],
-  origin: BoardPosition
-) {
-  return boardPositions.map((target) =>
-    getCapturingPositionPath(target, origin)
-  );
-}
-
-export function chooseBestPiece(
-  pieces: RawPiece[],
-  piecesImportance: PiecesImportance
-) {
-  let bestPiece = pieces[0];
-  for (const piece of pieces) {
-    if (
-      piecesImportance[bestPiece.pieceId].value <
-      piecesImportance[piece.pieceId].value
-    ) {
-      bestPiece = piece;
-    }
-  }
-  return bestPiece;
 }
 
 export default Piece;

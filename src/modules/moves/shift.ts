@@ -1,9 +1,9 @@
 import { isPieceId, type PieceId } from "../pieces/piece";
+import type { MovePerformContext } from "./move";
 import Move, {
   clearPositionValue,
   getCleanBoardPosition,
   handleInvalidRawMove,
-  MovePerformContext,
   movePositionValue,
   tellPieceItMoved,
 } from "./move";
@@ -21,9 +21,9 @@ import {
   isBoardPosition,
 } from "../board_manager";
 import { capturePosition, movePiece } from "./move";
-import { getPositionPiece, positionsEqual } from "../game_board_manager";
 import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
+import { getPositionPiece, positionsEqual } from "../utils/game";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";

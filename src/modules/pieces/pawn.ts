@@ -1,18 +1,22 @@
 import type Move from "../moves/move";
 import Shift, { isMoveShift } from "../moves/shift";
 import Promotion from "../moves/promotion";
-import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
-import { getDiffPosition } from "./piece";
 import type { RawPiece } from "./raw_piece";
-import { getRawPiece } from "./raw_piece";
-import type { PlayerColor } from "../game";
 import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
 import type { ComputedRef } from "vue";
-import { getPositionPiece } from "../game_board_manager";
+import {
+  getBoardPositionPiece,
+  getDiffPosition,
+  getPositionPiece,
+  getRawPiece,
+  isFriendlyPiece,
+  type PlayerColor,
+} from "../utils/game";
+import Piece from "./piece";
 
 interface RawPawn extends RawPiece {
   moved: boolean;

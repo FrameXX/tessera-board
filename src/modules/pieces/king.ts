@@ -3,17 +3,20 @@ import type {
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
-import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
-import Piece, {
-  getDiffPosition,
-  isPositionOnBoard,
-  isFriendlyPiece,
+import {
   getBoardPositionPiece,
-} from "./piece";
-import { type RawPiece, getRawPiece } from "./raw_piece";
+  getDiffPosition,
+  getRawPiece,
+  isFriendlyPiece,
+  isPositionOnBoard,
+  type PlayerColor,
+} from "../utils/game";
+import Piece from "./piece";
+import { type RawPiece } from "./raw_piece";
+import { isPieceRook } from "./rook";
 // import { isPieceRook } from "./rook";
 
 interface RawKing extends RawPiece {

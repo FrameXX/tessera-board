@@ -1,28 +1,23 @@
 import { reactive, ref, computed } from "vue";
-import type {
-  BoardPieceProps,
-  BoardPosition,
-  BoardStateValue,
-  MarkBoardState,
-} from "./board_manager";
+import type { BoardPieceProps, BoardPosition } from "./board_manager";
 import BoardManager from "./board_manager";
 import type { PiecesImportance } from "./pieces/piece";
-import type Piece from "./pieces/piece";
-import { getTargetMatchingPaths } from "./pieces/piece";
-import Game, { GameLogicError, type PlayerColor } from "./game";
+import type Game from "./game";
 import type Move from "./moves/move";
-import { MoveForwardContext } from "./moves/move";
+import type { MoveForwardContext } from "./moves/move";
+import type { PlayerColor } from "./utils/game";
+import {
+  GameLogicError,
+  getTargetMatchingPaths,
+  moveHasClickablePosition,
+  positionsEqual,
+} from "./utils/game";
 
 class GameBoardManager extends BoardManager {
   private _selectedPiece: BoardPieceProps | null = null;
   private _selectedCell: BoardPosition | null = null;
   private availibleMoves: Move[] = [];
   private dragEndTimeout: boolean = false;
-  public cellsMarks: MarkBoardState = reactive(
-    Array(8)
-      .fill(null)
-      .map(() => new Array(8).fill(null))
-  );
   public readonly selectedCells = ref<BoardPosition[]>([]);
   public readonly selectedPieces = ref<BoardPosition[]>([]);
   public readonly draggingOverCells = ref<BoardPosition[]>([]);
@@ -35,30 +30,25 @@ class GameBoardManager extends BoardManager {
     }
     return this.game.playerColor.value === "black";
   });
-  public readonly contentRotated = computed(() => {
-    if (!this.game.settings.secondCheckboardEnabled.value) {
-      return this.game.rotated.value;
-    }
-    if (!this.game.settings.tableModeEnabled.value) {
-      return this.game.playerColor.value === "black";
-    }
-    return this.game.playerColor.value === "black";
-  });
 
   constructor(
     private readonly game: Game,
     private readonly playerBoard: boolean,
     private readonly piecesImportance: PiecesImportance
   ) {
-    super();
-  }
-
-  private clearCellsMarks() {
-    for (const rowIndex in this.cellsMarks) {
-      for (const colIndex in this.cellsMarks[rowIndex]) {
-        this.cellsMarks[rowIndex][colIndex] = null;
-      }
-    }
+    super(
+      reactive(
+        Array(8)
+          .fill(null)
+          .map(() => new Array(8).fill(null))
+      ),
+      computed(() => {
+        if (!this.game.settings.secondCheckboardEnabled.value) {
+          return this.game.rotated.value;
+        }
+        return (this.game.playerColor.value === "black") === this.playerBoard;
+      })
+    );
   }
 
   private clearAvailibleMoves() {
@@ -137,7 +127,7 @@ class GameBoardManager extends BoardManager {
       this.game.lastMove
     );
     for (const move of moves) {
-      move.showCellMarks(this.cellsMarks, this.game.gameBoardState);
+      move.showCellMarks(this.cellMarks, this.game.gameBoardState);
     }
     this.availibleMoves = moves;
   }
@@ -183,7 +173,7 @@ class GameBoardManager extends BoardManager {
     ]);
     for (const path of paths) {
       const origin = path.origin;
-      this.cellsMarks[origin.row][origin.col] = "capturing";
+      this.cellMarks[origin.row][origin.col] = "capturing";
     }
   }
 
@@ -323,56 +313,6 @@ class GameBoardManager extends BoardManager {
     }
     this.selectedCell = null;
   }
-}
-
-function moveHasClickablePosition(
-  move: Move,
-  position: BoardPosition
-): boolean {
-  const matchingPositions = getMatchingPositions(
-    move.clickablePositions,
-    position
-  );
-
-  // There should be no duplicates in clickable positions!
-  if (matchingPositions.length > 1) {
-    throw new GameLogicError(
-      `Single move has same clickable positions for row ${position.row}, col ${position.col}. move: ${move}.`
-    );
-  }
-
-  return matchingPositions.length !== 0;
-}
-
-function getMatchingPositions(
-  positionsArray: BoardPosition[],
-  position: BoardPosition
-) {
-  return positionsArray.filter((arrayMember) =>
-    positionsEqual(arrayMember, position)
-  );
-}
-
-export function positionsEqual(
-  position1: BoardPosition,
-  position2: BoardPosition
-) {
-  return position1.row === position2.row && position1.col === position2.col;
-}
-
-export function getPositionPiece(
-  position: BoardPosition,
-  boardStateValue: BoardStateValue
-): Piece {
-  const piece = boardStateValue[position.row][position.col];
-  if (piece) {
-    return piece;
-  }
-  throw new GameLogicError(
-    `Board position is missing a required piece. Position: ${JSON.stringify(
-      position
-    )}`
-  );
 }
 
 export default GameBoardManager;

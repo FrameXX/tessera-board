@@ -1,17 +1,23 @@
-import Piece, { getBoardPositionPiece, isFriendlyPiece } from "./piece";
 import type { ComputedRef } from "vue";
 import type {
   BoardPieceProps,
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
-import type { PlayerColor } from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import { isPieceKing } from "./king";
-import { getDiffPosition, isPositionOnBoard } from "./piece";
-import { getRawPiece, type RawPiece } from "./raw_piece";
+import { type RawPiece } from "./raw_piece";
+import {
+  getBoardPositionPiece,
+  getDiffPosition,
+  getRawPiece,
+  isFriendlyPiece,
+  isPositionOnBoard,
+  type PlayerColor,
+} from "../utils/game";
+import Piece from "./piece";
 
 interface RawRook extends RawPiece {
   moved: boolean;

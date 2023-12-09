@@ -1,5 +1,4 @@
 import { ref } from "vue";
-import type { SecondsPerMovePenalty } from "../game";
 import Rook from "../pieces/rook";
 import Bishop from "../pieces/bishop";
 import King from "../pieces/king";
@@ -10,6 +9,7 @@ import type { Theme } from "../theme_manager";
 import type { Transitions } from "../transitions_manager";
 import type { PieceIconPack } from "./piece_set";
 import type { PreferredPlayerColor } from "./preferred_player_color";
+import { SecondsPerMovePenalty } from "../utils/game";
 
 const defualtSettings = {
   preferredFirstMoveColor: ref<PreferredPlayerColor>("white"),

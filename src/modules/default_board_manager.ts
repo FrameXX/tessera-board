@@ -5,10 +5,9 @@ import type {
 } from "./board_manager";
 import BoardManager from "./board_manager";
 import type ConfigPieceDialog from "./dialogs/config_piece";
-import { ref, type Ref } from "vue";
-import { isPositionOnBoard } from "./pieces/piece";
+import { computed, ref, type Ref } from "vue";
 import { movePiece } from "./moves/move";
-import { positionsEqual } from "./game_board_manager";
+import { isPositionOnBoard, positionsEqual } from "./utils/game";
 
 class DefaultBoardManager extends BoardManager {
   private dragEndTimeout: boolean = false;
@@ -22,7 +21,7 @@ class DefaultBoardManager extends BoardManager {
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly vibrationsEnabled: Ref<boolean>
   ) {
-    super();
+    super(computed(() => false));
   }
 
   private clearDraggingOverCells() {

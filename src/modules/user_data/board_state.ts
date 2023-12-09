@@ -1,7 +1,8 @@
 import ComplexUserData from "./complex_user_data";
+import { getPieceFromRaw } from "../pieces/raw_piece";
 import type ToastManager from "../toast_manager";
-import { isRawPiece, getPieceFromRaw } from "../pieces/raw_piece";
 import type { BoardStateValue } from "../board_manager";
+import { isRawPiece } from "../utils/game";
 
 class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(

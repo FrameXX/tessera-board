@@ -1,18 +1,19 @@
 import moveAudioEffectUrl from "../assets/audio/move.ogg";
 import removeAudioEffectUrl from "../assets/audio/remove.ogg";
+import { Howl } from "howler";
 import { type Ref, watch, ref, computed } from "vue";
 import BoardStateData from "./user_data/board_state";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
 import Timer from "./timer";
 import type { PieceId, PiecesImportance } from "./pieces/piece";
-import { positionsToPath, type Path } from "./pieces/piece";
+import { type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { BoardPieceProps, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
 import NumberUserData from "./user_data/number_user_data";
 import MoveListData from "./user_data/move_list";
-import { MovePerformContext } from "./moves/move";
+import type { MovePerformContext } from "./moves/move";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
@@ -34,97 +35,27 @@ import TransitionDurationData from "./user_data/transition_duration";
 import CapturedPiecesData from "./user_data/captured_pieces";
 import { hideSplashscreen, setSaturationMultiplier } from "./utils/elements";
 import defualtSettings from "./user_data/default_settings";
+import type {
+  MoveExecution,
+  PlayerColor,
+  WinReason,
+  Winner,
+} from "./utils/game";
 import {
   getAllPieceProps,
+  getColorTeamName,
   getGuardedPieces,
+  getOpossitePlayerColor,
+  getOpossiteTeamName,
+  getPlayerTeamName,
   invalidatePiecesCache,
   isGuardedPieceChecked,
+  isPlayer,
+  isPlayerColor,
+  isSecondsPerMovePenalty,
+  isWinReason,
+  positionsToPath,
 } from "./utils/game";
-
-type MoveDirection = "forward" | "reverse";
-type MoveExecution = "perform" | MoveDirection;
-
-export type GameSettings = typeof defualtSettings;
-
-export type Player = "player" | "opponent";
-export function isPlayer(string: string): string is Player {
-  return string === "player" || string === "opponent";
-}
-
-export type PlayerColor = "white" | "black";
-export function isPlayerColor(string: string): string is PlayerColor {
-  return string === "white" || string === "black";
-}
-
-export type TeamName = "White" | "Black";
-
-export function getOpossiteTeamName(teamName: TeamName): TeamName {
-  return teamName === "White" ? "Black" : "White";
-}
-
-export function getOpossitePlayerColor(playerColor: PlayerColor) {
-  return playerColor === "white" ? "black" : "white";
-}
-
-export function getColorTeamName(playerColor: PlayerColor): TeamName {
-  return playerColor === "white" ? "White" : "Black";
-}
-
-export function getPlayerTeamName(
-  player: Player,
-  playerColor: PlayerColor
-): TeamName {
-  const teamName =
-    player === "player"
-      ? getColorTeamName(playerColor)
-      : getColorTeamName(getOpossitePlayerColor(playerColor));
-  return teamName;
-}
-
-type UndecidedWinner = "draw" | "none";
-export function isUndecidedWinner(string: string): string is UndecidedWinner {
-  return string === "draw" || string === "none";
-}
-
-export type Winner = UndecidedWinner | Player;
-export function isWinner(string: string): string is Winner {
-  return isPlayer(string) || isUndecidedWinner(string);
-}
-
-export type WinReason =
-  | "none"
-  | "move_timeout"
-  | "match_timeout"
-  | "resign"
-  | "checkmate"
-  | "stalemate"
-  | "block";
-export function isWinReason(string: string | null): string is WinReason {
-  return (
-    string === "none" ||
-    string === "move_timeout" ||
-    string === "match_timeout" ||
-    string === "resign" ||
-    string === "checkmate" ||
-    string === "stalemate" ||
-    string === "block"
-  );
-}
-
-export type SecondsPerMovePenalty = "game_loss" | "random_move";
-export function isSecondsPerMovePenalty(
-  string: string
-): string is SecondsPerMovePenalty {
-  return string === "game_loss" || string === "random_move";
-}
-
-export class GameLogicError extends Error {
-  constructor(message: string) {
-    super(message);
-    Object.setPrototypeOf(this, GameLogicError.prototype);
-    this.name = GameLogicError.name;
-  }
-}
 
 class Game {
   public readonly pieceMoveAudioEffect = new Howl({
@@ -468,7 +399,7 @@ class Game {
   public readonly opponentMatchSecondsTimer: Timer;
   public readonly winner = ref<Winner>("none");
   public readonly playingColor = computed(() => {
-    let color: PlayerColor =
+    const color: PlayerColor =
       (isEven(this.lastMoveIndex.value) &&
         this.settings.preferredFirstMoveColor.value === "black") ||
       (!isEven(this.lastMoveIndex.value) &&
@@ -522,11 +453,10 @@ class Game {
     this.settings.vibrationsEnabled
   );
   public readonly rotated = computed(() => {
-    let rotated: boolean;
     if (!this.settings.tableModeEnabled.value) {
       return false;
     }
-    rotated = this.playingColor.value === "black";
+    const rotated = this.playingColor.value === "black";
     return rotated;
   });
   private readonly transitionsManager = new TransitionsManager(

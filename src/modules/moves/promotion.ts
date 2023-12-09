@@ -1,17 +1,11 @@
 import type { Ref } from "vue";
 import type Piece from "../pieces/piece";
-import { chooseBestPiece, type PieceId } from "../pieces/piece";
-import {
-  getPieceFromRaw,
-  isRawPiece,
-  type RawPiece,
-} from "../pieces/raw_piece";
+import { getPieceFromRaw, type RawPiece } from "../pieces/raw_piece";
+import type { MoveForwardContext, MovePerformContext } from "./move";
 import Move, {
   clearPositionValue,
   getCleanBoardPosition,
   handleInvalidRawMove,
-  MoveForwardContext,
-  MovePerformContext,
   movePositionValue,
   tellPieceItMoved,
 } from "./move";
@@ -28,8 +22,9 @@ import {
   getPositionNotation,
   isBoardPosition,
 } from "../board_manager";
-import { getPositionPiece } from "../game_board_manager";
 import type { RawMove } from "./raw_move";
+import { chooseBestPiece, getPositionPiece, isRawPiece } from "../utils/game";
+import { PieceId } from "../pieces/piece";
 
 export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";

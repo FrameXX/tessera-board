@@ -19,7 +19,7 @@ import {
   BoardPosition,
   BoardStateValue,
 } from "../modules/board_manager";
-import { GameSettings } from "../modules/game";
+import { GameSettings } from "../modules/utils/game";
 
 const props = defineProps({
   open: { type: Boolean, default: false },

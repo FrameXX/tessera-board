@@ -1,7 +1,8 @@
+import { ComputedRef } from "vue";
 import type { Mark } from "../components/Cell.vue";
 import type { Piece, PieceId } from "./pieces/piece";
 import type { RawPiece } from "./pieces/raw_piece";
-import { isRawPiece } from "./pieces/raw_piece";
+import { isRawPiece } from "./utils/game";
 
 export type BoardStateValue = (Piece | null)[][];
 
@@ -37,7 +38,10 @@ export function isRawBoardPieceProps(
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 abstract class BoardManager {
-  constructor() {}
+  constructor(
+    public readonly cellMarks: MarkBoardState,
+    public readonly contentRotated: ComputedRef<boolean>
+  ) {}
 
   public abstract onPieceClick(boardPiece: BoardPieceProps): void;
 
@@ -57,6 +61,14 @@ abstract class BoardManager {
     targetPosition: BoardPosition,
     pieceProps: BoardPieceProps
   ): void;
+
+  protected clearCellsMarks() {
+    for (const rowIndex in this.cellMarks) {
+      for (const colIndex in this.cellMarks[rowIndex]) {
+        this.cellMarks[+rowIndex][+colIndex] = null;
+      }
+    }
+  }
 }
 
 export function getPositionNotation(position: BoardPosition) {

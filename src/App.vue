@@ -136,42 +136,18 @@ onMounted(game.mount);
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area" :class="{ rotated: game.rotated.value }">
       <Board
-        :selected-pieces="game.playerBoardManager.selectedPieces.value"
-        :selected-cells="game.playerBoardManager.selectedCells.value"
-        :highlighted-cells="game.highlightedCells.value"
-        :dragging-over-cells="game.playerBoardManager.draggingOverCells.value"
-        :marks-state="game.playerBoardManager.cellsMarks"
-        :content-rotated="game.playerBoardManager.contentRotated.value"
-        :rotated="game.playerBoardManager.rotated.value"
+        :game="game"
         :manager="game.playerBoardManager"
         :state="game.gameBoardState"
-        :piece-set="game.settings.pieceIconPack.value"
-        :piece-padding="game.settings.piecePadding.value"
-        :piece-border="game.settings.pieceBorder.value"
-        :white-captured-pieces="game.whiteCapturedPieces.value"
-        :black-captured-pieces="game.blackCapturedPieces.value"
         primary
-        :all-piece-props="game.gameBoardPieceProps.value"
         id="player-board"
       />
       <Board
         v-if="game.settings.secondCheckboardEnabled"
-        :selected-pieces="game.opponentBoardManager.selectedPieces.value"
-        :selected-cells="game.opponentBoardManager.selectedCells.value"
-        :highlighted-cells="game.highlightedCells.value"
-        :dragging-over-cells="game.opponentBoardManager.draggingOverCells.value"
-        :marks-state="game.opponentBoardManager.cellsMarks"
-        :content-rotated="game.opponentBoardManager.contentRotated.value"
-        :rotated="game.opponentBoardManager.rotated.value"
+        primary
+        :game="game"
         :manager="game.opponentBoardManager"
         :state="game.gameBoardState"
-        :piece-set="game.settings.pieceIconPack.value"
-        :piece-padding="game.settings.piecePadding.value"
-        :piece-border="game.settings.pieceBorder.value"
-        :white-captured-pieces="game.whiteCapturedPieces.value"
-        :black-captured-pieces="game.blackCapturedPieces.value"
-        primary
-        :all-piece-props="game.gameBoardPieceProps.value"
         id="opponent-board"
       />
       <Transition name="slide-side">
@@ -202,6 +178,7 @@ onMounted(game.mount);
     :game-paused="game.paused.value"
   />
   <Settings
+    v-model="game.settings"
     :open="game.ui.settingsOpen.value"
     :default-board-config-manager="defaultBoardConfigManager"
     :default-board-manager="game.defaultBoardManager"

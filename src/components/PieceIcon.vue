@@ -4,8 +4,8 @@ import Icon from "./Icon.vue";
 import { PropType, computed, inject } from "vue";
 import { PieceId } from "../modules/pieces/piece";
 import { capitalizeFirst } from "../modules/utils/misc";
-import type { PlayerColor } from "../modules/game";
 import { PieceIconPack } from "../modules/user_data/piece_set";
+import { PlayerColor } from "../modules/utils/game";
 
 const props = defineProps({
   pieceId: { type: String as PropType<PieceId>, required: true },

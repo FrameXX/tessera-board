@@ -1,5 +1,3 @@
-import type { BoardPosition } from "../board_manager";
-
 export function getRandomNumber(min: number, max: number) {
   const number = Math.round(Math.random() * (max + 1 - min) + (min - 0.5)) * 1;
   return number + 0;
@@ -63,13 +61,6 @@ export function getDigitStr(number: number, digits: number = 2) {
     str = "0" + str;
   }
   return str;
-}
-
-export function sumPositions(
-  pos1: BoardPosition,
-  pos2: BoardPosition
-): BoardPosition {
-  return { row: pos1.row + pos2.row, col: pos1.col + pos2.col };
 }
 
 export function isEven(number: number) {

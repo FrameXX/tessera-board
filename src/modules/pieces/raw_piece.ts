@@ -1,13 +1,13 @@
-import { type PlayerColor, isPlayerColor } from "../game";
 import { UserDataError } from "../user_data/user_data";
 import type Piece from "./piece";
-import { type PieceId, isPieceId } from "./piece";
+import { type PieceId } from "./piece";
 import Bishop from "./bishop";
 import King from "./king";
 import Knight from "./knight";
 import Pawn from "./pawn";
 import Queen from "./queen";
 import Rook from "./rook";
+import type { PlayerColor } from "../utils/game";
 
 export interface RawPiece {
   // Raw Piece can possibly have extra custom properties
@@ -15,18 +15,6 @@ export interface RawPiece {
   pieceId: PieceId;
   color: PlayerColor;
   id?: string;
-}
-
-export function isRawPiece(object: any): object is RawPiece {
-  if (typeof object.pieceId !== "string") return false;
-  if (typeof object.color !== "string") return false;
-  if (!isPieceId(object.pieceId)) return false;
-  if (!isPlayerColor(object.color)) return false;
-  return true;
-}
-
-export function getRawPiece(piece: Piece): RawPiece {
-  return { color: piece.color, pieceId: piece.pieceId, id: piece.id };
 }
 
 export function getPieceFromRaw(rawPiece: RawPiece): Piece {
