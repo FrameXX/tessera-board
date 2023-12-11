@@ -1,6 +1,6 @@
 import type { ComputedRef } from "vue";
 import type {
-  BoardPieceProps,
+  PieceContext,
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
@@ -95,31 +95,31 @@ export class GameLogicError extends Error {
   }
 }
 
-export function getAllPieceProps(boardStateValue: BoardStateValue) {
-  const allPieceProps: BoardPieceProps[] = [];
+export function getAllpieceContext(boardStateValue: BoardStateValue) {
+  const allPiecesContext: PieceContext[] = [];
   for (const [rowIndex, row] of boardStateValue.entries()) {
     for (const [colIndex, piece] of row.entries()) {
       if (!piece) {
         continue;
       }
-      allPieceProps.push({
+      allPiecesContext.push({
         row: rowIndex,
         col: colIndex,
         piece: piece,
       });
     }
   }
-  allPieceProps.sort((a, b) => {
+  allPiecesContext.sort((a, b) => {
     return a.piece.id.localeCompare(b.piece.id);
   });
-  return allPieceProps;
+  return allPiecesContext;
 }
 
 export function getGuardedPieces(
-  pieceProps: BoardPieceProps[],
+  allPiecesContext: PieceContext[],
   color: PlayerColor
 ) {
-  return pieceProps.filter((props) => {
+  return allPiecesContext.filter((props) => {
     if (props.piece.color !== color) return false;
     return props.piece.guarded;
   });
@@ -128,18 +128,18 @@ export function getGuardedPieces(
 export function isGuardedPieceChecked(
   boardStateValue: BoardStateValue,
   color: PlayerColor,
-  allPieceProps: BoardPieceProps[],
-  guardedPieces: BoardPieceProps[],
+  allpiecesContext: PieceContext[],
+  guardedPieces: PieceContext[],
   lastMove: ComputedRef<Move | null>
 ) {
   let capturingPaths: Path[] = [];
 
-  for (const pieceProps of allPieceProps) {
-    const piece = pieceProps.piece;
+  for (const pieceContext of allpiecesContext) {
+    const piece = pieceContext.piece;
     if (piece.color === color) {
       continue;
     }
-    const origin: BoardPosition = pieceProps;
+    const origin: BoardPosition = pieceContext;
     capturingPaths = [
       ...capturingPaths,
       ...positionsToPath(
@@ -161,38 +161,20 @@ export function isGuardedPieceChecked(
   return false;
 }
 
-export function invalidatePiecesCache(allPieceProps: BoardPieceProps[]) {
-  for (const pieceProps of allPieceProps) {
-    pieceProps.piece.invalidateCache();
+export function invalidatePiecesCache(allPiecesContext: PieceContext[]) {
+  for (const pieceContext of allPiecesContext) {
+    pieceContext.piece.invalidateCache();
   }
 }
 
-export function moveHasClickablePosition(
-  move: Move,
-  position: BoardPosition
-): boolean {
-  const matchingPositions = getMatchingPositions(
-    move.clickablePositions,
-    position
-  );
-
-  // There should be no duplicates in clickable positions!
-  if (matchingPositions.length > 1) {
-    throw new GameLogicError(
-      `Single move has same clickable positions for row ${position.row}, col ${position.col}. move: ${move}.`
-    );
-  }
-
-  return matchingPositions.length !== 0;
-}
-
-function getMatchingPositions(
-  positionsArray: BoardPosition[],
-  position: BoardPosition
+export function positionsArrayHasPosition(
+  positions: BoardPosition[],
+  matchingPosition: BoardPosition
 ) {
-  return positionsArray.filter((arrayMember) =>
-    positionsEqual(arrayMember, position)
-  );
+  for (const position of positions) {
+    if (positionsEqual(position, matchingPosition)) return true;
+  }
+  return false;
 }
 
 export function positionsEqual(
@@ -226,13 +208,13 @@ export function willMoveCheckGuardedPiece(
 ) {
   move.forward(moveForwardContext);
 
-  const pieceProps = getAllPieceProps(newBoardStateValue);
-  invalidatePiecesCache(pieceProps);
-  const guardedPieces = getGuardedPieces(pieceProps, color);
+  const allPiecesContext = getAllpieceContext(newBoardStateValue);
+  invalidatePiecesCache(allPiecesContext);
+  const guardedPieces = getGuardedPieces(allPiecesContext, color);
   const checksGuardedPiece = isGuardedPieceChecked(
     newBoardStateValue,
     color,
-    pieceProps,
+    allPiecesContext,
     guardedPieces,
     lastMove
   );

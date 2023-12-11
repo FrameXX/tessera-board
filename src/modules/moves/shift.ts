@@ -8,16 +8,16 @@ import Move, {
   tellPieceItMoved,
 } from "./move";
 import type {
-  BoardPieceProps,
+  PieceContext,
   BoardPosition,
   BoardStateValue,
   MarkBoardState,
-  RawBoardPieceProps,
+  RawBoardpieceContext,
 } from "../board_manager";
 import {
   getPieceNotation,
   getPositionNotation,
-  isRawBoardPieceProps,
+  isRawBoardpieceContext,
   isBoardPosition,
 } from "../board_manager";
 import { capturePosition, movePiece } from "./move";
@@ -34,7 +34,7 @@ export interface RawShift extends RawMove {
   pieceId: PieceId;
   origin: BoardPosition;
   target: BoardPosition;
-  captures?: RawBoardPieceProps;
+  captures?: RawBoardpieceContext;
   id?: string;
 }
 
@@ -47,7 +47,7 @@ export function isRawShift(rawMove: RawMove): rawMove is RawShift {
   if (!isBoardPosition(rawMove.origin)) return false;
   if (!isBoardPosition(rawMove.target)) return false;
   if (rawMove.captures) {
-    if (!isRawBoardPieceProps(rawMove.captures)) {
+    if (!isRawBoardpieceContext(rawMove.captures)) {
       return false;
     }
   }
@@ -61,14 +61,14 @@ class Shift extends Move {
     public readonly pieceId: PieceId,
     public readonly origin: BoardPosition,
     public readonly target: BoardPosition,
-    public readonly captures?: BoardPieceProps,
+    public readonly captures?: PieceContext,
     private readonly id?: string
   ) {
     super("shift");
   }
 
   public getRaw(): RawShift {
-    let captures: RawBoardPieceProps | undefined = undefined;
+    let captures: RawBoardpieceContext | undefined = undefined;
     if (this.captures) {
       const rawPiece = this.captures.piece.getRawPiece();
       captures = {
@@ -94,7 +94,7 @@ class Shift extends Move {
       handleInvalidRawMove(rawMove);
     }
 
-    let captures: BoardPieceProps | undefined = undefined;
+    let captures: PieceContext | undefined = undefined;
     if (rawMove.captures) {
       const rawPiece = rawMove.captures.piece;
       const piece = getPieceFromRaw(rawPiece);

@@ -11,11 +11,11 @@ import Move, {
 } from "./move";
 import { capturePosition, movePiece, transformPiece } from "./move";
 import type {
-  BoardPieceProps,
+  PieceContext,
   BoardPosition,
   BoardStateValue,
   MarkBoardState,
-  RawBoardPieceProps,
+  RawBoardpieceContext,
 } from "../board_manager";
 import {
   getPieceNotation,
@@ -37,7 +37,7 @@ export interface RawPromotion extends RawMove {
   target: BoardPosition;
   transformOptions: [RawPiece, ...RawPiece[]];
   newRawPiece: RawPiece | null;
-  captures?: RawBoardPieceProps;
+  captures?: RawBoardpieceContext;
   id?: string;
 }
 
@@ -64,14 +64,14 @@ class Promotion extends Move {
     private readonly origin: BoardPosition,
     private readonly target: BoardPosition,
     private readonly allTransformOptions: [RawPiece, ...RawPiece[]],
-    private readonly captures?: BoardPieceProps,
+    private readonly captures?: PieceContext,
     private readonly id?: string
   ) {
     super("promotion");
   }
 
   public getRaw(): RawPromotion {
-    let captures: RawBoardPieceProps | undefined = undefined;
+    let captures: RawBoardpieceContext | undefined = undefined;
     if (this.captures) {
       const rawPiece = this.captures.piece.getRawPiece();
       captures = {
@@ -106,7 +106,7 @@ class Promotion extends Move {
       handleInvalidRawMove(rawMove);
     }
 
-    let captures: BoardPieceProps | undefined = undefined;
+    let captures: PieceContext | undefined = undefined;
     if (rawMove.captures) {
       const rawPiece = rawMove.captures.piece;
       const piece = getPieceFromRaw(rawPiece);

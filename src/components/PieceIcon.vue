@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import pieceUrl from "../assets/img/pieces.svg";
 import Icon from "./Icon.vue";
-import { PropType, computed, inject } from "vue";
+import { PropType, Ref, computed, inject } from "vue";
 import { PieceId } from "../modules/pieces/piece";
 import { capitalizeFirst } from "../modules/utils/misc";
 import { PieceIconPack } from "../modules/user_data/piece_set";
@@ -12,7 +12,7 @@ const props = defineProps({
   color: { type: String as PropType<PlayerColor>, required: true },
 });
 
-const pieceIconPack = inject<PieceIconPack>("pieceIconPack");
+const pieceIconPack = inject<Ref<PieceIconPack>>("pieceIconPack");
 
 const label = computed(() => {
   return `${capitalizeFirst(props.color)} ${props.pieceId}`;

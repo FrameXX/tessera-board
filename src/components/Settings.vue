@@ -12,14 +12,10 @@ import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
 import type ConfigsDialog from "../modules/dialogs/configs";
 import ConfigManager from "../modules/config_manager";
-import DefaultBoardManager from "../modules/default_board_manager";
 import UserDataManager from "../modules/user_data_manager";
-import {
-  BoardPieceProps,
-  BoardPosition,
-  BoardStateValue,
-} from "../modules/board_manager";
 import { GameSettings } from "../modules/utils/game";
+import BoardManager, { PieceContext } from "../modules/board_manager";
+import Game from "../modules/game";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -29,25 +25,18 @@ const props = defineProps({
     required: true,
   },
   defaultBoardManager: {
-    type: Object as PropType<DefaultBoardManager>,
-    required: true,
-  },
-  defaultBoardState: {
-    type: Object as PropType<BoardStateValue>,
+    type: Object as PropType<BoardManager>,
     required: true,
   },
   userDataManager: {
     type: Object as PropType<UserDataManager>,
     required: true,
   },
-  defaultDraggingOverCells: {
-    type: Object as PropType<BoardPosition[]>,
+  defaultBoardAllPieceContext: {
+    type: Object as PropType<PieceContext[]>,
     required: true,
   },
-  defaultBoardAllPieceProps: {
-    type: Object as PropType<BoardPieceProps[]>,
-    required: true,
-  },
+  game: { type: Object as PropType<Game>, required: true },
 });
 
 const configsDialog = inject("configsDialog") as ConfigsDialog;
@@ -207,7 +196,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="check-show-capturing-pieces"
-              v-model="props.modelValue.showCapturingPieces.value"
+              v-model="props.modelValue.markCellCapturingPieces.value"
             />
             <template #description>
               When a cell on the game board is selected, the pieces that are
@@ -225,7 +214,7 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <Checkbox
               id="show-other-availible-moves"
-              v-model="props.modelValue.showOtherAvailibleMoves.value"
+              v-model="props.modelValue.markUnactivePlayerAvailibleMoves.value"
             />
             <template #description>
               The player will be able to display the possible moves and board
@@ -305,15 +294,10 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
             </button>
             <div class="board-box">
               <Board
-                :manager="defaultBoardManager"
-                :state="defaultBoardState"
-                :piece-set="props.modelValue.pieceIconPack.value"
-                :piece-padding="props.modelValue.piecePadding.value"
-                :piece-border="props.modelValue.pieceBorder.value"
-                :dragging-over-cells="defaultDraggingOverCells"
-                board-id="default"
+                :manager="props.defaultBoardManager"
+                :all-pieces-context="$props.defaultBoardAllPieceContext"
+                :game="props.game"
                 id="default-board"
-                :all-piece-props="props.defaultBoardAllPieceProps"
               />
             </div>
             <template #description>

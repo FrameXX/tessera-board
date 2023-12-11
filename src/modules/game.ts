@@ -9,7 +9,7 @@ import Timer from "./timer";
 import type { PieceId, PiecesImportance } from "./pieces/piece";
 import { type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
-import type { BoardPieceProps, BoardPosition } from "./board_manager";
+import type { PieceContext, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
 import NumberUserData from "./user_data/number_user_data";
 import MoveListData from "./user_data/move_list";
@@ -42,7 +42,7 @@ import type {
   Winner,
 } from "./utils/game";
 import {
-  getAllPieceProps,
+  getAllpieceContext as getAllPiecesContext,
   getColorTeamName,
   getGuardedPieces,
   getOpossitePlayerColor,
@@ -186,9 +186,9 @@ class Game {
       ),
       new BooleanUserData(
         "show_capturing_pieces",
-        this.settings.showCapturingPieces.value,
+        this.settings.markCellCapturingPieces.value,
         this.ui.toastManager,
-        this.settings.showCapturingPieces
+        this.settings.markCellCapturingPieces
       ),
       new BooleanUserData(
         "second_checkboard",
@@ -373,9 +373,9 @@ class Game {
       ),
       new BooleanUserData(
         "show_other_availible_moves",
-        this.settings.showOtherAvailibleMoves.value,
+        this.settings.markUnactivePlayerAvailibleMoves.value,
         this.ui.toastManager,
-        this.settings.showOtherAvailibleMoves
+        this.settings.markUnactivePlayerAvailibleMoves
       ),
       this.defaultBoardStateData,
       this.gameBoardStateData,
@@ -440,8 +440,8 @@ class Game {
     }
     return this.lastMove.value.highlightedBoardPositions;
   });
-  public readonly gameBoardPieceProps: Ref<BoardPieceProps[]>;
-  public readonly defaultBoardPieceProps: Ref<BoardPieceProps[]>;
+  public readonly gameBoardAllPiecesContext: Ref<PieceContext[]>;
+  public readonly defaultBoardAllPiecesContext: Ref<PieceContext[]>;
   public readonly playerBoardManager: GameBoardManager;
   public readonly opponentBoardManager: GameBoardManager;
   public readonly defaultBoardManager = new DefaultBoardManager(
@@ -466,8 +466,12 @@ class Game {
 
   constructor() {
     new ThemeManager(this.settings.theme);
-    this.gameBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
-    this.defaultBoardPieceProps = ref(getAllPieceProps(this.gameBoardState));
+    this.gameBoardAllPiecesContext = ref(
+      getAllPiecesContext(this.gameBoardState)
+    );
+    this.defaultBoardAllPiecesContext = ref(
+      getAllPiecesContext(this.gameBoardState)
+    );
     this.playerBoardManager = new GameBoardManager(
       this,
       true,
@@ -490,7 +494,7 @@ class Game {
     this.userDataManager.updateReferences();
 
     watch(this.settings.defaultBoardState, () => {
-      this.defaultBoardPieceProps.value = getAllPieceProps(
+      this.defaultBoardAllPiecesContext.value = getAllPiecesContext(
         this.settings.defaultBoardState
       );
     });
@@ -632,11 +636,11 @@ class Game {
   }
 
   private performRandomMove(pieceColor?: PlayerColor) {
-    let randomPiece: BoardPieceProps;
+    let randomPiece: PieceContext;
     let moves: Move[];
     do {
       do {
-        randomPiece = getRandomArrayValue(this.gameBoardPieceProps.value);
+        randomPiece = getRandomArrayValue(this.gameBoardAllPiecesContext.value);
       } while (
         typeof pieceColor === "undefined" ||
         randomPiece.piece.color !== pieceColor
@@ -899,14 +903,16 @@ class Game {
   }
 
   private onBoardStateChange() {
-    this.gameBoardPieceProps.value = getAllPieceProps(this.gameBoardState);
+    this.gameBoardAllPiecesContext.value = getAllPiecesContext(
+      this.gameBoardState
+    );
     this.updateTimerState();
     if (this.playerPlaying.value) {
       this.opponentMoveSecondsTimer.reset();
     } else {
       this.playerMoveSecondsTimer.reset();
     }
-    invalidatePiecesCache(this.gameBoardPieceProps.value);
+    invalidatePiecesCache(this.gameBoardAllPiecesContext.value);
     this.updateCapturingPaths();
   }
 
@@ -922,13 +928,13 @@ class Game {
 
   private checkLoss() {
     const guardedPieces = getGuardedPieces(
-      this.gameBoardPieceProps.value,
+      this.gameBoardAllPiecesContext.value,
       this.playingColor.value
     );
     const checked = isGuardedPieceChecked(
       this.gameBoardState,
       this.playingColor.value,
-      this.gameBoardPieceProps.value,
+      this.gameBoardAllPiecesContext.value,
       guardedPieces,
       this.lastMove
     );
@@ -936,7 +942,7 @@ class Game {
 
     const canPlayerMove = this.canPlayerMove(
       this.playingColor.value,
-      this.gameBoardPieceProps.value
+      this.gameBoardAllPiecesContext.value
     );
     if (!canPlayerMove) {
       if (checked || guardedPieces.length === 0) {
@@ -951,8 +957,8 @@ class Game {
     }
   }
 
-  private canPlayerMove(color: PlayerColor, pieceProps: BoardPieceProps[]) {
-    for (const props of pieceProps) {
+  private canPlayerMove(color: PlayerColor, pieceContext: PieceContext[]) {
+    for (const props of pieceContext) {
       if (props.piece.color !== color) continue;
       const moves = props.piece.getPossibleMoves(
         props,
@@ -972,11 +978,11 @@ class Game {
   public updateCapturingPaths() {
     let whiteCapturingPaths: Path[] = [];
     let blackCapturingPaths: Path[] = [];
-    for (const pieceProps of this.gameBoardPieceProps.value) {
-      const piece = pieceProps.piece;
+    for (const pieceContext of this.gameBoardAllPiecesContext.value) {
+      const piece = pieceContext.piece;
       const origin: BoardPosition = {
-        row: +pieceProps.row,
-        col: +pieceProps.col,
+        row: +pieceContext.row,
+        col: +pieceContext.col,
       };
       if (piece.color === "white") {
         whiteCapturingPaths = [

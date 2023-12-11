@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 // Import from packages
-import { ref, onMounted, watch, computed, provide } from "vue";
+import { ref, onMounted, watch, computed, provide, inject } from "vue";
 
 // Import other classes and functions
 import { PIECE_IDS } from "./modules/pieces/piece";
@@ -28,6 +28,8 @@ import FragmentTitle from "./components/FragmentTitle.vue";
 import InfoCard from "./components/InfoCard.vue";
 
 const game = new Game();
+
+inject("pieceIconPack", game.settings.pieceIconPack);
 
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
@@ -138,16 +140,16 @@ onMounted(game.mount);
       <Board
         :game="game"
         :manager="game.playerBoardManager"
-        :state="game.gameBoardState"
+        :all-pieces-context="game.gameBoardAllPiecesContext.value"
         primary
         id="player-board"
       />
       <Board
-        v-if="game.settings.secondCheckboardEnabled"
+        v-if="game.settings.secondCheckboardEnabled.value"
         primary
         :game="game"
         :manager="game.opponentBoardManager"
-        :state="game.gameBoardState"
+        :all-pieces-context="game.gameBoardAllPiecesContext.value"
         id="opponent-board"
       />
       <Transition name="slide-side">
@@ -182,12 +184,9 @@ onMounted(game.mount);
     :open="game.ui.settingsOpen.value"
     :default-board-config-manager="defaultBoardConfigManager"
     :default-board-manager="game.defaultBoardManager"
-    :default-board-state="game.settings.defaultBoardState"
     :user-data-manager="game.userDataManager"
-    :default-dragging-over-cells="
-      game.defaultBoardManager.draggingOverCells.value
-    "
-    :default-board-all-piece-props="game.defaultBoardPieceProps.value"
+    :default-board-all-piece-context="game.defaultBoardAllPiecesContext.value"
+    :game="game"
   />
   <About :open="game.ui.aboutOpen.value" />
 

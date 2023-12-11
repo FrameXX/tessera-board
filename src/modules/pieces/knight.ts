@@ -1,6 +1,6 @@
 import type { ComputedRef } from "vue";
 import type {
-  BoardPieceProps,
+  PieceContext,
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
@@ -49,7 +49,7 @@ export class Knight extends Piece {
     );
 
     for (const target of capturingPositions) {
-      let captures: BoardPieceProps | undefined = undefined;
+      let captures: PieceContext | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;

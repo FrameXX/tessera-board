@@ -1,5 +1,5 @@
 import type {
-  BoardPieceProps,
+  PieceContext,
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
@@ -84,7 +84,7 @@ export class King extends Piece {
     const capturingPositions = this.getNewCapturingPositions(position);
 
     for (const target of capturingPositions) {
-      let captures: BoardPieceProps | undefined = undefined;
+      let captures: PieceContext | undefined = undefined;
       const piece = boardStateValue[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;

@@ -3,7 +3,7 @@ import Shift, { isMoveShift } from "../moves/shift";
 import Promotion from "../moves/promotion";
 import type { RawPiece } from "./raw_piece";
 import type {
-  BoardPieceProps,
+  PieceContext,
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
@@ -121,7 +121,7 @@ export class Pawn extends Piece {
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
-      const captures: BoardPieceProps = {
+      const captures: PieceContext = {
         ...target,
         piece: piece,
       };

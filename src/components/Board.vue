@@ -5,14 +5,11 @@ import BoardPiece from "./BoardPiece.vue";
 import type BoardManager from "../modules/board_manager";
 import CapturedPieces from "./CapturedPieces.vue";
 import { getElementSizes } from "../modules/utils/elements";
-import {
-  BoardPieceProps,
-  BoardPosition,
-  BoardStateValue,
-} from "../modules/board_manager";
+import { BoardPosition, PieceContext } from "../modules/board_manager";
 import {
   PlayerColor,
   getDiffPosition,
+  positionsArrayHasPosition,
   positionsEqual,
 } from "../modules/utils/game";
 import Game from "../modules/game";
@@ -30,7 +27,10 @@ const cellPercentDelta = (100 - borderPercentDelta) / 7;
 
 const props = defineProps({
   game: { type: Object as PropType<Game>, required: true },
-  state: { type: Object as PropType<BoardStateValue>, required: true },
+  allPiecesContext: {
+    type: Object as PropType<PieceContext[]>,
+    required: true,
+  },
   manager: { type: Object as PropType<BoardManager>, required: true },
   arrows: {
     type: Array as PropType<Arrow[]>,
@@ -41,7 +41,7 @@ const props = defineProps({
 
 const container = ref<HTMLDivElement | null>(null);
 const containerSize = ref<number>(0);
-const draggingPiece = ref<BoardPieceProps | null>(null);
+const draggingPiece = ref<PieceContext | null>(null);
 const showDragging = ref<boolean>(false);
 let inchCmOffset = ref(1.8);
 
@@ -62,6 +62,16 @@ function updateContainerSize() {
   }
 }
 
+function cellIsPosition(
+  row: number,
+  col: number,
+  position: BoardPosition | null
+) {
+  if (!position) return false;
+  const cellPosition: BoardPosition = { row: 8 - row, col: col - 1 };
+  return positionsEqual(cellPosition, position);
+}
+
 function getContainerMinSize() {
   if (container.value) {
     const [width, height] = getElementSizes(container.value);
@@ -77,17 +87,6 @@ function getContainerMinSize() {
 
 function onCellClick(position: BoardPosition) {
   props.manager.onCellClick({ row: 8 - position.row, col: position.col - 1 });
-}
-
-function isInArrayOfBoardPositions(
-  position: BoardPosition,
-  array: BoardPosition[]
-) {
-  return (
-    array.filter((selectedPosition) =>
-      positionsEqual(selectedPosition, position)
-    ).length > 0
-  );
 }
 
 function isPieceDragged(position: BoardPosition) {
@@ -195,9 +194,9 @@ function updatePointerPosition(x: number, y: number) {
   lastDragY = y;
 }
 
-function initDrag(event: PointerEvent, pieceProps: BoardPieceProps) {
+function initDrag(event: PointerEvent, pieceContext: PieceContext) {
   pressTimeout = null;
-  draggingPiece.value = pieceProps;
+  draggingPiece.value = pieceContext;
 
   const x = event.clientX;
   const y = event.clientY;
@@ -207,7 +206,7 @@ function initDrag(event: PointerEvent, pieceProps: BoardPieceProps) {
   updatePointerPosition(x, y);
 }
 
-function onPiecePointerStart(event: PointerEvent, pieceProps: BoardPieceProps) {
+function onPiecePointerStart(event: PointerEvent, pieceContext: PieceContext) {
   if (event.pointerType === "touch") {
     if (pressTimeout !== null || draggingPiece.value !== null) return;
     inchCmOffset.value = 1.8;
@@ -222,7 +221,7 @@ function onPiecePointerStart(event: PointerEvent, pieceProps: BoardPieceProps) {
   }
 
   pressTimeout = window.setTimeout(() => {
-    initDrag(event, pieceProps);
+    initDrag(event, pieceContext);
   }, props.game.settings.pieceLongPressTimeout.value);
 }
 
@@ -304,57 +303,47 @@ onMounted(() => {
           :col="col"
           :mark="props.manager.cellMarks[8 - row][col - 1]"
           :highlighted="
-            isInArrayOfBoardPositions(
-              { row: 8 - row, col: col - 1 },
-              props.game.highlightedCells.value
-            )
+            positionsArrayHasPosition(props.game.highlightedCells.value, {
+              row: 8 - row,
+              col: col - 1,
+            })
           "
-          :selected="
-            isInArrayOfBoardPositions(
-              { row: 8 - row, col: col - 1 },
-              props.manager.selectedCells
-            )
-          "
+          :selected="cellIsPosition(row, col, props.manager.selectedCell.value)"
           :drag-over="
-            isInArrayOfBoardPositions(
-              { row: 8 - row, col: col - 1 },
-              props.draggingOverCells
-            )
+            cellIsPosition(row, col, props.manager.draggingOverCell.value)
           "
         />
       </tr>
 
       <TransitionGroup name="piece">
         <BoardPiece
-          v-for="pieceProps in props.allPieceProps"
-          :key="pieceProps.piece.id"
-          @click="props.manager.onPieceClick(pieceProps)"
-          @pointerdown="onPiecePointerStart($event, pieceProps)"
+          v-for="pieceContext in props.allPiecesContext"
+          :key="pieceContext.piece.id"
+          @click="props.manager.onPieceClick(pieceContext)"
+          @pointerdown="onPiecePointerStart($event, pieceContext)"
           :selected="
-            isInArrayOfBoardPositions(
-              {
-                row: pieceProps.row,
-                col: pieceProps.col,
-              },
-              props.selectedPieces
+            cellIsPosition(
+              pieceContext.row,
+              pieceContext.col,
+              props.manager.selectedPiece.value
             )
           "
           :dragging="
             isPieceDragged({
-              row: pieceProps.row,
-              col: pieceProps.col,
+              row: pieceContext.row,
+              col: pieceContext.col,
             })
           "
           :drag-x-diff="dragXDiff"
           :drag-y-diff="shiftedDragYDiff"
           :inch-offset="inchCmOffset"
-          :row="pieceProps.row"
-          :col="pieceProps.col"
-          :piece="pieceProps.piece"
+          :row="pieceContext.row"
+          :col="pieceContext.col"
+          :piece="pieceContext.piece"
           :cell-size="cellSize"
-          :piece-padding="piecePadding"
-          :rotated="props.contentRotated"
-          :board-rotated="props.rotated"
+          :piece-padding="props.game.settings.piecePadding.value"
+          :rotated="props.manager.contentRotated.value"
+          :board-rotated="props.game.rotated.value"
           :size="pieceSize"
         />
       </TransitionGroup>
@@ -370,12 +359,14 @@ onMounted(() => {
           }%`"
           :x2="`calc(${
             borderPercentDelta / 2 + cellPercentDelta * arrow.target.col
-          }% + ${props.pieceBorder * 4}px)`"
+          }% + ${props.game.settings.pieceBorder.value * 4}px)`"
           :y2="`calc(${
             borderPercentDelta / 2 + cellPercentDelta * arrow.target.col
-          }% + ${props.pieceBorder * 4}px)`"
+          }% + ${props.game.settings.pieceBorder.value * 4}px)`"
           :stroke="`var(--color-piece-stroke-${arrow.color})`"
-          :stroke-width="`calc(1% + ${props.pieceBorder * 8}px)`"
+          :stroke-width="`calc(1% + ${
+            props.game.settings.pieceBorder.value * 8
+          }px)`"
         />
         <line
           v-for="arrow in props.arrows"
@@ -401,7 +392,6 @@ onMounted(() => {
 
 <style lang="scss">
 @import "../partials/mixins";
-import Game from '../modules/game';
 
 .board-container {
   @include stretch;

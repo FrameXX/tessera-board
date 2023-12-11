@@ -11,7 +11,7 @@ import type { BoardStateValue } from "../board_manager";
 import type SelectPieceDialog from "../dialogs/select_piece";
 import {
   GameLogicError,
-  getAllPieceProps,
+  getAllpieceContext,
   getPositionPiece,
 } from "../utils/game";
 
@@ -176,8 +176,8 @@ export async function movePiece(
 }
 
 export function getPieceById(id: string, boardStateValue: BoardStateValue) {
-  const pieceProps = getAllPieceProps(boardStateValue);
-  for (const props of pieceProps) {
+  const pieceContext = getAllpieceContext(boardStateValue);
+  for (const props of pieceContext) {
     if (props.piece.id !== id) {
       continue;
     } else {

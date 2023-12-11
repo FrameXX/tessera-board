@@ -1,7 +1,7 @@
-import { reactive, ref, computed } from "vue";
-import type { BoardPieceProps, BoardPosition } from "./board_manager";
+import { computed, ComputedRef } from "vue";
+import type { PieceContext, BoardPosition } from "./board_manager";
 import BoardManager from "./board_manager";
-import type { PiecesImportance } from "./pieces/piece";
+import type { Piece, PiecesImportance } from "./pieces/piece";
 import type Game from "./game";
 import type Move from "./moves/move";
 import type { MoveForwardContext } from "./moves/move";
@@ -9,87 +9,53 @@ import type { PlayerColor } from "./utils/game";
 import {
   GameLogicError,
   getTargetMatchingPaths,
-  moveHasClickablePosition,
+  positionsArrayHasPosition,
   positionsEqual,
 } from "./utils/game";
 
 class GameBoardManager extends BoardManager {
-  private _selectedPiece: BoardPieceProps | null = null;
-  private _selectedCell: BoardPosition | null = null;
   private availibleMoves: Move[] = [];
-  private dragEndTimeout: boolean = false;
-  public readonly selectedCells = ref<BoardPosition[]>([]);
-  public readonly selectedPieces = ref<BoardPosition[]>([]);
-  public readonly draggingOverCells = ref<BoardPosition[]>([]);
-  public readonly rotated = computed(() => {
-    if (
-      this.game.settings.tableModeEnabled.value ||
-      !this.game.settings.secondCheckboardEnabled.value
-    ) {
-      return false;
+  private dragEndTimeoutActive: boolean = false;
+  public readonly contentRotated: ComputedRef<boolean> = computed(() => {
+    if (!this.game.settings.secondCheckboardEnabled.value) {
+      return this.game.rotated.value;
     }
-    return this.game.playerColor.value === "black";
+    return (this.game.playerColor.value === "black") === this.isPlayerBoard;
   });
 
   constructor(
     private readonly game: Game,
-    private readonly playerBoard: boolean,
+    private readonly isPlayerBoard: boolean,
     private readonly piecesImportance: PiecesImportance
   ) {
-    super(
-      reactive(
-        Array(8)
-          .fill(null)
-          .map(() => new Array(8).fill(null))
-      ),
-      computed(() => {
-        if (!this.game.settings.secondCheckboardEnabled.value) {
-          return this.game.rotated.value;
-        }
-        return (this.game.playerColor.value === "black") === this.playerBoard;
-      })
-    );
+    super();
   }
 
-  private clearAvailibleMoves() {
+  private invalidateAvailibleMoves() {
     this.availibleMoves = [];
   }
 
-  private clearSelectedPiece() {
-    if (this.selectedPiece) {
-      this.selectedPieces.value = [];
-    }
-  }
-
-  private clearSelectedCells() {
-    if (this.selectedCell) {
-      this.selectedCells.value = [];
-    }
-  }
-
-  private clearDraggingOverCells() {
-    this.draggingOverCells.value = [];
-  }
-
-  private shouldShowMoves(pieceColor: PlayerColor) {
+  private isMarkingAvailibleMovesPermitted(pieceColor: PlayerColor) {
     if (
-      this.game.settings.showOtherAvailibleMoves.value ||
+      this.game.settings.markUnactivePlayerAvailibleMoves.value ||
       this.game.winner.value !== "none"
     )
       return true;
+
     if (
       !this.game.settings.secondCheckboardEnabled.value &&
       pieceColor !== this.game.playingColor.value
     )
       return false;
-    if (this.game.settings.secondCheckboardEnabled.value) {
-      if (
-        (this.playerBoard && pieceColor !== this.game.playerColor.value) ||
-        (!this.playerBoard && pieceColor === this.game.playerColor.value)
-      ) {
-        return false;
-      }
-    }
+
+    if (!this.game.settings.secondCheckboardEnabled.value) return true;
+
+    if (
+      (this.isPlayerBoard && pieceColor !== this.game.playerColor.value) ||
+      (!this.isPlayerBoard && pieceColor === this.game.playerColor.value)
+    )
+      return false;
+
     return true;
   }
 
@@ -103,70 +69,67 @@ class GameBoardManager extends BoardManager {
     };
   }
 
-  private set selectedPiece(pieceProps: BoardPieceProps | null) {
-    this.clearCellsMarks();
-    this.clearSelectedPiece();
-    this.clearAvailibleMoves();
-    this._selectedPiece = null;
-
-    if (!pieceProps) return;
-
-    this._selectedPiece = pieceProps;
-    this.selectedPieces.value.push(pieceProps);
-
-    if (!this.shouldShowMoves(pieceProps.piece.color)) {
-      return;
-    }
-
-    const moves = pieceProps.piece.getPossibleMoves(
-      pieceProps,
+  private setAvailibleMoves(pieceContext: PieceContext) {
+    this.availibleMoves = pieceContext.piece.getPossibleMoves(
+      pieceContext,
       this.game.gameBoardState,
       this.game.gameBoardStateData,
       this.moveForwardContext,
       this.game.settings.ignorePiecesGuardedProperty,
       this.game.lastMove
     );
+  }
+
+  private markMoves(moves: Move[]) {
     for (const move of moves) {
       move.showCellMarks(this.cellMarks, this.game.gameBoardState);
     }
-    this.availibleMoves = moves;
   }
 
-  private get selectedPiece(): BoardPieceProps | null {
-    return this._selectedPiece;
-  }
-
-  private getPositionMatchingMove(position: BoardPosition): Move | null {
-    if (!this.availibleMoves) {
-      return null;
+  private unselectPiece() {
+    if (!this.selectedPiece.value) {
+      throw new GameLogicError("Cannot unselect Piece if no cell is selected.");
     }
+    this.selectedPiece.value = null;
+    this.clearCellMarks();
+  }
 
-    const matchingMoves = this.availibleMoves.filter((move) => {
-      return moveHasClickablePosition(move, position);
-    });
-
-    if (matchingMoves.length > 1) {
+  private selectPiece(pieceContext: PieceContext) {
+    if (this.selectedPiece.value) {
       throw new GameLogicError(
-        `Multiple moves have same clickable positions for row ${position.row}, col ${position.col}.`
+        `Cannot select more than 1 piece. Piece "${JSON.stringify(
+          this.selectedPiece.value
+        )} is already slected.`
       );
     }
 
-    if (matchingMoves.length !== 1) {
-      return null;
+    this.invalidateAvailibleMoves();
+    this.selectedPiece.value = pieceContext;
+
+    if (!this.isMarkingAvailibleMovesPermitted(pieceContext.piece.color))
+      return;
+
+    this.setAvailibleMoves(pieceContext);
+    this.markMoves(this.availibleMoves);
+  }
+
+  /**
+   * This method returns a move that has provided position in its clickable positions if there's one.
+   * @method
+   * @param position
+   * @returns Move or null in case no move targets the positon.
+   */
+  private getAvailibleMoveWithClickablePosition(
+    position: BoardPosition
+  ): Move | null {
+    for (const move of this.availibleMoves) {
+      if (positionsArrayHasPosition(move.clickablePositions, position))
+        return move;
     }
-    return matchingMoves[0];
+    return null;
   }
 
-  public async performMove(move: Move) {
-    this.selectedPiece = null;
-    this.game.performMove(move);
-  }
-
-  private get selectedCell(): BoardPosition | null {
-    return this._selectedCell;
-  }
-
-  private showCellCapturingPieces(position: BoardPosition) {
+  private markCellCapturingPieces(position: BoardPosition) {
     const paths = getTargetMatchingPaths(position, [
       ...this.game.whiteCapturingPaths.value,
       ...this.game.blackCapturingPaths.value,
@@ -177,141 +140,197 @@ class GameBoardManager extends BoardManager {
     }
   }
 
-  private set selectedCell(position: BoardPosition | null) {
-    this.clearSelectedCells();
-    this.clearCellsMarks();
-    this._selectedCell = null;
+  private selectCell(position: BoardPosition) {
+    if (this.selectedCell.value) {
+      throw new GameLogicError(
+        `Cannot select cell. Cell "${JSON.stringify(
+          this.selectedCell.value
+        )}" is already selected.`
+      );
+    }
+    this.selectedCell.value = position;
+    if (this.game.settings.markCellCapturingPieces.value)
+      this.markCellCapturingPieces(position);
+  }
 
-    if (!position) {
+  private unselectCell() {
+    if (!this.selectedCell.value) {
+      throw new GameLogicError("Cannot unselect Cell if no cell is selected.");
+    }
+    this.selectedCell.value = null;
+    this.clearCellMarks();
+  }
+
+  /**
+   * This method is called by Board component when a user initializes a dragging sequence on a piece.
+   * @method
+   * @param targetPosition
+   * @param pieceContext
+   * @returns
+   */
+  public onPieceDragStart(
+    targetPosition: BoardPosition,
+    pieceContext: PieceContext
+  ): void {
+    this.onPieceDragOverCell(targetPosition, pieceContext);
+    if (!this.selectedPiece.value) {
+      this.onPieceClick(pieceContext);
+      return;
+    }
+    if (!positionsEqual(pieceContext, this.selectedPiece.value))
+      this.onPieceClick(pieceContext);
+  }
+
+  /**
+   * This function is called by BoardComponent when the user dragging a piece moves from one position (cell) to another.
+   * @method
+   * @param targetPosition
+   * @param pieceContext
+   * @returns
+   */
+  public onPieceDragOverCell(
+    targetPosition: BoardPosition,
+    pieceContext: PieceContext
+  ): void {
+    // A dragged piece can be returned to its original position.
+    if (positionsEqual(targetPosition, pieceContext)) {
+      this.draggingOverCell.value = targetPosition;
       return;
     }
 
-    this.selectedCells.value.push(position);
-    if (this.game.settings.showCapturingPieces.value)
-      this.showCellCapturingPieces(position);
+    const matchingMove =
+      this.getAvailibleMoveWithClickablePosition(targetPosition);
 
-    this._selectedCell = position;
+    this.draggingOverCell.value = matchingMove ? targetPosition : null;
   }
 
-  public unselectContent() {
-    this.selectedPiece = null;
-    this.selectedCell = null;
+  private temporarilyActivateDragEndTimeout() {
+    this.dragEndTimeoutActive = true;
+    setTimeout(() => {
+      this.dragEndTimeoutActive = false;
+    }, 100);
   }
 
-  private getMoveIfPossible(position: BoardPosition): Move | null {
-    if (this.game.winner.value !== "none") return null;
-    if (!this.availibleMoves || !this.selectedPiece) return null;
+  /**
+   * This method is called by Board component when the user dragging a Piece ends the dragging sequence.
+   * @method
+   * @param targetPosition
+   * @returns
+   */
+  public onPieceDragEnd(targetPosition: BoardPosition): void {
+    this.temporarilyActivateDragEndTimeout();
+    this.draggingOverCell.value = null;
+    const matchingMove =
+      this.getAvailibleMoveWithClickablePosition(targetPosition);
+    if (!matchingMove) {
+      return;
+    }
+    this.registerMove(matchingMove);
+  }
+
+  private isMovePerformationPermitted(piece: Piece) {
+    // Do not allow opponent on his checkboard to play moves for the player and vice versa.
     if (this.game.settings.secondCheckboardEnabled.value) {
-      if (
-        this.selectedPiece.piece.color !== this.game.playerColor.value &&
-        this.playerBoard
-      )
-        return null;
-      if (
-        this.selectedPiece.piece.color === this.game.playerColor.value &&
-        !this.playerBoard
-      )
-        return null;
+      if (piece.color !== this.game.playerColor.value && this.isPlayerBoard)
+        return false;
+      if (piece.color === this.game.playerColor.value && !this.isPlayerBoard)
+        return false;
     }
-    if (this.selectedPiece.piece.color !== this.game.playingColor.value)
-      return null;
-    const matchingMove = this.getPositionMatchingMove(position);
-    if (!matchingMove) {
-      return null;
-    }
-    return matchingMove;
-  }
 
-  private moveToIfPossible(position: BoardPosition): boolean {
-    const matchingMove = this.getMoveIfPossible(position);
-    if (!matchingMove) {
-      return false;
-    }
-    this.performMove(matchingMove);
+    // Do not allow player that is not playing to perform a move.
+    if (piece.color !== this.game.playingColor.value) return false;
+
+    // Do not allow move to be performed if game is decided.
+    if (this.game.winner.value !== "none") return false;
+
     return true;
   }
 
-  public onPieceDragStart(
-    targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
-  ): void {
-    this.onPieceDragOverCell(targetPosition, pieceProps);
-    if (this.selectedPiece === null) {
-      this.onPieceClick(pieceProps);
+  /**
+   * This method is called by Board component to let know its manager that user has clicked a piece with provided piece context.
+   * @method
+   * @param pieceContext
+   * @returns
+   */
+  public onPieceClick = (pieceContext: PieceContext): void => {
+    if (this.dragEndTimeoutActive) return;
+
+    // Select a piece.
+    if (!this.selectedPiece.value) {
+      if (this.selectedCell.value) this.unselectCell();
+      this.selectPiece(pieceContext);
       return;
     }
-    if (!positionsEqual(pieceProps, this.selectedPiece))
-      this.onPieceClick(pieceProps);
-  }
 
-  public onPieceDragOverCell(
-    targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
-  ): void {
-    this.clearDraggingOverCells();
-    if (
-      this.getMoveIfPossible(targetPosition) !== null ||
-      positionsEqual(pieceProps, targetPosition)
-    ) {
-      this.draggingOverCells.value.push(targetPosition);
-    }
-  }
-
-  public onPieceDragEnd(targetPosition: BoardPosition): void {
-    this.dragEndTimeout = true;
-    setTimeout(() => {
-      this.dragEndTimeout = false;
-    }, 100);
-    this.clearDraggingOverCells();
-    const matchingMove = this.getMoveIfPossible(targetPosition);
-    if (matchingMove !== null) {
-      this.performMove(matchingMove);
-    }
-  }
-
-  // Called by Board component
-  public onPieceClick(pieceProps: BoardPieceProps): void {
-    if (this.dragEndTimeout) return;
-    const moved = this.moveToIfPossible(pieceProps);
-    if (moved) return;
-
-    // Unselect cell
-    if (this.selectedCell) this.selectedCell = null;
-    if (this.selectedPiece === null) {
-      this.selectedPiece = pieceProps;
+    // Toggle piece selection.
+    if (positionsEqual(this.selectedPiece.value, pieceContext)) {
+      this.unselectPiece();
       return;
     }
-    if (!positionsEqual(this.selectedPiece, pieceProps)) {
-      this.selectedPiece = pieceProps;
+
+    // Do not check for move if there are none availible.
+    if (!this.availibleMoves) return;
+
+    if (!this.isMovePerformationPermitted(this.selectedPiece.value.piece))
       return;
-    }
-    this.selectedPiece = null;
+
+    // Perform move on piece.
+    const matchingMove =
+      this.getAvailibleMoveWithClickablePosition(pieceContext);
+
+    if (!matchingMove) return;
+
+    this.registerMove(matchingMove);
+  };
+
+  private registerMove(move: Move) {
+    this.unselectPiece();
+    this.game.performMove(move);
   }
 
-  // Called by Board component
+  /**
+   * This method is called by Board component to let know its manager that user has clicked a cell with provided piece position.
+   * @method
+   * @param position
+   * @returns
+   */
   public onCellClick(position: BoardPosition): void {
-    // Check if cell is on any of the clickable position of any of the availible moves
-    const moved = this.moveToIfPossible(position);
-    if (moved) return;
+    if (this.dragEndTimeoutActive) return;
 
-    // Take the cell click as a piece click if no move was performed on that position. This is useful if the cells with pieces are selected using tabindex.
-    const piece = this.game.gameBoardState[position.row][position.col];
-    if (piece) {
+    // Select a cell.
+    if (!this.selectedCell.value && !this.selectedPiece.value) {
+      this.selectCell(position);
+      return;
+    }
+
+    // Toggle cell selection.
+    if (this.selectedCell.value && !this.selectedPiece.value) {
+      if (positionsEqual(this.selectedCell.value, position)) {
+        this.unselectCell();
+        return;
+      }
+    }
+
+    if (!this.selectedPiece.value) {
+      // Take the cell click as a piece click if no move was performed on that position and there is a piece in that position. This is useful if the cells with pieces are selected using tabindex.
+      const piece = this.game.gameBoardState[position.row][position.col];
+      if (!piece) return;
       this.onPieceClick({ ...position, piece });
       return;
     }
 
-    // Unselect piece
-    if (this.selectedPiece) this.selectedPiece = null;
-    if (this.selectedCell === null) {
-      this.selectedCell = position;
+    // Do not check for move if there are none availible.
+    if (!this.availibleMoves) return;
+
+    if (!this.isMovePerformationPermitted(this.selectedPiece.value.piece))
       return;
-    }
-    if (!positionsEqual(this.selectedCell, position)) {
-      this.selectedCell = position;
-      return;
-    }
-    this.selectedCell = null;
+
+    // Perform move on cell.
+    const matchingMove = this.getAvailibleMoveWithClickablePosition(position);
+
+    if (!matchingMove) return;
+
+    this.registerMove(matchingMove);
   }
 }
 

@@ -1,4 +1,4 @@
-import { ComputedRef } from "vue";
+import { ComputedRef, computed, reactive, ref } from "vue";
 import type { Mark } from "../components/Cell.vue";
 import type { Piece, PieceId } from "./pieces/piece";
 import type { RawPiece } from "./pieces/raw_piece";
@@ -12,22 +12,38 @@ export interface BoardPosition {
   row: number;
   col: number;
 }
+
+// export class BoardPosition {
+//   constructor(public readonly row: number, public readonly col: number) {}
+
+//   public equals(position: BoardPosition) {
+//     return this.row === position.row && this.col === position.col;
+//   }
+
+//   isInList(positions: BoardPosition[]) {
+//     for (const position of positions) {
+//       if (position.equals(this)) return true;
+//     }
+//     return false;
+//   }
+// }
+
 export function isBoardPosition(object: any): object is BoardPosition {
   if (typeof object.row !== "number") return false;
   if (typeof object.col !== "number") return false;
   return true;
 }
 
-export interface BoardPieceProps extends BoardPosition {
+export interface PieceContext extends BoardPosition {
   piece: Piece;
 }
 
-export interface RawBoardPieceProps extends BoardPosition {
+export interface RawBoardpieceContext extends BoardPosition {
   piece: RawPiece;
 }
-export function isRawBoardPieceProps(
+export function isRawBoardpieceContext(
   object: any
-): object is RawBoardPieceProps {
+): object is RawBoardpieceContext {
   if (typeof object.row !== "number") return false;
   if (typeof object.col !== "number") return false;
   if (typeof object.piece !== "object") return false;
@@ -38,31 +54,38 @@ export function isRawBoardPieceProps(
 export const CHAR_INDEXES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 abstract class BoardManager {
-  constructor(
-    public readonly cellMarks: MarkBoardState,
-    public readonly contentRotated: ComputedRef<boolean>
-  ) {}
+  public readonly cellMarks: MarkBoardState = reactive(
+    Array(8)
+      .fill(null)
+      .map(() => new Array(8).fill(null))
+  );
+  public readonly contentRotated: ComputedRef<boolean> = computed(() => false);
+  public readonly selectedCell = ref<BoardPosition | null>(null);
+  public readonly draggingOverCell = ref<BoardPosition | null>(null);
+  public readonly selectedPiece = ref<PieceContext | null>(null);
 
-  public abstract onPieceClick(boardPiece: BoardPieceProps): void;
+  constructor() {}
+
+  public abstract onPieceClick(boardPiece: PieceContext): void;
 
   public abstract onCellClick(position: BoardPosition): void;
 
   public abstract onPieceDragStart(
     targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
+    pieceContext: PieceContext
   ): void;
 
   public abstract onPieceDragEnd(
     targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
+    pieceContext: PieceContext
   ): void;
 
   public abstract onPieceDragOverCell(
     targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
+    pieceContext: PieceContext
   ): void;
 
-  protected clearCellsMarks() {
+  protected clearCellMarks() {
     for (const rowIndex in this.cellMarks) {
       for (const colIndex in this.cellMarks[rowIndex]) {
         this.cellMarks[+rowIndex][+colIndex] = null;

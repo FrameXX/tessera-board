@@ -1,17 +1,16 @@
 import type {
-  BoardPieceProps,
+  PieceContext,
   BoardPosition,
   BoardStateValue,
 } from "./board_manager";
 import BoardManager from "./board_manager";
 import type ConfigPieceDialog from "./dialogs/config_piece";
-import { computed, ref, type Ref } from "vue";
+import { type Ref } from "vue";
 import { movePiece } from "./moves/move";
 import { isPositionOnBoard, positionsEqual } from "./utils/game";
 
 class DefaultBoardManager extends BoardManager {
-  private dragEndTimeout: boolean = false;
-  public readonly draggingOverCells = ref<BoardPosition[]>([]);
+  private dragEndTimeoutActive: boolean = false;
 
   constructor(
     private readonly boardStateValue: BoardStateValue,
@@ -21,11 +20,7 @@ class DefaultBoardManager extends BoardManager {
     private readonly pieceRemoveAudioEffect: Howl,
     private readonly vibrationsEnabled: Ref<boolean>
   ) {
-    super(computed(() => false));
-  }
-
-  private clearDraggingOverCells() {
-    this.draggingOverCells.value = [];
+    super();
   }
 
   private isPositionAvailible(position: BoardPosition) {
@@ -37,39 +32,43 @@ class DefaultBoardManager extends BoardManager {
 
   public onPieceDragStart(
     targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
+    pieceContext: PieceContext
   ): void {
-    this.onPieceDragOverCell(targetPosition, pieceProps);
+    this.onPieceDragOverCell(targetPosition, pieceContext);
   }
 
   public onPieceDragOverCell(
     targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
+    pieceContext: PieceContext
   ): void {
-    this.clearDraggingOverCells();
-    if (
-      !this.isPositionAvailible(targetPosition) &&
-      !positionsEqual(pieceProps, targetPosition)
-    ) {
+    // A dragged piece can be returned to its original position.
+    if (positionsEqual(targetPosition, pieceContext)) {
+      this.draggingOverCell.value = targetPosition;
       return;
     }
-    this.draggingOverCells.value.push(targetPosition);
+
+    this.draggingOverCell.value = this.isPositionAvailible(targetPosition)
+      ? targetPosition
+      : null;
+  }
+
+  private temporarilyActivateDragEndTimeout() {
+    this.dragEndTimeoutActive = true;
+    setTimeout(() => {
+      this.dragEndTimeoutActive = false;
+    }, 100);
   }
 
   public async onPieceDragEnd(
     targetPosition: BoardPosition,
-    pieceProps: BoardPieceProps
+    pieceContext: PieceContext
   ) {
-    this.dragEndTimeout = true;
-    setTimeout(() => {
-      this.dragEndTimeout = false;
-    }, 100);
-    this.clearDraggingOverCells();
+    this.temporarilyActivateDragEndTimeout();
     if (!this.isPositionAvailible(targetPosition)) {
       return;
     }
     await movePiece(
-      pieceProps,
+      pieceContext,
       targetPosition,
       this.boardStateValue,
       "default-board"
@@ -77,11 +76,11 @@ class DefaultBoardManager extends BoardManager {
     if (this.audioEffectsEnabled.value) this.pieceMoveAudioEffect.play();
   }
 
-  public onPieceClick(pieceProps: BoardPieceProps): void {
-    if (this.dragEndTimeout) {
+  public onPieceClick(pieceContext: PieceContext): void {
+    if (this.dragEndTimeoutActive) {
       return;
     }
-    this.boardStateValue[pieceProps.row][pieceProps.col] = null;
+    this.boardStateValue[pieceContext.row][pieceContext.col] = null;
     if (this.audioEffectsEnabled.value) this.pieceRemoveAudioEffect.play();
     if (this.vibrationsEnabled.value) navigator.vibrate(30);
   }
