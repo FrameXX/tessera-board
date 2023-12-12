@@ -1,15 +1,10 @@
 import type { Ref } from "vue";
 import NumberUserData from "./number_user_data";
 import { setCSSVariable } from "../utils/elements";
-import type ToastManager from "../toast_manager";
 
 class PieceBorderData extends NumberUserData {
-  constructor(
-    value: number,
-    valueRef: Ref<number>,
-    toastManager: ToastManager
-  ) {
-    super("piece_border", value, toastManager, valueRef);
+  constructor(value: number, valueRef: Ref<number>) {
+    super("piece_border", value, valueRef);
   }
 
   public apply(): void {

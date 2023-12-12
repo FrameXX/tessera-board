@@ -1,18 +1,16 @@
 import type { Ref } from "vue";
-import type ToastManager from "../toast_manager";
 import UserData from "./user_data";
 
 class NumberUserData extends UserData<number> {
   constructor(
     id: string,
     value: number,
-    toastManager: ToastManager,
     valueRef?: Ref<number>,
     private readonly minValue?: number,
     private readonly maxValue?: number,
     autoSave: boolean = true
   ) {
-    super(id, value, toastManager, valueRef, autoSave);
+    super(id, value, valueRef, autoSave);
   }
 
   public dump(): string {

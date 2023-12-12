@@ -1,7 +1,7 @@
 import { computed, ComputedRef } from "vue";
 import type { PieceContext, BoardPosition } from "./board_manager";
 import BoardManager from "./board_manager";
-import type { Piece, PiecesImportance } from "./pieces/piece";
+import type { Piece } from "./pieces/piece";
 import type Game from "./game";
 import type Move from "./moves/move";
 import type { MoveForwardContext } from "./moves/move";
@@ -25,8 +25,7 @@ class GameBoardManager extends BoardManager {
 
   constructor(
     private readonly game: Game,
-    private readonly isPlayerBoard: boolean,
-    private readonly piecesImportance: PiecesImportance
+    private readonly isPlayerBoard: boolean
   ) {
     super();
   }
@@ -62,7 +61,7 @@ class GameBoardManager extends BoardManager {
   private get moveForwardContext(): MoveForwardContext {
     return {
       boardStateValue: this.game.gameBoardState,
-      piecesImportance: this.piecesImportance,
+      piecesImportance: this.game.piecesImportance,
       blackCapturedPieces: this.game.blackCapturedPieces,
       whiteCapturedPieces: this.game.whiteCapturedPieces,
       reviveFromCapturedPieces: this.game.settings.reviveFromCapturedPieces,
@@ -102,6 +101,8 @@ class GameBoardManager extends BoardManager {
         )} is already slected.`
       );
     }
+
+    if (this.selectedCell.value) this.unselectCell();
 
     this.invalidateAvailibleMoves();
     this.selectedPiece.value = pieceContext;
@@ -148,6 +149,9 @@ class GameBoardManager extends BoardManager {
         )}" is already selected.`
       );
     }
+
+    if (this.selectedPiece.value) this.unselectPiece();
+
     this.selectedCell.value = position;
     if (this.game.settings.markCellCapturingPieces.value)
       this.markCellCapturingPieces(position);
@@ -172,6 +176,16 @@ class GameBoardManager extends BoardManager {
     targetPosition: BoardPosition,
     pieceContext: PieceContext
   ): void {
+    // Select piece if not selected already
+    if (this.selectedPiece.value) {
+      if (!positionsEqual(this.selectedPiece.value, pieceContext)) {
+        this.unselectPiece();
+        this.selectPiece(pieceContext);
+      }
+    } else {
+      this.selectPiece(pieceContext);
+    }
+
     this.onPieceDragOverCell(targetPosition, pieceContext);
     if (!this.selectedPiece.value) {
       this.onPieceClick(pieceContext);
@@ -246,6 +260,17 @@ class GameBoardManager extends BoardManager {
     return true;
   }
 
+  private tryToMove(position: BoardPosition): boolean {
+    if (!this.selectedPiece.value) return false;
+    if (!this.availibleMoves) return false;
+    if (!this.isMovePerformationPermitted(this.selectedPiece.value.piece))
+      return false;
+    const matchingMove = this.getAvailibleMoveWithClickablePosition(position);
+    if (!matchingMove) return false;
+    this.registerMove(matchingMove);
+    return true;
+  }
+
   /**
    * This method is called by Board component to let know its manager that user has clicked a piece with provided piece context.
    * @method
@@ -255,32 +280,25 @@ class GameBoardManager extends BoardManager {
   public onPieceClick = (pieceContext: PieceContext): void => {
     if (this.dragEndTimeoutActive) return;
 
-    // Select a piece.
+    // Select piece if none is selected.
     if (!this.selectedPiece.value) {
-      if (this.selectedCell.value) this.unselectCell();
       this.selectPiece(pieceContext);
       return;
     }
 
-    // Toggle piece selection.
+    // Unselect piece if the same piece was clicked.
     if (positionsEqual(this.selectedPiece.value, pieceContext)) {
       this.unselectPiece();
       return;
     }
 
-    // Do not check for move if there are none availible.
-    if (!this.availibleMoves) return;
+    const moved = this.tryToMove(pieceContext);
 
-    if (!this.isMovePerformationPermitted(this.selectedPiece.value.piece))
-      return;
+    if (moved) return;
 
-    // Perform move on piece.
-    const matchingMove =
-      this.getAvailibleMoveWithClickablePosition(pieceContext);
-
-    if (!matchingMove) return;
-
-    this.registerMove(matchingMove);
+    // Select the piece if there was no move to perform on it.
+    this.unselectPiece();
+    this.selectPiece(pieceContext);
   };
 
   private registerMove(move: Move) {
@@ -297,40 +315,30 @@ class GameBoardManager extends BoardManager {
   public onCellClick(position: BoardPosition): void {
     if (this.dragEndTimeoutActive) return;
 
-    // Select a cell.
-    if (!this.selectedCell.value && !this.selectedPiece.value) {
-      this.selectCell(position);
+    if (this.selectedCell.value) {
+      // Unselect cell if the same cell was clicked and select another one if different was clicked.
+      const clickedSameCell = positionsEqual(this.selectedCell.value, position);
+      this.unselectCell();
+      if (!clickedSameCell) {
+        this.selectCell(position);
+      }
       return;
     }
 
-    // Toggle cell selection.
-    if (this.selectedCell.value && !this.selectedPiece.value) {
-      if (positionsEqual(this.selectedCell.value, position)) {
-        this.unselectCell();
+    const moved = this.tryToMove(position);
+
+    if (moved) return;
+
+    // Take the cell click as a piece click if no move was performed on that cell and there is a piece in that cell. This is useful if the cells with pieces are selected using tabindex.
+    if (!this.selectedPiece.value) {
+      const piece = this.game.gameBoardState[position.row][position.col];
+      if (piece) {
+        this.onPieceClick({ ...position, piece });
         return;
       }
     }
 
-    if (!this.selectedPiece.value) {
-      // Take the cell click as a piece click if no move was performed on that position and there is a piece in that position. This is useful if the cells with pieces are selected using tabindex.
-      const piece = this.game.gameBoardState[position.row][position.col];
-      if (!piece) return;
-      this.onPieceClick({ ...position, piece });
-      return;
-    }
-
-    // Do not check for move if there are none availible.
-    if (!this.availibleMoves) return;
-
-    if (!this.isMovePerformationPermitted(this.selectedPiece.value.piece))
-      return;
-
-    // Perform move on cell.
-    const matchingMove = this.getAvailibleMoveWithClickablePosition(position);
-
-    if (!matchingMove) return;
-
-    this.registerMove(matchingMove);
+    this.selectCell(position);
   }
 }
 

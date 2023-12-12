@@ -1,6 +1,5 @@
 import type { Ref } from "vue";
 import SelectUserData from "./select_user_data";
-import type ToastManager from "../toast_manager";
 
 export type PreferredPlayerColor = "white" | "black" | "random";
 function isPreferredPlayerColor(
@@ -13,10 +12,9 @@ class PlayerColorOptionData extends SelectUserData<PreferredPlayerColor> {
   constructor(
     id: string,
     value: PreferredPlayerColor,
-    valueRef: Ref<PreferredPlayerColor>,
-    toastManager: ToastManager
+    valueRef: Ref<PreferredPlayerColor>
   ) {
-    super(id, value, isPreferredPlayerColor, toastManager, valueRef);
+    super(id, value, isPreferredPlayerColor, valueRef);
   }
 
   public apply(): void {}

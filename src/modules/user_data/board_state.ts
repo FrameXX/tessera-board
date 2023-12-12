@@ -8,10 +8,9 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     value: BoardStateValue,
     reactiveValue?: BoardStateValue,
-    toastManager?: ToastManager,
     autoSave: boolean = true
   ) {
-    super("game_board_state", value, reactiveValue, toastManager, autoSave);
+    super("game_board_state", value, reactiveValue, autoSave);
   }
 
   get rawVersion() {
@@ -24,14 +23,18 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
     return JSON.stringify(this.rawVersion);
   }
 
-  public load(dumped: string, fromRaw: boolean = false): void {
-    const value = this.safelyParse(dumped);
+  public load(
+    dumped: string,
+    toastManager: ToastManager,
+    fromRaw: boolean = false
+  ): void {
+    const value = this.safelyParse(dumped, toastManager);
     if (!value) {
       return;
     }
     if (!Array.isArray(value)) {
       console.error("The parsed value of board state is not an array");
-      this.handleInvalidLoadValue(dumped);
+      this.handleInvalidLoadValue(dumped, toastManager);
       return;
     }
     for (const rowIndex in value) {

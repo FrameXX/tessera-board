@@ -323,8 +323,8 @@ onMounted(() => {
           @pointerdown="onPiecePointerStart($event, pieceContext)"
           :selected="
             cellIsPosition(
-              pieceContext.row,
-              pieceContext.col,
+              8 - pieceContext.row,
+              pieceContext.col + 1,
               props.manager.selectedPiece.value
             )
           "

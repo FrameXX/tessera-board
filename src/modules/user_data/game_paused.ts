@@ -8,20 +8,16 @@ export function isGamePausedState(string: string): string is GamePausedState {
 }
 
 class GamePausedData extends SelectUserData<GamePausedState> {
-  constructor(
-    value: GamePausedState,
-    toastManager: ToastManager,
-    valueRef?: Ref<GamePausedState>
-  ) {
-    super("game_paused", value, isGamePausedState, toastManager, valueRef);
+  constructor(value: GamePausedState, valueRef?: Ref<GamePausedState>) {
+    super("game_paused", value, isGamePausedState, valueRef);
   }
 
-  public load(dumped: string): void {
+  public load(dumped: string, toastManager: ToastManager): void {
     if (!this.validate(dumped)) {
       console.error(
         `An error occured while trying to parse game_paused user data ${this.id}.`
       );
-      this.handleInvalidLoadValue(dumped);
+      this.handleInvalidLoadValue(dumped, toastManager);
       return;
     }
 

@@ -1,5 +1,4 @@
 import { toRaw, watch } from "vue";
-import type ToastManager from "../toast_manager";
 import UserData from "./user_data";
 
 /**
@@ -10,11 +9,10 @@ abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
     id: string,
     value: ValueType,
     protected reactiveValue?: ValueType,
-    toastManager?: ToastManager,
     autoSave: boolean = true,
     private readonly saveImmidiately = false
   ) {
-    super(id, value, toastManager);
+    super(id, value);
 
     if (autoSave && this.reactiveValue) {
       watch(reactiveValue!, (newValue) => {

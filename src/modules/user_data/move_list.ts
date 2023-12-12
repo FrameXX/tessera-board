@@ -8,13 +8,8 @@ import Promotion from "../moves/promotion";
 import Castling from "../moves/castling";
 
 class MoveListData extends UserData<Move[]> {
-  constructor(
-    id: string,
-    value: Move[],
-    valueRef: Ref<Move[]>,
-    toastManager: ToastManager
-  ) {
-    super(id, value, toastManager, valueRef, false);
+  constructor(id: string, value: Move[], valueRef: Ref<Move[]>) {
+    super(id, value, valueRef, false);
   }
 
   get rawVersion() {
@@ -27,36 +22,36 @@ class MoveListData extends UserData<Move[]> {
     return JSON.stringify(this.rawVersion);
   }
 
-  public load(dumped: string): void {
-    const rawMoves = this.safelyParse(dumped);
+  public load(dumped: string, toastManager: ToastManager): void {
+    const rawMoves = this.safelyParse(dumped, toastManager);
     if (!rawMoves) {
       return;
     }
     if (!Array.isArray(rawMoves)) {
       console.error("The parsed value of move list is not an array");
-      this.handleInvalidLoadValue(dumped);
+      this.handleInvalidLoadValue(dumped, toastManager);
       return;
     }
     const moves: Move[] = [];
     for (const rawMove of rawMoves) {
       if (!isRawMove(rawMove)) {
         console.error("The parsed value of move list is not an array");
-        this.handleInvalidLoadValue(dumped);
+        this.handleInvalidLoadValue(dumped, toastManager);
         return;
       }
       let move: Move;
       switch (rawMove.moveId) {
-      case "shift":
-        move = Shift.restore(rawMove);
-        break;
-      case "promotion":
-        move = Promotion.restore(rawMove);
-        break;
-      case "castling":
-        move = Castling.restore(rawMove);
-        break;
-      default:
-        return;
+        case "shift":
+          move = Shift.restore(rawMove);
+          break;
+        case "promotion":
+          move = Promotion.restore(rawMove);
+          break;
+        case "castling":
+          move = Castling.restore(rawMove);
+          break;
+        default:
+          return;
       }
       move.loadCustomProps(rawMove);
       moves.push(move);

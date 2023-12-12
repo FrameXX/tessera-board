@@ -24,7 +24,6 @@ import UI from "./ui";
 import UserDataManager from "./user_data_manager";
 import BooleanUserData from "./user_data/boolean_user_data";
 import HueData from "./user_data/hue";
-import RequireMoveConfirmData from "./user_data/require_move_confirm";
 import SelectUserData from "./user_data/select_user_data";
 import GamePausedData from "./user_data/game_paused";
 import PieceBorderData from "./user_data/piece_border";
@@ -79,13 +78,11 @@ class Game {
   public readonly gameBoardStateData = new BoardStateData(
     this.gameBoardState,
     this.gameBoardState,
-    this.ui.toastManager,
     false
   );
   public readonly defaultBoardStateData = new RawBoardStateData(
     this.settings.defaultBoardState,
-    this.settings.defaultBoardState,
-    this.ui.toastManager
+    this.settings.defaultBoardState
   );
   public readonly whiteCapturingPaths = ref<Path[]>([]);
   public readonly blackCapturingPaths = ref<Path[]>([]);
@@ -102,7 +99,6 @@ class Game {
   public readonly lastMoveIndexData = new NumberUserData(
     "move_index",
     this.lastMoveIndex.value,
-    this.ui.toastManager,
     this.lastMoveIndex,
     undefined,
     undefined,
@@ -112,8 +108,7 @@ class Game {
   public readonly moveListData = new MoveListData(
     "move_list",
     this.moveList.value,
-    this.moveList,
-    this.ui.toastManager
+    this.moveList
   );
   public readonly lastMove = computed(() => {
     if (this.lastMoveIndex.value === -1) {
@@ -126,80 +121,66 @@ class Game {
       new BooleanUserData(
         "vibrations_enabled",
         this.settings.vibrationsEnabled.value,
-        this.ui.toastManager,
         this.settings.vibrationsEnabled
       ),
       new BooleanUserData(
         "auto_pause",
         this.settings.autoPauseGame.value,
-        this.ui.toastManager,
         this.settings.autoPauseGame
       ),
       new HueData(
         this.settings.playerHue.value,
         this.settings.playerHue,
-        false,
-        this.ui.toastManager
+        false
       ),
       new HueData(
         this.settings.opponentHue.value,
         this.settings.opponentHue,
-        true,
-        this.ui.toastManager
+        true
       ),
       new PieceIconPackData(
         this.settings.pieceIconPack.value,
-        this.settings.pieceIconPack,
-        this.ui.toastManager
+        this.settings.pieceIconPack
       ),
       new PiecePaddingData(
         this.settings.piecePadding.value,
-        this.settings.piecePadding,
-        this.ui.toastManager
+        this.settings.piecePadding
       ),
       new PieceBorderData(
         this.settings.pieceBorder.value,
-        this.settings.pieceBorder,
-        this.ui.toastManager
+        this.settings.pieceBorder
       ),
       new TransitionDurationData(
         this.settings.transitionDuration.value,
-        this.settings.transitionDuration,
-        this.ui.toastManager
+        this.settings.transitionDuration
       ),
       new CellIndexOpacityData(
         this.settings.cellIndexOpacity.value,
-        this.settings.cellIndexOpacity,
-        this.ui.toastManager
+        this.settings.cellIndexOpacity
       ),
       new PlayerColorOptionData(
         "preferred_player_color",
         this.settings.preferredPlayerColor.value,
-        this.settings.preferredPlayerColor,
-        this.ui.toastManager
+        this.settings.preferredPlayerColor
       ),
       new PlayerColorOptionData(
         "preferred_first_move_color",
         this.settings.preferredFirstMoveColor.value,
-        this.settings.preferredFirstMoveColor,
-        this.ui.toastManager
+        this.settings.preferredFirstMoveColor
       ),
       new BooleanUserData(
         "show_capturing_pieces",
         this.settings.markCellCapturingPieces.value,
-        this.ui.toastManager,
         this.settings.markCellCapturingPieces
       ),
       new BooleanUserData(
         "second_checkboard",
         this.settings.secondCheckboardEnabled.value,
-        this.ui.toastManager,
         this.settings.secondCheckboardEnabled
       ),
       new NumberUserData(
         "piece_long_press_timeout",
         this.settings.pieceLongPressTimeout.value,
-        this.ui.toastManager,
         this.settings.pieceLongPressTimeout,
         0,
         600
@@ -207,174 +188,135 @@ class Game {
       new BooleanUserData(
         "table_mode",
         this.settings.tableModeEnabled.value,
-        this.ui.toastManager,
         this.settings.tableModeEnabled
       ),
       new BooleanUserData(
         "ignore_pieces_guarded_property",
         this.settings.ignorePiecesGuardedProperty.value,
-        this.ui.toastManager,
         this.settings.ignorePiecesGuardedProperty
       ),
-      new RequireMoveConfirmData(
+      new BooleanUserData(
+        "require_move_confirm",
         this.settings.requireMoveConfirm.value,
-        this.settings.requireMoveConfirm,
-        this.ui.toastManager
+        this.settings.requireMoveConfirm
       ),
       new SelectUserData(
         "player_color",
         this.playerColor.value,
         isPlayerColor,
-        this.ui.toastManager,
         this.playerColor
       ),
       new SelectUserData(
         "theme",
         this.settings.theme.value,
         isTheme,
-        this.ui.toastManager,
         this.settings.theme
       ),
       new SelectUserData(
         "transitions_enabled",
         this.settings.transitions.value,
         isTransitions,
-        this.ui.toastManager,
         this.settings.transitions
       ),
       new SelectUserData(
         "game_over_reason",
         this.winReason.value,
         isWinReason,
-        this.ui.toastManager,
         this.winReason
       ),
       new SelectUserData(
         "seconds_per_move_runout_punishment",
         "random_move",
         isSecondsPerMovePenalty,
-        this.ui.toastManager,
         this.settings.secondsMoveLimitRunOutPunishment
       ),
-      new GamePausedData(this.paused.value, this.ui.toastManager, this.paused),
+      new GamePausedData(this.paused.value, this.paused),
       new BooleanUserData(
         "revive_from_captured_pieces",
         this.settings.reviveFromCapturedPieces.value,
-        this.ui.toastManager,
         this.settings.reviveFromCapturedPieces
       ),
       new BooleanUserData(
         "audio_effects_enabled",
         this.settings.audioEffectsEnabled.value,
-        this.ui.toastManager,
         this.settings.audioEffectsEnabled
       ),
       new CapturedPiecesData(
         this.whiteCapturedPieces.value,
         this.whiteCapturedPieces,
-        "white",
-        this.ui.toastManager
+        "white"
       ),
       new CapturedPiecesData(
         this.blackCapturedPieces.value,
         this.blackCapturedPieces,
-        "black",
-        this.ui.toastManager
+        "black"
       ),
       new NumberUserData(
         "player_seconds_per_move",
         this.settings.playerSecondsPerMove.value,
-        this.ui.toastManager,
         this.settings.playerSecondsPerMove
       ),
       new NumberUserData(
         "opponent_seconds_per_move",
         this.settings.opponentSecondsPerMove.value,
-        this.ui.toastManager,
         this.settings.opponentSecondsPerMove
       ),
       new NumberUserData(
         "player_seconds_per_match",
         this.settings.playerSecondsPerMatch.value,
-        this.ui.toastManager,
         this.settings.playerSecondsPerMatch
       ),
       new NumberUserData(
         "opponent_seconds_per_match",
         this.settings.opponentSecondsPerMatch.value,
-        this.ui.toastManager,
         this.settings.opponentSecondsPerMatch
       ),
-      new NumberUserData(
-        "player_move_seconds",
-        0,
-        this.ui.toastManager,
-        this.playerMoveSeconds
-      ),
-      new NumberUserData(
-        "opponent_move_seconds",
-        0,
-        this.ui.toastManager,
-        this.opponentMoveSeconds
-      ),
-      new NumberUserData(
-        "player_match_seconds",
-        0,
-        this.ui.toastManager,
-        this.playerMatchSeconds
-      ),
+      new NumberUserData("player_move_seconds", 0, this.playerMoveSeconds),
+      new NumberUserData("opponent_move_seconds", 0, this.opponentMoveSeconds),
+      new NumberUserData("player_match_seconds", 0, this.playerMatchSeconds),
       new NumberUserData(
         "opponent_match_seconds",
         0,
-        this.ui.toastManager,
         this.opponentMatchSeconds
       ),
       new NumberUserData(
         "pawn_importance",
         this.settings.pawnImportance.value,
-        this.ui.toastManager,
         this.settings.pawnImportance
       ),
       new NumberUserData(
         "knight_importance",
         this.settings.knightImportance.value,
-        this.ui.toastManager,
         this.settings.knightImportance
       ),
       new NumberUserData(
         "bishop_importance",
         this.settings.bishopImportance.value,
-        this.ui.toastManager,
         this.settings.bishopImportance
       ),
       new NumberUserData(
         "rook_importance",
         this.settings.rookImportance.value,
-        this.ui.toastManager,
         this.settings.rookImportance
       ),
       new NumberUserData(
         "queen_importance",
         this.settings.queenImportance.value,
-        this.ui.toastManager,
         this.settings.queenImportance
       ),
       new NumberUserData(
         "king_importance",
         this.settings.kingImportance.value,
-        this.ui.toastManager,
         this.settings.kingImportance
       ),
       new NumberUserData(
         "knight_importance",
         this.settings.knightImportance.value,
-        this.ui.toastManager,
         this.settings.knightImportance
       ),
       new BooleanUserData(
         "show_other_availible_moves",
         this.settings.markUnactivePlayerAvailibleMoves.value,
-        this.ui.toastManager,
         this.settings.markUnactivePlayerAvailibleMoves
       ),
       this.defaultBoardStateData,
@@ -472,16 +414,8 @@ class Game {
     this.defaultBoardAllPiecesContext = ref(
       getAllPiecesContext(this.gameBoardState)
     );
-    this.playerBoardManager = new GameBoardManager(
-      this,
-      true,
-      this.piecesImportance
-    );
-    this.opponentBoardManager = new GameBoardManager(
-      this,
-      false,
-      this.piecesImportance
-    );
+    this.playerBoardManager = new GameBoardManager(this, true);
+    this.opponentBoardManager = new GameBoardManager(this, false);
 
     this.visited = localStorage.getItem("tessera_board-visited");
     if (this.visited === null) {
@@ -723,7 +657,11 @@ class Game {
   }
 
   private setupDefaultBoardState() {
-    this.gameBoardStateData.load(this.defaultBoardStateData.dump(), true);
+    this.gameBoardStateData.load(
+      this.defaultBoardStateData.dump(),
+      this.ui.toastManager,
+      true
+    );
     this.gameBoardStateData.updateReference();
   }
 

@@ -1,23 +1,12 @@
 import ComplexUserData from "./complex_user_data";
-import type ToastManager from "../toast_manager";
 import type { BoardStateValue } from "../board_manager";
 import { getPieceFromRaw } from "../pieces/raw_piece";
 import { getRawPiece, isRawPiece } from "../utils/game";
+import ToastManager from "../toast_manager";
 
 class RawBoardStateData extends ComplexUserData<BoardStateValue> {
-  constructor(
-    value: BoardStateValue,
-    valueReactive: BoardStateValue,
-    toastManager: ToastManager
-  ) {
-    super(
-      "default_board_state",
-      value,
-      valueReactive,
-      toastManager,
-      true,
-      true
-    );
+  constructor(value: BoardStateValue, valueReactive: BoardStateValue) {
+    super("default_board_state", value, valueReactive, true, true);
   }
 
   get rawVersion() {
@@ -30,14 +19,14 @@ class RawBoardStateData extends ComplexUserData<BoardStateValue> {
     return JSON.stringify(this.rawVersion);
   }
 
-  public load(dumped: string): void {
-    const value = this.safelyParse(dumped);
+  public load(dumped: string, toastManager: ToastManager): void {
+    const value = this.safelyParse(dumped, toastManager);
     if (!value) {
       return;
     }
     if (!Array.isArray(value)) {
       console.error("The parsed value of raw board state is not an array");
-      this.handleInvalidLoadValue(dumped);
+      this.handleInvalidLoadValue(dumped, toastManager);
       return;
     }
     for (const rowIndex in value) {

@@ -29,8 +29,8 @@ import InfoCard from "./components/InfoCard.vue";
 
 const game = new Game();
 
-inject("pieceIconPack", game.settings.pieceIconPack);
-
+provide("durationDialog", game.ui.durationDialog);
+provide("pieceIconPack", game.settings.pieceIconPack);
 const pixelsPerCm = getPixelsPerCm();
 provide("pixelsPerCm", pixelsPerCm);
 

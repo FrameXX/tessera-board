@@ -1,15 +1,9 @@
 import type { Ref } from "vue";
-import type ToastManager from "../toast_manager";
 import UserData from "./user_data";
 
 export class BooleanUserData extends UserData<boolean> {
-  constructor(
-    id: string,
-    value: boolean,
-    toastManager: ToastManager,
-    valueRef?: Ref<boolean>
-  ) {
-    super(id, value, toastManager, valueRef);
+  constructor(id: string, value: boolean, valueRef?: Ref<boolean>) {
+    super(id, value, valueRef);
   }
 
   public dump(): string {
