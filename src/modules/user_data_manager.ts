@@ -48,7 +48,7 @@ class UserDataManager {
     let recoverError = false;
     for (const entry of this.entries) {
       try {
-        entry.recover();
+        entry.recover(this.toastManager);
       } catch (error) {
         console.error(
           `An unexpected error occured when restoring ${entry.id}. No data was restored. Data may be corrupted or invalid. Alerting user.`,

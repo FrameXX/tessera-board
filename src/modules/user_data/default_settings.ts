@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import Rook from "../pieces/rook";
 import Bishop from "../pieces/bishop";
 import King from "../pieces/king";
@@ -45,7 +45,7 @@ const defualtSettings = {
   cellIndexOpacity: ref(90),
   pieceLongPressTimeout: ref(0),
   requireMoveConfirm: ref(false),
-  defaultBoardState: [
+  defaultBoardState: reactive([
     [
       new Rook("white"),
       new Knight("white"),
@@ -90,7 +90,7 @@ const defualtSettings = {
       new Knight("black"),
       new Rook("black"),
     ],
-  ],
+  ]),
 };
 
 export default defualtSettings;

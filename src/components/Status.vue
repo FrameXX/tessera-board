@@ -6,46 +6,83 @@ import {
   type MinSecTime,
   getDigitStr,
 } from "../modules/utils/misc";
-import { Winner } from "../modules/game";
+import Game from "../modules/game";
 
-const TOO_FEW_MOVE_SECONDS = 11;
-const TOO_FEW_MATCH_SECONDS = 31;
+const pulsingMoveSeconds = 11;
+const pulsingMatchSeconds = 31;
 
 const props = defineProps({
-  playerSecsMove: { type: Number, required: true },
-  playerSecsMatch: { type: Number, required: true },
-  opponentSecsMove: { type: Number, required: true },
-  opponentSecsMatch: { type: Number, required: true },
-  playerSecondsPerMoveSet: { type: Boolean, required: true },
-  opponentSecondsPerMoveSet: { type: Boolean, required: true },
-  playerSecondsPerMatchSet: { type: Boolean, required: true },
-  opponentSecondsPerMatchSet: { type: Boolean, required: true },
-  playerPlaying: { type: Boolean, required: true },
-  lastMoveIndex: { type: Number, required: true },
-  statusText: { type: String, required: true },
-  winner: { type: String as PropType<Winner>, required: true },
+  game: { type: Object as PropType<Game>, required: true },
 });
 
 const playerTimeMove = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.playerSecsMove);
+  return getMinsAndSecsTime(props.game.playerRemainingMoveSeconds.value);
 });
 const playerTimeMatch = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.playerSecsMatch);
+  return getMinsAndSecsTime(props.game.playerRemainingMatchSeconds.value);
 });
 const opponentTimeMove = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.opponentSecsMove);
+  return getMinsAndSecsTime(props.game.opponentRemainingMoveSeconds.value);
 });
 const opponentTimeMatch = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.opponentSecsMatch);
+  return getMinsAndSecsTime(props.game.opponentRemainingMatchSeconds.value);
 });
 
 const primaryClass = computed<"player" | "opponent" | "none">(() => {
-  if (props.winner === "none") {
-    return props.playerPlaying ? "player" : "opponent";
-  } else if (props.winner !== "draw") {
-    return props.winner;
+  if (props.game.winner.value === "none") {
+    return props.game.playerPlaying.value ? "player" : "opponent";
+  } else if (props.game.winner.value !== "draw") {
+    return props.game.winner.value;
   }
   return "none";
+});
+const playerSecondsPerMoveSet = computed(() => {
+  return props.game.settings.playerSecondsPerMove.value !== 0;
+});
+const opponentSecondsPerMoveSet = computed(() => {
+  return props.game.settings.opponentSecondsPerMove.value !== 0;
+});
+const playerSecondsPerMatchSet = computed(() => {
+  return props.game.settings.playerSecondsPerMatch.value !== 0;
+});
+const opponentSecondsPerMatchSet = computed(() => {
+  return props.game.settings.opponentSecondsPerMatch.value !== 0;
+});
+
+const playerMoveSecondsPulsing = computed(() => {
+  return (
+    props.game.playerRemainingMoveSeconds.value < pulsingMoveSeconds &&
+    props.game.playerRemainingMoveSeconds.value > 0 &&
+    props.game.playerPlaying.value &&
+    props.game.winner.value === "none"
+  );
+});
+
+const playerMatchSecondsPulsing = computed(() => {
+  return (
+    props.game.playerRemainingMatchSeconds.value < pulsingMatchSeconds &&
+    props.game.playerRemainingMatchSeconds.value > 0 &&
+    props.game.playerPlaying.value &&
+    props.game.winner.value === "none"
+  );
+});
+
+const opponentMoveSecondsPulsing = computed(() => {
+  return (
+    props.game.opponentRemainingMoveSeconds.value < pulsingMoveSeconds &&
+    props.game.opponentRemainingMoveSeconds.value > 0 &&
+    props.game.playerPlaying.value &&
+    props.game.winner.value === "none"
+  );
+});
+
+const opponentMatchSecondsPulsing = computed(() => {
+  return (
+    props.game.opponentRemainingMatchSeconds.value < pulsingMatchSeconds &&
+    props.game.opponentRemainingMatchSeconds.value > 0 &&
+    props.game.playerPlaying.value &&
+    props.game.winner.value === "none"
+  );
 });
 </script>
 
@@ -53,18 +90,14 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
   <div id="status">
     <div
       id="timers-player-wrapper"
-      v-show="props.playerSecondsPerMoveSet || props.playerSecondsPerMatchSet"
+      v-show="playerSecondsPerMoveSet || playerSecondsPerMatchSet"
     >
       <div id="timers-player">
         <InfoText
-          v-show="props.playerSecondsPerMoveSet"
+          v-show="playerSecondsPerMoveSet"
           content-role="timer"
           :class="{
-            pulsing:
-              props.playerSecsMove < TOO_FEW_MOVE_SECONDS &&
-              props.playerSecsMove > 0 &&
-              props.playerPlaying &&
-              winner === 'none',
+            pulsing: playerMoveSecondsPulsing,
           }"
           name="move"
           >{{
@@ -74,14 +107,10 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
           }}</InfoText
         >
         <InfoText
-          v-show="props.playerSecondsPerMatchSet"
+          v-show="playerSecondsPerMatchSet"
           content-role="timer"
           :class="{
-            pulsing:
-              props.playerSecsMatch < TOO_FEW_MATCH_SECONDS &&
-              props.playerSecsMatch > 0 &&
-              props.playerPlaying &&
-              winner === 'none',
+            pulsing: playerMatchSecondsPulsing,
           }"
           name="match"
           >{{
@@ -94,27 +123,21 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
     </div>
 
     <div id="status-text" :class="primaryClass">
-      <InfoText :name="`Move #${props.lastMoveIndex + 2}`">{{
-        props.statusText
+      <InfoText :name="`Move #${props.game.lastMoveIndex.value + 2}`">{{
+        props.game.status.value
       }}</InfoText>
     </div>
 
     <div
       id="timers-opponent-wrapper"
-      v-show="
-        props.opponentSecondsPerMoveSet || props.opponentSecondsPerMatchSet
-      "
+      v-show="opponentSecondsPerMoveSet || opponentSecondsPerMatchSet"
     >
       <div id="timers-opponent">
         <InfoText
-          v-show="props.opponentSecondsPerMoveSet"
+          v-show="opponentSecondsPerMoveSet"
           content-role="timer"
           :class="{
-            pulsing:
-              props.opponentSecsMove < TOO_FEW_MOVE_SECONDS &&
-              props.opponentSecsMove > 0 &&
-              !props.playerPlaying &&
-              winner === 'none',
+            pulsing: opponentMoveSecondsPulsing,
           }"
           name="move"
           >{{
@@ -124,14 +147,10 @@ const primaryClass = computed<"player" | "opponent" | "none">(() => {
           }}</InfoText
         >
         <InfoText
-          v-show="props.opponentSecondsPerMatchSet"
+          v-show="opponentSecondsPerMatchSet"
           content-role="timer"
           :class="{
-            pulsing:
-              props.opponentSecsMatch < TOO_FEW_MATCH_SECONDS &&
-              props.opponentSecsMatch > 0 &&
-              !props.playerPlaying &&
-              winner === 'none',
+            pulsing: opponentMatchSecondsPulsing,
           }"
           name="match"
           >{{

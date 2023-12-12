@@ -32,7 +32,11 @@ import PlayerColorOptionData from "./user_data/preferred_player_color";
 import CellIndexOpacityData from "./user_data/cell_index_opacity";
 import TransitionDurationData from "./user_data/transition_duration";
 import CapturedPiecesData from "./user_data/captured_pieces";
-import { hideSplashscreen, setSaturationMultiplier } from "./utils/elements";
+import {
+  hideSplashscreen,
+  setSaturationMultiplier,
+  updatePieceColors,
+} from "./utils/elements";
 import defualtSettings from "./user_data/default_settings";
 import type {
   MoveExecution,
@@ -63,6 +67,30 @@ class Game {
   public readonly pieceRemoveAudioEffect = new Howl({
     src: [removeAudioEffectUrl],
   });
+
+  public playerRemainingMoveSeconds = computed(() => {
+    return (
+      this.settings.playerSecondsPerMove.value - this.playerMoveSeconds.value
+    );
+  });
+  public opponentRemainingMoveSeconds = computed(() => {
+    return (
+      this.settings.opponentSecondsPerMove.value -
+      this.opponentMoveSeconds.value
+    );
+  });
+  public playerRemainingMatchSeconds = computed(() => {
+    return (
+      this.settings.playerSecondsPerMatch.value - this.playerMatchSeconds.value
+    );
+  });
+  public opponentRemainingMatchSeconds = computed(() => {
+    return (
+      this.settings.opponentSecondsPerMatch.value -
+      this.opponentMatchSeconds.value
+    );
+  });
+
   public readonly ui = new UI(this);
   public readonly settings = defualtSettings;
   public readonly gameBoardState = [
@@ -116,6 +144,10 @@ class Game {
     }
     return this.moveList.value[this.lastMoveIndex.value];
   });
+
+  /**
+   * User data manager takes care of dumping and loading data to and from localStorage.
+   */
   userDataManager = new UserDataManager(
     [
       new BooleanUserData(
@@ -327,6 +359,7 @@ class Game {
     this.ui.confirmDialog,
     this.ui.toastManager
   );
+
   public readonly piecesImportance: PiecesImportance = {
     rook: this.settings.rookImportance,
     knight: this.settings.knightImportance,
@@ -335,6 +368,7 @@ class Game {
     queen: this.settings.queenImportance,
     king: this.settings.kingImportance,
   };
+
   public readonly playerMoveSecondsTimer: Timer;
   public readonly opponentMoveSecondsTimer: Timer;
   public readonly playerMatchSecondsTimer: Timer;
@@ -350,9 +384,11 @@ class Game {
         : "black";
     return color;
   });
+
   public readonly playerPlaying = computed(() => {
     return this.playerColor.value === this.playingColor.value;
   });
+
   public readonly status = computed(() => {
     let text: string;
     switch (this.winner.value) {
@@ -376,12 +412,14 @@ class Game {
     }
     return text;
   });
+
   public readonly highlightedCells = computed(() => {
     if (!this.lastMove.value) {
       return [];
     }
     return this.lastMove.value.highlightedBoardPositions;
   });
+
   public readonly gameBoardAllPiecesContext: Ref<PieceContext[]>;
   public readonly defaultBoardAllPiecesContext: Ref<PieceContext[]>;
   public readonly playerBoardManager: GameBoardManager;
@@ -394,6 +432,7 @@ class Game {
     this.pieceRemoveAudioEffect,
     this.settings.vibrationsEnabled
   );
+
   public readonly rotated = computed(() => {
     if (!this.settings.tableModeEnabled.value) {
       return false;
@@ -401,6 +440,7 @@ class Game {
     const rotated = this.playingColor.value === "black";
     return rotated;
   });
+
   private readonly transitionsManager = new TransitionsManager(
     this.settings.transitions
   );
@@ -426,6 +466,19 @@ class Game {
     this.userDataManager.onRecoverCheck();
     this.userDataManager.applyData();
     this.userDataManager.updateReferences();
+
+    watch(this.rotated, (newValue) => {
+      this.ui.updateScreenRotation(newValue);
+    });
+    watch(this.playerPlaying, (newValue) => {
+      this.ui.updatePrimaryHue(newValue, this.winner.value);
+    });
+    watch(this.winner, (newValue) => {
+      this.ui.updatePrimaryHue(this.playerPlaying.value, newValue);
+    });
+    watch(this.playerColor, (newValue) => {
+      updatePieceColors(newValue);
+    });
 
     watch(this.settings.defaultBoardState, () => {
       this.defaultBoardAllPiecesContext.value = getAllPiecesContext(

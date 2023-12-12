@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 // Import from packages
-import { ref, onMounted, watch, computed, provide, inject } from "vue";
+import { ref, onMounted, computed, provide } from "vue";
 
 // Import other classes and functions
 import { PIECE_IDS } from "./modules/pieces/piece";
-import { updatePieceColors } from "./modules/utils/elements";
 import ConfigInventory from "./modules/config_inventory";
 import ConfigManager from "./modules/config_manager";
 import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
@@ -31,8 +30,7 @@ const game = new Game();
 
 provide("durationDialog", game.ui.durationDialog);
 provide("pieceIconPack", game.settings.pieceIconPack);
-const pixelsPerCm = getPixelsPerCm();
-provide("pixelsPerCm", pixelsPerCm);
+provide("pixelsPerCm", getPixelsPerCm());
 
 // UI refs are temporary. They are not part of any user data and won't be restored after load.
 const configNameInput = ref<HTMLElement | null>(null);
@@ -50,39 +48,6 @@ const configPieceSelectOptions = computed(() => {
   }
   return pieces;
 });
-const playerSecondsPerMoveSet = computed(() => {
-  return game.settings.playerSecondsPerMove.value !== 0;
-});
-const opponentSecondsPerMoveSet = computed(() => {
-  return game.settings.opponentSecondsPerMove.value !== 0;
-});
-const playerSecondsPerMatchSet = computed(() => {
-  return game.settings.playerSecondsPerMatch.value !== 0;
-});
-const opponentSecondsPerMatchSet = computed(() => {
-  return game.settings.opponentSecondsPerMatch.value !== 0;
-});
-const playerRemainingMoveSeconds = computed(() => {
-  return (
-    game.settings.playerSecondsPerMove.value - game.playerMoveSeconds.value
-  );
-});
-const opponentRemainingMoveSeconds = computed(() => {
-  return (
-    game.settings.opponentSecondsPerMove.value - game.opponentMoveSeconds.value
-  );
-});
-const playerRemainingMatchSeconds = computed(() => {
-  return (
-    game.settings.playerSecondsPerMatch.value - game.playerMatchSeconds.value
-  );
-});
-const opponentRemainingMatchSeconds = computed(() => {
-  return (
-    game.settings.opponentSecondsPerMatch.value -
-    game.opponentMatchSeconds.value
-  );
-});
 
 const defaultBoardConfigInventory = new ConfigInventory(
   "default-board",
@@ -94,19 +59,6 @@ const defaultBoardConfigManager = new ConfigManager(
   [game.defaultBoardStateData],
   game.ui.toastManager
 );
-
-watch(game.rotated, (newValue) => {
-  game.ui.updateScreenRotation(newValue);
-});
-watch(game.playerPlaying, (newValue) => {
-  game.ui.updatePrimaryHue(newValue, game.winner.value);
-});
-watch(game.winner, (newValue) => {
-  game.ui.updatePrimaryHue(game.playerPlaying.value, newValue);
-});
-watch(game.playerColor, (newValue) => {
-  updatePieceColors(newValue);
-});
 
 onMounted(game.mount);
 </script>
@@ -121,20 +73,7 @@ onMounted(game.mount);
   >
   <!-- Relative -->
   <div id="game-area">
-    <Status
-      :player-secs-move="playerRemainingMoveSeconds"
-      :opponent-secs-move="opponentRemainingMoveSeconds"
-      :player-secs-match="playerRemainingMatchSeconds"
-      :opponent-secs-match="opponentRemainingMatchSeconds"
-      :player-seconds-per-move-set="playerSecondsPerMoveSet"
-      :player-seconds-per-match-set="playerSecondsPerMatchSet"
-      :opponent-seconds-per-move-set="opponentSecondsPerMoveSet"
-      :opponent-seconds-per-match-set="opponentSecondsPerMatchSet"
-      :player-playing="game.playerPlaying.value"
-      :last-move-index="game.lastMoveIndex.value"
-      :status-text="game.status.value"
-      :winner="game.winner.value"
-    />
+    <Status :game="game" />
     <div class="captured-pieces-placeholder"></div>
     <div id="boards-area" :class="{ rotated: game.rotated.value }">
       <Board

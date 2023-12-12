@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type PropType, inject } from "vue";
+import { type PropType } from "vue";
 import Backdrop from "./Backdrop.vue";
 import UserOption from "./UserOption.vue";
 import Category from "./Category.vue";
@@ -10,7 +10,6 @@ import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
-import type ConfigsDialog from "../modules/dialogs/configs";
 import ConfigManager from "../modules/config_manager";
 import UserDataManager from "../modules/user_data_manager";
 import { GameSettings } from "../modules/utils/game";
@@ -38,8 +37,6 @@ const props = defineProps({
   },
   game: { type: Object as PropType<Game>, required: true },
 });
-
-const configsDialog = inject("configsDialog") as ConfigsDialog;
 </script>
 
 <template>
@@ -288,7 +285,9 @@ const configsDialog = inject("configsDialog") as ConfigsDialog;
           >
             <button
               class="single"
-              @click="configsDialog.open(defaultBoardConfigManager)"
+              @click="
+                props.game.ui.configsDialog.open(defaultBoardConfigManager)
+              "
             >
               <Icon icon-id="folder-outline" side />Checkboard configurations
             </button>

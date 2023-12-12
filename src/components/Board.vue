@@ -306,7 +306,7 @@ onMounted(() => {
             positionsArrayHasPosition(props.game.highlightedCells.value, {
               row: 8 - row,
               col: col - 1,
-            })
+            }) && props.primary
           "
           :selected="cellIsPosition(row, col, props.manager.selectedCell.value)"
           :drag-over="
