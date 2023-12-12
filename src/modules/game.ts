@@ -13,7 +13,7 @@ import type { PieceContext, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
 import NumberUserData from "./user_data/number_user_data";
 import MoveListData from "./user_data/move_list";
-import type { MovePerformContext } from "./moves/move";
+import type { MoveForwardContext, MovePerformContext } from "./moves/move";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
@@ -930,45 +930,60 @@ class Game {
 
   private onMovePerform() {
     this.onMoveForward();
-    this.checkLoss();
+    this.checkActivePlayerLoss();
   }
 
-  private checkLoss() {
-    const guardedPieces = getGuardedPieces(
+  private checkActivePlayerLoss() {
+    const activePlayerGuardedPieces = getGuardedPieces(
       this.gameBoardAllPiecesContext.value,
       this.playingColor.value
     );
-    const checked = isGuardedPieceChecked(
+    const activePlayerChecked = isGuardedPieceChecked(
       this.gameBoardState,
       this.playingColor.value,
       this.gameBoardAllPiecesContext.value,
-      guardedPieces,
+      activePlayerGuardedPieces,
       this.lastMove
     );
-    if (checked) this.ui.toastManager.showToast("Check!", "cross");
 
-    const canPlayerMove = this.canPlayerMove(
+    if (activePlayerChecked) this.ui.toastManager.showToast("Check!", "cross");
+
+    const canActivePlayerMove = this.canActivePlayerMove(
       this.playingColor.value,
       this.gameBoardAllPiecesContext.value
     );
-    if (!canPlayerMove) {
-      if (checked || guardedPieces.length === 0) {
-        const winReason: WinReason =
-          guardedPieces.length !== 0 ? "block" : "checkmate";
-        this.playerPlaying.value
-          ? this.opponentWin(winReason)
-          : this.playerWin(winReason);
-      } else {
-        this.draw("stalemate");
-      }
+
+    if (canActivePlayerMove) return;
+
+    if (activePlayerChecked || activePlayerGuardedPieces.length === 0) {
+      const winReason: WinReason =
+        activePlayerGuardedPieces.length === 0 ? "block" : "checkmate";
+      this.playerPlaying.value
+        ? this.opponentWin(winReason)
+        : this.playerWin(winReason);
+    } else {
+      this.draw("stalemate");
     }
   }
 
-  private canPlayerMove(color: PlayerColor, pieceContext: PieceContext[]) {
-    for (const props of pieceContext) {
-      if (props.piece.color !== color) continue;
-      const moves = props.piece.getPossibleMoves(
-        props,
+  public get moveForwardContext(): MoveForwardContext {
+    return {
+      boardStateValue: this.gameBoardState,
+      piecesImportance: this.piecesImportance,
+      blackCapturedPieces: this.blackCapturedPieces,
+      whiteCapturedPieces: this.whiteCapturedPieces,
+      reviveFromCapturedPieces: this.settings.reviveFromCapturedPieces,
+    };
+  }
+
+  private canActivePlayerMove(
+    color: PlayerColor,
+    allPiecesContext: PieceContext[]
+  ) {
+    for (const pieceContext of allPiecesContext) {
+      if (pieceContext.piece.color !== color) continue;
+      const moves = pieceContext.piece.getPossibleMoves(
+        pieceContext,
         this.gameBoardState,
         this.gameBoardStateData,
         this.movePerformContext,

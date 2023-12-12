@@ -4,7 +4,6 @@ import BoardManager from "./board_manager";
 import type { Piece } from "./pieces/piece";
 import type Game from "./game";
 import type Move from "./moves/move";
-import type { MoveForwardContext } from "./moves/move";
 import type { PlayerColor } from "./utils/game";
 import {
   GameLogicError,
@@ -58,22 +57,12 @@ class GameBoardManager extends BoardManager {
     return true;
   }
 
-  private get moveForwardContext(): MoveForwardContext {
-    return {
-      boardStateValue: this.game.gameBoardState,
-      piecesImportance: this.game.piecesImportance,
-      blackCapturedPieces: this.game.blackCapturedPieces,
-      whiteCapturedPieces: this.game.whiteCapturedPieces,
-      reviveFromCapturedPieces: this.game.settings.reviveFromCapturedPieces,
-    };
-  }
-
   private setAvailibleMoves(pieceContext: PieceContext) {
     this.availibleMoves = pieceContext.piece.getPossibleMoves(
       pieceContext,
       this.game.gameBoardState,
       this.game.gameBoardStateData,
-      this.moveForwardContext,
+      this.game.moveForwardContext,
       this.game.settings.ignorePiecesGuardedProperty,
       this.game.lastMove
     );
