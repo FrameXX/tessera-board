@@ -4,9 +4,6 @@ import { ref, onMounted, computed, provide } from "vue";
 
 // Import other classes and functions
 import { PIECE_IDS } from "./modules/pieces/piece";
-import ConfigInventory from "./modules/config_inventory";
-import ConfigManager from "./modules/config_manager";
-import { PREDEFINED_DEFAULT_BOARD_CONFIGS } from "./modules/predefined_configs";
 import Game from "./modules/game";
 import { getPixelsPerCm } from "./modules/utils/misc";
 import { RawPiece } from "./modules/pieces/raw_piece";
@@ -48,17 +45,6 @@ const configPieceSelectOptions = computed(() => {
   }
   return pieces;
 });
-
-const defaultBoardConfigInventory = new ConfigInventory(
-  "default-board",
-  PREDEFINED_DEFAULT_BOARD_CONFIGS,
-  game.ui.toastManager
-);
-const defaultBoardConfigManager = new ConfigManager(
-  defaultBoardConfigInventory,
-  [game.defaultBoardStateData],
-  game.ui.toastManager
-);
 
 onMounted(game.mount);
 </script>
@@ -121,10 +107,6 @@ onMounted(game.mount);
   <Settings
     v-model="game.settings"
     :open="game.ui.settingsOpen.value"
-    :default-board-config-manager="defaultBoardConfigManager"
-    :default-board-manager="game.defaultBoardManager"
-    :user-data-manager="game.userDataManager"
-    :default-board-all-piece-context="game.defaultBoardAllPiecesContext.value"
     :game="game"
   />
   <About :open="game.ui.aboutOpen.value" />
@@ -134,7 +116,7 @@ onMounted(game.mount);
   <div class="primary-buttons">
     <Transition name="counter">
       <button
-        @click="game.reverseMove()"
+        @click="game.undoMove()"
         aria-label="Previous move"
         title="Previous move"
       >
@@ -161,11 +143,7 @@ onMounted(game.mount);
       Actions
     </button>
     <Transition name="counter">
-      <button
-        @click="game.forwardMove()"
-        aria-label="Next move"
-        title="Next move"
-      >
+      <button @click="game.redoMove()" aria-label="Next move" title="Next move">
         <Icon icon-id="arrow-right"></Icon>
       </button>
     </Transition>

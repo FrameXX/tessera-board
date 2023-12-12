@@ -59,6 +59,9 @@ import {
   isWinReason,
   positionsToPath,
 } from "./utils/game";
+import { predefinedDefaultBoardConfigs } from "./predefined_configs";
+import ConfigInventory from "./config_inventory";
+import ConfigManager from "./config_manager";
 
 class Game {
   public readonly pieceMoveAudioEffect = new Howl({
@@ -68,23 +71,23 @@ class Game {
     src: [removeAudioEffectUrl],
   });
 
-  public playerRemainingMoveSeconds = computed(() => {
+  public readonly playerRemainingMoveSeconds = computed(() => {
     return (
       this.settings.playerSecondsPerMove.value - this.playerMoveSeconds.value
     );
   });
-  public opponentRemainingMoveSeconds = computed(() => {
+  public readonly opponentRemainingMoveSeconds = computed(() => {
     return (
       this.settings.opponentSecondsPerMove.value -
       this.opponentMoveSeconds.value
     );
   });
-  public playerRemainingMatchSeconds = computed(() => {
+  public readonly playerRemainingMatchSeconds = computed(() => {
     return (
       this.settings.playerSecondsPerMatch.value - this.playerMatchSeconds.value
     );
   });
-  public opponentRemainingMatchSeconds = computed(() => {
+  public readonly opponentRemainingMatchSeconds = computed(() => {
     return (
       this.settings.opponentSecondsPerMatch.value -
       this.opponentMatchSeconds.value
@@ -92,6 +95,7 @@ class Game {
   });
 
   public readonly ui = new UI(this);
+
   public readonly settings = defualtSettings;
   public readonly gameBoardState = [
     [null, null, null, null, null, null, null, null],
@@ -112,6 +116,18 @@ class Game {
     this.settings.defaultBoardState,
     this.settings.defaultBoardState
   );
+
+  public readonly defaultBoardConfigInventory = new ConfigInventory(
+    "default-board",
+    predefinedDefaultBoardConfigs,
+    this.ui.toastManager
+  );
+  public readonly defaultBoardConfigManager = new ConfigManager(
+    this.defaultBoardConfigInventory,
+    [this.defaultBoardStateData],
+    this.ui.toastManager
+  );
+
   public readonly whiteCapturingPaths = ref<Path[]>([]);
   public readonly blackCapturingPaths = ref<Path[]>([]);
   public readonly playerColor = ref<PlayerColor>("white");
@@ -452,7 +468,7 @@ class Game {
       getAllPiecesContext(this.gameBoardState)
     );
     this.defaultBoardAllPiecesContext = ref(
-      getAllPiecesContext(this.gameBoardState)
+      getAllPiecesContext(this.settings.defaultBoardState)
     );
     this.playerBoardManager = new GameBoardManager(this, true);
     this.opponentBoardManager = new GameBoardManager(this, false);
@@ -813,7 +829,7 @@ class Game {
     this.moveList.value.splice(this.lastMoveIndex.value, listIndexDiff);
   }
 
-  private performReverseMove() {
+  private reverseMove() {
     const reversedMove = this.moveList.value[this.lastMoveIndex.value + 1];
     reversedMove.reverse(this.gameBoardState);
   }
@@ -833,12 +849,12 @@ class Game {
     };
   }
 
-  private performForwardMove() {
+  private forwardMove() {
     const forwardedMove = this.moveList.value[this.lastMoveIndex.value];
     forwardedMove.forward(this.movePerformContext);
   }
 
-  public forwardMove() {
+  public redoMove() {
     if (this.moveList.value.length - this.lastMoveIndex.value < 2) {
       this.ui.toastManager.showToast(
         "You reached the last move. You cannot go further.",
@@ -851,7 +867,7 @@ class Game {
     this.onMove("forward");
   }
 
-  public reverseMove() {
+  public undoMove() {
     if (this.lastMoveIndex.value === -1) {
       this.ui.toastManager.showToast(
         "You reached the first move. You cannot go further.",
@@ -880,9 +896,9 @@ class Game {
       this.onMovePerform();
     } else {
       if (moveExecution === "reverse") {
-        this.performReverseMove();
+        this.reverseMove();
       } else {
-        this.performForwardMove();
+        this.forwardMove();
       }
       this.onBoardStateChange();
     }

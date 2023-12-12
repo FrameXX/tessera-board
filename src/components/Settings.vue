@@ -10,33 +10,16 @@ import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
-import ConfigManager from "../modules/config_manager";
-import UserDataManager from "../modules/user_data_manager";
 import { GameSettings } from "../modules/utils/game";
-import BoardManager, { PieceContext } from "../modules/board_manager";
 import Game from "../modules/game";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
   modelValue: { type: Object as PropType<GameSettings>, required: true },
-  defaultBoardConfigManager: {
-    type: Object as PropType<ConfigManager>,
-    required: true,
-  },
-  defaultBoardManager: {
-    type: Object as PropType<BoardManager>,
-    required: true,
-  },
-  userDataManager: {
-    type: Object as PropType<UserDataManager>,
-    required: true,
-  },
-  defaultBoardAllPieceContext: {
-    type: Object as PropType<PieceContext[]>,
-    required: true,
-  },
   game: { type: Object as PropType<Game>, required: true },
 });
+
+console.log(props.game.defaultBoardAllPiecesContext.value);
 </script>
 
 <template>
@@ -286,15 +269,19 @@ const props = defineProps({
             <button
               class="single"
               @click="
-                props.game.ui.configsDialog.open(defaultBoardConfigManager)
+                props.game.ui.configsDialog.open(
+                  props.game.defaultBoardConfigManager
+                )
               "
             >
               <Icon icon-id="folder-outline" side />Checkboard configurations
             </button>
             <div class="board-box">
               <Board
-                :manager="props.defaultBoardManager"
-                :all-pieces-context="$props.defaultBoardAllPieceContext"
+                :manager="props.game.defaultBoardManager"
+                :all-pieces-context="
+                  props.game.defaultBoardAllPiecesContext.value
+                "
                 :game="props.game"
                 id="default-board"
               />
@@ -662,7 +649,7 @@ const props = defineProps({
           <button
             title="Import data"
             aria-label="Import data"
-            @click="userDataManager.requestImportData()"
+            @click="props.game.userDataManager.requestImportData()"
           >
             <Icon icon-id="database-import-outline" side />
             Import data
@@ -670,7 +657,7 @@ const props = defineProps({
           <button
             title="Export data"
             aria-label="Import data"
-            @click="userDataManager.requestExportData()"
+            @click="props.game.userDataManager.requestExportData()"
           >
             <Icon icon-id="database-export-outline" side />
             Export data
@@ -678,7 +665,7 @@ const props = defineProps({
           <button
             title="Clear all data"
             aria-label="Clear all data"
-            @click="userDataManager.requestClearData()"
+            @click="props.game.userDataManager.requestClearData()"
           >
             <Icon icon-id="database-remove-outline" side />
             Clear all data
