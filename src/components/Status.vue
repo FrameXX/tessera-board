@@ -16,16 +16,24 @@ const props = defineProps({
 });
 
 const playerTimeMove = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.game.playerRemainingMoveSeconds.value);
+  return getMinsAndSecsTime(
+    props.game.timers.playerMove.remainingSeconds.value
+  );
 });
 const playerTimeMatch = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.game.playerRemainingMatchSeconds.value);
+  return getMinsAndSecsTime(
+    props.game.timers.playerMatch.remainingSeconds.value
+  );
 });
 const opponentTimeMove = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.game.opponentRemainingMoveSeconds.value);
+  return getMinsAndSecsTime(
+    props.game.timers.opponentMove.remainingSeconds.value
+  );
 });
 const opponentTimeMatch = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(props.game.opponentRemainingMatchSeconds.value);
+  return getMinsAndSecsTime(
+    props.game.timers.opponentMatch.remainingSeconds.value
+  );
 });
 
 const primaryClass = computed<"player" | "opponent" | "none">(() => {
@@ -51,8 +59,8 @@ const opponentSecondsPerMatchSet = computed(() => {
 
 const playerMoveSecondsPulsing = computed(() => {
   return (
-    props.game.playerRemainingMoveSeconds.value < pulsingMoveSeconds &&
-    props.game.playerRemainingMoveSeconds.value > 0 &&
+    props.game.timers.playerMove.remainingSeconds.value < pulsingMoveSeconds &&
+    props.game.timers.playerMove.remainingSeconds.value > 0 &&
     props.game.playerPlaying.value &&
     props.game.winner.value === "none"
   );
@@ -60,8 +68,9 @@ const playerMoveSecondsPulsing = computed(() => {
 
 const playerMatchSecondsPulsing = computed(() => {
   return (
-    props.game.playerRemainingMatchSeconds.value < pulsingMatchSeconds &&
-    props.game.playerRemainingMatchSeconds.value > 0 &&
+    props.game.timers.playerMatch.remainingSeconds.value <
+      pulsingMatchSeconds &&
+    props.game.timers.playerMatch.remainingSeconds.value > 0 &&
     props.game.playerPlaying.value &&
     props.game.winner.value === "none"
   );
@@ -69,8 +78,9 @@ const playerMatchSecondsPulsing = computed(() => {
 
 const opponentMoveSecondsPulsing = computed(() => {
   return (
-    props.game.opponentRemainingMoveSeconds.value < pulsingMoveSeconds &&
-    props.game.opponentRemainingMoveSeconds.value > 0 &&
+    props.game.timers.opponentMove.remainingSeconds.value <
+      pulsingMoveSeconds &&
+    props.game.timers.opponentMove.remainingSeconds.value > 0 &&
     props.game.playerPlaying.value &&
     props.game.winner.value === "none"
   );
@@ -78,8 +88,9 @@ const opponentMoveSecondsPulsing = computed(() => {
 
 const opponentMatchSecondsPulsing = computed(() => {
   return (
-    props.game.opponentRemainingMatchSeconds.value < pulsingMatchSeconds &&
-    props.game.opponentRemainingMatchSeconds.value > 0 &&
+    props.game.timers.opponentMatch.remainingSeconds.value <
+      pulsingMatchSeconds &&
+    props.game.timers.opponentMatch.remainingSeconds.value > 0 &&
     props.game.playerPlaying.value &&
     props.game.winner.value === "none"
   );

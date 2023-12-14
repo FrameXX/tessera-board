@@ -14,6 +14,7 @@ import {
   getAllpieceContext,
   getPositionPiece,
 } from "../utils/game";
+import { GameAudioEffects } from "../game";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {
@@ -31,8 +32,7 @@ export interface MoveForwardContext {
 export interface MovePerformContext extends MoveForwardContext {
   selectPieceDialog: SelectPieceDialog;
   audioEffectsEnabled: Ref<boolean>;
-  moveAudioEffect: Howl;
-  removeAudioEffect: Howl;
+  audioEffects: GameAudioEffects;
   vibrationsEnabled: Ref<boolean>;
 }
 

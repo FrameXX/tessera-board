@@ -173,11 +173,13 @@ class Shift extends Move {
         context.blackCapturedPieces,
         context.whiteCapturedPieces
       );
-      if (context.audioEffectsEnabled.value) context.removeAudioEffect.play();
+      if (context.audioEffectsEnabled.value)
+        context.audioEffects.pieceRemove.play();
       if (context.vibrationsEnabled.value) navigator.vibrate(30);
     }
     await movePiece(this.origin, this.target, context.boardStateValue);
-    if (context.audioEffectsEnabled.value) context.moveAudioEffect.play();
+    if (context.audioEffectsEnabled.value)
+      context.audioEffects.pieceMove.play();
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(

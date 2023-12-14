@@ -159,7 +159,8 @@ class Castling extends Move {
 
     movePiece(this.kingOrigin, this.kingTarget, context.boardStateValue);
     await movePiece(this.rookOrigin, this.rookTarget, context.boardStateValue);
-    if (context.audioEffectsEnabled.value) context.moveAudioEffect.play();
+    if (context.audioEffectsEnabled.value)
+      context.audioEffects.pieceMove.play();
 
     this.notation = this.kingSide ? "0-0" : "0-0-0";
   }

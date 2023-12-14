@@ -18,8 +18,6 @@ const props = defineProps({
   modelValue: { type: Object as PropType<GameSettings>, required: true },
   game: { type: Object as PropType<Game>, required: true },
 });
-
-console.log(props.game.defaultBoardAllPiecesContext.value);
 </script>
 
 <template>

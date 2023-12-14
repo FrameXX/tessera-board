@@ -1,25 +1,13 @@
-import type {
-  PieceContext,
-  BoardPosition,
-  BoardStateValue,
-} from "./board_manager";
+import type { PieceContext, BoardPosition } from "./board_manager";
 import BoardManager from "./board_manager";
-import type ConfigPieceDialog from "./dialogs/config_piece";
-import { type Ref } from "vue";
 import { movePiece } from "./moves/move";
 import { isPositionOnBoard, positionsEqual } from "./utils/game";
+import Game from "./game";
 
 class DefaultBoardManager extends BoardManager {
   private dragEndTimeoutActive: boolean = false;
 
-  constructor(
-    private readonly boardStateValue: BoardStateValue,
-    private readonly configPieceDialog: ConfigPieceDialog,
-    private readonly audioEffectsEnabled: Ref<boolean>,
-    private readonly pieceMoveAudioEffect: Howl,
-    private readonly pieceRemoveAudioEffect: Howl,
-    private readonly vibrationsEnabled: Ref<boolean>
-  ) {
+  constructor(private readonly game: Game) {
     super();
   }
 
@@ -27,7 +15,7 @@ class DefaultBoardManager extends BoardManager {
     if (!isPositionOnBoard(position)) {
       return false;
     }
-    return this.boardStateValue[position.row][position.col] === null;
+    return this.game.gameBoardState[position.row][position.col] === null;
   }
 
   public onPieceDragStart(
@@ -70,26 +58,29 @@ class DefaultBoardManager extends BoardManager {
     await movePiece(
       pieceContext,
       targetPosition,
-      this.boardStateValue,
+      this.game.gameBoardState,
       "default-board"
     );
-    if (this.audioEffectsEnabled.value) this.pieceMoveAudioEffect.play();
+    if (this.game.settings.audioEffectsEnabled.value)
+      this.game.audioEffects.pieceMove.play();
   }
 
   public onPieceClick(pieceContext: PieceContext): void {
     if (this.dragEndTimeoutActive) {
       return;
     }
-    this.boardStateValue[pieceContext.row][pieceContext.col] = null;
-    if (this.audioEffectsEnabled.value) this.pieceRemoveAudioEffect.play();
-    if (this.vibrationsEnabled.value) navigator.vibrate(30);
+    this.game.gameBoardState[pieceContext.row][pieceContext.col] = null;
+    if (this.game.settings.audioEffectsEnabled.value)
+      this.game.audioEffects.pieceRemove.play();
+    if (this.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
   }
 
   public async onCellClick(position: BoardPosition) {
-    const piece = await this.configPieceDialog.open();
-    this.boardStateValue[position.row][position.col] = piece;
-    if (this.audioEffectsEnabled.value) this.pieceMoveAudioEffect.play();
-    if (this.vibrationsEnabled.value) navigator.vibrate(30);
+    const piece = await this.game.ui.configPieceDialog.open();
+    this.game.gameBoardState[position.row][position.col] = piece;
+    if (this.game.settings.audioEffectsEnabled.value)
+      this.game.audioEffects.pieceMove.play();
+    if (this.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
   }
 }
 
