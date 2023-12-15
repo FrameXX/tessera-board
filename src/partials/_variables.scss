@@ -88,11 +88,11 @@
   --spacing-enormous: calc(28px * var(--spacing-multiplier));
 
   // ===== Hue =====
-  --H-player: 30;
-  --H-opponent: 221;
-  --H-primary: var(--H-player);
-  --H-piece-white: var(--H-player);
-  --H-piece-black: var(--H-opponent);
+  --H-primary-player: 30;
+  --H-secondary-player: 221;
+  --H-primary: var(--H-primary-player);
+  --H-piece-white: var(--H-primary-player);
+  --H-piece-black: var(--H-secondary-player);
   --H-error: 0;
 
   // ===== Saturation =====
@@ -189,14 +189,14 @@
 
   // Player surface accent
   --color-player-surface-accent: hsl(
-    var(--H-player),
+    var(--H-primary-player),
     var(--S-primary-surface-accent),
     var(--L-surface-accent)
   );
 
   // Opponent surface accent
   --color-opponent-surface-accent: hsl(
-    var(--H-opponent),
+    var(--H-secondary-player),
     var(--S-primary-surface-accent),
     var(--L-surface-accent)
   );

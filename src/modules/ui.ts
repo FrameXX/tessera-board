@@ -7,13 +7,13 @@ import {
 } from "./utils/elements";
 import ToastManager from "./toast_manager";
 import type Game from "./game";
-import type { Winner } from "./game";
 import DurationDialog from "./dialogs/duration";
 import ConfirmDialog from "./dialogs/confirm";
 import ConfigPieceDialog from "./dialogs/config_piece";
 import SelectPieceDialog from "./dialogs/select_piece";
 import ConfigPrintDialog from "./dialogs/config_print";
 import ConfigsDialog from "./dialogs/configs";
+import { Winner } from "./utils/game";
 
 /**
  * UI stands for User Interface. The class takes care of all the props and functions related to user interface.
@@ -44,24 +44,50 @@ class UI {
     watch(this.aboutOpen, () => {
       this.onDistractionChange();
     });
+    watch(this.game.paused, (newValue) => {
+      if (newValue !== "not") {
+        this.toastManager.showToast("Game paused", "pause");
+      } else {
+        this.toastManager.showToast("Game resumed", "play-outline");
+      }
+    });
+
+    addEventListener("keydown", (event: KeyboardEvent) => {
+      if (event.key === "Escape") this.escapeManager.escape();
+      if (event.key === "R" && event.shiftKey) this.game.restart();
+      if (event.key === "Z" && (event.shiftKey || event.ctrlKey))
+        this.game.undoMove();
+      if (event.key === "Y" && (event.shiftKey || event.ctrlKey))
+        this.game.redoMove();
+      if (event.key === "C" && event.shiftKey) {
+        this.toggleActionsPanel();
+        if (this.actionPanelOpen.value) {
+          this.toggleSettings();
+        }
+      }
+    });
+
+    addEventListener("visibilitychange", () => {
+      this.onDistractionChange();
+    });
   }
 
-  public updatePrimaryHue(playerPlaying: boolean, winner: Winner) {
+  public updatePrimaryHue(primaryPlayerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(playerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "player":
-      setPrimaryHue(true);
-      break;
-    case "opponent":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(primaryPlayerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "primary":
+        setPrimaryHue(true);
+        break;
+      case "secondary":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);

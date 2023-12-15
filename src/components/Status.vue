@@ -17,81 +17,82 @@ const props = defineProps({
 
 const playerTimeMove = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
-    props.game.timers.playerMove.remainingSeconds.value
+    props.game.timers.primaryPlayerMove.remainingSeconds.value
   );
 });
 const playerTimeMatch = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
-    props.game.timers.playerMatch.remainingSeconds.value
+    props.game.timers.primaryPlayerMatch.remainingSeconds.value
   );
 });
 const opponentTimeMove = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
-    props.game.timers.opponentMove.remainingSeconds.value
+    props.game.timers.secondaryPlayerMove.remainingSeconds.value
   );
 });
 const opponentTimeMatch = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
-    props.game.timers.opponentMatch.remainingSeconds.value
+    props.game.timers.secondaryPlayerMatch.remainingSeconds.value
   );
 });
 
-const primaryClass = computed<"player" | "opponent" | "none">(() => {
+const primaryClass = computed<"primary" | "secondary" | "none">(() => {
   if (props.game.winner.value === "none") {
-    return props.game.playerPlaying.value ? "player" : "opponent";
+    return props.game.primaryPlayerPlaying.value ? "primary" : "secondary";
   } else if (props.game.winner.value !== "draw") {
     return props.game.winner.value;
   }
   return "none";
 });
 const playerSecondsPerMoveSet = computed(() => {
-  return props.game.settings.playerSecondsPerMove.value !== 0;
+  return props.game.settings.primaryPlayerSecondsPerMove.value !== 0;
 });
 const opponentSecondsPerMoveSet = computed(() => {
-  return props.game.settings.opponentSecondsPerMove.value !== 0;
+  return props.game.settings.secondaryPlayerSecondsPerMove.value !== 0;
 });
 const playerSecondsPerMatchSet = computed(() => {
-  return props.game.settings.playerSecondsPerMatch.value !== 0;
+  return props.game.settings.primaryPlayerSecondsPerMatch.value !== 0;
 });
 const opponentSecondsPerMatchSet = computed(() => {
-  return props.game.settings.opponentSecondsPerMatch.value !== 0;
+  return props.game.settings.secondaryPlayerSecondsPerMatch.value !== 0;
 });
 
 const playerMoveSecondsPulsing = computed(() => {
   return (
-    props.game.timers.playerMove.remainingSeconds.value < pulsingMoveSeconds &&
-    props.game.timers.playerMove.remainingSeconds.value > 0 &&
-    props.game.playerPlaying.value &&
+    props.game.timers.primaryPlayerMove.remainingSeconds.value <
+      pulsingMoveSeconds &&
+    props.game.timers.primaryPlayerMove.remainingSeconds.value > 0 &&
+    props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
 });
 
 const playerMatchSecondsPulsing = computed(() => {
   return (
-    props.game.timers.playerMatch.remainingSeconds.value <
+    props.game.timers.primaryPlayerMatch.remainingSeconds.value <
       pulsingMatchSeconds &&
-    props.game.timers.playerMatch.remainingSeconds.value > 0 &&
-    props.game.playerPlaying.value &&
+    props.game.timers.primaryPlayerMatch.remainingSeconds.value > 0 &&
+    props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
 });
 
 const opponentMoveSecondsPulsing = computed(() => {
   return (
-    props.game.timers.opponentMove.remainingSeconds.value <
+    props.game.timers.secondaryPlayerMove.remainingSeconds.value <
       pulsingMoveSeconds &&
-    props.game.timers.opponentMove.remainingSeconds.value > 0 &&
-    props.game.playerPlaying.value &&
+    props.game.timers.secondaryPlayerMove.remainingSeconds.value > 0 &&
+    props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
 });
 
 const opponentMatchSecondsPulsing = computed(() => {
   return (
-    props.game.timers.opponentMatch.remainingSeconds.value <
+    props.game.timers.secondaryPlayerMatch.remainingSeconds.value <
       pulsingMatchSeconds &&
-    props.game.timers.opponentMatch.remainingSeconds.value > 0 &&
-    props.game.playerPlaying.value &&
+    props.game.timers.secondaryPlayerMatch.remainingSeconds.value > 0 &&
+    props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
 });
@@ -225,12 +226,12 @@ const opponentMatchSecondsPulsing = computed(() => {
   border-style: dashed;
   transition: background-color var(--transition-duration-medium) linear;
 
-  &.player {
+  &.primary {
     border-color: transparent var(--color-primary-accent) transparent
       transparent;
   }
 
-  &.opponent {
+  &.secondary {
     border-color: transparent transparent transparent
       var(--color-primary-accent);
   }

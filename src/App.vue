@@ -64,18 +64,18 @@ onMounted(game.mount);
     <div id="boards-area" :class="{ rotated: game.rotated.value }">
       <Board
         :game="game"
-        :manager="game.playerBoardManager"
+        :manager="game.primaryBoardManager"
         :all-pieces-context="game.gameBoardAllPiecesContext.value"
         primary
-        id="player-board"
+        id="primary-board"
       />
       <Board
         v-if="game.settings.secondCheckboardEnabled.value"
         primary
         :game="game"
-        :manager="game.opponentBoardManager"
+        :manager="game.secondaryBoardManager"
         :all-pieces-context="game.gameBoardAllPiecesContext.value"
-        id="opponent-board"
+        id="secondary-board"
       />
       <Transition name="slide-side">
         <div id="game-paused" v-show="game.paused.value === 'manual'">

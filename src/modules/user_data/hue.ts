@@ -12,9 +12,9 @@ class HueData extends NumberUserData {
 
   public apply(): void {
     if (this.forOpponent) {
-      setCSSVariable("H-opponent", this.value.toString());
+      setCSSVariable("H-secondary-player", this.value.toString());
     } else {
-      setCSSVariable("H-player", this.value.toString());
+      setCSSVariable("H-primary-player", this.value.toString());
     }
   }
 }

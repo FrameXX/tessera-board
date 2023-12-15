@@ -1,4 +1,4 @@
-import type { ComputedRef } from "vue";
+import type { Ref } from "vue";
 import type {
   PieceContext,
   BoardPosition,
@@ -7,17 +7,15 @@ import type {
 import { isPieceId, type Path, type PiecesImportance } from "../pieces/piece";
 import type Piece from "../pieces/piece";
 import type Move from "../moves/move";
-import type defualtSettings from "../user_data/default_settings";
 import type { RawPiece } from "../pieces/raw_piece";
 import type { MoveForwardContext } from "../moves/move";
 
-export type GameSettings = typeof defualtSettings;
 export type MoveDirection = "forward" | "reverse";
 export type MoveExecution = "perform" | MoveDirection;
 
-export type Player = "player" | "opponent";
+export type Player = "primary" | "secondary";
 export function isPlayer(string: string): string is Player {
-  return string === "player" || string === "opponent";
+  return string === "primary" || string === "secondary";
 }
 
 export type PlayerColor = "white" | "black";
@@ -25,29 +23,8 @@ export function isPlayerColor(string: string): string is PlayerColor {
   return string === "white" || string === "black";
 }
 
-export type TeamName = "White" | "Black";
-
-export function getOpossiteTeamName(teamName: TeamName): TeamName {
-  return teamName === "White" ? "Black" : "White";
-}
-
 export function getOpossitePlayerColor(playerColor: PlayerColor) {
   return playerColor === "white" ? "black" : "white";
-}
-
-export function getColorTeamName(playerColor: PlayerColor): TeamName {
-  return playerColor === "white" ? "White" : "Black";
-}
-
-export function getPlayerTeamName(
-  player: Player,
-  playerColor: PlayerColor
-): TeamName {
-  const teamName =
-    player === "player"
-      ? getColorTeamName(playerColor)
-      : getColorTeamName(getOpossitePlayerColor(playerColor));
-  return teamName;
 }
 
 type UndecidedWinner = "draw" | "none";
@@ -130,7 +107,7 @@ export function isGuardedPieceChecked(
   color: PlayerColor,
   allpiecesContext: PieceContext[],
   guardedPieces: PieceContext[],
-  lastMove: ComputedRef<Move | null>
+  lastMove: Ref<Move | null>
 ) {
   let capturingPaths: Path[] = [];
 
@@ -204,7 +181,7 @@ export function willMoveCheckGuardedPiece(
   color: PlayerColor,
   newBoardStateValue: BoardStateValue,
   moveForwardContext: MoveForwardContext,
-  lastMove: ComputedRef<Move | null>
+  lastMove: Ref<Move | null>
 ) {
   move.forward(moveForwardContext);
 

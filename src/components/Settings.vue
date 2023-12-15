@@ -10,8 +10,7 @@ import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
 import FragmentTitle from "./FragmentTitle.vue";
-import { GameSettings } from "../modules/utils/game";
-import Game from "../modules/game";
+import Game, { GameSettings } from "../modules/game";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -30,7 +29,7 @@ const props = defineProps({
           >You can open game configuration by pressing Shift + C.</InfoCard
         >
         <!-- Player -->
-        <Category name="Primary player (you)" icon-id="account">
+        <Category name="Primary player" icon-id="account">
           <UserOption
             name="color"
             icon-id="invert-colors"
@@ -61,15 +60,15 @@ const props = defineProps({
             </template>
           </UserOption>
         </Category>
-        <!-- Opponent -->
-        <Category name="Secondary player (opponent)" icon-id="target-account">
+        <!-- Secondary player -->
+        <Category name="Secondary player" icon-id="target-account">
           <UserOption
             name="computer"
             icon-id="memory"
-            option-id="check-computer-opponent"
+            option-id="check-computer-secondary-player"
             v-if="false"
           >
-            <Checkbox id="check-computer-opponent" />
+            <Checkbox id="check-computer-secondary-player" />
             <template #description>
               If this option is enabled an algorythm will play instead of a
               human player.
@@ -83,11 +82,11 @@ const props = defineProps({
           <UserOption
             name="Primary player time per move"
             icon-id="timer-outline"
-            option-id="input-player-seconds-per-move"
+            option-id="input-primary-player-seconds-per-move"
           >
             <TimeDurationInput
-              id="input-player-seconds-per-move"
-              v-model="props.modelValue.playerSecondsPerMove.value"
+              id="input-primary-player-seconds-per-move"
+              v-model="props.modelValue.primaryPlayerSecondsPerMove.value"
             />
             <template #description
               >Limits player's time per move. If the time runs out (expires) an
@@ -100,15 +99,16 @@ const props = defineProps({
           <UserOption
             name="Secondary player time per move"
             icon-id="timer-outline"
-            option-id="input-opponent-seconds-per-move"
+            option-id="input-secondary-player-seconds-per-move"
           >
             <TimeDurationInput
-              id="input-opponent-seconds-per-move"
-              v-model="props.modelValue.opponentSecondsPerMove.value"
+              id="input-secondary-player-seconds-per-move"
+              v-model="props.modelValue.secondaryPlayerSecondsPerMove.value"
             />
             <template #description
-              >Limits opponent's time per move. If the time runs out (expires)
-              an action specified in the option below will be performed.
+              >Limits time per move of secondary player. If the time runs out
+              (expires) an action specified in the option below will be
+              performed.
               <b
                 >The limit is disabled when both values are set to 0.</b
               ></template
@@ -117,15 +117,15 @@ const props = defineProps({
           <UserOption
             name="Primary player time per match"
             icon-id="clock-outline"
-            option-id="input-player-seconds-per-match"
+            option-id="input-primary-player-seconds-per-match"
           >
             <TimeDurationInput
-              id="input-player-seconds-per-match"
-              v-model="props.modelValue.playerSecondsPerMatch.value"
+              id="input-primary-player-seconds-per-match"
+              v-model="props.modelValue.primaryPlayerSecondsPerMatch.value"
             />
             <template #description
               >Limits player's time for whole match (game). If the time runs out
-              the player looses and opponent wins.
+              the primary player looses and secondary player wins.
               <b
                 >The limit is disabled when both values are set to 0.</b
               ></template
@@ -134,15 +134,15 @@ const props = defineProps({
           <UserOption
             name="Secondary player time per match"
             icon-id="clock-outline"
-            option-id="input-opponent-seconds-per-match"
+            option-id="input-secondary-player-seconds-per-match"
           >
             <TimeDurationInput
-              id="input-opponent-seconds-per-match"
-              v-model="props.modelValue.opponentSecondsPerMatch.value"
+              id="input-secondary-player-seconds-per-match"
+              v-model="props.modelValue.secondaryPlayerSecondsPerMatch.value"
             />
             <template #description
-              >Limits opponent's time for whole match (game). If the time runs
-              out the opponent looses and player wins.
+              >Limits time for whole match (game) of secondary player. If the
+              time runs out the secondary player looses and primary player wins.
               <b
                 >The limit is disabled when both values are set to 0.</b
               ></template
@@ -478,30 +478,30 @@ const props = defineProps({
               min="0"
               max="360"
               id="input-hue-player"
-              v-model="props.modelValue.playerHue.value"
+              v-model="props.modelValue.primaryPlayerHue.value"
             />
             <template #description
               >The UI transitions the overall hue of the app to this hue when
-              you are currently playing. The value is a hue degree from 0 to
-              360.
+              the primary player is currently playing. The value is a hue degree
+              from 0 to 360.
             </template>
           </UserOption>
           <UserOption
-            name="Opponent hue"
+            name="Secondary player hue"
             icon-id="format-color-fill"
-            option-id="input-hue-opponent"
+            option-id="input-hue-secondary-player"
           >
             <input
               type="number"
               min="0"
               max="360"
-              id="input-hue-opponent"
-              v-model="props.modelValue.opponentHue.value"
+              id="input-hue-secondary-player"
+              v-model="props.modelValue.secondaryPlayerHue.value"
             />
             <template #description
               >The UI transitions the overall hue of the app to this hue when
-              you are currently playing. The value is a hue degree from 0 to
-              360.
+              secondary player is currently playing. The value is a hue degree
+              from 0 to 360.
             </template>
           </UserOption>
           <!-- Checkboard -->

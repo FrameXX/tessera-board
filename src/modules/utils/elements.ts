@@ -1,4 +1,4 @@
-import type { PlayerColor } from "../game";
+import { PlayerColor } from "./game";
 
 export function getElementSizes(element: HTMLElement): [number, number] {
   const computedStyle = getComputedStyle(element);
@@ -113,17 +113,17 @@ export function setSaturationMultiplier(value: number): void {
 
 export function setPrimaryHue(playerPlaying: boolean) {
   playerPlaying
-    ? setCSSVariable("H-primary", "var(--H-player)")
-    : setCSSVariable("H-primary", "var(--H-opponent)");
+    ? setCSSVariable("H-primary", "var(--H-primary-player)")
+    : setCSSVariable("H-primary", "var(--H-secondary-player)");
 }
 
-export function updatePieceColors(playerColor: PlayerColor) {
-  if (playerColor === "white") {
-    setCSSVariable("H-piece-white", "var(--H-player)");
-    setCSSVariable("H-piece-black", "var(--H-opponent)");
+export function updatePieceColors(primaryPlayerColor: PlayerColor) {
+  if (primaryPlayerColor === "white") {
+    setCSSVariable("H-piece-white", "var(--H-primary-player)");
+    setCSSVariable("H-piece-black", "var(--H-secondary-player)");
   } else {
-    setCSSVariable("H-piece-white", "var(--H-opponent)");
-    setCSSVariable("H-piece-black", "var(--H-player)");
+    setCSSVariable("H-piece-white", "var(--H-secondary-player)");
+    setCSSVariable("H-piece-black", "var(--H-primary-player)");
   }
 }
 

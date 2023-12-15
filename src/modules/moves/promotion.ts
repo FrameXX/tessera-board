@@ -270,7 +270,6 @@ class Promotion extends Move {
       capturedPieces.value.push(this.piece.pieceId);
     }
 
-    console.log(this.target, newPiece);
     transformPiece(this.target, newPiece, context.boardStateValue);
     if (context.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
 

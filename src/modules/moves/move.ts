@@ -161,7 +161,7 @@ export async function movePiece(
   origin: BoardPosition,
   target: BoardPosition,
   boardStateValue: BoardStateValue,
-  boardId: string = "player-board"
+  boardId: string = "primary-board"
 ) {
   const piece = getPositionPiece(origin, boardStateValue);
   movePositionValue(piece, origin, target, boardStateValue);

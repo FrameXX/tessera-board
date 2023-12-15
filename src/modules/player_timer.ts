@@ -1,10 +1,9 @@
-import { type Ref, ref, computed, watch } from "vue";
+import { type Ref, ref, computed, watch, capitalize } from "vue";
 import Game from "./game";
 import {
+  Player,
   PlayerColor,
   WinReason,
-  Winner,
-  getColorTeamName,
   getOpossitePlayerColor,
 } from "./utils/game";
 
@@ -13,7 +12,8 @@ class PlayerTimer {
   public running = computed(() => {
     if (this.game.paused.value !== "not") return false;
     if (this.game.winner.value !== "none") return false;
-    if (this.isPlayer !== this.game.playerPlaying.value) return false;
+    if (this.isPrimaryPlayer !== this.game.primaryPlayerPlaying.value)
+      return false;
     return true;
   });
   public remainingSeconds = computed(() => {
@@ -28,16 +28,23 @@ class PlayerTimer {
 
   constructor(
     private readonly game: Game,
-    private readonly isPlayer: boolean,
+    private readonly isPrimaryPlayer: boolean,
     private readonly isMoveTimer: boolean,
     private readonly secondsLimit: Ref<number>
   ) {
-    watch(this.running, (newValue) =>
-      newValue ? this.startInterval() : this.stopInterval()
-    );
-    watch(this.reachedLimit, (newValue) =>
-      newValue ? this.onReachLimit() : this.onUnreachLimit()
-    );
+    this.onRunningChange(this.running.value);
+    this.onReachedLimitChange(this.reachedLimit.value);
+
+    watch(this.running, (newValue) => this.onRunningChange(newValue));
+    watch(this.reachedLimit, (newValue) => this.onReachedLimitChange(newValue));
+  }
+
+  private onReachedLimitChange(newValue: boolean) {
+    newValue ? this.onReachLimit() : this.onUnreachLimit();
+  }
+
+  private onRunningChange(newValue: boolean) {
+    newValue ? this.startInterval() : this.stopInterval();
   }
 
   private onUnreachLimit() {
@@ -51,7 +58,7 @@ class PlayerTimer {
 
   private onReachLimit() {
     this.game.ui.toastManager.showToast(
-      `${getColorTeamName(this.playerColor)} run out of ${this.name} time!`,
+      `${capitalize(this.playerColor)} run out of ${this.name} time!`,
       "timer-alert-outline"
     );
     if (
@@ -59,14 +66,15 @@ class PlayerTimer {
       this.game.settings.secondsMoveLimitRunOutPunishment.value ===
         "random_move"
     ) {
-      this.game.performRandomMove(this.playerColor);
+      const randomMove = this.game.getRandomMove(this.playerColor);
+      this.game.performMove(randomMove);
       return;
     }
-    this.opponentWin();
+    this.game.playerWin(this.limitReachWinner, this.winReason);
   }
 
-  private get limitReachWinner(): Winner {
-    return this.isPlayer ? "opponent" : "player";
+  private get limitReachWinner(): Player {
+    return this.isPrimaryPlayer ? "secondary" : "primary";
   }
 
   private get name() {
@@ -78,15 +86,9 @@ class PlayerTimer {
   }
 
   private get playerColor(): PlayerColor {
-    return this.isPlayer
-      ? this.game.playerColor.value
-      : getOpossitePlayerColor(this.game.playerColor.value);
-  }
-
-  private opponentWin() {
-    this.isPlayer
-      ? this.game.opponentWin(this.winReason)
-      : this.game.playerWin(this.winReason);
+    return this.isPrimaryPlayer
+      ? this.game.primaryPlayerColor.value
+      : getOpossitePlayerColor(this.game.primaryPlayerColor.value);
   }
 
   private startInterval() {

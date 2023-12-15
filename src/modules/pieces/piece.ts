@@ -5,7 +5,7 @@ import {
   getRawPiece,
   willMoveCheckGuardedPiece,
 } from "../utils/game";
-import type { ComputedRef, Ref } from "vue";
+import type { Ref } from "vue";
 import type Move from "../moves/move";
 import type { RawPiece } from "./raw_piece";
 import type { BoardPosition, BoardStateValue } from "../board_manager";
@@ -81,7 +81,7 @@ export abstract class Piece {
   public getCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
+    lastMove: Ref<Move | null>
   ): BoardPosition[] {
     if (!this.capturingPositionsCache)
       this.capturingPositionsCache = this.getNewCapturingPositions(
@@ -95,7 +95,7 @@ export abstract class Piece {
   public abstract getNewCapturingPositions(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
+    lastMove: Ref<Move | null>
   ): BoardPosition[];
 
   public getPossibleMoves(
@@ -104,7 +104,7 @@ export abstract class Piece {
     boardStateData: BoardStateData,
     moveForwardContext: MoveForwardContext,
     ignorePiecesGuardedProperty: Ref<boolean>,
-    lastMove: ComputedRef<Move | null>
+    lastMove: Ref<Move | null>
   ): Move[] {
     if (!this.possibleMovesCache) {
       let possibleMoves = this.getNewPossibleMoves(
@@ -139,7 +139,7 @@ export abstract class Piece {
   public abstract getNewPossibleMoves(
     position: BoardPosition,
     boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
+    lastMove: Ref<Move | null>
   ): Move[];
 }
 

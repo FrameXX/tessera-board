@@ -19,7 +19,9 @@ class GameBoardManager extends BoardManager {
     if (!this.game.settings.secondCheckboardEnabled.value) {
       return this.game.rotated.value;
     }
-    return (this.game.playerColor.value === "black") === this.isPlayerBoard;
+    return (
+      (this.game.primaryPlayerColor.value === "black") === this.isPlayerBoard
+    );
   });
 
   constructor(
@@ -49,8 +51,9 @@ class GameBoardManager extends BoardManager {
     if (!this.game.settings.secondCheckboardEnabled.value) return true;
 
     if (
-      (this.isPlayerBoard && pieceColor !== this.game.playerColor.value) ||
-      (!this.isPlayerBoard && pieceColor === this.game.playerColor.value)
+      (this.isPlayerBoard &&
+        pieceColor !== this.game.primaryPlayerColor.value) ||
+      (!this.isPlayerBoard && pieceColor === this.game.primaryPlayerColor.value)
     )
       return false;
 
@@ -60,7 +63,7 @@ class GameBoardManager extends BoardManager {
   private setAvailibleMoves(pieceContext: PieceContext) {
     this.availibleMoves = pieceContext.piece.getPossibleMoves(
       pieceContext,
-      this.game.gameBoardState,
+      this.game.boardState,
       this.game.gameBoardStateData,
       this.game.moveForwardContext,
       this.game.settings.ignorePiecesGuardedProperty,
@@ -70,7 +73,7 @@ class GameBoardManager extends BoardManager {
 
   private markMoves(moves: Move[]) {
     for (const move of moves) {
-      move.showCellMarks(this.cellMarks, this.game.gameBoardState);
+      move.showCellMarks(this.cellMarks, this.game.boardState);
     }
   }
 
@@ -144,6 +147,11 @@ class GameBoardManager extends BoardManager {
     this.selectedCell.value = position;
     if (this.game.settings.markCellCapturingPieces.value)
       this.markCellCapturingPieces(position);
+  }
+
+  public unselectAll() {
+    if (this.selectedPiece.value) this.unselectPiece();
+    if (this.selectedCell.value) this.unselectCell();
   }
 
   private unselectCell() {
@@ -234,9 +242,15 @@ class GameBoardManager extends BoardManager {
   private isMovePerformationPermitted(piece: Piece) {
     // Do not allow opponent on his checkboard to play moves for the player and vice versa.
     if (this.game.settings.secondCheckboardEnabled.value) {
-      if (piece.color !== this.game.playerColor.value && this.isPlayerBoard)
+      if (
+        piece.color !== this.game.primaryPlayerColor.value &&
+        this.isPlayerBoard
+      )
         return false;
-      if (piece.color === this.game.playerColor.value && !this.isPlayerBoard)
+      if (
+        piece.color === this.game.primaryPlayerColor.value &&
+        !this.isPlayerBoard
+      )
         return false;
     }
 
@@ -320,7 +334,7 @@ class GameBoardManager extends BoardManager {
 
     // Take the cell click as a piece click if no move was performed on that cell and there is a piece in that cell. This is useful if the cells with pieces are selected using tabindex.
     if (!this.selectedPiece.value) {
-      const piece = this.game.gameBoardState[position.row][position.col];
+      const piece = this.game.boardState[position.row][position.col];
       if (piece) {
         this.onPieceClick({ ...position, piece });
         return;
