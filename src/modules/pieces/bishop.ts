@@ -1,4 +1,3 @@
-import type { ComputedRef } from "vue";
 import type {
   PieceContext,
   BoardPosition,
@@ -7,13 +6,14 @@ import type {
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import {
-  getBoardPositionPiece,
   getDiffPosition,
+  getBoardPositionValue,
   isFriendlyPiece,
   isPositionOnBoard,
   type PlayerColor,
 } from "../utils/game";
 import Piece from "./piece";
+import Game from "../game";
 
 export class Bishop extends Piece {
   constructor(color: PlayerColor, id?: string) {
@@ -38,7 +38,7 @@ export class Bishop extends Piece {
           if (!isPositionOnBoard(target)) {
             break;
           }
-          piece = getBoardPositionPiece(target, boardStateValue);
+          piece = getBoardPositionValue(target, boardStateValue);
           capturingPositions.push(target);
         } while (piece === null);
       }
@@ -46,21 +46,16 @@ export class Bishop extends Piece {
     return capturingPositions;
   }
 
-  public getNewPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
-  ): Move[] {
+  public getNewPossibleMoves(position: BoardPosition, game: Game): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getCapturingPositions(
       position,
-      boardStateValue,
-      lastMove
+      game.boardState
     );
 
     for (const target of capturingPositions) {
       let captures: PieceContext | undefined = undefined;
-      const piece = boardStateValue[target.row][target.col];
+      const piece = game.boardState[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }

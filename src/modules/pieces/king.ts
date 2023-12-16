@@ -1,14 +1,11 @@
-import type {
-  PieceContext,
-  BoardPosition,
-  BoardStateValue,
-} from "../board_manager";
+import type { PieceContext, BoardPosition } from "../board_manager";
+import Game from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import {
-  getBoardPositionPiece,
   getDiffPosition,
+  getBoardPositionValue,
   getRawPiece,
   isFriendlyPiece,
   isPositionOnBoard,
@@ -76,16 +73,13 @@ export class King extends Piece {
     return capturingPositions;
   }
 
-  public getNewPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue
-  ): Move[] {
+  public getNewPossibleMoves(position: BoardPosition, game: Game): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getNewCapturingPositions(position);
 
     for (const target of capturingPositions) {
       let captures: PieceContext | undefined = undefined;
-      const piece = boardStateValue[target.row][target.col];
+      const piece = game.boardState[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
@@ -115,9 +109,9 @@ export class King extends Piece {
           if (Math.abs(totalColDiff) === 2) {
             kingTarget = searchRookPosition;
           }
-          const piece = getBoardPositionPiece(
+          const piece = getBoardPositionValue(
             searchRookPosition,
-            boardStateValue
+            game.boardState
           );
           if (!piece) continue;
           // There is wrong piece in way. Castling cannot be performed.

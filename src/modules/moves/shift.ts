@@ -1,5 +1,4 @@
 import { isPieceId, type PieceId } from "../pieces/piece";
-import type { MovePerformContext } from "./move";
 import Move, {
   clearPositionValue,
   getCleanBoardPosition,
@@ -23,7 +22,8 @@ import {
 import { capturePosition, movePiece } from "./move";
 import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
-import { getPositionPiece, positionsEqual } from "../utils/game";
+import { getBoardPositionPiece, positionsEqual } from "../utils/game";
+import Game from "../game";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -134,14 +134,14 @@ class Shift extends Move {
     }
   }
 
-  public forward(context: MovePerformContext): void {
-    this.onForward(context.boardStateValue);
+  public forward(boardState: BoardStateValue): void {
+    this.onForward(boardState);
 
     if (this.captures) {
-      clearPositionValue(this.captures, context.boardStateValue);
+      clearPositionValue(this.captures, boardState);
     }
-    const piece = getPositionPiece(this.origin, context.boardStateValue);
-    movePositionValue(piece, this.origin, this.target, context.boardStateValue);
+    const piece = getBoardPositionPiece(this.origin, boardState);
+    movePositionValue(piece, this.origin, this.target, boardState);
   }
 
   private onReverse(boardStateValue: BoardStateValue) {
@@ -154,7 +154,7 @@ class Shift extends Move {
   public reverse(boardStateValue: BoardStateValue): void {
     this.onReverse(boardStateValue);
 
-    const piece = getPositionPiece(this.target, boardStateValue);
+    const piece = getBoardPositionPiece(this.target, boardStateValue);
     movePositionValue(piece, this.target, this.origin, boardStateValue);
 
     if (this.captures) {
@@ -163,23 +163,23 @@ class Shift extends Move {
     }
   }
 
-  public async perform(context: MovePerformContext): Promise<void> {
-    this.onForward(context.boardStateValue);
+  public async perform(game: Game): Promise<void> {
+    this.onForward(game.boardState);
 
     if (this.captures) {
       capturePosition(
         this.captures,
-        context.boardStateValue,
-        context.blackCapturedPieces,
-        context.whiteCapturedPieces
+        game.boardState,
+        game.blackCapturedPieces,
+        game.whiteCapturedPieces
       );
-      if (context.audioEffectsEnabled.value)
-        context.audioEffects.pieceRemove.play();
-      if (context.vibrationsEnabled.value) navigator.vibrate(30);
+      if (game.settings.audioEffectsEnabled.value)
+        game.audioEffects.pieceRemove.play();
+      if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
     }
-    await movePiece(this.origin, this.target, context.boardStateValue);
-    if (context.audioEffectsEnabled.value)
-      context.audioEffects.pieceMove.play();
+    await movePiece(this.origin, this.target, game.boardState);
+    if (game.settings.audioEffectsEnabled.value)
+      game.audioEffects.pieceMove.play();
 
     this.notation = this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(

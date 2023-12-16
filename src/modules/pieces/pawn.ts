@@ -2,21 +2,17 @@ import type Move from "../moves/move";
 import Shift, { isMoveShift } from "../moves/shift";
 import Promotion from "../moves/promotion";
 import type { RawPiece } from "./raw_piece";
-import type {
-  PieceContext,
-  BoardPosition,
-  BoardStateValue,
-} from "../board_manager";
-import type { ComputedRef } from "vue";
+import type { PieceContext, BoardPosition } from "../board_manager";
 import {
-  getBoardPositionPiece,
   getDiffPosition,
-  getPositionPiece,
+  getBoardPositionValue,
   getRawPiece,
   isFriendlyPiece,
   type PlayerColor,
+  getBoardPositionPiece,
 } from "../utils/game";
 import Piece from "./piece";
+import Game from "../game";
 
 interface RawPawn extends RawPiece {
   moved: boolean;
@@ -67,11 +63,7 @@ export class Pawn extends Piece {
     return capturingPositions;
   }
 
-  public getNewPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
-  ): Move[] {
+  public getNewPossibleMoves(position: BoardPosition, game: Game): Move[] {
     const moves: Move[] = [];
 
     // Move one cell forward
@@ -81,7 +73,7 @@ export class Pawn extends Piece {
       }
       if (this.color === "black") rowDiff = rowDiff * -1;
       const target = getDiffPosition(position, 0, rowDiff);
-      if (getBoardPositionPiece(target, boardStateValue)) {
+      if (getBoardPositionValue(target, game.boardState)) {
         break;
       }
       if (
@@ -110,11 +102,10 @@ export class Pawn extends Piece {
     // Capture
     const capturingPositions = this.getCapturingPositions(
       position,
-      boardStateValue,
-      lastMove
+      game.boardState
     );
     for (const target of capturingPositions) {
-      const piece = getBoardPositionPiece(target, boardStateValue);
+      const piece = getBoardPositionValue(target, game.boardState);
       if (!piece) {
         continue;
       }
@@ -146,9 +137,9 @@ export class Pawn extends Piece {
       }
     }
 
-    if (!lastMove.value) return moves;
-    if (!isMoveShift(lastMove.value)) return moves;
-    const lastShift = lastMove.value;
+    if (!game.lastMove.value) return moves;
+    if (!isMoveShift(game.lastMove.value)) return moves;
+    const lastShift = game.lastMove.value;
 
     const moveRowDiff = lastShift.target.row - lastShift.origin.row;
     if (Math.abs(moveRowDiff) !== 2) return moves;
@@ -157,7 +148,10 @@ export class Pawn extends Piece {
     if (targetPawnAbsColDiff !== 1 || targetPawnAbsRowDiff !== 0) return moves;
 
     const targetRow = lastShift.target.row + (moveRowDiff === 2 ? -1 : 1);
-    const capturedPiece = getPositionPiece(lastShift.target, boardStateValue);
+    const capturedPiece = getBoardPositionPiece(
+      lastShift.target,
+      game.boardState
+    );
     moves.push(
       new Shift(
         this.pieceId,

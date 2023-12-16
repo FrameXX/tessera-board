@@ -4,8 +4,8 @@ import type {
   MarkBoardState,
 } from "../board_manager";
 import { isBoardPosition } from "../board_manager";
-import { getPositionPiece } from "../utils/game";
-import type { MovePerformContext } from "./move";
+import Game from "../game";
+import { getBoardPositionPiece } from "../utils/game";
 import Move, {
   getCleanBoardPosition,
   handleInvalidRawMove,
@@ -116,24 +116,14 @@ class Castling extends Move {
     }
   }
 
-  public forward(context: MovePerformContext): void {
-    this.onForward(context.boardStateValue);
+  public forward(boardState: BoardStateValue): void {
+    this.onForward(boardState);
 
-    const king = getPositionPiece(this.kingOrigin, context.boardStateValue);
-    const rook = getPositionPiece(this.rookOrigin, context.boardStateValue);
+    const king = getBoardPositionPiece(this.kingOrigin, boardState);
+    const rook = getBoardPositionPiece(this.rookOrigin, boardState);
 
-    movePositionValue(
-      king,
-      this.kingOrigin,
-      this.kingTarget,
-      context.boardStateValue
-    );
-    movePositionValue(
-      rook,
-      this.rookOrigin,
-      this.rookTarget,
-      context.boardStateValue
-    );
+    movePositionValue(king, this.kingOrigin, this.kingTarget, boardState);
+    movePositionValue(rook, this.rookOrigin, this.rookTarget, boardState);
   }
 
   private onReverse(boardStateValue: BoardStateValue) {
@@ -147,20 +137,20 @@ class Castling extends Move {
   public reverse(boardStateValue: BoardStateValue): void {
     this.onReverse(boardStateValue);
 
-    const king = getPositionPiece(this.kingTarget, boardStateValue);
-    const rook = getPositionPiece(this.rookTarget, boardStateValue);
+    const king = getBoardPositionPiece(this.kingTarget, boardStateValue);
+    const rook = getBoardPositionPiece(this.rookTarget, boardStateValue);
 
-    movePositionValue(king, this.kingOrigin, this.kingTarget, boardStateValue);
-    movePositionValue(rook, this.rookOrigin, this.rookTarget, boardStateValue);
+    movePositionValue(king, this.kingTarget, this.kingOrigin, boardStateValue);
+    movePositionValue(rook, this.rookTarget, this.rookOrigin, boardStateValue);
   }
 
-  public async perform(context: MovePerformContext): Promise<void> {
-    this.onForward(context.boardStateValue);
+  public async perform(game: Game): Promise<void> {
+    this.onForward(game.boardState);
 
-    movePiece(this.kingOrigin, this.kingTarget, context.boardStateValue);
-    await movePiece(this.rookOrigin, this.rookTarget, context.boardStateValue);
-    if (context.audioEffectsEnabled.value)
-      context.audioEffects.pieceMove.play();
+    movePiece(this.kingOrigin, this.kingTarget, game.boardState);
+    await movePiece(this.rookOrigin, this.rookTarget, game.boardState);
+    if (game.settings.audioEffectsEnabled.value)
+      game.audioEffects.pieceMove.play();
 
     this.notation = this.kingSide ? "0-0" : "0-0-0";
   }

@@ -1,4 +1,3 @@
-import type { ComputedRef } from "vue";
 import type {
   PieceContext,
   BoardPosition,
@@ -10,14 +9,15 @@ import Shift from "../moves/shift";
 import { isPieceKing } from "./king";
 import { type RawPiece } from "./raw_piece";
 import {
-  getBoardPositionPiece,
   getDiffPosition,
+  getBoardPositionValue,
   getRawPiece,
   isFriendlyPiece,
   isPositionOnBoard,
   type PlayerColor,
 } from "../utils/game";
 import Piece from "./piece";
+import Game from "../game";
 
 interface RawRook extends RawPiece {
   moved: boolean;
@@ -60,7 +60,7 @@ export class Rook extends Piece {
 
   public getNewCapturingPositions(
     position: BoardPosition,
-    boardStateValue: BoardStateValue
+    boardState: BoardStateValue
   ): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
 
@@ -76,7 +76,7 @@ export class Rook extends Piece {
           if (!isPositionOnBoard(target)) {
             break;
           }
-          const piece = getBoardPositionPiece(target, boardStateValue);
+          const piece = getBoardPositionValue(target, boardState);
           capturingPositions.push(target);
           if (piece) {
             break;
@@ -88,21 +88,16 @@ export class Rook extends Piece {
     return capturingPositions;
   }
 
-  public getNewPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
-  ): Move[] {
+  public getNewPossibleMoves(position: BoardPosition, game: Game): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getCapturingPositions(
       position,
-      boardStateValue,
-      lastMove
+      game.boardState
     );
 
     for (const target of capturingPositions) {
       let captures: PieceContext | undefined = undefined;
-      const piece = boardStateValue[target.row][target.col];
+      const piece = game.boardState[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
@@ -122,9 +117,9 @@ export class Rook extends Piece {
             position.row
           );
           if (!isPositionOnBoard(searchKingPosition)) break;
-          const piece = getBoardPositionPiece(
+          const piece = getBoardPositionValue(
             searchKingPosition,
-            boardStateValue
+            game.boardState
           );
           if (!piece) continue;
           // There is wrong piece in way. Castling cannot be performed.

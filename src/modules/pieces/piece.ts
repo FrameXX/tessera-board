@@ -1,5 +1,4 @@
 import { getRandomId } from "../utils/misc";
-import type BoardStateData from "../user_data/board_state";
 import {
   PlayerColor,
   getRawPiece,
@@ -9,7 +8,7 @@ import type { Ref } from "vue";
 import type Move from "../moves/move";
 import type { RawPiece } from "./raw_piece";
 import type { BoardPosition, BoardStateValue } from "../board_manager";
-import type { MoveForwardContext } from "../moves/move";
+import Game from "../game";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",
@@ -80,53 +79,32 @@ export abstract class Piece {
 
   public getCapturingPositions(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: Ref<Move | null>
+    boardState: BoardStateValue
   ): BoardPosition[] {
     if (!this.capturingPositionsCache)
       this.capturingPositionsCache = this.getNewCapturingPositions(
         position,
-        boardStateValue,
-        lastMove
+        boardState
       );
     return this.capturingPositionsCache;
   }
 
   public abstract getNewCapturingPositions(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: Ref<Move | null>
+    boardState: BoardStateValue
   ): BoardPosition[];
 
-  public getPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    boardStateData: BoardStateData,
-    moveForwardContext: MoveForwardContext,
-    ignorePiecesGuardedProperty: Ref<boolean>,
-    lastMove: Ref<Move | null>
-  ): Move[] {
+  public getPossibleMoves(game: Game, position: BoardPosition): Move[] {
     if (!this.possibleMovesCache) {
-      let possibleMoves = this.getNewPossibleMoves(
-        position,
-        boardStateValue,
-        lastMove
-      );
+      let possibleMoves = this.getNewPossibleMoves(position, game);
 
-      if (!ignorePiecesGuardedProperty.value) {
-        // const newBoardStateData = new BoardStateData([]);
-        // newBoardStateData.load(boardStateData.dump());
-        // const newBoardStateValue = newBoardStateData.value;
-
-        // moveForwardContext.boardStateValue = newBoardStateValue;
-
+      if (!game.settings.ignorePiecesGuardedProperty.value) {
         possibleMoves = possibleMoves.filter((move) => {
           return !willMoveCheckGuardedPiece(
+            game,
             move,
             this.color,
-            boardStateValue,
-            moveForwardContext,
-            lastMove
+            game.backendBoardStateData.value
           );
         });
       }
@@ -138,8 +116,7 @@ export abstract class Piece {
 
   public abstract getNewPossibleMoves(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: Ref<Move | null>
+    game: Game
   ): Move[];
 }
 

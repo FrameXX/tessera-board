@@ -1,4 +1,3 @@
-import type { Ref } from "vue";
 import type {
   PieceContext,
   BoardPosition,
@@ -7,8 +6,8 @@ import type {
 import { isPieceId, type Path, type PiecesImportance } from "../pieces/piece";
 import type Piece from "../pieces/piece";
 import type Move from "../moves/move";
-import type { RawPiece } from "../pieces/raw_piece";
-import type { MoveForwardContext } from "../moves/move";
+import { type RawPiece } from "../pieces/raw_piece";
+import Game from "../game";
 
 export type MoveDirection = "forward" | "reverse";
 export type MoveExecution = "perform" | MoveDirection;
@@ -103,11 +102,10 @@ export function getGuardedPieces(
 }
 
 export function isGuardedPieceChecked(
-  boardStateValue: BoardStateValue,
+  boardState: BoardStateValue,
   color: PlayerColor,
   allpiecesContext: PieceContext[],
-  guardedPieces: PieceContext[],
-  lastMove: Ref<Move | null>
+  guardedPieces: PieceContext[]
 ) {
   let capturingPaths: Path[] = [];
 
@@ -120,7 +118,7 @@ export function isGuardedPieceChecked(
     capturingPaths = [
       ...capturingPaths,
       ...positionsToPath(
-        piece.getCapturingPositions(origin, boardStateValue, lastMove),
+        piece.getCapturingPositions(origin, boardState),
         origin
       ),
     ];
@@ -161,42 +159,48 @@ export function positionsEqual(
   return position1.row === position2.row && position1.col === position2.col;
 }
 
-export function getPositionPiece(
+export function getBoardPositionPiece(
   position: BoardPosition,
   boardStateValue: BoardStateValue
 ): Piece {
-  const piece = boardStateValue[position.row][position.col];
-  if (piece) {
-    return piece;
+  const piece = getBoardPositionValue(position, boardStateValue);
+  if (!piece) {
+    throw new GameLogicError(
+      `Board position is missing a required piece. Position: ${JSON.stringify(
+        position
+      )}`
+    );
   }
-  throw new GameLogicError(
-    `Board position is missing a required piece. Position: ${JSON.stringify(
-      position
-    )}`
-  );
+  return piece;
+}
+
+export function getBoardPositionValue(
+  position: BoardPosition,
+  boardStateValue: BoardStateValue
+): Piece | null {
+  const piece = boardStateValue[position.row][position.col];
+  return piece;
 }
 
 export function willMoveCheckGuardedPiece(
+  game: Game,
   move: Move,
   color: PlayerColor,
-  newBoardStateValue: BoardStateValue,
-  moveForwardContext: MoveForwardContext,
-  lastMove: Ref<Move | null>
+  boardState: BoardStateValue
 ) {
-  move.forward(moveForwardContext);
+  move.forward(boardState, game);
 
-  const allPiecesContext = getAllpieceContext(newBoardStateValue);
+  const allPiecesContext = getAllpieceContext(boardState);
   invalidatePiecesCache(allPiecesContext);
   const guardedPieces = getGuardedPieces(allPiecesContext, color);
   const checksGuardedPiece = isGuardedPieceChecked(
-    newBoardStateValue,
+    boardState,
     color,
     allPiecesContext,
-    guardedPieces,
-    lastMove
+    guardedPieces
   );
 
-  move.reverse(newBoardStateValue);
+  move.reverse(boardState);
 
   return checksGuardedPiece;
 }
@@ -207,13 +211,6 @@ export function getDiffPosition(
   rowDiff: number
 ): BoardPosition {
   return sumPositions(position, { row: rowDiff, col: colDiff });
-}
-
-export function getBoardPositionPiece(
-  position: BoardPosition,
-  boardStateValue: BoardStateValue
-) {
-  return boardStateValue[position.row][position.col];
 }
 
 export function isFriendlyPiece(

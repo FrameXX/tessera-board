@@ -62,12 +62,8 @@ class GameBoardManager extends BoardManager {
 
   private setAvailibleMoves(pieceContext: PieceContext) {
     this.availibleMoves = pieceContext.piece.getPossibleMoves(
-      pieceContext,
-      this.game.boardState,
-      this.game.gameBoardStateData,
-      this.game.moveForwardContext,
-      this.game.settings.ignorePiecesGuardedProperty,
-      this.game.lastMove
+      this.game,
+      pieceContext
     );
   }
 

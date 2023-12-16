@@ -13,7 +13,6 @@ import type { PieceContext, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
 import NumberUserData from "./user_data/number_user_data";
 import MoveListData from "./user_data/move_list";
-import type { MoveForwardContext, MovePerformContext } from "./moves/move";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
@@ -113,7 +112,7 @@ export default class Game {
     cellIndexOpacity: ref(90),
     pieceLongPressTimeout: ref(0),
     requireMoveConfirm: ref(false),
-    defaultBoardState: reactive([
+    defaultBoardState: reactive<(Piece | null)[][]>([
       [
         new Rook("white"),
         new Knight("white"),
@@ -299,6 +298,7 @@ export default class Game {
     this.settings.defaultBoardState,
     this.settings.defaultBoardState
   );
+  public backendBoardStateData = new BoardStateData([]);
   public readonly lastMoveIndexData = new NumberUserData(
     "move_index",
     this.lastMoveIndex.value,
@@ -602,7 +602,7 @@ export default class Game {
   };
 
   public performMove(move: Move) {
-    move.perform(this.movePerformContext);
+    move.perform(this);
     this.moveList.value.push(move);
     this.onMovePerform();
   }
@@ -633,22 +633,20 @@ export default class Game {
   }
 
   public getRandomMove(pieceColor?: PlayerColor) {
-    let randomPiece: PieceContext;
+    let randomPieceContext: PieceContext;
     let moves: Move[];
     do {
       do {
-        randomPiece = getRandomArrayValue(this.gameBoardAllPiecesContext.value);
+        randomPieceContext = getRandomArrayValue(
+          this.gameBoardAllPiecesContext.value
+        );
       } while (
         typeof pieceColor === "undefined" ||
-        randomPiece.piece.color !== pieceColor
+        randomPieceContext.piece.color !== pieceColor
       );
-      moves = randomPiece.piece.getPossibleMoves(
-        randomPiece,
-        this.boardState,
-        this.gameBoardStateData,
-        this.movePerformContext,
-        this.settings.ignorePiecesGuardedProperty,
-        this.lastMove
+      moves = randomPieceContext.piece.getPossibleMoves(
+        this,
+        randomPieceContext
       );
     } while (moves.length === 0);
     const chosenMove = getRandomArrayValue(moves);
@@ -782,6 +780,7 @@ export default class Game {
     this.initPlayerColors();
     this.updateMoveRelated();
     this.resetTimers();
+    this.updateBackendBoardStateData();
     this.checkActivePlayerLoss();
     this.saveMove();
     this.primaryBoardManager.unselectAll();
@@ -794,21 +793,8 @@ export default class Game {
     this.updateCapturingPaths();
     updatePieceColors(this.primaryPlayerColor.value);
     this.updateGameBoardAllPiecesContext();
+    this.updateBackendBoardStateData();
     this.checkActivePlayerLoss();
-  }
-
-  private get movePerformContext(): MovePerformContext {
-    return {
-      boardStateValue: this.boardState,
-      blackCapturedPieces: this.blackCapturedPieces,
-      whiteCapturedPieces: this.whiteCapturedPieces,
-      selectPieceDialog: this.ui.selectPieceDialog,
-      reviveFromCapturedPieces: this.settings.reviveFromCapturedPieces,
-      audioEffectsEnabled: this.settings.audioEffectsEnabled,
-      audioEffects: this.audioEffects,
-      vibrationsEnabled: this.settings.vibrationsEnabled,
-      piecesImportance: this.piecesImportance,
-    };
   }
 
   private spliceReversedMoves(listIndexDiff: number) {
@@ -823,7 +809,7 @@ export default class Game {
 
   private forwardMove() {
     const forwardedMove = this.moveList.value[this.lastMoveIndex.value + 1];
-    forwardedMove.forward(this.movePerformContext);
+    forwardedMove.forward(this.boardState, this);
     this.onMoveForward();
   }
 
@@ -877,7 +863,15 @@ export default class Game {
     }
   }
 
+  private updateBackendBoardStateData() {
+    this.backendBoardStateData.load(
+      this.gameBoardStateData.dump(),
+      this.ui.toastManager
+    );
+  }
+
   public onMove() {
+    this.updateBackendBoardStateData();
     this.updateGameBoardAllPiecesContext();
     this.resetNotPlayingPlayerMoveTimer();
     invalidatePiecesCache(this.gameBoardAllPiecesContext.value);
@@ -923,8 +917,7 @@ export default class Game {
       this.boardState,
       this.playingColor.value,
       this.gameBoardAllPiecesContext.value,
-      activePlayerGuardedPieces,
-      this.lastMove
+      activePlayerGuardedPieces
     );
 
     if (activePlayerChecked) this.ui.toastManager.showToast("Check!", "cross");
@@ -945,30 +938,13 @@ export default class Game {
     }
   }
 
-  public get moveForwardContext(): MoveForwardContext {
-    return {
-      boardStateValue: this.boardState,
-      piecesImportance: this.piecesImportance,
-      blackCapturedPieces: this.blackCapturedPieces,
-      whiteCapturedPieces: this.whiteCapturedPieces,
-      reviveFromCapturedPieces: this.settings.reviveFromCapturedPieces,
-    };
-  }
-
   private canActivePlayerMove(
     color: PlayerColor,
     allPiecesContext: PieceContext[]
   ) {
     for (const pieceContext of allPiecesContext) {
       if (pieceContext.piece.color !== color) continue;
-      const moves = pieceContext.piece.getPossibleMoves(
-        pieceContext,
-        this.boardState,
-        this.gameBoardStateData,
-        this.movePerformContext,
-        this.settings.ignorePiecesGuardedProperty,
-        this.lastMove
-      );
+      const moves = pieceContext.piece.getPossibleMoves(this, pieceContext);
       if (moves.length !== 0) {
         return true;
       }
@@ -989,7 +965,7 @@ export default class Game {
         whiteCapturingPaths = [
           ...whiteCapturingPaths,
           ...positionsToPath(
-            piece.getCapturingPositions(origin, this.boardState, this.lastMove),
+            piece.getCapturingPositions(origin, this.boardState),
             origin
           ),
         ];
@@ -997,7 +973,7 @@ export default class Game {
         blackCapturingPaths = [
           ...blackCapturingPaths,
           ...positionsToPath(
-            piece.getCapturingPositions(origin, this.boardState, this.lastMove),
+            piece.getCapturingPositions(origin, this.boardState),
             origin
           ),
         ];

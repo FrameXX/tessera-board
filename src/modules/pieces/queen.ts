@@ -1,4 +1,3 @@
-import type { ComputedRef } from "vue";
 import type {
   PieceContext,
   BoardPosition,
@@ -10,6 +9,7 @@ import { Bishop } from "./bishop";
 import Piece from "./piece";
 import Rook from "./rook";
 import { isFriendlyPiece, type PlayerColor } from "../utils/game";
+import Game from "../game";
 
 export class Queen extends Piece {
   constructor(color: PlayerColor, id?: string) {
@@ -18,34 +18,28 @@ export class Queen extends Piece {
 
   public getNewCapturingPositions(
     position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
+    boardState: BoardStateValue
   ): BoardPosition[] {
     // NOTE: Capturing positions of qeen are same as capturing positions of rook and bishop in same state joined together. There's no overlap between rook and bishop capturing positions which is also great.
     const rook = new Rook(this.color);
     const bishop = new Bishop(this.color);
     const capturingPositions: BoardPosition[] = [
-      ...rook.getCapturingPositions(position, boardStateValue, lastMove),
-      ...bishop.getCapturingPositions(position, boardStateValue, lastMove),
+      ...rook.getCapturingPositions(position, boardState),
+      ...bishop.getCapturingPositions(position, boardState),
     ];
     return capturingPositions;
   }
 
-  public getNewPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
-  ): Move[] {
+  public getNewPossibleMoves(position: BoardPosition, game: Game): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getNewCapturingPositions(
       position,
-      boardStateValue,
-      lastMove
+      game.boardState
     );
 
     for (const target of capturingPositions) {
       let captures: PieceContext | undefined = undefined;
-      const piece = boardStateValue[target.row][target.col];
+      const piece = game.boardState[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }

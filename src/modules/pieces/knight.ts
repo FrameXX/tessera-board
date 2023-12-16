@@ -1,9 +1,4 @@
-import type { ComputedRef } from "vue";
-import type {
-  PieceContext,
-  BoardPosition,
-  BoardStateValue,
-} from "../board_manager";
+import type { PieceContext, BoardPosition } from "../board_manager";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import {
@@ -13,6 +8,7 @@ import {
   type PlayerColor,
 } from "../utils/game";
 import Piece from "./piece";
+import Game from "../game";
 
 export class Knight extends Piece {
   constructor(color: PlayerColor, id?: string) {
@@ -36,21 +32,16 @@ export class Knight extends Piece {
     return capturingPositions;
   }
 
-  public getNewPossibleMoves(
-    position: BoardPosition,
-    boardStateValue: BoardStateValue,
-    lastMove: ComputedRef<Move | null>
-  ): Move[] {
+  public getNewPossibleMoves(position: BoardPosition, game: Game): Move[] {
     const moves: Move[] = [];
     const capturingPositions = this.getCapturingPositions(
       position,
-      boardStateValue,
-      lastMove
+      game.boardState
     );
 
     for (const target of capturingPositions) {
       let captures: PieceContext | undefined = undefined;
-      const piece = boardStateValue[target.row][target.col];
+      const piece = game.boardState[target.row][target.col];
       if (isFriendlyPiece(piece, this.color)) {
         continue;
       }
