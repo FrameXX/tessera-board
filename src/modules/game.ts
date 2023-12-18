@@ -172,7 +172,7 @@ export default class Game {
     }),
   };
 
-  public readonly boardState: (Piece | null)[][] = [
+  public readonly boardState: (Piece | null)[][] = reactive([
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
@@ -181,7 +181,7 @@ export default class Game {
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
-  ];
+  ]);
 
   public readonly paused = ref<GamePausedState>("not");
   public readonly ui = new UI(this);
@@ -298,7 +298,7 @@ export default class Game {
     this.settings.defaultBoardState,
     this.settings.defaultBoardState
   );
-  public backendBoardStateData = new BoardStateData([]);
+  public backendBoardStateData = new BoardStateData([], []);
   public readonly lastMoveIndexData = new NumberUserData(
     "move_index",
     this.lastMoveIndex.value,
@@ -576,11 +576,10 @@ export default class Game {
       this.ui.updateScreenRotation(newValue);
     });
 
-    watch(this.settings.defaultBoardState, () => {
-      this.defaultBoardAllPiecesContext.value = getAllPiecesContext(
-        this.settings.defaultBoardState
-      );
-    });
+    watch(
+      this.settings.defaultBoardState,
+      this.updateDefaultBoardAllPiecesContext.bind(this)
+    );
   }
 
   public mount = () => {
@@ -601,10 +600,9 @@ export default class Game {
     }, 600);
   };
 
-  public performMove(move: Move) {
-    move.perform(this);
-    this.moveList.value.push(move);
-    this.onMovePerform();
+  public async performMove(move: Move) {
+    await move.perform(this);
+    this.onMovePerform(move);
   }
 
   public playerWin(player: Player, reason: WinReason) {
@@ -851,7 +849,13 @@ export default class Game {
     this.notPlayingPlayer.value = this.getNotPlayingPlayer();
   }
 
-  private updateGameBoardAllPiecesContext() {
+  public updateDefaultBoardAllPiecesContext() {
+    this.defaultBoardAllPiecesContext.value = getAllPiecesContext(
+      this.settings.defaultBoardState
+    );
+  }
+
+  public updateGameBoardAllPiecesContext() {
     this.gameBoardAllPiecesContext.value = getAllPiecesContext(this.boardState);
   }
 
@@ -873,10 +877,10 @@ export default class Game {
   public onMove() {
     this.updateBackendBoardStateData();
     this.updateGameBoardAllPiecesContext();
-    this.resetNotPlayingPlayerMoveTimer();
     invalidatePiecesCache(this.gameBoardAllPiecesContext.value);
     this.updateCapturingPaths();
     this.updateMoveRelated();
+    this.resetNotPlayingPlayerMoveTimer();
   }
 
   private saveMove() {
@@ -896,13 +900,14 @@ export default class Game {
     this.saveMove();
   }
 
-  private onMovePerform() {
+  private onMovePerform(move: Move) {
     this.lastMoveIndex.value++;
     const moveListIndexShift =
-      this.moveList.value.length - this.lastMoveIndex.value - 1;
+      this.moveList.value.length - this.lastMoveIndex.value;
     if (moveListIndexShift > 0) {
       this.spliceReversedMoves(moveListIndexShift);
     }
+    this.moveList.value.push(move);
     this.onMove();
     this.checkActivePlayerLoss();
     this.saveMove();

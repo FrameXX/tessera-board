@@ -103,19 +103,17 @@ export function addCapturedPiece(
   blackCapturedPieces: Ref<PieceId[]>,
   whiteCapturedPieces: Ref<PieceId[]>
 ) {
-  if (piece.color === "white") {
-    blackCapturedPieces.value.push(piece.pieceId);
-  } else {
-    whiteCapturedPieces.value.push(piece.pieceId);
-  }
+  piece.color === "white"
+    ? blackCapturedPieces.value.push(piece.pieceId)
+    : whiteCapturedPieces.value.push(piece.pieceId);
 }
 
 export function transformPiece(
   position: BoardPosition,
   newPiece: Piece,
-  boardStateValue: BoardStateValue
+  boardState: BoardStateValue
 ) {
-  const piece = boardStateValue[position.row][position.col];
+  const piece = boardState[position.row][position.col];
   if (!piece) {
     throw new GameLogicError(
       `Board position is missing a required piece. Position: ${JSON.stringify(
@@ -123,7 +121,7 @@ export function transformPiece(
       )}`
     );
   }
-  boardStateValue[position.row][position.col] = newPiece;
+  boardState[position.row][position.col] = newPiece;
 }
 
 export function handleInvalidRawMove(rawMove: RawMove): never {
@@ -135,25 +133,25 @@ export function movePositionValue(
   piece: Piece,
   origin: BoardPosition,
   target: BoardPosition,
-  boardStateValue: BoardStateValue
+  boardState: BoardStateValue
 ) {
-  boardStateValue[target.row][target.col] = piece;
-  boardStateValue[origin.row][origin.col] = null;
+  boardState[target.row][target.col] = piece;
+  boardState[origin.row][origin.col] = null;
 }
 
 export async function movePiece(
   origin: BoardPosition,
   target: BoardPosition,
-  boardStateValue: BoardStateValue,
+  boardState: BoardStateValue,
   boardId: string = "primary-board"
 ) {
-  const piece = getBoardPositionPiece(origin, boardStateValue);
-  movePositionValue(piece, origin, target, boardStateValue);
+  const piece = getBoardPositionPiece(origin, boardState);
+  movePositionValue(piece, origin, target, boardState);
   // Player board is always visible so it's ok to observe the transition only on player board
   const board = getElementInstanceById(boardId);
   const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);
   if (!(pieceElement instanceof SVGElement)) {
-    console.error(`Could not find piece element of piece ${piece.id}`);
+    console.error("Could not find SVG element of piece", piece);
     return;
   }
   await waitForTransitionEnd(pieceElement);
@@ -175,10 +173,10 @@ export function getPieceById(id: string, boardStateValue: BoardStateValue) {
 
 export function tellPieceItMoved(
   id: string,
-  boardStateValue: BoardStateValue,
+  boardState: BoardStateValue,
   newValue: boolean = true
 ): boolean {
-  const piece = getPieceById(id, boardStateValue);
+  const piece = getPieceById(id, boardState);
   if (!("moved" in piece)) {
     return false;
   }
@@ -196,10 +194,10 @@ export function getCleanBoardPosition(position: BoardPosition) {
 
 export function tellPieceItCastled(
   id: string,
-  boardStateValue: BoardStateValue,
+  boardState: BoardStateValue,
   newValue: boolean = true
 ): boolean {
-  const piece = getPieceById(id, boardStateValue);
+  const piece = getPieceById(id, boardState);
   if (!("castled" in piece)) {
     return false;
   }
@@ -213,23 +211,27 @@ export function tellPieceItCastled(
 
 export function clearPositionValue(
   position: BoardPosition,
-  boardStateValue: BoardStateValue
+  boardState: BoardStateValue
 ) {
-  boardStateValue[position.row][position.col] = null;
+  boardState[position.row][position.col] = null;
 }
 
 export function capturePosition(
   position: BoardPosition,
-  boardStateValue: BoardStateValue,
+  boardState: BoardStateValue,
   blackCapturedPieces: Ref<PieceId[]>,
   whiteCapturedPieces: Ref<PieceId[]>
 ) {
-  const piece = boardStateValue[position.row][position.col];
+  const piece = boardState[position.row][position.col];
   if (!piece) {
-    return;
+    throw new GameLogicError(
+      `Provided position has no piece to capture ${JSON.stringify(position)}`
+    );
   }
-  boardStateValue[position.row][position.col] = null;
+  boardState[position.row][position.col] = null;
   addCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
 }
+
+export function unCapturePosition() {}
 
 export default Move;

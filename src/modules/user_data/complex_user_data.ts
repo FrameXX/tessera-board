@@ -8,14 +8,14 @@ abstract class ComplexUserData<ValueType> extends UserData<ValueType> {
   constructor(
     id: string,
     value: ValueType,
-    protected reactiveValue?: ValueType,
+    protected reactiveValue: ValueType & object,
     autoSave: boolean = true,
     private readonly saveImmidiately = false
   ) {
     super(id, value);
 
     if (autoSave && this.reactiveValue) {
-      watch(reactiveValue!, (newValue) => {
+      watch(reactiveValue, (newValue) => {
         this.onValueChange(newValue);
       });
     }

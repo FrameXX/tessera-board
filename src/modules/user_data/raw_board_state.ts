@@ -5,8 +5,8 @@ import { getRawPiece, isRawPiece } from "../utils/game";
 import ToastManager from "../toast_manager";
 
 class RawBoardStateData extends ComplexUserData<BoardStateValue> {
-  constructor(value: BoardStateValue, valueReactive: BoardStateValue) {
-    super("default_board_state", value, valueReactive, true, true);
+  constructor(value: BoardStateValue, reactiveValue: BoardStateValue) {
+    super("default_board_state", value, reactiveValue, true, true);
   }
 
   get rawVersion() {

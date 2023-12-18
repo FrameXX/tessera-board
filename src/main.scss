@@ -102,7 +102,8 @@ button {
   background-color: var(--color-primary-surface-accent);
   color: var(--color-primary-text);
   padding: var(--spacing-tiny) var(--spacing-big);
-  transition: background-color var(--transition-duration-medium) linear;
+  transition: background-color var(--transition-duration-medium) linear,
+    outline var(--transition-duration-small) linear;
 
   &:hover:not(.checkbox, .set-time-duration),
   &:focus:not(.checkbox, .set-time-duration) {

@@ -8,29 +8,29 @@ import {
 } from "../modules/utils/misc";
 import Game from "../modules/game";
 
-const pulsingMoveSeconds = 11;
-const pulsingMatchSeconds = 31;
+const pulsingMoveSeconds = 10;
+const pulsingMatchSeconds = 30;
 
 const props = defineProps({
   game: { type: Object as PropType<Game>, required: true },
 });
 
-const playerTimeMove = computed<MinSecTime>(() => {
+const primaryPlayerTimeMove = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
     props.game.timers.primaryPlayerMove.remainingSeconds.value
   );
 });
-const playerTimeMatch = computed<MinSecTime>(() => {
+const primaryPlayerTimeMatch = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
     props.game.timers.primaryPlayerMatch.remainingSeconds.value
   );
 });
-const opponentTimeMove = computed<MinSecTime>(() => {
+const secondaryPlayerTimeMove = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
     props.game.timers.secondaryPlayerMove.remainingSeconds.value
   );
 });
-const opponentTimeMatch = computed<MinSecTime>(() => {
+const secondaryPlayerTimeMatch = computed<MinSecTime>(() => {
   return getMinsAndSecsTime(
     props.game.timers.secondaryPlayerMatch.remainingSeconds.value
   );
@@ -44,22 +44,23 @@ const primaryClass = computed<"primary" | "secondary" | "none">(() => {
   }
   return "none";
 });
-const playerSecondsPerMoveSet = computed(() => {
+
+const primaryPlayerSecondsPerMoveSet = computed(() => {
   return props.game.settings.primaryPlayerSecondsPerMove.value !== 0;
 });
-const opponentSecondsPerMoveSet = computed(() => {
+const secondaryPlayerSecondsPerMoveSet = computed(() => {
   return props.game.settings.secondaryPlayerSecondsPerMove.value !== 0;
 });
-const playerSecondsPerMatchSet = computed(() => {
+const primaryPlayerSecondsPerMatchSet = computed(() => {
   return props.game.settings.primaryPlayerSecondsPerMatch.value !== 0;
 });
-const opponentSecondsPerMatchSet = computed(() => {
+const secondaryPlayerSecondsPerMatchSet = computed(() => {
   return props.game.settings.secondaryPlayerSecondsPerMatch.value !== 0;
 });
 
-const playerMoveSecondsPulsing = computed(() => {
+const primaryPlayerMoveSecondsPulsing = computed(() => {
   return (
-    props.game.timers.primaryPlayerMove.remainingSeconds.value <
+    props.game.timers.primaryPlayerMove.remainingSeconds.value <=
       pulsingMoveSeconds &&
     props.game.timers.primaryPlayerMove.remainingSeconds.value > 0 &&
     props.game.primaryPlayerPlaying.value &&
@@ -67,9 +68,9 @@ const playerMoveSecondsPulsing = computed(() => {
   );
 });
 
-const playerMatchSecondsPulsing = computed(() => {
+const primaryPlayerMatchSecondsPulsing = computed(() => {
   return (
-    props.game.timers.primaryPlayerMatch.remainingSeconds.value <
+    props.game.timers.primaryPlayerMatch.remainingSeconds.value <=
       pulsingMatchSeconds &&
     props.game.timers.primaryPlayerMatch.remainingSeconds.value > 0 &&
     props.game.primaryPlayerPlaying.value &&
@@ -77,22 +78,22 @@ const playerMatchSecondsPulsing = computed(() => {
   );
 });
 
-const opponentMoveSecondsPulsing = computed(() => {
+const secondaryPlayerMoveSecondsPulsing = computed(() => {
   return (
-    props.game.timers.secondaryPlayerMove.remainingSeconds.value <
+    props.game.timers.secondaryPlayerMove.remainingSeconds.value <=
       pulsingMoveSeconds &&
     props.game.timers.secondaryPlayerMove.remainingSeconds.value > 0 &&
-    props.game.primaryPlayerPlaying.value &&
+    !props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
 });
 
-const opponentMatchSecondsPulsing = computed(() => {
+const secondaryPlayerMatchSecondsPulsing = computed(() => {
   return (
-    props.game.timers.secondaryPlayerMatch.remainingSeconds.value <
+    props.game.timers.secondaryPlayerMatch.remainingSeconds.value <=
       pulsingMatchSeconds &&
     props.game.timers.secondaryPlayerMatch.remainingSeconds.value > 0 &&
-    props.game.primaryPlayerPlaying.value &&
+    !props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
 });
@@ -102,33 +103,33 @@ const opponentMatchSecondsPulsing = computed(() => {
   <div id="status">
     <div
       id="timers-player-wrapper"
-      v-show="playerSecondsPerMoveSet || playerSecondsPerMatchSet"
+      v-show="primaryPlayerSecondsPerMoveSet || primaryPlayerSecondsPerMatchSet"
     >
       <div id="timers-player">
         <InfoText
-          v-show="playerSecondsPerMoveSet"
+          v-show="primaryPlayerSecondsPerMoveSet"
           content-role="timer"
           :class="{
-            pulsing: playerMoveSecondsPulsing,
+            pulsing: primaryPlayerMoveSecondsPulsing,
           }"
           name="move"
           >{{
-            getDigitStr(playerTimeMove.mins) +
+            getDigitStr(primaryPlayerTimeMove.mins) +
             ":" +
-            getDigitStr(playerTimeMove.secs)
+            getDigitStr(primaryPlayerTimeMove.secs)
           }}</InfoText
         >
         <InfoText
-          v-show="playerSecondsPerMatchSet"
+          v-show="primaryPlayerSecondsPerMatchSet"
           content-role="timer"
           :class="{
-            pulsing: playerMatchSecondsPulsing,
+            pulsing: primaryPlayerMatchSecondsPulsing,
           }"
           name="match"
           >{{
-            getDigitStr(playerTimeMatch.mins) +
+            getDigitStr(primaryPlayerTimeMatch.mins) +
             ":" +
-            getDigitStr(playerTimeMatch.secs)
+            getDigitStr(primaryPlayerTimeMatch.secs)
           }}</InfoText
         >
       </div>
@@ -142,33 +143,35 @@ const opponentMatchSecondsPulsing = computed(() => {
 
     <div
       id="timers-opponent-wrapper"
-      v-show="opponentSecondsPerMoveSet || opponentSecondsPerMatchSet"
+      v-show="
+        secondaryPlayerSecondsPerMoveSet || secondaryPlayerSecondsPerMatchSet
+      "
     >
       <div id="timers-opponent">
         <InfoText
-          v-show="opponentSecondsPerMoveSet"
+          v-show="secondaryPlayerSecondsPerMoveSet"
           content-role="timer"
           :class="{
-            pulsing: opponentMoveSecondsPulsing,
+            pulsing: secondaryPlayerMoveSecondsPulsing,
           }"
           name="move"
           >{{
-            getDigitStr(opponentTimeMove.mins) +
+            getDigitStr(secondaryPlayerTimeMove.mins) +
             ":" +
-            getDigitStr(opponentTimeMove.secs)
+            getDigitStr(secondaryPlayerTimeMove.secs)
           }}</InfoText
         >
         <InfoText
-          v-show="opponentSecondsPerMatchSet"
+          v-show="secondaryPlayerSecondsPerMatchSet"
           content-role="timer"
           :class="{
-            pulsing: opponentMatchSecondsPulsing,
+            pulsing: secondaryPlayerMatchSecondsPulsing,
           }"
           name="match"
           >{{
-            getDigitStr(opponentTimeMatch.mins) +
+            getDigitStr(secondaryPlayerTimeMatch.mins) +
             ":" +
-            getDigitStr(opponentTimeMatch.secs)
+            getDigitStr(secondaryPlayerTimeMatch.secs)
           }}</InfoText
         >
       </div>

@@ -243,7 +243,10 @@ class Promotion extends Move {
         game.audioEffects.pieceRemove.play();
       if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
     }
+
     await movePiece(this.origin, this.target, game.boardState);
+    game.updateGameBoardAllPiecesContext();
+
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
 
@@ -251,10 +254,12 @@ class Promotion extends Move {
       game.blackCapturedPieces,
       game.whiteCapturedPieces
     );
+
     const transformOptions = this.getTransformOptions(
       game.settings.reviveFromCapturedPieces,
       capturedPieces
     );
+
     this.newRawPiece =
       transformOptions.length === 1
         ? transformOptions[0]

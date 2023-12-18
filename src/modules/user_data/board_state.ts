@@ -7,7 +7,7 @@ import { isRawPiece } from "../utils/game";
 class BoardStateData extends ComplexUserData<BoardStateValue> {
   constructor(
     value: BoardStateValue,
-    reactiveValue?: BoardStateValue,
+    reactiveValue: BoardStateValue,
     autoSave: boolean = true
   ) {
     super("game_board_state", value, reactiveValue, autoSave);

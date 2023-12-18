@@ -12,10 +12,10 @@ class DefaultBoardManager extends BoardManager {
   }
 
   private isPositionAvailible(position: BoardPosition) {
-    if (!isPositionOnBoard(position)) {
-      return false;
-    }
-    return this.game.boardState[position.row][position.col] === null;
+    if (!isPositionOnBoard(position)) return false;
+    return (
+      this.game.settings.defaultBoardState[position.row][position.col] === null
+    );
   }
 
   public onPieceDragStart(
@@ -58,7 +58,7 @@ class DefaultBoardManager extends BoardManager {
     await movePiece(
       pieceContext,
       targetPosition,
-      this.game.boardState,
+      this.game.settings.defaultBoardState,
       "default-board"
     );
     if (this.game.settings.audioEffectsEnabled.value)
@@ -69,7 +69,8 @@ class DefaultBoardManager extends BoardManager {
     if (this.dragEndTimeoutActive) {
       return;
     }
-    this.game.boardState[pieceContext.row][pieceContext.col] = null;
+    this.game.settings.defaultBoardState[pieceContext.row][pieceContext.col] =
+      null;
     if (this.game.settings.audioEffectsEnabled.value)
       this.game.audioEffects.pieceRemove.play();
     if (this.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
@@ -77,7 +78,7 @@ class DefaultBoardManager extends BoardManager {
 
   public async onCellClick(position: BoardPosition) {
     const piece = await this.game.ui.configPieceDialog.open();
-    this.game.boardState[position.row][position.col] = piece;
+    this.game.settings.defaultBoardState[position.row][position.col] = piece;
     if (this.game.settings.audioEffectsEnabled.value)
       this.game.audioEffects.pieceMove.play();
     if (this.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
