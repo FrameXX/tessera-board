@@ -87,15 +87,12 @@ export class Pawn extends Piece {
             position,
             target,
             this.transformOptions,
-            undefined,
-            this.id
+            undefined
           )
         );
         break;
       } else {
-        moves.push(
-          new Shift(this.pieceId, position, target, undefined, this.id)
-        );
+        moves.push(new Shift(this.pieceId, position, target, undefined));
       }
     }
 
@@ -121,19 +118,10 @@ export class Pawn extends Piece {
         (target.row === 0 && this.color === "black")
       ) {
         moves.push(
-          new Promotion(
-            this,
-            position,
-            target,
-            this.transformOptions,
-            captures,
-            this.id
-          )
+          new Promotion(this, position, target, this.transformOptions, captures)
         );
       } else {
-        moves.push(
-          new Shift(this.pieceId, position, target, captures, this.id)
-        );
+        moves.push(new Shift(this.pieceId, position, target, captures));
       }
     }
 
@@ -164,8 +152,7 @@ export class Pawn extends Piece {
           row: lastShift.target.row,
           col: lastShift.target.col,
           piece: capturedPiece,
-        },
-        this.id
+        }
       )
     );
 

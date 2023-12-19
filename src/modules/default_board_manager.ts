@@ -56,6 +56,7 @@ class DefaultBoardManager extends BoardManager {
       return;
     }
     await movePiece(
+      pieceContext.piece,
       pieceContext,
       targetPosition,
       this.game.settings.defaultBoardState,

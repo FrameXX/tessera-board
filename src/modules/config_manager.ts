@@ -26,7 +26,7 @@ class ConfigManager {
     try {
       for (const index in configValues) {
         const entry = this.entries[index];
-        entry.load(configValues[index]);
+        entry.load(configValues[index], this.toastManager);
       }
     } catch (error) {
       console.error(
@@ -57,7 +57,7 @@ class ConfigManager {
     try {
       for (const index in configValues) {
         const entry = this.entries[index];
-        entry.load(configValues[index]);
+        entry.load(configValues[index], this.toastManager);
       }
     } catch (error) {
       console.error(

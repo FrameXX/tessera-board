@@ -4,7 +4,7 @@ import type { PieceIconPack } from "../modules/user_data/piece_set";
 import PieceIcon from "./PieceIcon.vue";
 import type { PieceId } from "../modules/pieces/piece";
 import { getRandomId } from "../modules/utils/misc";
-import type { PlayerColor } from "../modules/game";
+import { PlayerColor } from "../modules/utils/game";
 
 const props = defineProps({
   pieceIds: { type: Array as PropType<PieceId[]> },

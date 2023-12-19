@@ -84,7 +84,7 @@ export class King extends Piece {
         continue;
       }
       if (piece) captures = { ...target, piece: piece };
-      moves.push(new Shift(this.pieceId, position, target, captures, this.id));
+      moves.push(new Shift(this.pieceId, position, target, captures));
     }
 
     // https://en.wikipedia.org/wiki/Castling
