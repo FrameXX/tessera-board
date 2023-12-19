@@ -1,7 +1,9 @@
-import { ComputedRef, computed, ref, watch } from "vue";
-import BoardManager, { BoardPosition, PieceContext } from "./board_manager";
+import type { ComputedRef } from "vue";
+import { computed, ref, watch } from "vue";
+import type { BoardPosition, PieceContext } from "./board_manager";
+import type BoardManager from "./board_manager";
 import { getDiffPosition, positionsEqual } from "./utils/game";
-import Game from "./game";
+import type Game from "./game";
 
 export default class BoardPieceDragHandler {
   private pressTimeout: number | null = null;
@@ -25,16 +27,12 @@ export default class BoardPieceDragHandler {
   });
   private dragRowDiff = computed(() => {
     let diff = Math.round(-this.shiftedDragYDiff.value / this.cellSize.value);
-    if (diff === -0) {
-      diff = 0;
-    }
+    diff = diff + 0;
     return diff;
   });
   private dragColDiff = computed(() => {
     let diff = Math.round(this.dragXDiff.value / this.cellSize.value);
-    if (diff === -0) {
-      diff = 0;
-    }
+    diff = diff + 0;
     return diff;
   });
   private targetingDragPosition = computed(() => {

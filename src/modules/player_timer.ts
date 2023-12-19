@@ -1,9 +1,10 @@
 import { type Ref, ref, computed, watch, capitalize } from "vue";
-import Game from "./game";
-import {
+import type Game from "./game";
+import type {
   Player,
   PlayerColor,
-  WinReason,
+  WinReason} from "./utils/game";
+import {
   getOpossitePlayerColor,
 } from "./utils/game";
 

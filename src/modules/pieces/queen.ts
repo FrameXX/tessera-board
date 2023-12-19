@@ -9,7 +9,7 @@ import { Bishop } from "./bishop";
 import Piece from "./piece";
 import Rook from "./rook";
 import { isFriendlyPiece, type PlayerColor } from "../utils/game";
-import Game from "../game";
+import type Game from "../game";
 
 export class Queen extends Piece {
   constructor(color: PlayerColor, id?: string) {

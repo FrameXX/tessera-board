@@ -4,8 +4,8 @@ import type {
   MarkBoardState,
 } from "../board_manager";
 import { isBoardPosition } from "../board_manager";
-import Game from "../game";
-import Piece from "../pieces/piece";
+import type Game from "../game";
+import type Piece from "../pieces/piece";
 import { getBoardPositionPiece } from "../utils/game";
 import Move, {
   getCleanBoardPosition,

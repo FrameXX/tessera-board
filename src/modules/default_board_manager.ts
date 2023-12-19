@@ -2,7 +2,7 @@ import type { PieceContext, BoardPosition } from "./board_manager";
 import BoardManager from "./board_manager";
 import { movePiece } from "./moves/move";
 import { isPositionOnBoard, positionsEqual } from "./utils/game";
-import Game from "./game";
+import type Game from "./game";
 
 class DefaultBoardManager extends BoardManager {
   private dragEndTimeoutActive: boolean = false;

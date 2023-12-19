@@ -12,7 +12,7 @@ import {
   getBoardPositionPiece,
 } from "../utils/game";
 import Piece from "./piece";
-import Game from "../game";
+import type Game from "../game";
 
 interface RawPawn extends RawPiece {
   moved: boolean;

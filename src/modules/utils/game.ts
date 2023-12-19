@@ -7,7 +7,7 @@ import { isPieceId, type Path, type PiecesImportance } from "../pieces/piece";
 import type Piece from "../pieces/piece";
 import type Move from "../moves/move";
 import { type RawPiece } from "../pieces/raw_piece";
-import Game from "../game";
+import type Game from "../game";
 
 export type MoveDirection = "forward" | "reverse";
 export type MoveExecution = "perform" | MoveDirection;

@@ -1,5 +1,5 @@
 import type { PieceContext, BoardPosition } from "../board_manager";
-import Game from "../game";
+import type Game from "../game";
 import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";

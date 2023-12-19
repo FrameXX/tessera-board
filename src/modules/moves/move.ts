@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-import Piece from "../pieces/piece";
+import type Piece from "../pieces/piece";
 import type { PieceId } from "../pieces/piece";
 import {
   getElementInstanceById,
@@ -9,7 +9,7 @@ import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
 import { GameLogicError, getAllpieceContext } from "../utils/game";
-import Game from "../game";
+import type Game from "../game";
 
 export type MoveId = "shift" | "castling" | "promotion";
 export function isMoveId(string: string): string is MoveId {
@@ -132,11 +132,11 @@ export function removeCapturedPiece(
 ) {
   piece.color === "white"
     ? blackCapturedPieces.value.splice(
-        blackCapturedPieces.value.indexOf(piece.pieceId)
-      )
+      blackCapturedPieces.value.indexOf(piece.pieceId)
+    )
     : whiteCapturedPieces.value.splice(
-        blackCapturedPieces.value.indexOf(piece.pieceId)
-      );
+      blackCapturedPieces.value.indexOf(piece.pieceId)
+    );
 }
 
 export function transformPiece(

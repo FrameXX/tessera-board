@@ -1,6 +1,7 @@
 import { getRandomId } from "../utils/misc";
+import type {
+  PlayerColor} from "../utils/game";
 import {
-  PlayerColor,
   getRawPiece,
   willMoveCheckGuardedPiece,
 } from "../utils/game";
@@ -8,7 +9,7 @@ import type { Ref } from "vue";
 import type Move from "../moves/move";
 import type { RawPiece } from "./raw_piece";
 import type { BoardPosition, BoardStateValue } from "../board_manager";
-import Game from "../game";
+import type Game from "../game";
 
 export const PIECE_IDS: PieceId[] = [
   "rook",

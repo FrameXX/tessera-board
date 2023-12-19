@@ -16,12 +16,15 @@ import MoveListData from "./user_data/move_list";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
-import ThemeManager, { Theme, isTheme } from "./theme_manager";
+import type { Theme} from "./theme_manager";
+import ThemeManager, { isTheme } from "./theme_manager";
+import type {
+  Transitions} from "./transitions_manager";
 import TransitionsManager, {
-  Transitions,
   isTransitions,
 } from "./transitions_manager";
-import PieceIconPackData, { PieceIconPack } from "./user_data/piece_set";
+import type { PieceIconPack } from "./user_data/piece_set";
+import PieceIconPackData from "./user_data/piece_set";
 import UI from "./ui";
 import UserDataManager from "./user_data_manager";
 import BooleanUserData from "./user_data/boolean_user_data";
@@ -30,9 +33,10 @@ import SelectUserData from "./user_data/select_user_data";
 import GamePausedData from "./user_data/game_paused";
 import PieceBorderData from "./user_data/piece_border";
 import PiecePaddingData from "./user_data/piece_padding";
-import PlayerColorOptionData, {
+import type {
   PreferredPlayerColor,
 } from "./user_data/preferred_player_color";
+import PlayerColorOptionData from "./user_data/preferred_player_color";
 import CellIndexOpacityData from "./user_data/cell_index_opacity";
 import TransitionDurationData from "./user_data/transition_duration";
 import CapturedPiecesData from "./user_data/captured_pieces";
@@ -247,22 +251,22 @@ export default class Game {
   public readonly status = computed(() => {
     let text: string;
     switch (this.winner.value) {
-      case "none":
-        text = `${capitalize(this.playingColor.value)} plays`;
-        break;
-      case "draw":
-        text = "Draw";
-        break;
-      case "secondary":
-        text = this.playingColor.value === "white" ? "Black won" : "White won";
-        break;
-      case "primary":
-        text = this.playingColor.value === "white" ? "White won" : "Black won";
-        break;
-      default:
-        throw new UserDataError(
-          `Winner value is of an invalid type. value: ${this.winner.value}`
-        );
+    case "none":
+      text = `${capitalize(this.playingColor.value)} plays`;
+      break;
+    case "draw":
+      text = "Draw";
+      break;
+    case "secondary":
+      text = this.playingColor.value === "white" ? "Black won" : "White won";
+      break;
+    case "primary":
+      text = this.playingColor.value === "white" ? "White won" : "Black won";
+      break;
+    default:
+      throw new UserDataError(
+        `Winner value is of an invalid type. value: ${this.winner.value}`
+      );
     }
     return text;
   });

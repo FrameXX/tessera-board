@@ -1,4 +1,5 @@
-import Piece, { isPieceId, type PieceId } from "../pieces/piece";
+import type Piece from "../pieces/piece";
+import { isPieceId, type PieceId } from "../pieces/piece";
 import Move, {
   clearPositionValue,
   getCleanBoardPosition,
@@ -25,7 +26,7 @@ import { capturePosition, movePiece } from "./move";
 import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
 import { getBoardPositionPiece, positionsEqual } from "../utils/game";
-import Game from "../game";
+import type Game from "../game";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -112,8 +113,8 @@ class Shift extends Move {
   public getNotation(): string {
     return this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-          this.captures
-        )}`
+        this.captures
+      )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 

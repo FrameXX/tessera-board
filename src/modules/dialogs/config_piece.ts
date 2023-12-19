@@ -2,7 +2,7 @@ import { reactive, watch } from "vue";
 import type Piece from "../pieces/piece";
 import type { RawPiece } from "../pieces/raw_piece";
 import { getPieceFromRaw } from "../pieces/raw_piece";
-import { PlayerColor } from "../utils/game";
+import type { PlayerColor } from "../utils/game";
 
 export class ConfigPieceDialogError extends Error {
   constructor(message: string) {

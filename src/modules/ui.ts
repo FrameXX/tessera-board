@@ -13,7 +13,7 @@ import ConfigPieceDialog from "./dialogs/config_piece";
 import SelectPieceDialog from "./dialogs/select_piece";
 import ConfigPrintDialog from "./dialogs/config_print";
 import ConfigsDialog from "./dialogs/configs";
-import { Winner } from "./utils/game";
+import type { Winner } from "./utils/game";
 
 /**
  * UI stands for User Interface. The class takes care of all the props and functions related to user interface.
@@ -74,20 +74,20 @@ class UI {
 
   public updatePrimaryHue(primaryPlayerPlaying: boolean, winner: Winner) {
     switch (winner) {
-      case "none":
-        setPrimaryHue(primaryPlayerPlaying);
-        break;
-      case "draw":
-        setSaturationMultiplier(0);
-        break;
-      case "primary":
-        setPrimaryHue(true);
-        break;
-      case "secondary":
-        setPrimaryHue(false);
-        break;
-      default:
-        break;
+    case "none":
+      setPrimaryHue(primaryPlayerPlaying);
+      break;
+    case "draw":
+      setSaturationMultiplier(0);
+      break;
+    case "primary":
+      setPrimaryHue(true);
+      break;
+    case "secondary":
+      setPrimaryHue(false);
+      break;
+    default:
+      break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);

@@ -1,4 +1,4 @@
-import { PlayerColor } from "./game";
+import type { PlayerColor } from "./game";
 
 export function getElementSizes(element: HTMLElement): [number, number] {
   const computedStyle = getComputedStyle(element);

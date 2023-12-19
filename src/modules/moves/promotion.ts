@@ -25,8 +25,8 @@ import {
 } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import { chooseBestPiece, GameLogicError, isRawPiece } from "../utils/game";
-import { PieceId } from "../pieces/piece";
-import Game from "../game";
+import type { PieceId } from "../pieces/piece";
+import type Game from "../game";
 import { getBoardPositionPiece } from "../utils/game";
 
 export function isMovePromotion(move: Move): move is Promotion {
@@ -352,11 +352,11 @@ class Promotion extends Move {
 
     return this.captures
       ? `${getPieceNotation(this.originalPiece.pieceId)}x${getPositionNotation(
-          this.captures
-        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
+        this.captures
+      )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-          this.newRawPiece.pieceId
-        )}`;
+        this.newRawPiece.pieceId
+      )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

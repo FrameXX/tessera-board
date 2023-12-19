@@ -1,4 +1,5 @@
-import { computed, ComputedRef } from "vue";
+import type { ComputedRef } from "vue";
+import { computed } from "vue";
 import type { PieceContext, BoardPosition } from "./board_manager";
 import BoardManager from "./board_manager";
 import type { Piece } from "./pieces/piece";

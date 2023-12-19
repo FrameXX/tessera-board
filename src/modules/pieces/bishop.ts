@@ -13,7 +13,7 @@ import {
   type PlayerColor,
 } from "../utils/game";
 import Piece from "./piece";
-import Game from "../game";
+import type Game from "../game";
 
 export class Bishop extends Piece {
   constructor(color: PlayerColor, id?: string) {
