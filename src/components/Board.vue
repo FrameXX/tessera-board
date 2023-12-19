@@ -8,11 +8,11 @@ import { getElementSizes } from "../modules/utils/elements";
 import { BoardPosition, PieceContext } from "../modules/board_manager";
 import {
   PlayerColor,
-  getDiffPosition,
   positionsArrayHasPosition,
   positionsEqual,
 } from "../modules/utils/game";
 import Game from "../modules/game";
+import BoardPieceDragHandler from "../modules/board_piece_drag_handler";
 
 interface Arrow {
   color: PlayerColor;
@@ -41,9 +41,6 @@ const props = defineProps({
 
 const container = ref<HTMLDivElement | null>(null);
 const containerSize = ref<number>(0);
-const draggingPiece = ref<PieceContext | null>(null);
-const showDragging = ref<boolean>(false);
-let inchCmOffset = ref(1.8);
 
 const cellSize = computed(() => {
   return containerSize.value / 8;
@@ -89,166 +86,25 @@ function onCellClick(position: BoardPosition) {
   props.manager.onCellClick({ row: 8 - position.row, col: position.col - 1 });
 }
 
-function isPieceDragged(position: BoardPosition) {
-  if (!draggingPiece.value || !showDragging.value) {
-    return false;
+const pieceDragHandler = new BoardPieceDragHandler(
+  props.manager,
+  props.game,
+  cellSize,
+  pixelsPerCm
+);
+
+watch(
+  () => props.manager,
+  (newValue) => {
+    pieceDragHandler.boardManager = newValue;
   }
-  return positionsEqual(draggingPiece.value, position);
-}
-
-function resetDragDiff() {
-  dragXDiff.value = 0;
-  dragYDiff.value = 0;
-}
-
-const shiftedDragYDiff = computed(() => {
-  return dragYDiff.value - inchPxOffset.value;
-});
-
-const dragRowDiff = computed(() => {
-  let diff = Math.round(-shiftedDragYDiff.value / cellSize.value);
-  if (diff === -0) {
-    diff = 0;
+);
+watch(
+  () => props.game,
+  (newValue) => {
+    pieceDragHandler.game = newValue;
   }
-  return diff;
-});
-
-const dragColDiff = computed(() => {
-  let diff = Math.round(dragXDiff.value / cellSize.value);
-  if (diff === -0) {
-    diff = 0;
-  }
-  return diff;
-});
-
-const targetingDragPosition = computed(() => {
-  if (!draggingPiece.value) {
-    return { row: 0, col: 0 };
-  }
-  const position = getDiffPosition(
-    { row: draggingPiece.value?.row, col: draggingPiece.value?.col },
-    dragColDiff.value,
-    dragRowDiff.value
-  );
-  return position;
-});
-
-watch(targetingDragPosition, () => {
-  if (!draggingPiece.value || !showDragging.value) {
-    return;
-  }
-  props.manager.onPieceDragOverCell(
-    targetingDragPosition.value,
-    draggingPiece.value
-  );
-});
-
-watch(showDragging, (newValue) => {
-  if (!draggingPiece.value || !newValue) return;
-  props.manager.onPieceDragStart(
-    targetingDragPosition.value,
-    draggingPiece.value
-  );
-  if (props.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
-});
-
-const inchPxOffset = computed(() => {
-  let offset = inchCmOffset.value * pixelsPerCm;
-  if (props.manager.contentRotated.value !== props.game.rotated.value) {
-    offset *= -1;
-  }
-  return offset;
-});
-
-let pressTimeout: number | null = null;
-let lastDragX = 0;
-let lastDragY = 0;
-const dragXDiff = ref(0);
-const dragYDiff = ref(0);
-
-watch(dragXDiff, dragDiffChange);
-watch(dragYDiff, dragDiffChange);
-
-function dragDiffChange() {
-  if (showDragging.value || !draggingPiece.value) return;
-  if (
-    Math.abs(dragXDiff.value) / cellSize.value > 0.5 ||
-    Math.abs(dragYDiff.value) / cellSize.value > 0.5
-  ) {
-    showDragging.value = true;
-  }
-}
-
-function updatePointerPosition(x: number, y: number) {
-  let xDiff = x - lastDragX;
-  let yDiff = y - lastDragY;
-  if (props.game.rotated.value) {
-    xDiff = -xDiff;
-    yDiff = -yDiff;
-  }
-
-  dragXDiff.value = dragXDiff.value + xDiff;
-  dragYDiff.value = dragYDiff.value + yDiff;
-
-  lastDragX = x;
-  lastDragY = y;
-}
-
-function initDrag(event: PointerEvent, pieceContext: PieceContext) {
-  pressTimeout = null;
-  draggingPiece.value = pieceContext;
-
-  const x = event.clientX;
-  const y = event.clientY;
-
-  lastDragX = x;
-  lastDragY = y;
-  updatePointerPosition(x, y);
-}
-
-function onPiecePointerStart(event: PointerEvent, pieceContext: PieceContext) {
-  if (event.pointerType === "touch") {
-    if (pressTimeout !== null || draggingPiece.value !== null) return;
-    inchCmOffset.value = 1.8;
-  } else {
-    if (
-      event.button !== 0 ||
-      pressTimeout !== null ||
-      draggingPiece.value !== null
-    )
-      return;
-    inchCmOffset.value = 0;
-  }
-
-  pressTimeout = window.setTimeout(() => {
-    initDrag(event, pieceContext);
-  }, props.game.settings.pieceLongPressTimeout.value);
-}
-
-function onPointerMove(event: PointerEvent) {
-  if (!draggingPiece.value) {
-    return;
-  }
-  updatePointerPosition(event.clientX, event.clientY);
-}
-
-function onPointerUp() {
-  if (!draggingPiece.value) {
-    if (pressTimeout === null) return;
-    clearTimeout(pressTimeout);
-    pressTimeout = null;
-    return;
-  }
-  if (showDragging.value) {
-    props.manager.onPieceDragEnd(
-      targetingDragPosition.value,
-      draggingPiece.value
-    );
-    showDragging.value = false;
-  }
-  draggingPiece.value = null;
-  resetDragDiff();
-}
+);
 
 onMounted(() => {
   const observer = new ResizeObserver(updateContainerSize);
@@ -260,10 +116,10 @@ onMounted(() => {
     );
   }
 
-  addEventListener("pointerup", onPointerUp, {
+  addEventListener("pointerup", pieceDragHandler.onPointerUp, {
     passive: true,
   });
-  addEventListener("pointermove", onPointerMove, {
+  addEventListener("pointermove", pieceDragHandler.onPointerMove, {
     passive: true,
   });
 });
@@ -277,7 +133,7 @@ onMounted(() => {
       :class="{
         rotated: props.game.rotated.value,
         contentRotated: props.manager.contentRotated.value,
-        active: draggingPiece,
+        active: pieceDragHandler.draggingPiece.value,
       }"
       :style="`--board-size: ${containerSize}px;`"
     >
@@ -320,7 +176,9 @@ onMounted(() => {
           v-for="pieceContext in props.allPiecesContext"
           :key="pieceContext.piece.id"
           @click="props.manager.onPieceClick(pieceContext)"
-          @pointerdown="onPiecePointerStart($event, pieceContext)"
+          @pointerdown="
+            pieceDragHandler.onPiecePointerStart($event, pieceContext)
+          "
           :selected="
             cellIsPosition(
               8 - pieceContext.row,
@@ -329,14 +187,14 @@ onMounted(() => {
             )
           "
           :dragging="
-            isPieceDragged({
+            pieceDragHandler.isPieceDragged({
               row: pieceContext.row,
               col: pieceContext.col,
             })
           "
-          :drag-x-diff="dragXDiff"
-          :drag-y-diff="shiftedDragYDiff"
-          :inch-offset="inchCmOffset"
+          :drag-x-diff="pieceDragHandler.dragXDiff.value"
+          :drag-y-diff="pieceDragHandler.shiftedDragYDiff.value"
+          :inch-offset="pieceDragHandler.inchCmOffset.value"
           :row="pieceContext.row"
           :col="pieceContext.col"
           :piece="pieceContext.piece"

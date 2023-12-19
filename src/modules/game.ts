@@ -580,7 +580,7 @@ export default class Game {
 
     watch(
       this.settings.defaultBoardState,
-      this.updateDefaultBoardAllPiecesContext.bind(this)
+      this.updateDefaultBoardAllPiecesContext
     );
   }
 
@@ -851,11 +851,11 @@ export default class Game {
     this.notPlayingPlayer.value = this.getNotPlayingPlayer();
   }
 
-  public updateDefaultBoardAllPiecesContext() {
+  public updateDefaultBoardAllPiecesContext = () => {
     this.defaultBoardAllPiecesContext.value = getAllPiecesContext(
       this.settings.defaultBoardState
     );
-  }
+  };
 
   public updateGameBoardAllPiecesContext() {
     this.gameBoardAllPiecesContext.value = getAllPiecesContext(this.boardState);

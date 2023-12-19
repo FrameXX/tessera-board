@@ -52,9 +52,9 @@ class ToastManager {
     return id;
   }
 
-  public hideToastId(id: string) {
+  public hideToastId = (id: string) => {
     this.toasts.value = this.toasts.value.filter((toast) => toast.id !== id);
-  }
+  };
 
   private hideToastIndex(index: number = 0) {
     this.toasts.value.splice(index, 1);
