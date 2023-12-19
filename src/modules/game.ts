@@ -307,6 +307,16 @@ export default class Game {
     undefined,
     false
   );
+  public readonly whiteCapturedPiecesData = new CapturedPiecesData(
+    this.whiteCapturedPieces.value,
+    this.whiteCapturedPieces,
+    "white"
+  );
+  public readonly blackCapturedPiecesData = new CapturedPiecesData(
+    this.blackCapturedPieces.value,
+    this.blackCapturedPieces,
+    "black"
+  );
 
   public readonly defaultBoardConfigInventory = new ConfigInventory(
     "default-board",
@@ -447,16 +457,6 @@ export default class Game {
         this.settings.audioEffectsEnabled.value,
         this.settings.audioEffectsEnabled
       ),
-      new CapturedPiecesData(
-        this.whiteCapturedPieces.value,
-        this.whiteCapturedPieces,
-        "white"
-      ),
-      new CapturedPiecesData(
-        this.blackCapturedPieces.value,
-        this.blackCapturedPieces,
-        "black"
-      ),
       new NumberUserData(
         "primary_player_seconds_per_move",
         this.settings.primaryPlayerSecondsPerMove.value,
@@ -547,6 +547,8 @@ export default class Game {
       this.gameBoardStateData,
       this.lastMoveIndexData,
       this.moveListData,
+      this.whiteCapturedPiecesData,
+      this.blackCapturedPiecesData,
     ],
     this.ui.confirmDialog,
     this.ui.toastManager
@@ -801,13 +803,13 @@ export default class Game {
 
   private reverseMove() {
     const reversedMove = this.moveList.value[this.lastMoveIndex.value];
-    reversedMove.reverse(this.boardState);
+    reversedMove.reverse(this.boardState, this, true);
     this.onMoveReverse();
   }
 
   private forwardMove() {
     const forwardedMove = this.moveList.value[this.lastMoveIndex.value + 1];
-    forwardedMove.forward(this.boardState, this);
+    forwardedMove.forward(this.boardState, this, true);
     this.onMoveForward();
   }
 
@@ -887,6 +889,8 @@ export default class Game {
     this.gameBoardStateData.save();
     this.lastMoveIndexData.save();
     this.moveListData.save();
+    this.whiteCapturedPiecesData.save();
+    this.blackCapturedPiecesData.save();
   }
 
   private onMoveReverse() {

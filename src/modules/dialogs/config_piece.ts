@@ -2,7 +2,15 @@ import { reactive, watch } from "vue";
 import type Piece from "../pieces/piece";
 import type { RawPiece } from "../pieces/raw_piece";
 import { getPieceFromRaw } from "../pieces/raw_piece";
-import type { PlayerColor } from "../game";
+import { PlayerColor } from "../utils/game";
+
+export class ConfigPieceDialogError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, ConfigPieceDialogError.prototype);
+    this.name = ConfigPieceDialogError.name;
+  }
+}
 
 interface ConfigPieceDialogProps {
   open: boolean;
@@ -11,7 +19,7 @@ interface ConfigPieceDialogProps {
 }
 
 class ConfigPieceDialog {
-  private resolve?: (piece: Piece) => void;
+  private resolve?: (piece: Piece | null) => void;
   public props: ConfigPieceDialogProps;
 
   constructor() {
@@ -29,7 +37,7 @@ class ConfigPieceDialog {
     );
   }
 
-  public open(): Promise<Piece> {
+  public open(): Promise<Piece | null> {
     this.props.open = true;
     return new Promise((resolve) => {
       this.resolve = resolve;
@@ -37,14 +45,24 @@ class ConfigPieceDialog {
   }
 
   public confirm = () => {
-    if (this.resolve) {
-      this.resolve(getPieceFromRaw(this.props.selectedPiece));
-      this.resolve = undefined;
+    if (!this.resolve) {
+      throw new ConfigPieceDialogError(
+        "Cannot confirm dialog. No resolve function is availible."
+      );
     }
+    this.resolve(getPieceFromRaw(this.props.selectedPiece));
+    this.resolve = undefined;
+
     this.props.open = false;
   };
 
   public cancel = () => {
+    if (!this.resolve) {
+      throw new ConfigPieceDialogError(
+        "Cannot confirm dialog. No resolve function is availible."
+      );
+    }
+    this.resolve(null);
     this.resolve = undefined;
     this.props.open = false;
   };

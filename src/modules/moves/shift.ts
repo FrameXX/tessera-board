@@ -1,10 +1,12 @@
-import { isPieceId, type PieceId } from "../pieces/piece";
+import Piece, { isPieceId, type PieceId } from "../pieces/piece";
 import Move, {
   clearPositionValue,
   getCleanBoardPosition,
   handleInvalidRawMove,
   movePositionValue,
-  tellPieceItMoved,
+  pieceHasMovedProperty,
+  setPieceMoveProperty,
+  unCapturePosition,
 } from "./move";
 import type {
   PieceContext,
@@ -61,8 +63,7 @@ class Shift extends Move {
     public readonly pieceId: PieceId,
     public readonly origin: BoardPosition,
     public readonly target: BoardPosition,
-    public readonly captures?: PieceContext,
-    private readonly id?: string
+    public readonly captures?: PieceContext
   ) {
     super("shift");
   }
@@ -85,7 +86,6 @@ class Shift extends Move {
       origin: getCleanBoardPosition(this.origin),
       target: getCleanBoardPosition(this.target),
       captures,
-      id: this.id,
     };
   }
 
@@ -106,16 +106,15 @@ class Shift extends Move {
       };
     }
 
-    let id: string | undefined = undefined;
-    if (rawMove.id) id = rawMove.id;
+    return new Shift(rawMove.pieceId, rawMove.origin, rawMove.target, captures);
+  }
 
-    return new Shift(
-      rawMove.pieceId,
-      rawMove.origin,
-      rawMove.target,
-      captures,
-      id
-    );
+  public getNotation(): string {
+    return this.captures
+      ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
+          this.captures
+        )}`
+      : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 
   public loadCustomProps(rawMove: RawShift): void {
@@ -127,45 +126,7 @@ class Shift extends Move {
     return [this.origin, this.target];
   }
 
-  private onForward(boardStateValue: BoardStateValue) {
-    super.onPerformForward();
-    if (this.id) {
-      this.firstMove = !tellPieceItMoved(this.id, boardStateValue, true);
-    }
-  }
-
-  public forward(boardState: BoardStateValue): void {
-    this.onForward(boardState);
-
-    if (this.captures) {
-      clearPositionValue(this.captures, boardState);
-    }
-    const piece = getBoardPositionPiece(this.origin, boardState);
-    movePositionValue(piece, this.origin, this.target, boardState);
-  }
-
-  private onReverse(boardStateValue: BoardStateValue) {
-    super.beforePerformReverse();
-    if (this.id) {
-      tellPieceItMoved(this.id, boardStateValue, !this.firstMove);
-    }
-  }
-
-  public reverse(boardStateValue: BoardStateValue): void {
-    this.onReverse(boardStateValue);
-
-    const piece = getBoardPositionPiece(this.target, boardStateValue);
-    movePositionValue(piece, this.target, this.origin, boardStateValue);
-
-    if (this.captures) {
-      boardStateValue[this.captures.row][this.captures.col] =
-        this.captures.piece;
-    }
-  }
-
-  public async perform(game: Game): Promise<void> {
-    this.onForward(game.boardState);
-
+  protected async redo(game: Game) {
     if (this.captures) {
       capturePosition(
         this.captures,
@@ -177,15 +138,85 @@ class Shift extends Move {
         game.audioEffects.pieceRemove.play();
       if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
     }
-    await movePiece(this.origin, this.target, game.boardState);
+
+    const piece = getBoardPositionPiece(this.origin, game.boardState);
+    movePositionValue(piece, this.origin, this.target, game.boardState);
+    this.forwardMovedProperty(piece);
+    if (game.settings.audioEffectsEnabled.value)
+      game.audioEffects.pieceMove.play();
+  }
+
+  private forwardMovedProperty(piece: Piece) {
+    if (!pieceHasMovedProperty(piece)) return;
+    this.firstMove = !piece.moved;
+    setPieceMoveProperty(piece, true);
+  }
+
+  protected performForward(boardState: BoardStateValue): void {
+    if (this.captures) {
+      clearPositionValue(this.captures, boardState);
+    }
+
+    const piece = getBoardPositionPiece(this.origin, boardState);
+    movePositionValue(piece, this.origin, this.target, boardState);
+    this.forwardMovedProperty(piece);
+  }
+
+  protected async undo(game: Game) {
+    const piece = getBoardPositionPiece(this.target, game.boardState);
+    movePositionValue(piece, this.target, this.origin, game.boardState);
+    this.reverseMovedProperty(piece);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
 
-    this.notation = this.captures
-      ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-          this.captures
-        )}`
-      : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
+    if (this.captures) {
+      unCapturePosition(
+        this.captures,
+        this.captures.piece,
+        game.boardState,
+        game.blackCapturedPieces,
+        game.whiteCapturedPieces
+      );
+      if (game.settings.audioEffectsEnabled.value)
+        game.audioEffects.pieceMove.play();
+    }
+  }
+
+  private reverseMovedProperty(piece: Piece) {
+    if (!pieceHasMovedProperty(piece)) return;
+    setPieceMoveProperty(piece, !this.firstMove);
+  }
+
+  protected performReverse(boardState: BoardStateValue): void {
+    const piece = getBoardPositionPiece(this.target, boardState);
+    movePositionValue(piece, this.target, this.origin, boardState);
+    this.reverseMovedProperty(piece);
+
+    if (this.captures)
+      boardState[this.captures.row][this.captures.col] = this.captures.piece;
+  }
+
+  public async performFirst(game: Game) {
+    if (this.captures) {
+      capturePosition(
+        this.captures,
+        game.boardState,
+        game.blackCapturedPieces,
+        game.whiteCapturedPieces
+      );
+      if (game.settings.audioEffectsEnabled.value)
+        game.audioEffects.pieceRemove.play();
+      if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+    }
+
+    const piece = getBoardPositionPiece(this.origin, game.boardState);
+    await movePiece(piece, this.origin, this.target, game.boardState);
+    this.forwardMovedProperty(piece);
+
+    if (game.settings.audioEffectsEnabled.value)
+      game.audioEffects.pieceMove.play();
+
+    return true;
   }
 
   public get clickablePositions(): BoardPosition[] {

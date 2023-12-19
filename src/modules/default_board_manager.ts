@@ -78,6 +78,9 @@ class DefaultBoardManager extends BoardManager {
 
   public async onCellClick(position: BoardPosition) {
     const piece = await this.game.ui.configPieceDialog.open();
+    if (!piece) {
+      return;
+    }
     this.game.settings.defaultBoardState[position.row][position.col] = piece;
     if (this.game.settings.audioEffectsEnabled.value)
       this.game.audioEffects.pieceMove.play();

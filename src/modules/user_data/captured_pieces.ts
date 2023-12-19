@@ -10,7 +10,7 @@ class CapturedPiecesData extends UserData<PieceId[]> {
     valueRef: Ref<PieceId[]>,
     playerColor: PlayerColor
   ) {
-    super(`${playerColor}_captured_pieces`, value, valueRef);
+    super(`${playerColor}_captured_pieces`, value, valueRef, false);
   }
 
   public dump(): string {

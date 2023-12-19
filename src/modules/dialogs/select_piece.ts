@@ -8,8 +8,16 @@ interface SelectPieceDialogProps {
   pieceOptions: RawPiece[];
 }
 
+export class SelectPieceDialogError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, SelectPieceDialogError.prototype);
+    this.name = SelectPieceDialogError.name;
+  }
+}
+
 class SelectPieceDialog {
-  private resolve?: (piece: RawPiece) => void;
+  private resolve?: (piece: RawPiece | null) => void;
   public props: SelectPieceDialogProps;
 
   constructor(private readonly toastManager: ToastManager) {
@@ -20,7 +28,7 @@ class SelectPieceDialog {
     });
   }
 
-  public open(pieceOptions: RawPiece[]): Promise<RawPiece> {
+  public open(pieceOptions: RawPiece[]): Promise<RawPiece | null> {
     this.props.pieceOptions = pieceOptions;
     if (pieceOptions.length > 0) {
       this.props.selectedPiece = pieceOptions[0];
@@ -32,6 +40,11 @@ class SelectPieceDialog {
   }
 
   public confirm = () => {
+    if (!this.resolve) {
+      throw new SelectPieceDialogError(
+        "Cannot confirm dialog. No resolve function is availible."
+      );
+    }
     if (!this.props.selectedPiece) {
       this.toastManager.showToast(
         "Please select one of the pieces by clicking on them.",
@@ -40,16 +53,20 @@ class SelectPieceDialog {
       );
       return;
     }
-    if (this.resolve) this.resolve(this.props.selectedPiece);
+    this.resolve(this.props.selectedPiece);
+    this.resolve = undefined;
     this.props.open = false;
   };
 
   public cancel = () => {
-    this.toastManager.showToast(
-      "Cannot cancel. Please select one of the pieces.",
-
-      "cancel"
-    );
+    if (!this.resolve) {
+      throw new SelectPieceDialogError(
+        "Cannot confirm dialog. No resolve function is availible."
+      );
+    }
+    this.resolve(null);
+    this.resolve = undefined;
+    this.props.open = false;
   };
 }
 

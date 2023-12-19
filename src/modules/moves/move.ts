@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-import type Piece from "../pieces/piece";
+import Piece from "../pieces/piece";
 import type { PieceId } from "../pieces/piece";
 import {
   getElementInstanceById,
@@ -8,11 +8,7 @@ import {
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
-import {
-  GameLogicError,
-  getAllpieceContext,
-  getBoardPositionPiece,
-} from "../utils/game";
+import { GameLogicError, getAllpieceContext } from "../utils/game";
 import Game from "../game";
 
 export type MoveId = "shift" | "castling" | "promotion";
@@ -41,30 +37,40 @@ abstract class Move {
    */
   public abstract get highlightedBoardPositions(): BoardPosition[];
 
+  protected abstract redo(game: Game): Promise<void>;
+
   /**
    * Alters the gameBoardState according to the move without any further effects or requiring any user input.
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  public abstract forward(boardState: BoardStateValue, game: Game): void;
+  protected abstract performForward(
+    boardState: BoardStateValue,
+    game: Game
+  ): void;
 
-  protected onPerformForward() {
+  public forward(boardState: BoardStateValue, game: Game, redo = false) {
     if (this.performed) {
       throw new GameLogicError(
         "A move that was already performed shouldn't be performed again."
       );
     }
     this.performed = true;
+    redo ? this.redo(game) : this.performForward(boardState, game);
   }
+
+  public abstract getNotation(): string;
+
+  protected abstract undo(game: Game): Promise<void>;
 
   /**
    * Alters the gameBoardState according to the move, but reverse and without any further effects or requiring any user input.
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  public abstract reverse(boardState: BoardStateValue): void;
+  protected abstract performReverse(boardState: BoardStateValue): void;
 
-  protected beforePerformReverse() {
+  public reverse(boardState: BoardStateValue, game: Game, undo = false) {
     if (!this.performed) {
       console.error(this);
       throw new GameLogicError(
@@ -72,6 +78,17 @@ abstract class Move {
       );
     }
     this.performed = false;
+    undo ? this.undo(game) : this.performReverse(boardState);
+  }
+
+  public perform(game: Game) {
+    if (this.performed) {
+      throw new GameLogicError(
+        "A move that was already performed shouldn't be performed again."
+      );
+    }
+    this.performed = true;
+    this.performFirst(game);
   }
 
   /**
@@ -79,7 +96,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  public abstract perform(game: Game): Promise<void>;
+  protected abstract performFirst(game: Game): Promise<boolean>;
 
   /**
    * Returns an array of board positions that after click should perform this move.
@@ -106,6 +123,20 @@ export function addCapturedPiece(
   piece.color === "white"
     ? blackCapturedPieces.value.push(piece.pieceId)
     : whiteCapturedPieces.value.push(piece.pieceId);
+}
+
+export function removeCapturedPiece(
+  piece: Piece,
+  blackCapturedPieces: Ref<PieceId[]>,
+  whiteCapturedPieces: Ref<PieceId[]>
+) {
+  piece.color === "white"
+    ? blackCapturedPieces.value.splice(
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      )
+    : whiteCapturedPieces.value.splice(
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      );
 }
 
 export function transformPiece(
@@ -140,12 +171,12 @@ export function movePositionValue(
 }
 
 export async function movePiece(
+  piece: Piece,
   origin: BoardPosition,
   target: BoardPosition,
   boardState: BoardStateValue,
   boardId: string = "primary-board"
 ) {
-  const piece = getBoardPositionPiece(origin, boardState);
   movePositionValue(piece, origin, target, boardState);
   // Player board is always visible so it's ok to observe the transition only on player board
   const board = getElementInstanceById(boardId);
@@ -157,8 +188,8 @@ export async function movePiece(
   await waitForTransitionEnd(pieceElement);
 }
 
-export function getPieceById(id: string, boardStateValue: BoardStateValue) {
-  const pieceContext = getAllpieceContext(boardStateValue);
+export function getPieceById(id: string, boardState: BoardStateValue) {
+  const pieceContext = getAllpieceContext(boardState);
   for (const props of pieceContext) {
     if (props.piece.id !== id) {
       continue;
@@ -171,21 +202,23 @@ export function getPieceById(id: string, boardStateValue: BoardStateValue) {
   );
 }
 
-export function tellPieceItMoved(
-  id: string,
-  boardState: BoardStateValue,
-  newValue: boolean = true
-): boolean {
-  const piece = getPieceById(id, boardState);
+export function pieceHasMovedProperty(
+  piece: Piece
+): piece is Piece & { moved: boolean } {
   if (!("moved" in piece)) {
     return false;
   }
   if (typeof piece.moved !== "boolean") {
     return false;
   }
-  const previousValue = piece.moved;
+  return true;
+}
+
+export function setPieceMoveProperty(
+  piece: Piece & { moved: boolean },
+  newValue: boolean = true
+) {
   piece.moved = newValue;
-  return previousValue;
 }
 
 export function getCleanBoardPosition(position: BoardPosition) {
@@ -225,13 +258,28 @@ export function capturePosition(
   const piece = boardState[position.row][position.col];
   if (!piece) {
     throw new GameLogicError(
-      `Provided position has no piece to capture ${JSON.stringify(position)}`
+      `Provided position has no piece to capture: ${JSON.stringify(position)}`
     );
   }
   boardState[position.row][position.col] = null;
   addCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
 }
 
-export function unCapturePosition() {}
+export function unCapturePosition(
+  position: BoardPosition,
+  piece: Piece,
+  boardState: BoardStateValue,
+  blackCapturedPieces: Ref<PieceId[]>,
+  whiteCapturedPieces: Ref<PieceId[]>
+) {
+  const value = boardState[position.row][position.col];
+  if (value) {
+    throw new GameLogicError(
+      `Provided position already has a piece: ${JSON.stringify(value)}`
+    );
+  }
+  boardState[position.row][position.col] = piece;
+  removeCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
+}
 
 export default Move;
