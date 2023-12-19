@@ -93,12 +93,7 @@ onMounted(game.mount);
   </div>
 
   <!-- Fixed -->
-  <ActionPanel
-    :game="game"
-    :open="game.ui.actionPanelOpen.value"
-    :status-text="game.status.value"
-    :game-paused="game.paused.value"
-  />
+  <ActionPanel :game="game" :open="game.ui.actionPanelOpen.value" />
   <Settings
     v-model="game.settings"
     :open="game.ui.settingsOpen.value"

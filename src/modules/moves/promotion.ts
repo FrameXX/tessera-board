@@ -41,7 +41,6 @@ export interface RawPromotion extends RawMove {
   transformOptions: [RawPiece, ...RawPiece[]];
   newRawPiece: RawPiece | null;
   captures?: RawBoardpieceContext;
-  id?: string;
 }
 
 export function isRawPromotion(rawMove: RawMove): rawMove is RawPromotion {
@@ -51,7 +50,7 @@ export function isRawPromotion(rawMove: RawMove): rawMove is RawPromotion {
   if (typeof rawMove.target !== "object") return false;
   if (typeof rawMove.transformOptions !== "object") return false;
 
-  if (!isRawPiece(rawMove.piece)) return false;
+  if (!isRawPiece(rawMove.originalPiece)) return false;
   if (!isBoardPosition(rawMove.origin)) return false;
   if (!isBoardPosition(rawMove.target)) return false;
   if (!Array.isArray(rawMove.transformOptions)) return false;
@@ -119,8 +118,8 @@ class Promotion extends Move {
       };
     }
 
-    const piece = getPieceFromRaw(rawMove.piece);
-    piece.loadCustomProps(rawMove.piece);
+    const piece = getPieceFromRaw(rawMove.originalPiece);
+    piece.loadCustomProps(rawMove.originalPiece);
 
     return new Promotion(
       piece,
@@ -188,6 +187,7 @@ class Promotion extends Move {
     const piece = getBoardPositionPiece(this.origin, game.boardState);
     await movePiece(piece, this.origin, this.target, game.boardState);
     this.forwardMovedProperty(piece);
+    game.updateGameBoardAllPiecesContext();
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
 
@@ -271,6 +271,7 @@ class Promotion extends Move {
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceMove.play();
     }
+    game.updateGameBoardAllPiecesContext();
   }
 
   protected performReverse(boardState: BoardStateValue): void {
@@ -301,7 +302,6 @@ class Promotion extends Move {
     const piece = getBoardPositionPiece(this.origin, game.boardState);
     await movePiece(piece, this.origin, this.target, game.boardState);
     this.forwardMovedProperty(piece);
-    game.updateGameBoardAllPiecesContext();
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -336,9 +336,10 @@ class Promotion extends Move {
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceRemove.play();
     transformPiece(this.target, newPiece, game.boardState);
-    if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
+    if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
+    game.updateGameBoardAllPiecesContext();
 
     return true;
   }
@@ -352,11 +353,11 @@ class Promotion extends Move {
 
     return this.captures
       ? `${getPieceNotation(this.originalPiece.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(this.newRawPiece.pieceId)}`
+          this.captures
+        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-        this.newRawPiece.pieceId
-      )}`;
+          this.newRawPiece.pieceId
+        )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {
