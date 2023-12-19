@@ -143,7 +143,7 @@ class UI {
     return true;
   }
 
-  public async onGameRestart() {
+  public async requestRestart() {
     const confirmed = await this.confirmDialog.show(
       "Currently played game will be lost. Are you sure?",
       "Confirm",

@@ -1,56 +1,47 @@
 <script lang="ts" setup>
-import { type PropType, watch } from "vue";
+import { type PropType } from "vue";
 import Backdrop from "./Backdrop.vue";
 import FastButton from "./FastButton.vue";
-import { GamePausedState } from "../modules/user_data/game_paused";
+import Game from "../modules/game";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
-  statusText: { type: String, required: true },
-  gamePaused: { type: String as PropType<GamePausedState>, required: true },
+  game: { type: Object as PropType<Game>, required: true },
 });
-const emit = defineEmits([
-  "open",
-  "close",
-  "backdropClick",
-  "configureGame",
-  "restartGame",
-  "aboutGame",
-  "pause",
-  "resign",
-]);
-
-watch(
-  () => props.open,
-  () => {
-    props.open ? emit("open") : emit("close");
-  }
-);
 </script>
 
 <template>
-  <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
+  <Backdrop v-show="props.open" @click="props.game.ui.toggleActionsPanel()" />
   <Transition name="slide-up">
     <nav v-show="props.open">
       <div class="actions">
         <FastButton
-          @click="$emit('aboutGame')"
+          @click="props.game.ui.toggleAbout()"
           icon-id="information-outline"
           title="About game"
         />
-        <FastButton @click="emit('resign')" icon-id="flag" title="Resign" />
+        <FastButton icon-id="help-circle-outline" title="Help" />
         <FastButton
-          @click="$emit('pause')"
-          :icon-id="props.gamePaused !== 'not' ? 'play-outline' : 'pause'"
-          :title="`${props.gamePaused !== 'not' ? 'Resume' : 'Pause'} game`"
+          @click="props.game.resign()"
+          icon-id="flag"
+          title="Resign"
         />
         <FastButton
-          @click="$emit('restartGame')"
+          @click="props.game.ui.manuallyTogglePause()"
+          :icon-id="
+            props.game.paused.value !== 'not' ? 'play-outline' : 'pause'
+          "
+          :title="`${
+            props.game.paused.value !== 'not' ? 'Resume' : 'Pause'
+          } game`"
+        />
+        <FastButton
+          @click="props.game.ui.requestRestart()"
           icon-id="restart"
           title="New match"
         />
         <FastButton
-          @click="$emit('configureGame')"
+          @click="props.game.ui.toggleSettings()"
           icon-id="cog-outline"
           title="Config game"
         />

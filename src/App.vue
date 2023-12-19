@@ -94,12 +94,7 @@ onMounted(game.mount);
 
   <!-- Fixed -->
   <ActionPanel
-    @about-game="game.ui.toggleAbout()"
-    @backdrop-click="game.ui.toggleActionsPanel()"
-    @configure-game="game.ui.toggleSettings()"
-    @restart-game="game.ui.onGameRestart()"
-    @pause="game.ui.manuallyTogglePause()"
-    @resign="game.resign()"
+    :game="game"
     :open="game.ui.actionPanelOpen.value"
     :status-text="game.status.value"
     :game-paused="game.paused.value"
