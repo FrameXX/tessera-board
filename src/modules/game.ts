@@ -60,7 +60,6 @@ import {
   getOpossitePlayerColor,
   invalidatePiecesCache,
   isGuardedPieceChecked,
-  isPlayer,
   isPlayerColor,
   isSecondsPerMovePenalty,
   isWinReason,
@@ -250,26 +249,20 @@ export default class Game {
   };
 
   public readonly status = computed(() => {
-    let text: string;
     switch (this.winner.value) {
       case "none":
-        text = `${capitalize(this.playingColor.value)} plays`;
-        break;
+        return `${capitalize(this.playingColor.value)} plays`;
       case "draw":
-        text = "Draw";
-        break;
+        return "Draw";
       case "secondary":
-        text = this.playingColor.value === "white" ? "Black won" : "White won";
-        break;
+        return `${capitalize(this.secondaryPlayerColor.value)} won`;
       case "primary":
-        text = this.playingColor.value === "white" ? "White won" : "Black won";
-        break;
+        return `${capitalize(this.primaryPlayerColor.value)} won`;
       default:
         throw new UserDataError(
           `Winner value is of an invalid type. value: ${this.winner.value}`
         );
     }
-    return text;
   });
 
   public readonly primaryPlayerRemainingMoveTime = computed<MinSecTime>(() => {
@@ -698,17 +691,19 @@ export default class Game {
   }
 
   public cancelWin() {
-    this.winReason.value = "none";
-    this.winner.value = "none";
-    if (!isPlayer(this.winner.value)) {
-      return;
-    }
-    const winnerColor =
-      this.winner.value === "primary"
-        ? this.primaryPlayerColor.value
-        : this.secondaryPlayerColor.value;
+    const wasWinner = this.winner.value;
+    const winnerWasDraw = wasWinner === "draw";
+
+    this.clearWinner();
+
+    if (winnerWasDraw) return;
+
+    const loserColor =
+      wasWinner === "primary"
+        ? this.secondaryPlayerColor.value
+        : this.primaryPlayerColor.value;
     this.ui.toastManager.showToast(
-      `${capitalize(winnerColor)} is back in the game.`,
+      `${capitalize(loserColor)} is back in the game.`,
       "keyboard-return"
     );
   }
@@ -778,7 +773,7 @@ export default class Game {
       : this.secondaryPlayerColor.value;
   }
 
-  public async resign() {
+  public async requestResign() {
     if (this.winner.value !== "none") {
       this.ui.toastManager.showToast(
         "You cannot resign. The game ending was already decided.",
@@ -793,6 +788,10 @@ export default class Game {
     if (!confirmed) {
       return;
     }
+    this.resign();
+  }
+
+  private resign() {
     this.ui.toastManager.showToast(
       `${capitalize(this.notPlayingPlayerColor)} resigned`,
 
@@ -813,8 +812,13 @@ export default class Game {
     this.firstMoveColor.value = this.chooseFirstMoveColor();
   }
 
-  public restart() {
+  private clearWinner() {
     this.winner.value = "none";
+    this.winReason.value = "none";
+  }
+
+  public restart() {
+    this.clearWinner();
     this.clearCapturedPieces();
     this.lastMoveIndex.value = -1;
     this.moveList.value = [];
@@ -822,10 +826,11 @@ export default class Game {
     this.updateGameBoardAllPiecesContext();
     this.initFirstMoveColor();
     this.initPlayerColors();
-    this.updateMoveRelated();
+    this.updateStateRefs();
     this.resetTimers();
+    this.updateCapturingPaths();
     this.updateBackendBoardStateData();
-    this.checkActivePlayerLoss();
+    this.updateWinner();
     this.saveMove();
     this.primaryBoardManager.unselectAll();
     this.secondaryBoardManager.unselectAll();
@@ -833,12 +838,13 @@ export default class Game {
   }
 
   public restore() {
-    this.updateMoveRelated();
+    this.updateStateRefs();
     updatePieceColors(this.primaryPlayerColor.value);
     this.updateGameBoardAllPiecesContext();
     this.updateCapturingPaths();
     this.updateBackendBoardStateData();
-    this.checkActivePlayerLoss();
+    this.updateWinner();
+    if (this.winReason.value === "resign") this.resign();
   }
 
   private spliceReversedMoves(listIndexDiff: number) {
@@ -883,7 +889,7 @@ export default class Game {
     this.reverseMove();
   }
 
-  private updateMoveRelated() {
+  private updateStateRefs() {
     this.lastMove.value = this.getLastMove();
     this.playingColor.value = this.getPlayingColor();
     this.primaryPlayerPlaying.value = this.getPrimaryPlayerPlaying();
@@ -953,12 +959,13 @@ export default class Game {
   }
 
   public onMove() {
-    this.updateBackendBoardStateData();
     this.updateGameBoardAllPiecesContext();
     invalidatePiecesCache(this.gameBoardAllPiecesContext.value);
-    this.updateMoveRelated();
+    this.updateStateRefs();
     this.updateCapturingPaths();
+    this.updateBackendBoardStateData();
     this.resetNotPlayingPlayerMoveTimer();
+    this.updateWinner();
   }
 
   private saveMove() {
@@ -989,11 +996,10 @@ export default class Game {
     }
     this.moveList.value.push(move);
     this.onMove();
-    this.checkActivePlayerLoss();
     this.saveMove();
   }
 
-  private checkActivePlayerLoss() {
+  private updateWinner() {
     const activePlayerGuardedPieces = getGuardedPieces(
       this.gameBoardAllPiecesContext.value,
       this.playingColor.value
@@ -1012,15 +1018,23 @@ export default class Game {
       this.gameBoardAllPiecesContext.value
     );
 
-    if (canActivePlayerMove) return;
+    if (canActivePlayerMove) {
+      if (
+        this.winReason.value === "checkmate" ||
+        this.winReason.value === "block" ||
+        this.winReason.value === "stalemate"
+      )
+        this.cancelWin();
+      return;
+    }
 
     if (activePlayerChecked || activePlayerGuardedPieces.length === 0) {
       const winReason: WinReason =
         activePlayerGuardedPieces.length === 0 ? "block" : "checkmate";
       this.playerWin(this.notPlayingPlayer.value, winReason);
-    } else {
-      this.draw("stalemate");
+      return;
     }
+    this.draw("stalemate");
   }
 
   private canActivePlayerMove(

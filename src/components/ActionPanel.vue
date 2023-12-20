@@ -22,7 +22,7 @@ const props = defineProps({
         />
         <FastButton icon-id="help-circle-outline" title="Help" />
         <FastButton
-          @click="props.game.resign()"
+          @click="props.game.requestResign()"
           icon-id="flag"
           title="Resign"
         />
