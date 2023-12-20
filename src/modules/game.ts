@@ -3,8 +3,9 @@ import removeAudioEffectUrl from "../assets/audio/remove.ogg";
 import { Howl } from "howler";
 import { type Ref, watch, ref, computed, capitalize, reactive } from "vue";
 import BoardStateData from "./user_data/board_state";
+import type {
+  MinSecTime} from "./utils/misc";
 import {
-  MinSecTime,
   getMinsAndSecsTime,
   getRandomArrayValue,
   getRandomNumber,
@@ -250,18 +251,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-      case "none":
-        return `${capitalize(this.playingColor.value)} plays`;
-      case "draw":
-        return "Draw";
-      case "secondary":
-        return `${capitalize(this.secondaryPlayerColor.value)} won`;
-      case "primary":
-        return `${capitalize(this.primaryPlayerColor.value)} won`;
-      default:
-        throw new UserDataError(
-          `Winner value is of an invalid type. value: ${this.winner.value}`
-        );
+    case "none":
+      return `${capitalize(this.playingColor.value)} plays`;
+    case "draw":
+      return "Draw";
+    case "secondary":
+      return `${capitalize(this.secondaryPlayerColor.value)} won`;
+    case "primary":
+      return `${capitalize(this.primaryPlayerColor.value)} won`;
+    default:
+      throw new UserDataError(
+        `Winner value is of an invalid type. value: ${this.winner.value}`
+      );
     }
   });
 
