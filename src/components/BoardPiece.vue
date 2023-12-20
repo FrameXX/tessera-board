@@ -18,7 +18,6 @@ const props = defineProps({
   cellSize: { type: Number, required: true },
   piecePadding: { type: Number, required: true },
   rotated: { type: Boolean, default: false },
-  boardRotated: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
   size: { type: Number, required: true },
   dragging: { type: Boolean, default: false },

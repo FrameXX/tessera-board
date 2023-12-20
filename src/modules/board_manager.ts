@@ -1,9 +1,8 @@
-import type { ComputedRef} from "vue";
+import type { ComputedRef } from "vue";
 import { computed, reactive, ref } from "vue";
-import type { Mark } from "../components/Cell.vue";
 import type { Piece, PieceId } from "./pieces/piece";
 import type { RawPiece } from "./pieces/raw_piece";
-import { isRawPiece } from "./utils/game";
+import { Mark, isRawPiece } from "./utils/game";
 
 export type BoardStateValue = (Piece | null)[][];
 
@@ -61,6 +60,7 @@ abstract class BoardManager {
       .map(() => new Array(8).fill(null))
   );
   public readonly contentRotated: ComputedRef<boolean> = computed(() => false);
+  public readonly boardRotated: ComputedRef<boolean> = computed(() => false);
   public readonly selectedCell = ref<BoardPosition | null>(null);
   public readonly draggingOverCell = ref<BoardPosition | null>(null);
   public readonly selectedPiece = ref<PieceContext | null>(null);

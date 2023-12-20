@@ -22,8 +22,8 @@ interface Arrow {
 
 const pixelsPerCm = inject("pixelsPerCm") as number;
 
-const borderPercentDelta = 100 / 7;
-const cellPercentDelta = (100 - borderPercentDelta) / 7;
+// const borderPercentDelta = 100 / 7;
+// const cellPercentDelta = (100 - borderPercentDelta) / 7;
 
 const props = defineProps({
   game: { type: Object as PropType<Game>, required: true },
@@ -70,16 +70,15 @@ function cellIsPosition(
 }
 
 function getContainerMinSize() {
-  if (container.value) {
-    const [width, height] = getElementSizes(container.value);
-    const minSize = Math.min(width, height);
-    return minSize;
-  } else {
+  if (!container.value) {
     console.error(
       "Board container element reference is null. Cannot get minSize."
     );
     return null;
   }
+  const [width, height] = getElementSizes(container.value);
+  const minSize = Math.min(width, height);
+  return minSize;
 }
 
 function onCellClick(position: BoardPosition) {
@@ -131,7 +130,7 @@ onMounted(() => {
       role="grid"
       class="board"
       :class="{
-        rotated: props.game.rotated.value,
+        rotated: props.manager.boardRotated.value,
         contentRotated: props.manager.contentRotated.value,
         active: pieceDragHandler.draggingPiece.value,
       }"
@@ -201,12 +200,11 @@ onMounted(() => {
           :cell-size="cellSize"
           :piece-padding="props.game.settings.piecePadding.value"
           :rotated="props.manager.contentRotated.value"
-          :board-rotated="props.game.rotated.value"
           :size="pieceSize"
         />
       </TransitionGroup>
 
-      <svg id="class">
+      <!-- <svg>
         <line
           v-for="arrow in props.arrows"
           :x1="`${
@@ -243,7 +241,7 @@ onMounted(() => {
           :stroke="`var(--color-piece-fill-${arrow.color})`"
           stroke-width="1%"
         />
-      </svg>
+      </svg> -->
     </table>
   </div>
 </template>

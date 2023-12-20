@@ -2,8 +2,7 @@
 import { PropType, computed } from "vue";
 import Icon from "./Icon.vue";
 import { CHAR_INDEXES } from "../modules/board_manager";
-
-export type Mark = "availible" | "capture" | "capturing";
+import { Mark } from "../modules/utils/game";
 
 const props = defineProps({
   row: { type: Number, required: true },

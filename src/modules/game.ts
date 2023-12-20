@@ -3,8 +3,7 @@ import removeAudioEffectUrl from "../assets/audio/remove.ogg";
 import { Howl } from "howler";
 import { type Ref, watch, ref, computed, capitalize, reactive } from "vue";
 import BoardStateData from "./user_data/board_state";
-import type {
-  MinSecTime} from "./utils/misc";
+import type { MinSecTime } from "./utils/misc";
 import {
   getMinsAndSecsTime,
   getRandomArrayValue,
@@ -251,18 +250,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingColor.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayerColor.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayerColor.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingColor.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayerColor.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayerColor.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -316,13 +315,6 @@ export default class Game {
   public readonly primaryBoardManager: GameBoardManager;
   public readonly secondaryBoardManager: GameBoardManager;
   public readonly defaultBoardManager = new DefaultBoardManager(this);
-  public readonly rotated = computed(() => {
-    if (!this.settings.tableModeEnabled.value) {
-      return false;
-    }
-    const rotated = this.playingColor.value === "black";
-    return rotated;
-  });
   private readonly transitionsManager = new TransitionsManager(
     this.settings.transitions
   );
@@ -612,10 +604,6 @@ export default class Game {
     this.userDataManager.applyData();
     this.userDataManager.updateReferences();
 
-    watch(this.rotated, (newValue) => {
-      this.ui.updateScreenRotation(newValue);
-    });
-
     watch(
       this.settings.defaultBoardState,
       this.updateDefaultBoardAllPiecesContext
@@ -839,6 +827,7 @@ export default class Game {
   }
 
   public restore() {
+    this.initPlayerColors();
     this.updateStateRefs();
     updatePieceColors(this.primaryPlayerColor.value);
     this.updateGameBoardAllPiecesContext();

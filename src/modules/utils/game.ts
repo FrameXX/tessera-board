@@ -9,6 +9,8 @@ import type Move from "../moves/move";
 import { type RawPiece } from "../pieces/raw_piece";
 import type Game from "../game";
 
+export type Mark = "availible" | "capture" | "capturing";
+
 export type MoveDirection = "forward" | "reverse";
 export type MoveExecution = "perform" | MoveDirection;
 

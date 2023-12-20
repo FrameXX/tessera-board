@@ -17,19 +17,38 @@ class GameBoardManager extends BoardManager {
   private availibleMoves: Move[] = [];
   private dragEndTimeoutActive: boolean = false;
   public readonly contentRotated: ComputedRef<boolean> = computed(() => {
-    if (!this.game.settings.secondCheckboardEnabled.value) {
-      return this.game.rotated.value;
+    if (this.game.settings.secondCheckboardEnabled.value)
+      return this.playerColor === "black";
+    if (this.game.settings.tableModeEnabled.value)
+      return (
+        !this.game.primaryPlayerPlaying.value ===
+        (this.game.primaryPlayerColor.value === "white")
+      );
+    return false;
+  });
+  public readonly boardRotated: ComputedRef<boolean> = computed(() => {
+    if (this.game.settings.secondCheckboardEnabled.value) {
+      if (this.game.settings.tableModeEnabled.value)
+        return (this.playerColor === "black") === this.isPrimaryBoard;
+      return this.playerColor === "black";
     }
     return (
-      (this.game.primaryPlayerColor.value === "black") === this.isPlayerBoard
+      this.game.settings.tableModeEnabled.value &&
+      this.game.primaryPlayerColor.value !== "white"
     );
   });
 
   constructor(
     private readonly game: Game,
-    private readonly isPlayerBoard: boolean
+    private readonly isPrimaryBoard: boolean
   ) {
     super();
+  }
+
+  private get playerColor() {
+    return this.isPrimaryBoard
+      ? this.game.primaryPlayerColor.value
+      : this.game.secondaryPlayerColor.value;
   }
 
   private invalidateAvailibleMoves() {
@@ -52,9 +71,10 @@ class GameBoardManager extends BoardManager {
     if (!this.game.settings.secondCheckboardEnabled.value) return true;
 
     if (
-      (this.isPlayerBoard &&
+      (this.isPrimaryBoard &&
         pieceColor !== this.game.primaryPlayerColor.value) ||
-      (!this.isPlayerBoard && pieceColor === this.game.primaryPlayerColor.value)
+      (!this.isPrimaryBoard &&
+        pieceColor === this.game.primaryPlayerColor.value)
     )
       return false;
 
@@ -241,12 +261,12 @@ class GameBoardManager extends BoardManager {
     if (this.game.settings.secondCheckboardEnabled.value) {
       if (
         piece.color !== this.game.primaryPlayerColor.value &&
-        this.isPlayerBoard
+        this.isPrimaryBoard
       )
         return false;
       if (
         piece.color === this.game.primaryPlayerColor.value &&
-        !this.isPlayerBoard
+        !this.isPrimaryBoard
       )
         return false;
     }

@@ -61,7 +61,7 @@ onMounted(game.mount);
   <div id="game-area">
     <Status :game="game" />
     <div class="captured-pieces-placeholder"></div>
-    <div id="boards-area" :class="{ rotated: game.rotated.value }">
+    <div id="boards-area" :class="{ rotated: game.ui.rotated.value }">
       <Board
         :game="game"
         :manager="game.primaryBoardManager"

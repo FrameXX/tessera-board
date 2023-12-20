@@ -1,4 +1,4 @@
-import { watch, type Ref, ref } from "vue";
+import { watch, type Ref, ref, computed } from "vue";
 import EscapeManager from "./escape_manager";
 import {
   setCSSVariable,
@@ -36,6 +36,13 @@ class UI {
     this.configPrintDialog,
     this.toastManager
   );
+  public readonly rotated = computed(() => {
+    return (
+      this.game.settings.tableModeEnabled.value &&
+      !this.game.settings.secondCheckboardEnabled.value &&
+      !this.game.primaryPlayerPlaying.value
+    );
+  });
 
   constructor(private readonly game: Game) {
     this.escapeManager = new EscapeManager(this.toggleActionsPanel);
@@ -54,6 +61,9 @@ class UI {
       } else {
         this.toastManager.showToast("Game resumed", "play-outline");
       }
+    });
+    watch(this.rotated, (newValue) => {
+      this.updateScreenRotation(newValue);
     });
 
     addEventListener("keydown", (event: KeyboardEvent) => {
@@ -79,20 +89,20 @@ class UI {
 
   public updatePrimaryHue(primaryPlayerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(primaryPlayerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "primary":
-      setPrimaryHue(true);
-      break;
-    case "secondary":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(primaryPlayerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "primary":
+        setPrimaryHue(true);
+        break;
+      case "secondary":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
