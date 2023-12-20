@@ -9,6 +9,7 @@ import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
+import Time from "./Time.vue";
 import FragmentTitle from "./FragmentTitle.vue";
 import Game, { GameSettings } from "../modules/game";
 
@@ -79,6 +80,10 @@ const props = defineProps({
         <Category name="Game rules" icon-id="rule">
           <!-- Time restrictions -->
           <SectionTitle title="Time restrictions" />
+          <InfoCard
+            >Each time limit is considered to be disabled/infinite when its
+            value is set to 0.</InfoCard
+          >
           <UserOption
             name="Primary player time per move"
             icon-id="timer-outline"
@@ -90,11 +95,22 @@ const props = defineProps({
             />
             <template #description
               >Limits player's time per move. If the time runs out (expires) an
-              action specified in the option below will be performed.
-              <b
-                >The limit is disabled when both values are set to 0.</b
-              ></template
+              action specified in the option below will be performed.</template
             >
+            <template #extra>
+              <div class="player-time">
+                <div class="time">
+                  <Time :time="props.game.primaryPlayerMoveTime.value" />
+                </div>
+                <button
+                  title="Reset timer"
+                  @click="props.game.requestPrimaryPlayerMoveTimerReset()"
+                >
+                  <Icon icon-id="numeric-0-box-outline" side />
+                  Reset
+                </button>
+              </div>
+            </template>
           </UserOption>
           <UserOption
             name="Secondary player time per move"
@@ -109,10 +125,21 @@ const props = defineProps({
               >Limits time per move of secondary player. If the time runs out
               (expires) an action specified in the option below will be
               performed.
-              <b
-                >The limit is disabled when both values are set to 0.</b
-              ></template
-            >
+            </template>
+            <template #extra>
+              <div class="player-time">
+                <div class="time">
+                  <Time :time="props.game.secondaryPlayerMoveTime.value" />
+                </div>
+                <button
+                  title="Reset timer"
+                  @click="props.game.requestSecondaryPlayerMoveTimerReset()"
+                >
+                  <Icon icon-id="numeric-0-box-outline" side />
+                  Reset
+                </button>
+              </div>
+            </template>
           </UserOption>
           <UserOption
             name="Primary player time per match"
@@ -126,10 +153,21 @@ const props = defineProps({
             <template #description
               >Limits player's time for whole match (game). If the time runs out
               the primary player looses and secondary player wins.
-              <b
-                >The limit is disabled when both values are set to 0.</b
-              ></template
-            >
+            </template>
+            <template #extra>
+              <div class="player-time">
+                <div class="time">
+                  <Time :time="props.game.primaryPlayerMatchTime.value" />
+                </div>
+                <button
+                  title="Reset timer"
+                  @click="props.game.requestPrimaryPlayerMatchTimerReset()"
+                >
+                  <Icon icon-id="numeric-0-box-outline" side />
+                  Reset
+                </button>
+              </div>
+            </template>
           </UserOption>
           <UserOption
             name="Secondary player time per match"
@@ -143,10 +181,21 @@ const props = defineProps({
             <template #description
               >Limits time for whole match (game) of secondary player. If the
               time runs out the secondary player looses and primary player wins.
-              <b
-                >The limit is disabled when both values are set to 0.</b
-              ></template
-            >
+            </template>
+            <template #extra>
+              <div class="player-time">
+                <div class="time">
+                  <Time :time="props.game.secondaryPlayerMatchTime.value" />
+                </div>
+                <button
+                  title="Reset timer"
+                  @click="props.game.requestSecondaryPlayerMatchTimerReset()"
+                >
+                  <Icon icon-id="numeric-0-box-outline" side />
+                  Reset
+                </button>
+              </div>
+            </template>
           </UserOption>
           <UserOption
             name="Time per move expiration punishment"
@@ -646,7 +695,6 @@ const props = defineProps({
         <div class="action-buttons-drawer">
           <button
             title="Import data"
-            aria-label="Import data"
             @click="props.game.userDataManager.requestImportData()"
           >
             <Icon icon-id="database-import-outline" side />
@@ -654,7 +702,6 @@ const props = defineProps({
           </button>
           <button
             title="Export data"
-            aria-label="Import data"
             @click="props.game.userDataManager.requestExportData()"
           >
             <Icon icon-id="database-export-outline" side />
@@ -662,7 +709,6 @@ const props = defineProps({
           </button>
           <button
             title="Clear all data"
-            aria-label="Clear all data"
             @click="props.game.userDataManager.requestClearData()"
           >
             <Icon icon-id="database-remove-outline" side />
@@ -708,6 +754,24 @@ header {
 .action-buttons-drawer {
   button {
     margin: var(--spacing-small) var(--spacing-medium) var(--spacing-small) 0;
+  }
+}
+
+.player-time {
+  margin-top: var(--spacing-small);
+  display: flex;
+  justify-content: space-between;
+  align-self: center;
+
+  .time {
+    @include shadow;
+    @include round-border;
+    @include flex-center;
+
+    font-weight: bold;
+    margin: var(--spacing-small) 0;
+    padding: var(--spacing-tiny) var(--spacing-big);
+    background-color: var(--color-primary-surface-top);
   }
 }
 </style>

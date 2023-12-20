@@ -26,7 +26,6 @@ const props = defineProps({
   margin: var(--spacing-big) 0;
   padding: var(--spacing-small);
   background-color: var(--color-primary-surface-top);
-  border: var(--border-width) solid var(--color-primary-accent);
   width: fit-content;
 
   .content {

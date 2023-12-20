@@ -20,13 +20,16 @@ const props = defineProps({
         <slot v-if="props.simple"></slot>
       </span>
     </label>
-    <span
+    <div
       class="description"
       v-if="props.description"
       :id="`${props.optionId}-description`"
     >
       <slot name="description"></slot>
-    </span>
+    </div>
+    <div class="extra">
+      <slot name="extra"></slot>
+    </div>
     <span class="input" v-if="!props.simple">
       <slot v-if="!props.simple"></slot>
     </span>

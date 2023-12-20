@@ -17,6 +17,7 @@ const open = ref<Boolean>(false);
       @click="open = !open"
       class="head"
       :aria-controls="`category-content-${props.name}`"
+      :title="`${props.name} category`"
     >
       <Icon :icon-id="props.iconId" side />
       <h3>{{ capitalizeFirst(props.name) }}</h3>

@@ -1,39 +1,14 @@
 <script lang="ts" setup>
 import { PropType, computed } from "vue";
 import InfoText from "./InfoText.vue";
-import {
-  getMinsAndSecsTime,
-  type MinSecTime,
-  getDigitStr,
-} from "../modules/utils/misc";
 import Game from "../modules/game";
+import Time from "./Time.vue";
 
 const pulsingMoveSeconds = 10;
 const pulsingMatchSeconds = 30;
 
 const props = defineProps({
   game: { type: Object as PropType<Game>, required: true },
-});
-
-const primaryPlayerTimeMove = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(
-    props.game.timers.primaryPlayerMove.remainingSeconds.value
-  );
-});
-const primaryPlayerTimeMatch = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(
-    props.game.timers.primaryPlayerMatch.remainingSeconds.value
-  );
-});
-const secondaryPlayerTimeMove = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(
-    props.game.timers.secondaryPlayerMove.remainingSeconds.value
-  );
-});
-const secondaryPlayerTimeMatch = computed<MinSecTime>(() => {
-  return getMinsAndSecsTime(
-    props.game.timers.secondaryPlayerMatch.remainingSeconds.value
-  );
 });
 
 const primaryClass = computed<"primary" | "secondary" | "none">(() => {
@@ -113,12 +88,9 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
             pulsing: primaryPlayerMoveSecondsPulsing,
           }"
           name="move"
-          >{{
-            getDigitStr(primaryPlayerTimeMove.mins) +
-            ":" +
-            getDigitStr(primaryPlayerTimeMove.secs)
-          }}</InfoText
         >
+          <Time :time="props.game.primaryPlayerRemainingMoveTime.value" />
+        </InfoText>
         <InfoText
           v-show="primaryPlayerSecondsPerMatchSet"
           content-role="timer"
@@ -126,12 +98,9 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
             pulsing: primaryPlayerMatchSecondsPulsing,
           }"
           name="match"
-          >{{
-            getDigitStr(primaryPlayerTimeMatch.mins) +
-            ":" +
-            getDigitStr(primaryPlayerTimeMatch.secs)
-          }}</InfoText
         >
+          <Time :time="props.game.primaryPlayerRemainingMatchTime.value"
+        /></InfoText>
       </div>
     </div>
 
@@ -155,12 +124,9 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
             pulsing: secondaryPlayerMoveSecondsPulsing,
           }"
           name="move"
-          >{{
-            getDigitStr(secondaryPlayerTimeMove.mins) +
-            ":" +
-            getDigitStr(secondaryPlayerTimeMove.secs)
-          }}</InfoText
         >
+          <Time :time="props.game.secondaryPlayerRemainingMoveTime.value"
+        /></InfoText>
         <InfoText
           v-show="secondaryPlayerSecondsPerMatchSet"
           content-role="timer"
@@ -168,12 +134,9 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
             pulsing: secondaryPlayerMatchSecondsPulsing,
           }"
           name="match"
-          >{{
-            getDigitStr(secondaryPlayerTimeMatch.mins) +
-            ":" +
-            getDigitStr(secondaryPlayerTimeMatch.secs)
-          }}</InfoText
         >
+          <Time :time="props.game.secondaryPlayerRemainingMatchTime.value"
+        /></InfoText>
       </div>
     </div>
   </div>

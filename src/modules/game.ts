@@ -3,7 +3,13 @@ import removeAudioEffectUrl from "../assets/audio/remove.ogg";
 import { Howl } from "howler";
 import { type Ref, watch, ref, computed, capitalize, reactive } from "vue";
 import BoardStateData from "./user_data/board_state";
-import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
+import {
+  MinSecTime,
+  getMinsAndSecsTime,
+  getRandomArrayValue,
+  getRandomNumber,
+  isEven,
+} from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
 import PlayerTimer from "./player_timer";
 import type { Piece, PieceId, PiecesImportance } from "./pieces/piece";
@@ -16,13 +22,10 @@ import MoveListData from "./user_data/move_list";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
-import type { Theme} from "./theme_manager";
+import type { Theme } from "./theme_manager";
 import ThemeManager, { isTheme } from "./theme_manager";
-import type {
-  Transitions} from "./transitions_manager";
-import TransitionsManager, {
-  isTransitions,
-} from "./transitions_manager";
+import type { Transitions } from "./transitions_manager";
+import TransitionsManager, { isTransitions } from "./transitions_manager";
 import type { PieceIconPack } from "./user_data/piece_set";
 import PieceIconPackData from "./user_data/piece_set";
 import UI from "./ui";
@@ -33,9 +36,7 @@ import SelectUserData from "./user_data/select_user_data";
 import GamePausedData from "./user_data/game_paused";
 import PieceBorderData from "./user_data/piece_border";
 import PiecePaddingData from "./user_data/piece_padding";
-import type {
-  PreferredPlayerColor,
-} from "./user_data/preferred_player_color";
+import type { PreferredPlayerColor } from "./user_data/preferred_player_color";
 import PlayerColorOptionData from "./user_data/preferred_player_color";
 import CellIndexOpacityData from "./user_data/cell_index_opacity";
 import TransitionDurationData from "./user_data/transition_duration";
@@ -251,25 +252,64 @@ export default class Game {
   public readonly status = computed(() => {
     let text: string;
     switch (this.winner.value) {
-    case "none":
-      text = `${capitalize(this.playingColor.value)} plays`;
-      break;
-    case "draw":
-      text = "Draw";
-      break;
-    case "secondary":
-      text = this.playingColor.value === "white" ? "Black won" : "White won";
-      break;
-    case "primary":
-      text = this.playingColor.value === "white" ? "White won" : "Black won";
-      break;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        text = `${capitalize(this.playingColor.value)} plays`;
+        break;
+      case "draw":
+        text = "Draw";
+        break;
+      case "secondary":
+        text = this.playingColor.value === "white" ? "Black won" : "White won";
+        break;
+      case "primary":
+        text = this.playingColor.value === "white" ? "White won" : "Black won";
+        break;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
     return text;
   });
+
+  public readonly primaryPlayerRemainingMoveTime = computed<MinSecTime>(() => {
+    return getMinsAndSecsTime(
+      this.timers.primaryPlayerMove.remainingSeconds.value
+    );
+  });
+  public readonly primaryPlayerRemainingMatchTime = computed<MinSecTime>(() => {
+    return getMinsAndSecsTime(
+      this.timers.primaryPlayerMatch.remainingSeconds.value
+    );
+  });
+  public readonly secondaryPlayerRemainingMoveTime = computed<MinSecTime>(
+    () => {
+      return getMinsAndSecsTime(
+        this.timers.secondaryPlayerMove.remainingSeconds.value
+      );
+    }
+  );
+  public readonly secondaryPlayerRemainingMatchTime = computed<MinSecTime>(
+    () => {
+      return getMinsAndSecsTime(
+        this.timers.secondaryPlayerMatch.remainingSeconds.value
+      );
+    }
+  );
+
+  public readonly primaryPlayerMoveTime = computed<MinSecTime>(() => {
+    return getMinsAndSecsTime(this.timers.primaryPlayerMove.seconds.value);
+  });
+  public readonly primaryPlayerMatchTime = computed<MinSecTime>(() => {
+    return getMinsAndSecsTime(this.timers.primaryPlayerMatch.seconds.value);
+  });
+  public readonly secondaryPlayerMoveTime = computed<MinSecTime>(() => {
+    return getMinsAndSecsTime(this.timers.secondaryPlayerMove.seconds.value);
+  });
+  public readonly secondaryPlayerMatchTime = computed<MinSecTime>(() => {
+    return getMinsAndSecsTime(this.timers.secondaryPlayerMatch.seconds.value);
+  });
+
   public readonly highlightedCells = computed(() => {
     if (!this.lastMove.value) {
       return [];
@@ -794,9 +834,9 @@ export default class Game {
 
   public restore() {
     this.updateMoveRelated();
-    this.updateCapturingPaths();
     updatePieceColors(this.primaryPlayerColor.value);
     this.updateGameBoardAllPiecesContext();
+    this.updateCapturingPaths();
     this.updateBackendBoardStateData();
     this.checkActivePlayerLoss();
   }
@@ -865,6 +905,38 @@ export default class Game {
     this.gameBoardAllPiecesContext.value = getAllPiecesContext(this.boardState);
   }
 
+  public requestPrimaryPlayerMoveTimerReset() {
+    this.timers.primaryPlayerMove.reset();
+    this.ui.toastManager.showToast(
+      "Primary player move timer reset.",
+      "numeric-0-box-outline"
+    );
+  }
+
+  public requestSecondaryPlayerMoveTimerReset() {
+    this.timers.secondaryPlayerMove.reset();
+    this.ui.toastManager.showToast(
+      "Secondary player move timer reset.",
+      "numeric-0-box-outline"
+    );
+  }
+
+  public requestPrimaryPlayerMatchTimerReset() {
+    this.timers.primaryPlayerMatch.reset();
+    this.ui.toastManager.showToast(
+      "Primary player match timer reset.",
+      "numeric-0-box-outline"
+    );
+  }
+
+  public requestSecondaryPlayerMatchTimerReset() {
+    this.timers.secondaryPlayerMatch.reset();
+    this.ui.toastManager.showToast(
+      "Secondary player match timer reset.",
+      "numeric-0-box-outline"
+    );
+  }
+
   private resetNotPlayingPlayerMoveTimer() {
     if (this.primaryPlayerPlaying.value) {
       this.timers.secondaryPlayerMove.reset();
@@ -884,8 +956,8 @@ export default class Game {
     this.updateBackendBoardStateData();
     this.updateGameBoardAllPiecesContext();
     invalidatePiecesCache(this.gameBoardAllPiecesContext.value);
-    this.updateCapturingPaths();
     this.updateMoveRelated();
+    this.updateCapturingPaths();
     this.resetNotPlayingPlayerMoveTimer();
   }
 
