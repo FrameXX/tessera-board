@@ -2,7 +2,8 @@ import type { ComputedRef } from "vue";
 import { computed, reactive, ref } from "vue";
 import type { Piece, PieceId } from "./pieces/piece";
 import type { RawPiece } from "./pieces/raw_piece";
-import { Mark, isRawPiece } from "./utils/game";
+import type { Mark} from "./utils/game";
+import { isRawPiece } from "./utils/game";
 
 export type BoardStateValue = (Piece | null)[][];
 
