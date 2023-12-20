@@ -20,7 +20,11 @@ const props = defineProps({
           icon-id="information-outline"
           title="About game"
         />
-        <FastButton icon-id="help-circle-outline" title="Help" />
+        <FastButton
+          @click="props.game.ui.toggleHelp()"
+          icon-id="help-circle-outline"
+          title="Help"
+        />
         <FastButton
           @click="props.game.requestResign()"
           icon-id="flag"

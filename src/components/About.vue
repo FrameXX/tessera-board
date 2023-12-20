@@ -7,7 +7,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
 <template>
   <Backdrop v-show="props.open" />
   <Transition name="slide-up">
-    <div id="about" v-show="props.open">
+    <div class="fragment" id="about" v-show="props.open">
       <div class="content">
         <img id="logo" src="../assets/img/favicon.svg" />
         <header>
@@ -40,14 +40,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
 
 #about {
   @include flex-center;
-  @include fix-centered;
-  @include scrollable;
-  @include shadow;
   text-align: center;
-  overflow-x: hidden;
-  z-index: var(--z-index-top-fragment);
-  height: 100%;
-  background-color: var(--color-primary-surface);
 
   #logo {
     width: 150px;
@@ -55,14 +48,6 @@ const props = defineProps({ open: { type: Boolean, default: false } });
 
   p {
     margin: var(--spacing-small) 0;
-  }
-
-  > .content {
-    padding: var(--spacing-big);
-    left: 0;
-    right: 0;
-    margin: auto;
-    max-width: 900px;
   }
 }
 </style>

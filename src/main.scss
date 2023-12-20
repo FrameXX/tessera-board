@@ -177,6 +177,24 @@ header.version {
   @include shadow;
 }
 
+.fragment {
+  @include fix-centered;
+  @include scrollable;
+  @include shadow;
+  overflow-x: hidden;
+  z-index: var(--z-index-top-fragment);
+  height: 100%;
+  background-color: var(--color-primary-surface);
+
+  > .content {
+    padding: var(--spacing-big);
+    left: 0;
+    right: 0;
+    margin: auto;
+    max-width: 900px;
+  }
+}
+
 .icon {
   @include no-select;
   @include no-shrink;

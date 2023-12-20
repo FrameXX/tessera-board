@@ -23,12 +23,9 @@ const props = defineProps({
 <template>
   <Backdrop v-show="props.open" />
   <Transition name="slide-up">
-    <div id="settings" v-show="props.open">
+    <div class="fragment" id="settings" v-show="props.open">
       <div class="content">
         <FragmentTitle icon-id="cog-outline">Configure game</FragmentTitle>
-        <InfoCard
-          >You can open game configuration by pressing Shift + C.</InfoCard
-        >
         <!-- Player -->
         <Category name="Primary player" icon-id="account">
           <UserOption
@@ -726,24 +723,6 @@ const props = defineProps({
 
 header {
   margin-bottom: var(--spacing-huge);
-}
-
-#settings {
-  @include fix-centered;
-  @include scrollable;
-  @include shadow;
-  overflow-x: hidden;
-  z-index: var(--z-index-top-fragment);
-  height: 100%;
-  background-color: var(--color-primary-surface);
-
-  > .content {
-    padding: var(--spacing-big);
-    left: 0;
-    right: 0;
-    margin: auto;
-    max-width: 900px;
-  }
 }
 
 .board-box {

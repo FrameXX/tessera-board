@@ -24,6 +24,7 @@ class UI {
   public readonly actionPanelOpen: Ref<boolean> = ref(false);
   public readonly settingsOpen: Ref<boolean> = ref(false);
   public readonly aboutOpen: Ref<boolean> = ref(false);
+  public readonly helpOpen: Ref<boolean> = ref(false);
   public readonly toastManager = new ToastManager();
   public readonly durationDialog = new DurationDialog();
   public readonly confirmDialog = new ConfirmDialog();
@@ -44,6 +45,9 @@ class UI {
     watch(this.aboutOpen, () => {
       this.onDistractionChange();
     });
+    watch(this.helpOpen, () => {
+      this.onDistractionChange();
+    });
     watch(this.game.paused, (newValue) => {
       if (newValue !== "not") {
         this.toastManager.showToast("Game paused", "pause");
@@ -55,6 +59,7 @@ class UI {
     addEventListener("keydown", (event: KeyboardEvent) => {
       if (event.key === "Escape") this.escapeManager.escape();
       if (event.key === "R" && event.shiftKey) this.game.restart();
+      if (event.key === "P" && event.shiftKey) this.manuallyTogglePause();
       if (event.key === "Z" && (event.shiftKey || event.ctrlKey))
         this.game.undoMove();
       if (event.key === "Y" && (event.shiftKey || event.ctrlKey))
@@ -74,20 +79,20 @@ class UI {
 
   public updatePrimaryHue(primaryPlayerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(primaryPlayerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "primary":
-      setPrimaryHue(true);
-      break;
-    case "secondary":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(primaryPlayerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "primary":
+        setPrimaryHue(true);
+        break;
+      case "secondary":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
@@ -101,12 +106,9 @@ class UI {
       : this.escapeManager.removeLayer();
 
     if (!this.actionPanelOpen.value) {
-      if (this.settingsOpen.value) {
-        this.toggleSettings();
-      }
-      if (this.aboutOpen.value) {
-        this.toggleAbout();
-      }
+      if (this.settingsOpen.value) this.toggleSettings();
+      if (this.aboutOpen.value) this.toggleAbout();
+      if (this.helpOpen.value) this.toggleHelp();
     }
   };
 
@@ -120,6 +122,13 @@ class UI {
   public toggleAbout = () => {
     this.aboutOpen.value = !this.aboutOpen.value;
     this.aboutOpen.value
+      ? this.escapeManager.addLayer(this.toggleActionsPanel)
+      : this.escapeManager.removeLayer();
+  };
+
+  public toggleHelp = () => {
+    this.helpOpen.value = !this.helpOpen.value;
+    this.helpOpen.value
       ? this.escapeManager.addLayer(this.toggleActionsPanel)
       : this.escapeManager.removeLayer();
   };
@@ -147,8 +156,7 @@ class UI {
     const confirmed = await this.confirmDialog.show(
       "Currently played game will be lost. Are you sure?",
       "Confirm",
-      "Cancel",
-      "You can also start a new game by pressing Shift + R, which will bypass this confirmation dialog."
+      "Cancel"
     );
     if (!confirmed) return;
     this.actionPanelOpen.value = false;
@@ -167,7 +175,8 @@ class UI {
     const distracted =
       document.visibilityState === "hidden" ||
       this.settingsOpen.value ||
-      this.aboutOpen.value;
+      this.aboutOpen.value ||
+      this.helpOpen.value;
 
     if (
       distracted &&

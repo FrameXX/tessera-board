@@ -21,7 +21,7 @@ import Status from "./components/Status.vue";
 import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
-import InfoCard from "./components/InfoCard.vue";
+import Help from "./components/Help.vue";
 
 const game = new Game();
 
@@ -100,6 +100,7 @@ onMounted(game.mount);
     :game="game"
   />
   <About :open="game.ui.aboutOpen.value" />
+  <Help :open="game.ui.helpOpen.value" />
 
   <!-- Relative -->
   <!-- Primary buttons -->
@@ -356,9 +357,6 @@ onMounted(game.mount);
     @close="game.ui.escapeManager.removeLayer()"
   >
     <p class="message">{{ game.ui.confirmDialog.props.message }}</p>
-    <InfoCard v-show="game.ui.confirmDialog.props.showHint">{{
-      game.ui.confirmDialog.props.hint
-    }}</InfoCard>
     <template #action-buttons>
       <button @click="game.ui.confirmDialog.cancel()" title="Cancel">
         <Icon side icon-id="close-circle-outline" />{{
