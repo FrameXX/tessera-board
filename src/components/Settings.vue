@@ -480,21 +480,6 @@ const props = defineProps({
               borwser tab is switched, browser window is not focused etc...
             </template>
           </UserOption>
-          <UserOption
-            name="require move confirm"
-            icon-id="check-all"
-            option-id="check-require-move-confirm"
-          >
-            <Checkbox
-              id="check-require-move-confirm"
-              v-model="props.modelValue.requireMoveConfirm.value"
-            />
-            <template #description>
-              Requires player to confirm move using buttons that appear next to
-              the action button. This can be useful when you are playing on a
-              touchscreen and you often click accidentally in wrong positions.
-            </template>
-          </UserOption>
           <!-- Colors -->
           <SectionTitle title="Colors" />
           <UserOption

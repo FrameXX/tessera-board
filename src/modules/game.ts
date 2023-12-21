@@ -115,7 +115,6 @@ export default class Game {
     transitionDuration: ref(100),
     cellIndexOpacity: ref(90),
     pieceLongPressTimeout: ref(0),
-    requireMoveConfirm: ref(false),
     defaultBoardState: reactive<(Piece | null)[][]>([
       [
         new Rook("white"),
@@ -250,18 +249,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingColor.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayerColor.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayerColor.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingColor.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayerColor.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayerColor.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -440,11 +439,6 @@ export default class Game {
         "ignore_pieces_guarded_property",
         this.settings.ignorePiecesGuardedProperty.value,
         this.settings.ignorePiecesGuardedProperty
-      ),
-      new BooleanUserData(
-        "require_move_confirm",
-        this.settings.requireMoveConfirm.value,
-        this.settings.requireMoveConfirm
       ),
       new SelectUserData(
         "primary_player_color",
