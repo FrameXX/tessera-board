@@ -25,7 +25,7 @@ const props = defineProps({
   <Transition name="slide-up">
     <div class="fragment" id="settings" v-show="props.open">
       <div class="content">
-        <FragmentTitle icon-id="cog-outline">Configure game</FragmentTitle>
+        <FragmentTitle icon-id="cog-outline">Configuration</FragmentTitle>
         <!-- Player -->
         <Category name="Primary player" icon-id="account">
           <UserOption

@@ -25,6 +25,7 @@ const props = defineProps({
           icon-id="help-circle-outline"
           title="Help"
         />
+        <FastButton icon-id="chart-box-outline" title="Statistics" />
         <FastButton
           @click="props.game.requestResign()"
           icon-id="flag"
@@ -47,7 +48,7 @@ const props = defineProps({
         <FastButton
           @click="props.game.ui.toggleSettings()"
           icon-id="cog-outline"
-          title="Config game"
+          title="Configuration"
         />
       </div>
       <div class="nav-placeholder"></div>
