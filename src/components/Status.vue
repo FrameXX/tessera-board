@@ -35,9 +35,9 @@ const secondaryPlayerSecondsPerMatchSet = computed(() => {
 
 const primaryPlayerMoveSecondsPulsing = computed(() => {
   return (
-    props.game.timers.primaryPlayerMove.remainingSeconds.value <=
+    props.game.playerTimers.primaryPlayerMove.remainingSeconds.value <=
       pulsingMoveSeconds &&
-    props.game.timers.primaryPlayerMove.remainingSeconds.value > 0 &&
+    props.game.playerTimers.primaryPlayerMove.remainingSeconds.value > 0 &&
     props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
@@ -45,9 +45,9 @@ const primaryPlayerMoveSecondsPulsing = computed(() => {
 
 const primaryPlayerMatchSecondsPulsing = computed(() => {
   return (
-    props.game.timers.primaryPlayerMatch.remainingSeconds.value <=
+    props.game.playerTimers.primaryPlayerMatch.remainingSeconds.value <=
       pulsingMatchSeconds &&
-    props.game.timers.primaryPlayerMatch.remainingSeconds.value > 0 &&
+    props.game.playerTimers.primaryPlayerMatch.remainingSeconds.value > 0 &&
     props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
@@ -55,9 +55,9 @@ const primaryPlayerMatchSecondsPulsing = computed(() => {
 
 const secondaryPlayerMoveSecondsPulsing = computed(() => {
   return (
-    props.game.timers.secondaryPlayerMove.remainingSeconds.value <=
+    props.game.playerTimers.secondaryPlayerMove.remainingSeconds.value <=
       pulsingMoveSeconds &&
-    props.game.timers.secondaryPlayerMove.remainingSeconds.value > 0 &&
+    props.game.playerTimers.secondaryPlayerMove.remainingSeconds.value > 0 &&
     !props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
@@ -65,9 +65,9 @@ const secondaryPlayerMoveSecondsPulsing = computed(() => {
 
 const secondaryPlayerMatchSecondsPulsing = computed(() => {
   return (
-    props.game.timers.secondaryPlayerMatch.remainingSeconds.value <=
+    props.game.playerTimers.secondaryPlayerMatch.remainingSeconds.value <=
       pulsingMatchSeconds &&
-    props.game.timers.secondaryPlayerMatch.remainingSeconds.value > 0 &&
+    props.game.playerTimers.secondaryPlayerMatch.remainingSeconds.value > 0 &&
     !props.game.primaryPlayerPlaying.value &&
     props.game.winner.value === "none"
   );
@@ -89,7 +89,11 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="move"
         >
-          <Time :time="props.game.primaryPlayerRemainingMoveTime.value" />
+          <Time
+            :time="
+              props.game.playerTimers.primaryPlayerMove.remainingDuration.value
+            "
+          />
         </InfoText>
         <InfoText
           v-show="primaryPlayerSecondsPerMatchSet"
@@ -99,7 +103,10 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="match"
         >
-          <Time :time="props.game.primaryPlayerRemainingMatchTime.value"
+          <Time
+            :time="
+              props.game.playerTimers.primaryPlayerMatch.remainingDuration.value
+            "
         /></InfoText>
       </div>
     </div>
@@ -125,7 +132,11 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="move"
         >
-          <Time :time="props.game.secondaryPlayerRemainingMoveTime.value"
+          <Time
+            :time="
+              props.game.playerTimers.secondaryPlayerMove.remainingDuration
+                .value
+            "
         /></InfoText>
         <InfoText
           v-show="secondaryPlayerSecondsPerMatchSet"
@@ -135,7 +146,11 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="match"
         >
-          <Time :time="props.game.secondaryPlayerRemainingMatchTime.value"
+          <Time
+            :time="
+              props.game.playerTimers.secondaryPlayerMatch.remainingDuration
+                .value
+            "
         /></InfoText>
       </div>
     </div>

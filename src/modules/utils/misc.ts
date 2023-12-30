@@ -44,12 +44,12 @@ export function capitalizeFirst(string: string) {
   return string[0].toUpperCase() + string.slice(1);
 }
 
-export interface MinSecTime {
+export interface Duration {
   mins: number;
   secs: number;
 }
 
-export function getMinsAndSecsTime(secs: number): MinSecTime {
+export function getDuration(secs: number): Duration {
   const mins = Math.trunc(secs / 60);
   const secsRest = secs % 60;
   return { mins, secs: secsRest };

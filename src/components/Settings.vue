@@ -97,11 +97,17 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time :time="props.game.primaryPlayerMoveTime.value" />
+                  <Time
+                    :time="
+                      props.game.playerTimers.primaryPlayerMove.duration.value
+                    "
+                  />
                 </div>
                 <button
                   title="Reset timer"
-                  @click="props.game.requestPrimaryPlayerMoveTimerReset()"
+                  @click="
+                    props.game.playerTimers.primaryPlayerMove.requestReset()
+                  "
                 >
                   <Icon icon-id="numeric-0-box-outline" side />
                   Reset
@@ -126,11 +132,17 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time :time="props.game.secondaryPlayerMoveTime.value" />
+                  <Time
+                    :time="
+                      props.game.playerTimers.secondaryPlayerMove.duration.value
+                    "
+                  />
                 </div>
                 <button
                   title="Reset timer"
-                  @click="props.game.requestSecondaryPlayerMoveTimerReset()"
+                  @click="
+                    props.game.playerTimers.secondaryPlayerMove.requestReset()
+                  "
                 >
                   <Icon icon-id="numeric-0-box-outline" side />
                   Reset
@@ -154,11 +166,17 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time :time="props.game.primaryPlayerMatchTime.value" />
+                  <Time
+                    :time="
+                      props.game.playerTimers.primaryPlayerMatch.duration.value
+                    "
+                  />
                 </div>
                 <button
                   title="Reset timer"
-                  @click="props.game.requestPrimaryPlayerMatchTimerReset()"
+                  @click="
+                    props.game.playerTimers.primaryPlayerMatch.requestReset()
+                  "
                 >
                   <Icon icon-id="numeric-0-box-outline" side />
                   Reset
@@ -182,11 +200,18 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time :time="props.game.secondaryPlayerMatchTime.value" />
+                  <Time
+                    :time="
+                      props.game.playerTimers.secondaryPlayerMatch.duration
+                        .value
+                    "
+                  />
                 </div>
                 <button
                   title="Reset timer"
-                  @click="props.game.requestSecondaryPlayerMatchTimerReset()"
+                  @click="
+                    props.game.playerTimers.secondaryPlayerMatch.requestReset()
+                  "
                 >
                   <Icon icon-id="numeric-0-box-outline" side />
                   Reset

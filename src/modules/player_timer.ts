@@ -1,14 +1,13 @@
 import { type Ref, ref, computed, watch, capitalize } from "vue";
 import type Game from "./game";
-import type {
-  Player,
-  PlayerColor,
-  WinReason} from "./utils/game";
-import {
-  getOpossitePlayerColor,
-} from "./utils/game";
+import type { Player, PlayerColor, WinReason } from "./utils/game";
+import { getOpossitePlayerColor } from "./utils/game";
+import { getDuration } from "./utils/misc";
 
 class PlayerTimer {
+  public duration = computed(() => {
+    return getDuration(this.seconds.value);
+  });
   public seconds = ref(0);
   public running = computed(() => {
     if (this.game.paused.value !== "not") return false;
@@ -16,6 +15,9 @@ class PlayerTimer {
     if (this.isPrimaryPlayer !== this.game.primaryPlayerPlaying.value)
       return false;
     return true;
+  });
+  public remainingDuration = computed(() => {
+    return getDuration(this.remainingSeconds.value);
   });
   public remainingSeconds = computed(() => {
     return this.secondsLimit.value - this.seconds.value;
@@ -51,7 +53,7 @@ class PlayerTimer {
   private onUnreachLimit() {
     if (
       this.game.winReason.value === this.winReason &&
-      this.game.winner.value === this.limitReachWinner
+      this.game.winner.value === this.opponentPlayer
     ) {
       this.game.cancelWin();
     }
@@ -71,11 +73,15 @@ class PlayerTimer {
       this.game.performMove(randomMove);
       return;
     }
-    this.game.playerWin(this.limitReachWinner, this.winReason);
+    this.game.playerWin(this.opponentPlayer, this.winReason);
   }
 
-  private get limitReachWinner(): Player {
+  private get opponentPlayer(): Player {
     return this.isPrimaryPlayer ? "secondary" : "primary";
+  }
+
+  private get player(): Player {
+    return this.isPrimaryPlayer ? "primary" : "secondary";
   }
 
   private get name() {
@@ -100,6 +106,14 @@ class PlayerTimer {
 
   private stopInterval() {
     window.clearInterval(this.interval);
+  }
+
+  public requestReset() {
+    this.reset();
+    this.game.ui.toastManager.showToast(
+      `${capitalize(this.player)} player ${this.name} timer reset.`,
+      "numeric-0-box-outline"
+    );
   }
 
   public reset() {

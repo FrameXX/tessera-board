@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch, computed, inject } from "vue";
-import { getDigitStr, getMinsAndSecsTime } from "../modules/utils/misc";
+import { getDigitStr, getDuration } from "../modules/utils/misc";
 import DurationDialog from "../modules/dialogs/duration";
 
 const props = defineProps({
@@ -14,7 +14,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const seconds = ref(props.modelValue);
 const duration = computed(() => {
-  return getMinsAndSecsTime(seconds.value);
+  return getDuration(seconds.value);
 });
 
 watch(

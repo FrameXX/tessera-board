@@ -1,10 +1,10 @@
 import { PropType } from 'vue';
 <script setup lang="ts">
 import { PropType } from "vue";
-import { MinSecTime, getDigitStr } from "../modules/utils/misc";
+import { Duration, getDigitStr } from "../modules/utils/misc";
 
 defineProps({
-  time: { type: Object as PropType<MinSecTime>, required: true },
+  time: { type: Object as PropType<Duration>, required: true },
 });
 </script>
 
