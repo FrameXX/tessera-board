@@ -319,7 +319,9 @@ class Promotion extends Move {
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceRemove.play();
+
     transformPiece(this.target, newPiece, game.boardState);
+
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
     if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);

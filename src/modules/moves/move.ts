@@ -48,14 +48,14 @@ abstract class Move {
    */
   protected abstract _forward(boardState: BoardStateValue, game: Game): void;
 
-  public forward(boardState: BoardStateValue, game: Game, redo = false) {
+  public async forward(boardState: BoardStateValue, game: Game, redo = false) {
     if (this.performed) {
       throw new GameLogicError(
         "A move that was already performed shouldn't be performed again."
       );
     }
     this.performed = true;
-    redo ? this.redo(game) : this._forward(boardState, game);
+    redo ? await this.redo(game) : this._forward(boardState, game);
   }
 
   public abstract getNotation(): string;
@@ -69,7 +69,7 @@ abstract class Move {
    */
   protected abstract _reverse(boardState: BoardStateValue): void;
 
-  public reverse(boardState: BoardStateValue, game: Game, undo = false) {
+  public async reverse(boardState: BoardStateValue, game: Game, undo = false) {
     if (!this.performed) {
       console.error(this);
       throw new GameLogicError(
@@ -77,17 +77,17 @@ abstract class Move {
       );
     }
     this.performed = false;
-    undo ? this.undo(game) : this._reverse(boardState);
+    undo ? await this.undo(game) : this._reverse(boardState);
   }
 
-  public perform(game: Game) {
+  public async perform(game: Game) {
     if (this.performed) {
       throw new GameLogicError(
         "A move that was already performed shouldn't be performed again."
       );
     }
     this.performed = true;
-    this._perform(game);
+    await this._perform(game);
   }
 
   /**
