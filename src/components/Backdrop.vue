@@ -1,6 +1,13 @@
+<script setup lang="ts">
+const props = defineProps({
+  zIndexCategory: { type: String, default: "top-fragment" },
+});
+</script>
+
 <template>
   <Transition name="opacity">
     <div
+      :style="`z-index: var(--z-index-${props.zIndexCategory});`"
       class="backdrop"
       aria-hidden="true"
       tabindex="0"

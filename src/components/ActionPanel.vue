@@ -11,21 +11,29 @@ const props = defineProps({
 </script>
 
 <template>
-  <Backdrop v-show="props.open" @click="props.game.ui.toggleActionsPanel()" />
+  <Backdrop
+    z-index-category="status"
+    v-show="props.open"
+    @click="props.game.ui.toggleActionsPanel()"
+  />
   <Transition name="slide-up">
     <nav v-show="props.open">
       <div class="actions">
         <FastButton
-          @click="props.game.ui.toggleAbout()"
+          @click="props.game.ui.toggleFragment('about')"
           icon-id="information-outline"
           title="About game"
         />
         <FastButton
-          @click="props.game.ui.toggleHelp()"
+          @click="props.game.ui.toggleFragment('help')"
           icon-id="help-circle-outline"
           title="Help"
         />
-        <FastButton icon-id="chart-box-outline" title="Statistics" />
+        <FastButton
+          @click="props.game.ui.toggleFragment('statistics')"
+          icon-id="chart-box-outline"
+          title="Statistics"
+        />
         <FastButton
           @click="props.game.requestResign()"
           icon-id="flag"
@@ -46,7 +54,7 @@ const props = defineProps({
           title="New match"
         />
         <FastButton
-          @click="props.game.ui.toggleSettings()"
+          @click="props.game.ui.toggleFragment('settings')"
           icon-id="cog-outline"
           title="Configuration"
         />
@@ -64,7 +72,7 @@ nav {
   @include no-overrender;
   width: fit-content;
   text-align: center;
-  z-index: var(--z-index-modal);
+  z-index: var(--z-index-status);
   bottom: 0;
   left: 0;
   right: 0;

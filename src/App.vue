@@ -22,6 +22,7 @@ import SelectPiece from "./components/SelectPiece.vue";
 import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
 import Help from "./components/Help.vue";
+import Statistics from "./components/Statistics.vue";
 
 const game = new Game();
 
@@ -57,6 +58,11 @@ onMounted(game.mount);
     title="Skip to navigation"
     >Skip to navigation</a
   >
+
+  <!-- Fixed bottom -->
+  <ActionPanel :game="game" :open="game.ui.actionPanelOpen.value" />
+  <Statistics :open="game.ui.openedFragment.value === 'statistics'" />
+
   <!-- Relative -->
   <div id="game-area">
     <Status :game="game" />
@@ -92,15 +98,14 @@ onMounted(game.mount);
     <div class="captured-pieces-placeholder"></div>
   </div>
 
-  <!-- Fixed -->
-  <ActionPanel :game="game" :open="game.ui.actionPanelOpen.value" />
+  <!-- Fixed top -->
   <Settings
     v-model="game.settings"
-    :open="game.ui.settingsOpen.value"
+    :open="game.ui.openedFragment.value === 'settings'"
     :game="game"
   />
-  <About :open="game.ui.aboutOpen.value" />
-  <Help :open="game.ui.helpOpen.value" />
+  <About :open="game.ui.openedFragment.value === 'about'" />
+  <Help :open="game.ui.openedFragment.value === 'help'" />
 
   <!-- Relative -->
   <!-- Primary buttons -->
@@ -428,7 +433,7 @@ onMounted(game.mount);
   @include centered;
   @include flex-center;
   margin: auto;
-  z-index: var(--z-index-top-fragment);
+  z-index: var(--z-index-bottom-fragment);
   flex-direction: column;
   position: absolute;
   text-align: center;

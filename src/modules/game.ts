@@ -5,7 +5,7 @@ import { type Ref, watch, ref, computed, capitalize, reactive } from "vue";
 import BoardStateData from "./user_data/board_state";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
-import type { Piece, PiecesImportance } from "./pieces/piece";
+import type { Piece } from "./pieces/piece";
 import { type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { PieceContext, BoardPosition } from "./board_manager";
@@ -70,6 +70,7 @@ import King from "./pieces/king";
 import Pawn from "./pieces/pawn";
 import PlayerTimers from "./player_timers";
 import CapturedPieces from "./capturedPieces";
+import PiecesImportance from "./pieces_importance";
 
 export type GameAudioEffects = Game["audioEffects"];
 export type GameSettings = Game["settings"];
@@ -79,6 +80,7 @@ export default class Game {
    * Holds vue references to all user configurable values.
    */
   public readonly settings = {
+    piecesImportance: new PiecesImportance(),
     preferredFirstMoveColor: ref<PreferredPlayerColor>("white"),
     preferredPlayerColor: ref<PreferredPlayerColor>("random"),
     primaryPlayerSecondsPerMove: ref<number>(0),
@@ -198,15 +200,6 @@ export default class Game {
     this.moveList
   );
 
-  public readonly piecesImportance: PiecesImportance = {
-    rook: this.settings.rookImportance,
-    knight: this.settings.knightImportance,
-    bishop: this.settings.bishopImportance,
-    pawn: this.settings.pawnImportance,
-    queen: this.settings.queenImportance,
-    king: this.settings.kingImportance,
-  };
-
   public readonly firstMoveColor = ref<PlayerColor>("white");
   public readonly lastMove: Ref<Move | null> = ref(null);
   public readonly winner = ref<Winner>("none");
@@ -214,6 +207,8 @@ export default class Game {
   public readonly primaryPlayerPlaying = ref<boolean>(true);
   public readonly playingPlayer = ref<Player>("primary");
   public readonly notPlayingPlayer = ref<Player>("secondary");
+  public readonly primaryPlayerScore = ref(0);
+  public readonly secondaryPlayerScore = ref(0);
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
@@ -498,6 +493,12 @@ export default class Game {
         isPlayerColor,
         this.firstMoveColor
       ),
+      new SelectUserData(
+        "primary_player_color",
+        this.primaryPlayerColor.value,
+        isPlayerColor,
+        this.primaryPlayerColor
+      ),
       this.defaultBoardStateData,
       this.gameBoardStateData,
       this.lastMoveIndexData,
@@ -523,7 +524,7 @@ export default class Game {
     if (this.visited === null) {
       localStorage.setItem("tessera_board-visited", "1");
     } else {
-      this.ui.tryRecoverData();
+      this.tryToRecoverData();
     }
     this.userDataManager.onRecoverCheck();
     this.userDataManager.applyData();
@@ -533,6 +534,18 @@ export default class Game {
       this.settings.defaultBoardState,
       this.updateDefaultBoardAllPiecesContext
     );
+  }
+
+  private tryToRecoverData() {
+    if (!navigator.cookieEnabled) {
+      this.ui.toastManager.showToast(
+        "Cookies are disabled. -> No changes will be restored in next session.",
+
+        "cookie-alert"
+      );
+      return;
+    }
+    this.userDataManager.recoverData();
   }
 
   public mount = () => {
@@ -705,6 +718,10 @@ export default class Game {
 
   private initPlayerColors() {
     this.primaryPlayerColor.value = this.choosePrimaryPlayerColor();
+    this.initSecondaryPlayerColor();
+  }
+
+  private initSecondaryPlayerColor() {
     this.secondaryPlayerColor.value = getOpossitePlayerColor(
       this.primaryPlayerColor.value
     );
@@ -745,7 +762,7 @@ export default class Game {
   }
 
   public restore() {
-    this.initPlayerColors();
+    this.initSecondaryPlayerColor();
     this.updateStateRefs();
     updatePieceColors(this.primaryPlayerColor.value);
     this.updateGameBoardAllPiecesContext();
@@ -807,6 +824,12 @@ export default class Game {
     );
     this.playingPlayer.value = this.getPlayingPlayer();
     this.notPlayingPlayer.value = this.getNotPlayingPlayer();
+    this.primaryPlayerScore.value = this.getPlayerScore(
+      this.primaryPlayerColor.value
+    );
+    this.secondaryPlayerScore.value = this.getPlayerScore(
+      this.secondaryPlayerColor.value
+    );
   }
 
   public updateDefaultBoardAllPiecesContext = () => {
@@ -970,5 +993,15 @@ export default class Game {
     }
     this.boardState[position.row][position.col] = piece;
     this.capturedPieces.remove(piece);
+  }
+
+  public getPlayerScore(color: PlayerColor) {
+    let score = 0;
+    for (const pieceContext of this.gameBoardAllPiecesContext.value) {
+      if (pieceContext.piece.color !== color) continue;
+      score +=
+        this.settings.piecesImportance.values[pieceContext.piece.pieceId].value;
+    }
+    return score;
   }
 }

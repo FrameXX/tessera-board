@@ -75,7 +75,7 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
 </script>
 
 <template>
-  <div id="status">
+  <div id="status" @click="props.game.ui.switchFragment('statistics')">
     <div
       id="timers-player-wrapper"
       v-show="primaryPlayerSecondsPerMoveSet || primaryPlayerSecondsPerMatchSet"
@@ -161,9 +161,12 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
 @import "../partials/mixins";
 
 #status {
+  @include clickable;
   @include shadow;
   @include flex-center;
   width: 100%;
+  height: 68px;
+  z-index: var(--z-index-status);
 
   .info-text {
     display: inline-flex;

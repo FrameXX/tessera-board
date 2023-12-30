@@ -3,7 +3,11 @@ import type {
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
-import { isPieceId, type Path, type PiecesImportance } from "../pieces/piece";
+import {
+  isPieceId,
+  type Path,
+  type PiecesImportanceValues,
+} from "../pieces/piece";
 import type Piece from "../pieces/piece";
 import type Move from "../moves/move";
 import { type RawPiece } from "../pieces/raw_piece";
@@ -264,7 +268,7 @@ export function positionsToPath(
 
 export function chooseBestPiece(
   pieces: RawPiece[],
-  piecesImportance: PiecesImportance
+  piecesImportance: PiecesImportanceValues
 ) {
   let bestPiece = pieces[0];
   for (const piece of pieces) {

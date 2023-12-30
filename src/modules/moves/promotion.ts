@@ -194,7 +194,10 @@ class Promotion extends Move {
       this.newRawPiece =
         transformOptions.length === 1
           ? transformOptions[0]
-          : chooseBestPiece(transformOptions, game.piecesImportance);
+          : chooseBestPiece(
+              transformOptions,
+              game.settings.piecesImportance.values
+            );
     }
     const newPiece = getPieceFromRaw(this.newRawPiece);
 
@@ -226,7 +229,10 @@ class Promotion extends Move {
       this.newRawPiece =
         transformOptions.length === 1
           ? transformOptions[0]
-          : chooseBestPiece(transformOptions, game.piecesImportance);
+          : chooseBestPiece(
+              transformOptions,
+              game.settings.piecesImportance.values
+            );
     }
     const newPiece = getPieceFromRaw(this.newRawPiece);
 

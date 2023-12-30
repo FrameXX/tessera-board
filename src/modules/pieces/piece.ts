@@ -23,7 +23,7 @@ export function isPieceId(string: string): string is PieceId {
   return Object.keys(PIECES).includes(string);
 }
 
-export type PiecesImportance = {
+export type PiecesImportanceValues = {
   [key in PieceId]: Ref<number>;
 };
 

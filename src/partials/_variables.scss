@@ -34,11 +34,13 @@
   );
 
   // ===== Z-index layers =====
-  --z-index-alert: 8;
-  --z-index-splashscreen: 7;
-  --z-index-modal-top: 6;
-  --z-index-modal: 4;
-  --z-index-top-fragment: 4;
+  --z-index-alert: 10;
+  --z-index-splashscreen: 9;
+  --z-index-modal-top: 8;
+  --z-index-modal: 7;
+  --z-index-top-fragment: 6;
+  --z-index-status: 5;
+  --z-index-bottom-fragment: 4;
   --z-index-piece-top: 3;
   --z-index-mark: 2;
   --z-index-piece: 1;
