@@ -129,7 +129,7 @@ class Castling extends Move {
       game.audioEffects.pieceMove.play();
   }
 
-  protected performForward(boardState: BoardStateValue): void {
+  protected _forward(boardState: BoardStateValue): void {
     const king = getBoardPositionPiece(this.kingOrigin, boardState);
     this.forwardMovedProperty(king);
     const rook = getBoardPositionPiece(this.rookOrigin, boardState);
@@ -158,7 +158,7 @@ class Castling extends Move {
       game.audioEffects.pieceMove.play();
   }
 
-  protected performReverse(boardState: BoardStateValue): void {
+  protected _reverse(boardState: BoardStateValue): void {
     const king = getBoardPositionPiece(this.kingTarget, boardState);
     this.reverseMovedProperty(king);
     const rook = getBoardPositionPiece(this.rookTarget, boardState);
@@ -168,7 +168,7 @@ class Castling extends Move {
     movePositionValue(rook, this.rookTarget, this.rookOrigin, boardState);
   }
 
-  protected async performFirst(game: Game) {
+  protected async _perform(game: Game) {
     const king = getBoardPositionPiece(this.kingOrigin, game.boardState);
     const rook = getBoardPositionPiece(this.rookOrigin, game.boardState);
 

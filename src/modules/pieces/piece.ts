@@ -7,24 +7,20 @@ import type { RawPiece } from "./raw_piece";
 import type { BoardPosition, BoardStateValue } from "../board_manager";
 import type Game from "../game";
 
-export const PIECE_IDS: PieceId[] = [
-  "rook",
-  "knight",
-  "bishop",
-  "queen",
-  "king",
-  "pawn",
-];
-export type PieceId = "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
+export const PIECES = {
+  rook: "Rook",
+  knight: "Knight",
+  bishop: "Bishop",
+  queen: "Queen",
+  king: "King",
+  pawn: "Pawn",
+} as const;
+
+export const PIECE_IDS = Object.keys(PIECES) as PieceId[];
+
+export type PieceId = keyof typeof PIECES;
 export function isPieceId(string: string): string is PieceId {
-  return (
-    string === "rook" ||
-    string === "knight" ||
-    string === "bishop" ||
-    string === "queen" ||
-    string === "king" ||
-    string === "pawn"
-  );
+  return Object.keys(PIECES).includes(string);
 }
 
 export type PiecesImportance = {

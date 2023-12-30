@@ -20,9 +20,9 @@ function isEntries(object: any): object is Entries {
 function downloadBlob(blob: Blob) {
   const downloadUrl = URL.createObjectURL(blob);
   const date = new Date();
-  const fileName = `tessera-board_data_${date.getFullYear()}-${
+  const fileName = `tessera_board_data_${date.getFullYear()}_${
     date.getMonth() + 1
-  }-${date.getDate()}_${date.getHours()}-${date.getMinutes()}`;
+  }_${date.getDate()}_${date.getHours()}_${date.getMinutes()}`;
   const link = document.createElement("a");
 
   link.href = downloadUrl;

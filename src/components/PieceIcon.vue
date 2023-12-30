@@ -6,6 +6,7 @@ import { PieceId } from "../modules/pieces/piece";
 import { capitalizeFirst } from "../modules/utils/misc";
 import { PieceIconPack } from "../modules/user_data/piece_set";
 import { PlayerColor } from "../modules/utils/game";
+import { PIECES } from "../modules/pieces/piece";
 
 const props = defineProps({
   pieceId: { type: String as PropType<PieceId>, required: true },
@@ -15,7 +16,7 @@ const props = defineProps({
 const pieceIconPack = inject<Ref<PieceIconPack>>("pieceIconPack");
 
 const label = computed(() => {
-  return `${capitalizeFirst(props.color)} ${props.pieceId}`;
+  return `${capitalizeFirst(props.color)} ${PIECES[props.pieceId]}`;
 });
 </script>
 

@@ -113,8 +113,8 @@ class Shift extends Move {
   public getNotation(): string {
     return this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 
@@ -153,7 +153,7 @@ class Shift extends Move {
     setPieceMoveProperty(piece, true);
   }
 
-  protected performForward(boardState: BoardStateValue): void {
+  protected _forward(boardState: BoardStateValue): void {
     if (this.captures) {
       clearPositionValue(this.captures, boardState);
     }
@@ -188,7 +188,7 @@ class Shift extends Move {
     setPieceMoveProperty(piece, !this.firstMove);
   }
 
-  protected performReverse(boardState: BoardStateValue): void {
+  protected _reverse(boardState: BoardStateValue): void {
     const piece = getBoardPositionPiece(this.target, boardState);
     movePositionValue(piece, this.target, this.origin, boardState);
     this.reverseMovedProperty(piece);
@@ -197,7 +197,7 @@ class Shift extends Move {
       boardState[this.captures.row][this.captures.col] = this.captures.piece;
   }
 
-  public async performFirst(game: Game) {
+  public async _perform(game: Game) {
     if (this.captures) {
       capturePosition(
         this.captures,

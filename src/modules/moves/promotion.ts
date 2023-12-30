@@ -215,7 +215,7 @@ class Promotion extends Move {
     if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
   }
 
-  protected performForward(boardState: BoardStateValue, game: Game): void {
+  protected _forward(boardState: BoardStateValue, game: Game): void {
     if (this.captures) {
       clearPositionValue(this.captures, boardState);
     }
@@ -274,7 +274,7 @@ class Promotion extends Move {
     game.updateGameBoardAllPiecesContext();
   }
 
-  protected performReverse(boardState: BoardStateValue): void {
+  protected _reverse(boardState: BoardStateValue): void {
     transformPiece(this.target, this.originalPiece, boardState);
 
     const piece = getBoardPositionPiece(this.target, boardState);
@@ -286,7 +286,7 @@ class Promotion extends Move {
     }
   }
 
-  protected async performFirst(game: Game) {
+  protected async _perform(game: Game) {
     if (this.captures) {
       capturePosition(
         this.captures,
@@ -353,11 +353,11 @@ class Promotion extends Move {
 
     return this.captures
       ? `${getPieceNotation(this.originalPiece.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(this.newRawPiece.pieceId)}`
+          this.captures
+        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-        this.newRawPiece.pieceId
-      )}`;
+          this.newRawPiece.pieceId
+        )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

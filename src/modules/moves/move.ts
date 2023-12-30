@@ -11,9 +11,11 @@ import type { BoardStateValue } from "../board_manager";
 import { GameLogicError, getAllpieceContext } from "../utils/game";
 import type Game from "../game";
 
-export type MoveId = "shift" | "castling" | "promotion";
+export const MOVE_IDS = ["shift", "castling", "promotion"] as const;
+
+type MoveId = (typeof MOVE_IDS)[number];
 export function isMoveId(string: string): string is MoveId {
-  return string === "shift" || string === "castling" || string === "promotion";
+  return MOVE_IDS.includes(string as MoveId);
 }
 
 /**
@@ -44,10 +46,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  protected abstract performForward(
-    boardState: BoardStateValue,
-    game: Game
-  ): void;
+  protected abstract _forward(boardState: BoardStateValue, game: Game): void;
 
   public forward(boardState: BoardStateValue, game: Game, redo = false) {
     if (this.performed) {
@@ -56,7 +55,7 @@ abstract class Move {
       );
     }
     this.performed = true;
-    redo ? this.redo(game) : this.performForward(boardState, game);
+    redo ? this.redo(game) : this._forward(boardState, game);
   }
 
   public abstract getNotation(): string;
@@ -68,7 +67,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  protected abstract performReverse(boardState: BoardStateValue): void;
+  protected abstract _reverse(boardState: BoardStateValue): void;
 
   public reverse(boardState: BoardStateValue, game: Game, undo = false) {
     if (!this.performed) {
@@ -78,7 +77,7 @@ abstract class Move {
       );
     }
     this.performed = false;
-    undo ? this.undo(game) : this.performReverse(boardState);
+    undo ? this.undo(game) : this._reverse(boardState);
   }
 
   public perform(game: Game) {
@@ -88,7 +87,7 @@ abstract class Move {
       );
     }
     this.performed = true;
-    this.performFirst(game);
+    this._perform(game);
   }
 
   /**
@@ -96,7 +95,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  protected abstract performFirst(game: Game): Promise<boolean>;
+  protected abstract _perform(game: Game): Promise<boolean>;
 
   /**
    * Returns an array of board positions that after click should perform this move.
@@ -132,11 +131,11 @@ export function removeCapturedPiece(
 ) {
   piece.color === "white"
     ? blackCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    )
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      )
     : whiteCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    );
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      );
 }
 
 export function transformPiece(
