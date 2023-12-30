@@ -138,13 +138,13 @@ onMounted(() => {
     >
       <div v-if="primary" class="black captured-pieces">
         <CapturedPieces
-          :piece-ids="props.game.blackCapturedPieces.value"
+          :piece-ids="props.game.capturedPieces.black.value"
           color="white"
         />
       </div>
       <div v-if="primary" class="white captured-pieces">
         <CapturedPieces
-          :piece-ids="props.game.whiteCapturedPieces.value"
+          :piece-ids="props.game.capturedPieces.white.value"
           color="black"
         />
       </div>

@@ -248,37 +248,4 @@ export function clearPositionValue(
   boardState[position.row][position.col] = null;
 }
 
-export function capturePosition(
-  position: BoardPosition,
-  boardState: BoardStateValue,
-  blackCapturedPieces: Ref<PieceId[]>,
-  whiteCapturedPieces: Ref<PieceId[]>
-) {
-  const piece = boardState[position.row][position.col];
-  if (!piece) {
-    throw new GameLogicError(
-      `Provided position has no piece to capture: ${JSON.stringify(position)}`
-    );
-  }
-  boardState[position.row][position.col] = null;
-  addCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
-}
-
-export function unCapturePosition(
-  position: BoardPosition,
-  piece: Piece,
-  boardState: BoardStateValue,
-  blackCapturedPieces: Ref<PieceId[]>,
-  whiteCapturedPieces: Ref<PieceId[]>
-) {
-  const value = boardState[position.row][position.col];
-  if (value) {
-    throw new GameLogicError(
-      `Provided position already has a piece: ${JSON.stringify(value)}`
-    );
-  }
-  boardState[position.row][position.col] = piece;
-  removeCapturedPiece(piece, blackCapturedPieces, whiteCapturedPieces);
-}
-
 export default Move;

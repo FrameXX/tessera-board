@@ -7,7 +7,6 @@ import Move, {
   movePositionValue,
   pieceHasMovedProperty,
   setPieceMoveProperty,
-  unCapturePosition,
 } from "./move";
 import type {
   PieceContext,
@@ -22,7 +21,7 @@ import {
   isRawBoardpieceContext,
   isBoardPosition,
 } from "../board_manager";
-import { capturePosition, movePiece } from "./move";
+import { movePiece } from "./move";
 import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
 import { getBoardPositionPiece, positionsEqual } from "../utils/game";
@@ -129,12 +128,7 @@ class Shift extends Move {
 
   protected async redo(game: Game) {
     if (this.captures) {
-      capturePosition(
-        this.captures,
-        game.boardState,
-        game.blackCapturedPieces,
-        game.whiteCapturedPieces
-      );
+      game.capturePosition(this.captures);
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceRemove.play();
       if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
@@ -171,13 +165,7 @@ class Shift extends Move {
       game.audioEffects.pieceMove.play();
 
     if (this.captures) {
-      unCapturePosition(
-        this.captures,
-        this.captures.piece,
-        game.boardState,
-        game.blackCapturedPieces,
-        game.whiteCapturedPieces
-      );
+      game.unCapturePosition(this.captures, this.captures.piece);
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceMove.play();
     }
@@ -199,12 +187,7 @@ class Shift extends Move {
 
   public async _perform(game: Game) {
     if (this.captures) {
-      capturePosition(
-        this.captures,
-        game.boardState,
-        game.blackCapturedPieces,
-        game.whiteCapturedPieces
-      );
+      game.capturePosition(this.captures);
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceRemove.play();
       if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);

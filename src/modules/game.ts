@@ -5,7 +5,7 @@ import { type Ref, watch, ref, computed, capitalize, reactive } from "vue";
 import BoardStateData from "./user_data/board_state";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
-import type { Piece, PieceId, PiecesImportance } from "./pieces/piece";
+import type { Piece, PiecesImportance } from "./pieces/piece";
 import { type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { PieceContext, BoardPosition } from "./board_manager";
@@ -48,6 +48,7 @@ import type {
   Winner,
 } from "./utils/game";
 import {
+  GameLogicError,
   getAllpieceContext as getAllPiecesContext,
   getGuardedPieces,
   getOpossitePlayerColor,
@@ -68,6 +69,7 @@ import Queen from "./pieces/queen";
 import King from "./pieces/king";
 import Pawn from "./pieces/pawn";
 import PlayerTimers from "./player_timers";
+import CapturedPieces from "./capturedPieces";
 
 export type GameAudioEffects = Game["audioEffects"];
 export type GameSettings = Game["settings"];
@@ -187,8 +189,7 @@ export default class Game {
   public readonly primaryPlayerColor = ref<PlayerColor>("white");
   public readonly secondaryPlayerColor = ref<PlayerColor>("black");
   public readonly winReason = ref<WinReason>("none");
-  public readonly blackCapturedPieces = ref<PieceId[]>([]);
-  public readonly whiteCapturedPieces = ref<PieceId[]>([]);
+  public readonly capturedPieces = new CapturedPieces();
   public readonly lastMoveIndex = ref(-1);
   public readonly moveList = ref([]) as Ref<Move[]>;
   public readonly moveListData = new MoveListData(
@@ -267,13 +268,13 @@ export default class Game {
     false
   );
   public readonly whiteCapturedPiecesData = new CapturedPiecesData(
-    this.whiteCapturedPieces.value,
-    this.whiteCapturedPieces,
+    this.capturedPieces.white.value,
+    this.capturedPieces.white,
     "white"
   );
   public readonly blackCapturedPiecesData = new CapturedPiecesData(
-    this.blackCapturedPieces.value,
-    this.blackCapturedPieces,
+    this.capturedPieces.black.value,
+    this.capturedPieces.black,
     "black"
   );
 
@@ -571,11 +572,6 @@ export default class Game {
     setPrimaryHue(player === "primary");
   }
 
-  private clearCapturedPieces() {
-    this.whiteCapturedPieces.value = [];
-    this.blackCapturedPieces.value = [];
-  }
-
   private draw(reason: WinReason) {
     this.ui.toastManager.showToast("Draw.", "sword-cross");
     this.winner.value = "draw";
@@ -731,7 +727,7 @@ export default class Game {
 
   public restart() {
     this.clearWinner();
-    this.clearCapturedPieces();
+    this.capturedPieces.clearAll();
     this.lastMoveIndex.value = -1;
     this.moveList.value = [];
     this.setupDefaultBoardState();
@@ -952,5 +948,27 @@ export default class Game {
     }
     this.whiteCapturingPaths.value = whiteCapturingPaths;
     this.blackCapturingPaths.value = blackCapturingPaths;
+  }
+
+  public capturePosition(position: BoardPosition) {
+    const piece = this.boardState[position.row][position.col];
+    if (!piece) {
+      throw new GameLogicError(
+        `Provided position has no piece to capture: ${JSON.stringify(position)}`
+      );
+    }
+    this.boardState[position.row][position.col] = null;
+    this.capturedPieces.add(piece);
+  }
+
+  public unCapturePosition(position: BoardPosition, piece: Piece) {
+    const value = this.boardState[position.row][position.col];
+    if (value) {
+      throw new GameLogicError(
+        `Provided position already has a piece: ${JSON.stringify(value)}`
+      );
+    }
+    this.boardState[position.row][position.col] = piece;
+    this.capturedPieces.remove(piece);
   }
 }
