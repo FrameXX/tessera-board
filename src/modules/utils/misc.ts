@@ -44,17 +44,6 @@ export function capitalizeFirst(string: string) {
   return string[0].toUpperCase() + string.slice(1);
 }
 
-export interface Duration {
-  mins: number;
-  secs: number;
-}
-
-export function getDuration(secs: number): Duration {
-  const mins = Math.trunc(secs / 60);
-  const secsRest = secs % 60;
-  return { mins, secs: secsRest };
-}
-
 export function getDigitStr(number: number, digits: number = 2) {
   let str = number.toString();
   while (str.length < digits) {

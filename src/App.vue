@@ -61,7 +61,10 @@ onMounted(game.mount);
 
   <!-- Fixed bottom -->
   <ActionPanel :game="game" :open="game.ui.actionPanelOpen.value" />
-  <Statistics :open="game.ui.openedFragment.value === 'statistics'" />
+  <Statistics
+    :game="game"
+    :open="game.ui.openedFragment.value === 'statistics'"
+  />
 
   <!-- Relative -->
   <div id="game-area">

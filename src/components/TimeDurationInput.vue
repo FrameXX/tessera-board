@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, watch, computed, inject } from "vue";
-import { getDigitStr, getDuration } from "../modules/utils/misc";
 import DurationDialog from "../modules/dialogs/duration";
+import Duration from "../modules/utils/duration";
 
 const props = defineProps({
   modelValue: { type: Number, default: 0 },
@@ -14,7 +14,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const seconds = ref(props.modelValue);
 const duration = computed(() => {
-  return getDuration(seconds.value);
+  return new Duration(seconds.value);
 });
 
 watch(
@@ -25,19 +25,13 @@ watch(
 );
 
 const text = computed(() => {
-  if (duration.value.mins === 0 && duration.value.secs === 0) {
-    return "∞";
-  } else {
-    return `${getDigitStr(duration.value.mins)}:${getDigitStr(
-      duration.value.secs
-    )}`;
-  }
+  return duration.value.stringifiedLimit;
 });
 
 async function set() {
   const newValue = await durationDialog.show(
-    duration.value.mins,
-    duration.value.secs
+    duration.value.minutes,
+    duration.value.seconds
   );
   if (newValue === null) {
     return;

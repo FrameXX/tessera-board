@@ -37,7 +37,7 @@ const open = ref<Boolean>(false);
 <style lang="scss">
 @import "../partials/mixins";
 
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 650px) {
   .category .content {
     column-count: 2;
   }

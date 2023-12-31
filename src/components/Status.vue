@@ -2,7 +2,6 @@
 import { PropType, computed } from "vue";
 import InfoText from "./InfoText.vue";
 import Game from "../modules/game";
-import Time from "./Time.vue";
 
 const pulsingMoveSeconds = 10;
 const pulsingMatchSeconds = 30;
@@ -89,11 +88,10 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="move"
         >
-          <Time
-            :time="
-              props.game.playerTimers.primaryPlayerMove.remainingDuration.value
-            "
-          />
+          {{
+            props.game.playerTimers.primaryPlayerMove.remainingDurationString
+              .value
+          }}
         </InfoText>
         <InfoText
           v-show="primaryPlayerSecondsPerMatchSet"
@@ -103,11 +101,11 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="match"
         >
-          <Time
-            :time="
-              props.game.playerTimers.primaryPlayerMatch.remainingDuration.value
-            "
-        /></InfoText>
+          {{
+            props.game.playerTimers.primaryPlayerMatch.remainingDurationString
+              .value
+          }}
+        </InfoText>
       </div>
     </div>
 
@@ -132,12 +130,11 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="move"
         >
-          <Time
-            :time="
-              props.game.playerTimers.secondaryPlayerMove.remainingDuration
-                .value
-            "
-        /></InfoText>
+          {{
+            props.game.playerTimers.secondaryPlayerMove.remainingDurationString
+              .value
+          }}
+        </InfoText>
         <InfoText
           v-show="secondaryPlayerSecondsPerMatchSet"
           content-role="timer"
@@ -146,12 +143,11 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
           }"
           name="match"
         >
-          <Time
-            :time="
-              props.game.playerTimers.secondaryPlayerMatch.remainingDuration
-                .value
-            "
-        /></InfoText>
+          {{
+            props.game.playerTimers.secondaryPlayerMatch.remainingDurationString
+              .value
+          }}
+        </InfoText>
       </div>
     </div>
   </div>
@@ -197,7 +193,7 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
 }
 
 #timers-player-wrapper {
-  background-color: var(--color-player-surface-accent);
+  background-color: var(--color-primary-player-surface-accent);
 }
 
 #status-text {
@@ -226,7 +222,7 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
 }
 
 #timers-opponent-wrapper {
-  background-color: var(--color-opponent-surface-accent);
+  background-color: var(--color-secondary-player-surface-accent);
 }
 
 .pulsing {

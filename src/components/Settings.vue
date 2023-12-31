@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type PropType } from "vue";
+import { ref, type PropType, Ref } from "vue";
 import Backdrop from "./Backdrop.vue";
 import UserOption from "./UserOption.vue";
 import Category from "./Category.vue";
@@ -9,15 +9,17 @@ import SectionTitle from "./SectionTitle.vue";
 import Checkbox from "./Checkbox.vue";
 import InfoCard from "./InfoCard.vue";
 import Board from "./Board.vue";
-import Time from "./Time.vue";
 import FragmentTitle from "./FragmentTitle.vue";
 import Game, { GameSettings } from "../modules/game";
+import { PIECES, PieceId } from "../modules/pieces/piece";
 
 const props = defineProps({
   open: { type: Boolean, default: false },
   modelValue: { type: Object as PropType<GameSettings>, required: true },
   game: { type: Object as PropType<Game>, required: true },
 });
+
+const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
 </script>
 
 <template>
@@ -83,7 +85,7 @@ const props = defineProps({
           >
           <UserOption
             name="Primary player time per move"
-            icon-id="timer-outline"
+            icon-id="timer-sand"
             option-id="input-primary-player-seconds-per-move"
           >
             <TimeDurationInput
@@ -97,11 +99,10 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time
-                    :time="
-                      props.game.playerTimers.primaryPlayerMove.duration.value
-                    "
-                  />
+                  {{
+                    props.game.playerTimers.primaryPlayerMove.durationString
+                      .value
+                  }}
                 </div>
                 <button
                   title="Reset timer"
@@ -117,7 +118,7 @@ const props = defineProps({
           </UserOption>
           <UserOption
             name="Secondary player time per move"
-            icon-id="timer-outline"
+            icon-id="timer-sand"
             option-id="input-secondary-player-seconds-per-move"
           >
             <TimeDurationInput
@@ -132,11 +133,10 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time
-                    :time="
-                      props.game.playerTimers.secondaryPlayerMove.duration.value
-                    "
-                  />
+                  {{
+                    props.game.playerTimers.secondaryPlayerMove.durationString
+                      .value
+                  }}
                 </div>
                 <button
                   title="Reset timer"
@@ -152,7 +152,7 @@ const props = defineProps({
           </UserOption>
           <UserOption
             name="Primary player time per match"
-            icon-id="clock-outline"
+            icon-id="timer-outline"
             option-id="input-primary-player-seconds-per-match"
           >
             <TimeDurationInput
@@ -166,11 +166,10 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time
-                    :time="
-                      props.game.playerTimers.primaryPlayerMatch.duration.value
-                    "
-                  />
+                  {{
+                    props.game.playerTimers.primaryPlayerMatch.durationString
+                      .value
+                  }}
                 </div>
                 <button
                   title="Reset timer"
@@ -186,7 +185,7 @@ const props = defineProps({
           </UserOption>
           <UserOption
             name="Secondary player time per match"
-            icon-id="clock-outline"
+            icon-id="timer-outline"
             option-id="input-secondary-player-seconds-per-match"
           >
             <TimeDurationInput
@@ -200,12 +199,10 @@ const props = defineProps({
             <template #extra>
               <div class="player-time">
                 <div class="time">
-                  <Time
-                    :time="
-                      props.game.playerTimers.secondaryPlayerMatch.duration
-                        .value
-                    "
-                  />
+                  {{
+                    props.game.playerTimers.secondaryPlayerMatch.durationString
+                      .value
+                  }}
                 </div>
                 <button
                   title="Reset timer"
@@ -221,7 +218,7 @@ const props = defineProps({
           </UserOption>
           <UserOption
             name="Time per move expiration punishment"
-            icon-id="timer-alert-outline"
+            icon-id="timer-sand-complete"
             option-id="seconds-move-limit-run-out-punishment"
           >
             <select
@@ -367,75 +364,16 @@ const props = defineProps({
             his/her opponent to capture it.</InfoCard
           >
           <UserOption
-            name="Pawn importance"
-            icon-id="chess-pawn"
-            option-id="input-pawn-importance"
+            v-for="pieceId in pieceIds"
+            :name="`${PIECES[pieceId]} importance`"
+            :icon-id="`chess-${pieceId}`"
+            :option-id="`input-${pieceId}-importance`"
             :description="false"
           >
             <input
               type="number"
-              id="input-pawn-importance"
-              v-model="props.modelValue.pawnImportance.value"
-            />
-          </UserOption>
-          <UserOption
-            name="Knight importance"
-            icon-id="chess-knight"
-            option-id="input-knight-importance"
-            :description="false"
-          >
-            <input
-              type="number"
-              id="input-knight-importance"
-              v-model="props.modelValue.knightImportance.value"
-            />
-          </UserOption>
-          <UserOption
-            name="Bishop importance"
-            icon-id="chess-bishop"
-            option-id="input-bishop-importance"
-            :description="false"
-          >
-            <input
-              type="number"
-              id="input-bishop-importance"
-              v-model="props.modelValue.bishopImportance.value"
-            />
-          </UserOption>
-          <UserOption
-            name="Rook importance"
-            icon-id="chess-rook"
-            option-id="input-rook-importance"
-            :description="false"
-          >
-            <input
-              type="number"
-              id="input-rook-importance"
-              v-model="props.modelValue.rookImportance.value"
-            />
-          </UserOption>
-          <UserOption
-            name="Queen importance"
-            icon-id="chess-queen"
-            option-id="input-queen-importance"
-            :description="false"
-          >
-            <input
-              type="number"
-              id="input-queen-importance"
-              v-model="props.modelValue.queenImportance.value"
-            />
-          </UserOption>
-          <UserOption
-            name="King importance"
-            icon-id="chess-king"
-            option-id="input-king-importance"
-            :description="false"
-          >
-            <input
-              type="number"
-              id="input-king-importance"
-              v-model="props.modelValue.kingImportance.value"
+              :id="`input-${pieceId}-importance`"
+              v-model="props.modelValue.piecesImportance.values[pieceId].value"
             />
           </UserOption>
         </Category>

@@ -16,6 +16,15 @@ export const PIECES = {
   pawn: "Pawn",
 } as const;
 
+export const PIECES_DEFAULT_IMPORTANCE = {
+  rook: 5,
+  knight: 3,
+  bishop: 3.25,
+  queen: 9,
+  king: 27,
+  pawn: 1,
+} as const;
+
 export const PIECE_IDS = Object.keys(PIECES) as PieceId[];
 
 export type PieceId = keyof typeof PIECES;

@@ -1,4 +1,8 @@
-import { PIECE_IDS, type PiecesImportanceValues } from "./pieces/piece";
+import {
+  PIECES_DEFAULT_IMPORTANCE,
+  PIECE_IDS,
+  type PiecesImportanceValues,
+} from "./pieces/piece";
 import { ref } from "vue";
 
 export default class PiecesImportance {
@@ -7,7 +11,7 @@ export default class PiecesImportance {
   constructor() {
     const values = {} as any;
     for (const pieceId of PIECE_IDS) {
-      values[pieceId] = ref(0);
+      values[pieceId] = ref(PIECES_DEFAULT_IMPORTANCE[pieceId]);
     }
     this.values = values;
   }

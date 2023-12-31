@@ -6,7 +6,7 @@ import BoardStateData from "./user_data/board_state";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
 import type { Piece } from "./pieces/piece";
-import { type Path } from "./pieces/piece";
+import { PIECES, PIECE_IDS, type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { PieceContext, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
@@ -97,12 +97,6 @@ export default class Game {
     autoPauseGame: ref(true),
     markUnactivePlayerAvailibleMoves: ref(false),
     tableModeEnabled: ref(false),
-    pawnImportance: ref(1),
-    knightImportance: ref(3),
-    bishopImportance: ref(3.25),
-    rookImportance: ref(5),
-    queenImportance: ref(9),
-    kingImportance: ref(25),
     theme: ref<Theme>("auto"),
     transitions: ref<Transitions>("auto"),
     primaryPlayerHue: ref(37),
@@ -207,8 +201,10 @@ export default class Game {
   public readonly primaryPlayerPlaying = ref<boolean>(true);
   public readonly playingPlayer = ref<Player>("primary");
   public readonly notPlayingPlayer = ref<Player>("secondary");
-  public readonly primaryPlayerScore = ref(0);
-  public readonly secondaryPlayerScore = ref(0);
+  public readonly primaryPlayerUnitExtent = ref(0);
+  public readonly primaryPlayerMaxUnitExtent = ref(0);
+  public readonly secondaryPlayerUnitExtent = ref(0);
+  public readonly secondaryPlayerMaxUnitExtent = ref(0);
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
@@ -287,8 +283,15 @@ export default class Game {
   /**
    * User data manager takes care of dumping and loading data to and from localStorage.
    */
-  userDataManager = new UserDataManager(
+  public userDataManager = new UserDataManager(
     [
+      ...PIECE_IDS.map((pieceId) => {
+        return new NumberUserData(
+          `${pieceId}-importance`,
+          this.settings.piecesImportance.values[pieceId].value,
+          this.settings.piecesImportance.values[pieceId]
+        );
+      }),
       new BooleanUserData(
         "vibrations_enabled",
         this.settings.vibrationsEnabled.value,
@@ -447,41 +450,6 @@ export default class Game {
         0,
         this.playerTimers.secondaryPlayerMatch.seconds
       ),
-      new NumberUserData(
-        "pawn_importance",
-        this.settings.pawnImportance.value,
-        this.settings.pawnImportance
-      ),
-      new NumberUserData(
-        "knight_importance",
-        this.settings.knightImportance.value,
-        this.settings.knightImportance
-      ),
-      new NumberUserData(
-        "bishop_importance",
-        this.settings.bishopImportance.value,
-        this.settings.bishopImportance
-      ),
-      new NumberUserData(
-        "rook_importance",
-        this.settings.rookImportance.value,
-        this.settings.rookImportance
-      ),
-      new NumberUserData(
-        "queen_importance",
-        this.settings.queenImportance.value,
-        this.settings.queenImportance
-      ),
-      new NumberUserData(
-        "king_importance",
-        this.settings.kingImportance.value,
-        this.settings.kingImportance
-      ),
-      new NumberUserData(
-        "knight_importance",
-        this.settings.knightImportance.value,
-        this.settings.knightImportance
-      ),
       new BooleanUserData(
         "show_other_availible_moves",
         this.settings.markUnactivePlayerAvailibleMoves.value,
@@ -498,6 +466,26 @@ export default class Game {
         this.primaryPlayerColor.value,
         isPlayerColor,
         this.primaryPlayerColor
+      ),
+      new NumberUserData(
+        "primary_player_unit_extent",
+        this.primaryPlayerUnitExtent.value,
+        this.primaryPlayerUnitExtent
+      ),
+      new NumberUserData(
+        "secondary_player_unit_extent",
+        this.secondaryPlayerUnitExtent.value,
+        this.secondaryPlayerUnitExtent
+      ),
+      new NumberUserData(
+        "primary_player_max_unit_extent",
+        this.primaryPlayerMaxUnitExtent.value,
+        this.primaryPlayerMaxUnitExtent
+      ),
+      new NumberUserData(
+        "secondary_player_max_unit_extent",
+        this.secondaryPlayerMaxUnitExtent.value,
+        this.secondaryPlayerMaxUnitExtent
       ),
       this.defaultBoardStateData,
       this.gameBoardStateData,
@@ -742,6 +730,12 @@ export default class Game {
     this.secondaryBoardManager.unselectAll();
   }
 
+  private initMaxUnitExtent() {
+    this.primaryPlayerMaxUnitExtent.value = this.primaryPlayerUnitExtent.value;
+    this.secondaryPlayerMaxUnitExtent.value =
+      this.secondaryPlayerUnitExtent.value;
+  }
+
   public restart() {
     this.clearWinner();
     this.capturedPieces.clearAll();
@@ -752,6 +746,7 @@ export default class Game {
     this.initFirstMoveColor();
     this.initPlayerColors();
     this.updateStateRefs();
+    this.initMaxUnitExtent();
     this.playerTimers.resetAll();
     this.updateCapturingPaths();
     this.updateBackendBoardStateData();
@@ -763,9 +758,9 @@ export default class Game {
 
   public restore() {
     this.initSecondaryPlayerColor();
+    this.updateGameBoardAllPiecesContext();
     this.updateStateRefs();
     updatePieceColors(this.primaryPlayerColor.value);
-    this.updateGameBoardAllPiecesContext();
     this.updateCapturingPaths();
     this.updateBackendBoardStateData();
     this.updateWinner();
@@ -824,10 +819,10 @@ export default class Game {
     );
     this.playingPlayer.value = this.getPlayingPlayer();
     this.notPlayingPlayer.value = this.getNotPlayingPlayer();
-    this.primaryPlayerScore.value = this.getPlayerScore(
+    this.primaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
       this.primaryPlayerColor.value
     );
-    this.secondaryPlayerScore.value = this.getPlayerScore(
+    this.secondaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
       this.secondaryPlayerColor.value
     );
   }
@@ -995,7 +990,7 @@ export default class Game {
     this.capturedPieces.remove(piece);
   }
 
-  public getPlayerScore(color: PlayerColor) {
+  public getPlayerUnitExtent(color: PlayerColor) {
     let score = 0;
     for (const pieceContext of this.gameBoardAllPiecesContext.value) {
       if (pieceContext.piece.color !== color) continue;

@@ -189,15 +189,15 @@
     var(--L-surface-accent)
   );
 
-  // Player surface accent
-  --color-player-surface-accent: hsl(
+  // Primary player surface accent
+  --color-primary-player-surface-accent: hsl(
     var(--H-primary-player),
     var(--S-primary-surface-accent),
     var(--L-surface-accent)
   );
 
-  // Opponent surface accent
-  --color-opponent-surface-accent: hsl(
+  // Secondary player surface accent
+  --color-secondary-player-surface-accent: hsl(
     var(--H-secondary-player),
     var(--S-primary-surface-accent),
     var(--L-surface-accent)
@@ -206,6 +206,20 @@
   // Accent
   --color-primary-accent: hsl(
     var(--H-primary),
+    var(--S-primary-accent),
+    var(--L-accent)
+  );
+
+  // Primary player accent
+  --color-primary-player-accent: hsl(
+    var(--H-primary-player),
+    var(--S-primary-accent),
+    var(--L-accent)
+  );
+
+  // Secondary player accent
+  --color-secondary-player-accent: hsl(
+    var(--H-secondary-player),
     var(--S-primary-accent),
     var(--L-accent)
   );

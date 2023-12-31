@@ -2,11 +2,30 @@ import { type Ref, ref, computed, watch, capitalize } from "vue";
 import type Game from "./game";
 import type { Player, PlayerColor, WinReason } from "./utils/game";
 import { getOpossitePlayerColor } from "./utils/game";
-import { getDuration } from "./utils/misc";
+import Duration from "./utils/duration";
 
 class PlayerTimer {
   public duration = computed(() => {
-    return getDuration(this.seconds.value);
+    return new Duration(this.seconds.value);
+  });
+  public durationString = computed(() => {
+    return this.duration.value.strigifiedTimer;
+  });
+  public remainingDuration = computed(() => {
+    return new Duration(this.remainingSeconds.value);
+  });
+  public remainingDurationString = computed(() => {
+    return this.remainingDuration.value.strigifiedTimer;
+  });
+  public maxDuration = computed(() => {
+    return new Duration(this.secondsLimit.value);
+  });
+  public maxDurationString = computed(() => {
+    return this.maxDuration.value.stringifiedLimit;
+  });
+  public elapsedFactor = computed(() => {
+    if (this.secondsLimit.value === 0) return 0;
+    return this.seconds.value / this.secondsLimit.value;
   });
   public seconds = ref(0);
   public running = computed(() => {
@@ -15,9 +34,6 @@ class PlayerTimer {
     if (this.isPrimaryPlayer !== this.game.primaryPlayerPlaying.value)
       return false;
     return true;
-  });
-  public remainingDuration = computed(() => {
-    return getDuration(this.remainingSeconds.value);
   });
   public remainingSeconds = computed(() => {
     return this.secondsLimit.value - this.seconds.value;
