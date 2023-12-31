@@ -8,6 +8,7 @@ const props = defineProps({
   subtitle: { type: String, required: true },
   factor: { type: Number, default: 0 },
   secondary: { type: Boolean, default: false },
+  comparison: { type: Boolean, default: false },
 });
 
 const full = computed(() => {
@@ -15,11 +16,13 @@ const full = computed(() => {
 });
 
 const backgroundColor = computed(() => {
+  if (props.comparison) return "var(--color-secondary-player-accent)";
   return props.secondary
     ? "var(--color-secondary-player-surface-accent)"
     : "var(--color-primary-player-surface-accent)";
 });
 const fillerColor = computed(() => {
+  if (props.comparison) return "var(--color-primary-player-accent)";
   return props.secondary
     ? "var(--color-secondary-player-accent)"
     : "var(--color-primary-player-accent)";
@@ -60,7 +63,8 @@ const fillerColor = computed(() => {
   }
 
   .content {
-    mix-blend-mode: exclusion;
+    color: var(--color-primary-text);
+    font-weight: bold;
     display: flex;
     position: absolute;
     width: 100%;

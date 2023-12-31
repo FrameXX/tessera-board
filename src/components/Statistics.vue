@@ -24,6 +24,14 @@ const secondaryPlayerUnitExtentFactor = computed(() => {
     props.game.secondaryPlayerMaxUnitExtent.value
   );
 });
+
+const playersUnitExtentFactor = computed(() => {
+  return (
+    props.game.primaryPlayerUnitExtent.value /
+    (props.game.secondaryPlayerUnitExtent.value +
+      props.game.primaryPlayerUnitExtent.value)
+  );
+});
 </script>
 
 <template>
@@ -36,7 +44,14 @@ const secondaryPlayerUnitExtentFactor = computed(() => {
         <InfoCard>
           Unit extent is a sum of importances of all pieces player has on board.
         </InfoCard>
-        <div id="statistics-this-game">
+        <Tile
+          comparison
+          icon-id="shield-crown-outline"
+          title="Unit extent comparison"
+          :subtitle="`${props.game.primaryPlayerUnitExtent.value}|${props.game.secondaryPlayerUnitExtent.value}`"
+          :factor="playersUnitExtentFactor"
+        />
+        <div id="statistics-players">
           <div class="statistics-player">
             <h3>Primary player</h3>
             <Tile
@@ -120,7 +135,7 @@ const secondaryPlayerUnitExtentFactor = computed(() => {
 }
 
 @media only screen and (min-width: 600px) {
-  #statistics #statistics-this-game {
+  #statistics #statistics-players {
     column-count: 2;
   }
 }
