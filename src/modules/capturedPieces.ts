@@ -1,5 +1,6 @@
 import { ref } from "vue";
-import Piece, { PieceId } from "./pieces/piece";
+import type { PieceId } from "./pieces/piece";
+import type Piece from "./pieces/piece";
 
 export default class CapturedPieces {
   public readonly white = ref<PieceId[]>([]);

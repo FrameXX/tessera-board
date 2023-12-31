@@ -1,4 +1,4 @@
-import Game from "./game";
+import type Game from "./game";
 import PlayerTimer from "./player_timer";
 
 export default class PlayerTimers {

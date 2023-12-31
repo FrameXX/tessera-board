@@ -13,7 +13,7 @@ import type Game from "../game";
 
 export const MOVE_IDS = ["shift", "castling", "promotion"] as const;
 
-type MoveId = (typeof MOVE_IDS)[number];
+export type MoveId = (typeof MOVE_IDS)[number];
 export function isMoveId(string: string): string is MoveId {
   return MOVE_IDS.includes(string as MoveId);
 }
@@ -131,11 +131,11 @@ export function removeCapturedPiece(
 ) {
   piece.color === "white"
     ? blackCapturedPieces.value.splice(
-        blackCapturedPieces.value.indexOf(piece.pieceId)
-      )
+      blackCapturedPieces.value.indexOf(piece.pieceId)
+    )
     : whiteCapturedPieces.value.splice(
-        blackCapturedPieces.value.indexOf(piece.pieceId)
-      );
+      blackCapturedPieces.value.indexOf(piece.pieceId)
+    );
 }
 
 export function transformPiece(

@@ -6,7 +6,7 @@ import BoardStateData from "./user_data/board_state";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
 import type { Piece } from "./pieces/piece";
-import { PIECES, PIECE_IDS, type Path } from "./pieces/piece";
+import { PIECE_IDS, type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { PieceContext, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
@@ -208,18 +208,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-      case "none":
-        return `${capitalize(this.playingColor.value)} plays`;
-      case "draw":
-        return "Draw";
-      case "secondary":
-        return `${capitalize(this.secondaryPlayerColor.value)} won`;
-      case "primary":
-        return `${capitalize(this.primaryPlayerColor.value)} won`;
-      default:
-        throw new UserDataError(
-          `Winner value is of an invalid type. value: ${this.winner.value}`
-        );
+    case "none":
+      return `${capitalize(this.playingColor.value)} plays`;
+    case "draw":
+      return "Draw";
+    case "secondary":
+      return `${capitalize(this.secondaryPlayerColor.value)} won`;
+    case "primary":
+      return `${capitalize(this.primaryPlayerColor.value)} won`;
+    default:
+      throw new UserDataError(
+        `Winner value is of an invalid type. value: ${this.winner.value}`
+      );
     }
   });
 
