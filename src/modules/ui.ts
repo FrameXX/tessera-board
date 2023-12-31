@@ -66,9 +66,9 @@ class UI {
       if (event.key === "R" && event.shiftKey) this.game.restart();
       if (event.key === "P" && event.shiftKey) this.manuallyTogglePause();
       if (event.key === "Z" && (event.shiftKey || event.ctrlKey))
-        this.game.undoMove();
+        this.game.requestUndoMove();
       if (event.key === "Y" && (event.shiftKey || event.ctrlKey))
-        this.game.redoMove();
+        this.game.requestRedoMove();
       if (event.key === "C" && event.shiftKey) this.switchFragment("settings");
     });
 
@@ -79,20 +79,20 @@ class UI {
 
   public updatePrimaryHue(primaryPlayerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(primaryPlayerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "primary":
-      setPrimaryHue(true);
-      break;
-    case "secondary":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(primaryPlayerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "primary":
+        setPrimaryHue(true);
+        break;
+      case "secondary":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);

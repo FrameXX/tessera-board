@@ -1,6 +1,5 @@
 import type { PieceContext, BoardPosition } from "./board_manager";
 import BoardManager from "./board_manager";
-import { movePiece } from "./moves/move";
 import { isPositionOnBoard, positionsEqual } from "./utils/game";
 import type Game from "./game";
 
@@ -55,7 +54,7 @@ class DefaultBoardManager extends BoardManager {
     if (!this.isPositionAvailible(targetPosition)) {
       return;
     }
-    await movePiece(
+    await this.game.movePiece(
       pieceContext.piece,
       pieceContext,
       targetPosition,

@@ -17,7 +17,7 @@ export class SelectPieceDialogError extends Error {
 }
 
 class SelectPieceDialog {
-  private resolve?: (piece: RawPiece | null) => void;
+  private resolve?: (piece: RawPiece) => void;
   public props: SelectPieceDialogProps;
 
   constructor(private readonly toastManager: ToastManager) {
@@ -28,7 +28,7 @@ class SelectPieceDialog {
     });
   }
 
-  public open(pieceOptions: RawPiece[]): Promise<RawPiece | null> {
+  public open(pieceOptions: RawPiece[]): Promise<RawPiece> {
     this.props.pieceOptions = pieceOptions;
     if (pieceOptions.length > 0) {
       this.props.selectedPiece = pieceOptions[0];
@@ -59,14 +59,11 @@ class SelectPieceDialog {
   };
 
   public cancel = () => {
-    if (!this.resolve) {
-      throw new SelectPieceDialogError(
-        "Cannot confirm dialog. No resolve function is availible."
-      );
-    }
-    this.resolve(null);
-    this.resolve = undefined;
-    this.props.open = false;
+    this.toastManager.showToast(
+      "Promotion cannot be canceled. You can undo the move after it's complete.",
+      "cancel",
+      "error"
+    );
   };
 }
 

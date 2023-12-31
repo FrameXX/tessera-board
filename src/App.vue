@@ -115,7 +115,7 @@ onMounted(game.mount);
   <div class="primary-buttons">
     <Transition name="counter">
       <button
-        @click="game.undoMove()"
+        @click="game.requestUndoMove()"
         aria-label="Previous move"
         title="Previous move"
       >
@@ -142,7 +142,11 @@ onMounted(game.mount);
       Actions
     </button>
     <Transition name="counter">
-      <button @click="game.redoMove()" aria-label="Next move" title="Next move">
+      <button
+        @click="game.requestRedoMove()"
+        aria-label="Next move"
+        title="Next move"
+      >
         <Icon icon-id="arrow-right"></Icon>
       </button>
     </Transition>

@@ -8,7 +8,11 @@ import RawBoardStateData from "./user_data/raw_board_state";
 import type { Piece } from "./pieces/piece";
 import { PIECE_IDS, type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
-import type { PieceContext, BoardPosition } from "./board_manager";
+import type {
+  PieceContext,
+  BoardPosition,
+  BoardStateValue,
+} from "./board_manager";
 import type Move from "./moves/move";
 import NumberUserData from "./user_data/number_user_data";
 import MoveListData from "./user_data/move_list";
@@ -71,6 +75,7 @@ import Pawn from "./pieces/pawn";
 import PlayerTimers from "./player_timers";
 import CapturedPieces from "./capturedPieces";
 import PiecesImportance from "./pieces_importance";
+import { movePositionValue } from "./moves/move";
 
 export type GameAudioEffects = Game["audioEffects"];
 export type GameSettings = Game["settings"];
@@ -167,7 +172,7 @@ export default class Game {
     }),
   };
 
-  public readonly boardState: (Piece | null)[][] = reactive([
+  public readonly boardState: (Piece | null)[][] = [
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
@@ -176,7 +181,7 @@ export default class Game {
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
-  ]);
+  ];
 
   public readonly paused = ref<GamePausedState>("not");
   public readonly ui = new UI(this);
@@ -208,18 +213,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingColor.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayerColor.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayerColor.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingColor.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayerColor.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayerColor.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -771,19 +776,19 @@ export default class Game {
     this.moveList.value.splice(this.lastMoveIndex.value, listIndexDiff);
   }
 
-  private reverseMove() {
+  private async undoMove() {
     const reversedMove = this.moveList.value[this.lastMoveIndex.value];
-    reversedMove.reverse(this.boardState, this, true);
-    this.onMoveReverse();
+    await reversedMove.undo(this);
+    this.onMoveUndo();
   }
 
-  private forwardMove() {
+  private async redoMove() {
     const forwardedMove = this.moveList.value[this.lastMoveIndex.value + 1];
-    forwardedMove.forward(this.boardState, this, true);
-    this.onMoveForward();
+    await forwardedMove.redo(this);
+    this.onMoveRedo();
   }
 
-  public redoMove() {
+  public requestRedoMove() {
     if (this.moveList.value.length - this.lastMoveIndex.value < 2) {
       this.ui.toastManager.showToast(
         "You reached the last move. You cannot go further.",
@@ -793,10 +798,10 @@ export default class Game {
       if (this.settings.vibrationsEnabled) navigator.vibrate(30);
       return;
     }
-    this.forwardMove();
+    this.redoMove();
   }
 
-  public undoMove() {
+  public requestUndoMove() {
     if (this.lastMoveIndex.value === -1) {
       this.ui.toastManager.showToast(
         "You reached the first move. You cannot go further.",
@@ -806,7 +811,7 @@ export default class Game {
       if (this.settings.vibrationsEnabled) navigator.vibrate(30);
       return;
     }
-    this.reverseMove();
+    this.undoMove();
   }
 
   private updateStateRefs() {
@@ -862,12 +867,12 @@ export default class Game {
     this.blackCapturedPiecesData.save();
   }
 
-  private onMoveReverse() {
+  private onMoveUndo() {
     this.lastMoveIndex.value--;
     this.onMove();
   }
 
-  private onMoveForward() {
+  private onMoveRedo() {
     this.lastMoveIndex.value++;
     this.onMove();
     this.saveMove();
@@ -998,5 +1003,19 @@ export default class Game {
         this.settings.piecesImportance.values[pieceContext.piece.pieceId].value;
     }
     return score;
+  }
+
+  public movePiece(
+    piece: Piece,
+    origin: BoardPosition,
+    target: BoardPosition,
+    transitionMultiplier: number,
+    boardState?: BoardStateValue
+  ) {
+    if (!boardState) boardState = this.boardState;
+    movePositionValue(piece, origin, target, boardState);
+    return new Promise((resolve) => {
+      setTimeout(resolve, 200 * (transitionMultiplier / 100));
+    });
   }
 }

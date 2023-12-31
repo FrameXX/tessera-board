@@ -1,10 +1,6 @@
 import type { Ref } from "vue";
 import type Piece from "../pieces/piece";
 import type { PieceId } from "../pieces/piece";
-import {
-  getElementInstanceById,
-  waitForTransitionEnd,
-} from "../utils/elements";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
@@ -39,37 +35,37 @@ abstract class Move {
    */
   public abstract get highlightedBoardPositions(): BoardPosition[];
 
-  protected abstract redo(game: Game): Promise<void>;
-
-  /**
-   * Alters the gameBoardState according to the move without any further effects or requiring any user input.
-   * @param args The arguments and their count vary from class to class
-   * @abstract
-   */
-  protected abstract _forward(boardState: BoardStateValue, game: Game): void;
-
-  public async forward(boardState: BoardStateValue, game: Game, redo = false) {
+  public forward(boardState: BoardStateValue, game: Game) {
     if (this.performed) {
       throw new GameLogicError(
         "A move that was already performed shouldn't be performed again."
       );
     }
     this.performed = true;
-    redo ? await this.redo(game) : this._forward(boardState, game);
+    this._forward(boardState, game);
   }
+
+  /**
+   * Alters the gameBoardState according to the move without any further effects or requiring any user input.
+   * @abstract
+   */
+  protected abstract _forward(boardState: BoardStateValue, game: Game): void;
 
   public abstract getNotation(): string;
 
-  protected abstract undo(game: Game): Promise<void>;
+  public async redo(game: Game) {
+    if (this.performed) {
+      throw new GameLogicError(
+        "A move that was already performed shouldn't be performed again."
+      );
+    }
+    this.performed = true;
+    await this._redo(game);
+  }
 
-  /**
-   * Alters the gameBoardState according to the move, but reverse and without any further effects or requiring any user input.
-   * @param args The arguments and their count vary from class to class
-   * @abstract
-   */
-  protected abstract _reverse(boardState: BoardStateValue): void;
+  protected abstract _redo(game: Game): Promise<void>;
 
-  public async reverse(boardState: BoardStateValue, game: Game, undo = false) {
+  public async undo(game: Game) {
     if (!this.performed) {
       console.error(this);
       throw new GameLogicError(
@@ -77,8 +73,27 @@ abstract class Move {
       );
     }
     this.performed = false;
-    undo ? await this.undo(game) : this._reverse(boardState);
+    await this._undo(game);
   }
+
+  protected abstract _undo(game: Game): Promise<void>;
+
+  public reverse(boardState: BoardStateValue) {
+    if (!this.performed) {
+      console.error(this);
+      throw new GameLogicError(
+        "A move that wasn't performed yet shouldn't be reversed already."
+      );
+    }
+    this.performed = false;
+    this._reverse(boardState);
+  }
+
+  /**
+   * Alters the gameBoardState according to the move, but reverse and without any further effects or requiring any user input.
+   * @abstract
+   */
+  protected abstract _reverse(boardState: BoardStateValue): void;
 
   public async perform(game: Game) {
     if (this.performed) {
@@ -95,7 +110,7 @@ abstract class Move {
    * @param args The arguments and their count vary from class to class
    * @abstract
    */
-  protected abstract _perform(game: Game): Promise<boolean>;
+  protected abstract _perform(game: Game): Promise<void>;
 
   /**
    * Returns an array of board positions that after click should perform this move.
@@ -131,11 +146,11 @@ export function removeCapturedPiece(
 ) {
   piece.color === "white"
     ? blackCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    )
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      )
     : whiteCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    );
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      );
 }
 
 export function transformPiece(
@@ -167,24 +182,6 @@ export function movePositionValue(
 ) {
   boardState[target.row][target.col] = piece;
   boardState[origin.row][origin.col] = null;
-}
-
-export async function movePiece(
-  piece: Piece,
-  origin: BoardPosition,
-  target: BoardPosition,
-  boardState: BoardStateValue,
-  boardId: string = "primary-board"
-) {
-  movePositionValue(piece, origin, target, boardState);
-
-  const board = getElementInstanceById(boardId);
-  const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);
-  if (!(pieceElement instanceof SVGElement)) {
-    console.error("Could not find SVG element of piece", piece);
-    return;
-  }
-  await waitForTransitionEnd(pieceElement);
 }
 
 export function getPieceById(id: string, boardState: BoardStateValue) {

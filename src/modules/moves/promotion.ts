@@ -9,7 +9,7 @@ import Move, {
   pieceHasMovedProperty,
   setPieceMoveProperty,
 } from "./move";
-import { movePiece, transformPiece } from "./move";
+import { transformPiece } from "./move";
 import type {
   PieceContext,
   BoardPosition,
@@ -168,42 +168,53 @@ class Promotion extends Move {
     setPieceMoveProperty(piece, true);
   }
 
-  protected async redo(game: Game) {
+  protected async _redo(game: Game) {
     if (this.captures) {
       game.capturePosition(this.captures);
+
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceRemove.play();
       if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
-    await movePiece(piece, this.origin, this.target, game.boardState);
+    await game.movePiece(
+      piece,
+      this.origin,
+      this.target,
+      game.settings.transitionDuration.value
+    );
     this.forwardMovedProperty(piece);
-    game.updateGameBoardAllPiecesContext();
+
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
 
-    const opponentCapturedPieces = this.getOpponentCapturedPieces(
-      game.capturedPieces
-    );
-    const transformOptions = this.getTransformOptions(
-      game.settings.reviveFromCapturedPieces,
-      opponentCapturedPieces
-    );
     if (!this.newRawPiece) {
+      const opponentCapturedPieces = this.getOpponentCapturedPieces(
+        game.capturedPieces
+      );
+      const transformOptions = this.getTransformOptions(
+        game.settings.reviveFromCapturedPieces,
+        opponentCapturedPieces
+      );
+
       this.newRawPiece =
         transformOptions.length === 1
           ? transformOptions[0]
           : chooseBestPiece(
-            transformOptions,
-            game.settings.piecesImportance.values
-          );
+              transformOptions,
+              game.settings.piecesImportance.values
+            );
     }
+
     const newPiece = getPieceFromRaw(this.newRawPiece);
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceRemove.play();
+
     transformPiece(this.target, newPiece, game.boardState);
+    console.log("done");
+
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
     if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
@@ -218,22 +229,24 @@ class Promotion extends Move {
     movePositionValue(piece, this.origin, this.target, boardState);
     this.forwardMovedProperty(piece);
 
-    const opponentCapturedPieces = this.getOpponentCapturedPieces(
-      game.capturedPieces
-    );
-    const transformOptions = this.getTransformOptions(
-      game.settings.reviveFromCapturedPieces,
-      opponentCapturedPieces
-    );
     if (!this.newRawPiece) {
+      const opponentCapturedPieces = this.getOpponentCapturedPieces(
+        game.capturedPieces
+      );
+      const transformOptions = this.getTransformOptions(
+        game.settings.reviveFromCapturedPieces,
+        opponentCapturedPieces
+      );
+
       this.newRawPiece =
         transformOptions.length === 1
           ? transformOptions[0]
           : chooseBestPiece(
-            transformOptions,
-            game.settings.piecesImportance.values
-          );
+              transformOptions,
+              game.settings.piecesImportance.values
+            );
     }
+
     const newPiece = getPieceFromRaw(this.newRawPiece);
 
     transformPiece(this.target, newPiece, boardState);
@@ -244,7 +257,7 @@ class Promotion extends Move {
     setPieceMoveProperty(piece, !this.firstMove);
   }
 
-  protected async undo(game: Game) {
+  protected async _undo(game: Game) {
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceRemove.play();
     transformPiece(this.target, this.originalPiece, game.boardState);
@@ -253,7 +266,12 @@ class Promotion extends Move {
     if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
 
     const piece = getBoardPositionPiece(this.target, game.boardState);
-    await movePiece(piece, this.target, this.origin, game.boardState);
+    await game.movePiece(
+      piece,
+      this.target,
+      this.origin,
+      game.settings.transitionDuration.value
+    );
     this.reverseMovedProperty(piece);
 
     if (this.captures) {
@@ -285,8 +303,15 @@ class Promotion extends Move {
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
-    await movePiece(piece, this.origin, this.target, game.boardState);
+
+    await game.movePiece(
+      piece,
+      this.origin,
+      this.target,
+      game.settings.transitionDuration.value
+    );
     this.forwardMovedProperty(piece);
+    game.updateGameBoardAllPiecesContext();
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -304,8 +329,6 @@ class Promotion extends Move {
       transformOptions.length === 1
         ? transformOptions[0]
         : await game.ui.selectPieceDialog.open(transformOptions);
-
-    if (!this.newRawPiece) return false;
 
     const newPiece = getPieceFromRaw(this.newRawPiece);
 
@@ -326,8 +349,6 @@ class Promotion extends Move {
       game.audioEffects.pieceMove.play();
     if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
     game.updateGameBoardAllPiecesContext();
-
-    return true;
   }
 
   public getNotation(): string {
@@ -339,11 +360,11 @@ class Promotion extends Move {
 
     return this.captures
       ? `${getPieceNotation(this.originalPiece.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(this.newRawPiece.pieceId)}`
+          this.captures
+        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-        this.newRawPiece.pieceId
-      )}`;
+          this.newRawPiece.pieceId
+        )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

@@ -21,7 +21,6 @@ import {
   isRawBoardpieceContext,
   isBoardPosition,
 } from "../board_manager";
-import { movePiece } from "./move";
 import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
 import { getBoardPositionPiece, positionsEqual } from "../utils/game";
@@ -112,8 +111,8 @@ class Shift extends Move {
   public getNotation(): string {
     return this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 
@@ -126,7 +125,7 @@ class Shift extends Move {
     return [this.origin, this.target];
   }
 
-  protected async redo(game: Game) {
+  protected async _redo(game: Game) {
     if (this.captures) {
       game.capturePosition(this.captures);
       if (game.settings.audioEffectsEnabled.value)
@@ -135,7 +134,12 @@ class Shift extends Move {
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
-    movePositionValue(piece, this.origin, this.target, game.boardState);
+    await game.movePiece(
+      piece,
+      this.origin,
+      this.target,
+      game.settings.transitionDuration.value
+    );
     this.forwardMovedProperty(piece);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -157,9 +161,14 @@ class Shift extends Move {
     this.forwardMovedProperty(piece);
   }
 
-  protected async undo(game: Game) {
+  protected async _undo(game: Game) {
     const piece = getBoardPositionPiece(this.target, game.boardState);
-    movePositionValue(piece, this.target, this.origin, game.boardState);
+    await game.movePiece(
+      piece,
+      this.target,
+      this.origin,
+      game.settings.transitionDuration.value
+    );
     this.reverseMovedProperty(piece);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -194,13 +203,16 @@ class Shift extends Move {
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
-    await movePiece(piece, this.origin, this.target, game.boardState);
+    await game.movePiece(
+      piece,
+      this.origin,
+      this.target,
+      game.settings.transitionDuration.value
+    );
     this.forwardMovedProperty(piece);
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-
-    return true;
   }
 
   public get clickablePositions(): BoardPosition[] {

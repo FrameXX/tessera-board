@@ -10,7 +10,6 @@ import { getBoardPositionPiece } from "../utils/game";
 import Move, {
   getCleanBoardPosition,
   handleInvalidRawMove,
-  movePiece,
   movePositionValue,
   pieceHasMovedProperty,
   setPieceMoveProperty,
@@ -115,16 +114,26 @@ class Castling extends Move {
     setPieceMoveProperty(piece, true);
   }
 
-  protected async redo(game: Game): Promise<void> {
+  protected async _redo(game: Game): Promise<void> {
     const king = getBoardPositionPiece(this.kingOrigin, game.boardState);
     this.forwardMovedProperty(king);
     const rook = getBoardPositionPiece(this.rookOrigin, game.boardState);
     this.forwardMovedProperty(rook);
 
-    movePositionValue(king, this.kingOrigin, this.kingTarget, game.boardState);
+    game.movePiece(
+      king,
+      this.kingOrigin,
+      this.kingTarget,
+      game.settings.transitionDuration.value
+    );
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    movePositionValue(rook, this.rookOrigin, this.rookTarget, game.boardState);
+    await game.movePiece(
+      rook,
+      this.rookOrigin,
+      this.rookTarget,
+      game.settings.transitionDuration.value
+    );
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
   }
@@ -144,15 +153,25 @@ class Castling extends Move {
     setPieceMoveProperty(piece, !this.firstMove);
   }
 
-  protected async undo(game: Game): Promise<void> {
+  protected async _undo(game: Game): Promise<void> {
     const king = getBoardPositionPiece(this.kingTarget, game.boardState);
     const rook = getBoardPositionPiece(this.rookTarget, game.boardState);
 
-    movePositionValue(king, this.kingTarget, this.kingOrigin, game.boardState);
+    game.movePiece(
+      king,
+      this.kingTarget,
+      this.kingOrigin,
+      game.settings.transitionDuration.value
+    );
     this.reverseMovedProperty(king);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    movePositionValue(rook, this.rookTarget, this.rookOrigin, game.boardState);
+    await game.movePiece(
+      rook,
+      this.rookTarget,
+      this.rookOrigin,
+      game.settings.transitionDuration.value
+    );
     this.reverseMovedProperty(rook);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -172,16 +191,24 @@ class Castling extends Move {
     const king = getBoardPositionPiece(this.kingOrigin, game.boardState);
     const rook = getBoardPositionPiece(this.rookOrigin, game.boardState);
 
-    movePiece(king, this.kingOrigin, this.kingTarget, game.boardState);
+    game.movePiece(
+      king,
+      this.kingOrigin,
+      this.kingTarget,
+      game.settings.transitionDuration.value
+    );
     this.forwardMovedProperty(king);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    await movePiece(rook, this.rookOrigin, this.rookTarget, game.boardState);
+    await game.movePiece(
+      rook,
+      this.rookOrigin,
+      this.rookTarget,
+      game.settings.transitionDuration.value
+    );
     this.forwardMovedProperty(rook);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-
-    return true;
   }
 
   public getNotation(): string {
