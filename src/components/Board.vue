@@ -48,7 +48,7 @@ const cellSize = computed(() => {
 const pieceSize = computed(() => {
   return (
     cellSize.value -
-    (props.game.settings.piecePadding.value / 50) * cellSize.value
+    (props.game.settings.piecePadding.value / 100) * cellSize.value
   );
 });
 
@@ -138,13 +138,13 @@ onMounted(() => {
     >
       <div v-if="primary" class="black captured-pieces">
         <CapturedPieces
-          :piece-ids="props.game.capturedPieces.black.value"
+          :piece-ids="props.game.capturedPieces.white.value"
           color="white"
         />
       </div>
       <div v-if="primary" class="white captured-pieces">
         <CapturedPieces
-          :piece-ids="props.game.capturedPieces.white.value"
+          :piece-ids="props.game.capturedPieces.black.value"
           color="black"
         />
       </div>
@@ -198,7 +198,6 @@ onMounted(() => {
           :col="pieceContext.col"
           :piece="pieceContext.piece"
           :cell-size="cellSize"
-          :piece-padding="props.game.settings.piecePadding.value"
           :rotated="props.manager.contentRotated.value"
           :size="pieceSize"
         />

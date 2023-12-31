@@ -102,7 +102,7 @@ export default class Game {
     primaryPlayerHue: ref(37),
     secondaryPlayerHue: ref(200),
     pieceIconPack: ref<PieceIconPack>("font_awesome"),
-    piecePadding: ref(10),
+    piecePadding: ref(20),
     pieceBorder: ref(1.1),
     transitionDuration: ref(100),
     cellIndexOpacity: ref(90),
@@ -208,18 +208,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingColor.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayerColor.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayerColor.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingColor.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayerColor.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayerColor.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 

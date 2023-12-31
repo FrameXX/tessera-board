@@ -52,7 +52,7 @@ export function areTransitionsDisabled(): boolean {
 export async function waitForTransitionEnd(
   element: HTMLElement | SVGElement,
   propertyName?: string,
-  abortionTimoutMs: number = 1000
+  abortionTimoutMs: number = 5000
 ): Promise<void> {
   return new Promise((resolve) => {
     if (areTransitionsDisabled()) {

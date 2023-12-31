@@ -131,11 +131,11 @@ export function removeCapturedPiece(
 ) {
   piece.color === "white"
     ? blackCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    )
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      )
     : whiteCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    );
+        blackCapturedPieces.value.indexOf(piece.pieceId)
+      );
 }
 
 export function transformPiece(
@@ -177,7 +177,7 @@ export async function movePiece(
   boardId: string = "primary-board"
 ) {
   movePositionValue(piece, origin, target, boardState);
-  // Player board is always visible so it's ok to observe the transition only on player board
+
   const board = getElementInstanceById(boardId);
   const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);
   if (!(pieceElement instanceof SVGElement)) {

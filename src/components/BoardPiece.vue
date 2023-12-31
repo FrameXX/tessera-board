@@ -16,7 +16,6 @@ const props = defineProps({
   row: { type: Number, required: true },
   col: { type: Number, required: true },
   cellSize: { type: Number, required: true },
-  piecePadding: { type: Number, required: true },
   rotated: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
   size: { type: Number, required: true },
@@ -161,7 +160,7 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 0;
   left: 0;
-  padding: calc(var(--piece-padding) / 8);
+  padding: calc(var(--piece-padding) / 16);
   transition: transform var(--transition-duration-medium) ease-in-out,
     filter var(--transition-duration-short) linear;
 

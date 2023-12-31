@@ -17,7 +17,10 @@ export default class BoardPieceDragHandler {
 
   private inchPxOffset = computed(() => {
     let offset = this.inchCmOffset.value * this.pixelsPerCm;
-    if (this.boardManager.contentRotated.value !== this.game.ui.rotated.value) {
+    if (
+      this.boardManager.contentRotated.value &&
+      this.boardManager.boardRotated.value
+    ) {
       offset *= -1;
     }
     return offset;
@@ -130,7 +133,7 @@ export default class BoardPieceDragHandler {
   private updatePointerPosition(x: number, y: number) {
     let xDiff = x - this.lastDragX;
     let yDiff = y - this.lastDragY;
-    if (this.game.ui.rotated.value) {
+    if (this.boardManager.boardRotated.value) {
       xDiff = -xDiff;
       yDiff = -yDiff;
     }
