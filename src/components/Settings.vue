@@ -30,6 +30,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
         <FragmentTitle icon-id="cog-outline">Configuration</FragmentTitle>
         <!-- Player -->
         <Category name="Primary player" icon-id="account">
+          <SectionTitle title="Player color" />
           <UserOption
             name="color"
             icon-id="invert-colors"
@@ -47,31 +48,151 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
               Specifies the colour of your pieces, whether black or white.
             </template>
           </UserOption>
+          <SectionTitle title="Computer" />
           <UserOption
-            v-if="false"
             name="computer"
             icon-id="memory"
-            option-id="check-computer-player"
+            option-id="check-computer-primary-player"
           >
-            <Checkbox id="check-computer-player" />
+            <Checkbox id="check-computer-primary-player" />
             <template #description>
-              If this feature is activated, an algorithm will play instead of a
-              human player.
+              An algorythm will decide the move instead of a human.
+            </template>
+          </UserOption>
+          <UserOption
+            name="computer precision"
+            icon-id="octagram-outline"
+            option-id="input-computer-precision-primary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="100"
+              id="input-computer-precision-primary-player"
+            />
+            <template #description>
+              Determnines how much precise will the computer be when choosing
+              the best moved based on its analysis. The less the value the more
+              random will the computer moves be.
+            </template>
+          </UserOption>
+          <UserOption
+            name="dynamic computer precision"
+            icon-id="octagram-edit-outline"
+            option-id="check-dynamic-computer-precision-primary-player"
+          >
+            <Checkbox id="check-dynamic-computer-precision-primary-playe" />
+            <template #description>
+              Computer precision will be balanced during the game based on unit
+              extent comparison. The more unit extent the computer opponent has
+              against it, the more precise will the computer be.
+            </template>
+          </UserOption>
+          <UserOption
+            name="dynamic computer precision strength"
+            icon-id="octagram-edit-outline"
+            option-id="input-dynamic-computer-precision-strength-primary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="100"
+              id="input-dynamic-computer-precision-strength-primary-player"
+            />
+            <template #description>
+              Determines by how much can dynamic precision alter computer
+              precision.
+            </template>
+          </UserOption>
+          <UserOption
+            name="computer-aggressivity"
+            icon-id="lightning-bolt-outline"
+            option-id="input-computer-aggressivity-primary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="100"
+              id="input-computer-aggressivity-primary-player"
+            />
+            <template #description>
+              Determines how much unit extent is the computer willing to lose to
+              take unit extent from its opponent.
             </template>
           </UserOption>
         </Category>
         <!-- Secondary player -->
         <Category name="Secondary player" icon-id="target-account">
+          <SectionTitle title="Computer" />
           <UserOption
             name="computer"
             icon-id="memory"
             option-id="check-computer-secondary-player"
-            v-if="false"
           >
             <Checkbox id="check-computer-secondary-player" />
             <template #description>
-              If this option is enabled an algorythm will play instead of a
-              human player.
+              An algorythm will decide the move instead of a human.
+            </template>
+          </UserOption>
+          <UserOption
+            name="computer precision"
+            icon-id="octagram-outline"
+            option-id="input-computer-precision-secondary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="100"
+              id="input-computer-precision-secondary-player"
+            />
+            <template #description>
+              Determnines how much precise will the computer be when choosing
+              the best moved based on its analysis. The less the value the more
+              random will the computer moves be.
+            </template>
+          </UserOption>
+          <UserOption
+            name="dynamic computer precision"
+            icon-id="octagram-edit-outline"
+            option-id="check-dynamic-computer-precision-secondary-player"
+          >
+            <Checkbox id="check-dynamic-computer-precision-secondary-player" />
+            <template #description>
+              Computer precision will be balanced during the game based on unit
+              extent comparison. The more unit extent the computer opponent has
+              against it, the more precise will the computer be.
+            </template>
+          </UserOption>
+          <UserOption
+            name="dynamic computer precision strength"
+            icon-id="octagram-edit-outline"
+            option-id="input-dynamic-computer-precision-strength-secondary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="100"
+              id="input-dynamic-computer-precision-strength-secondary-player"
+            />
+            <template #description>
+              Determines by how much can dynamic precision alter computer
+              precision.
+            </template>
+          </UserOption>
+          <UserOption
+            name="computer-aggressivity"
+            icon-id="lightning-bolt-outline"
+            option-id="input-computer-aggressivity-secondary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="100"
+              id="input-computer-aggressivity-secondary-player"
+            />
+            <template #description>
+              Determines how much unit extent is the computer willing to lose to
+              take unit extent from its opponent.
             </template>
           </UserOption>
         </Category>
