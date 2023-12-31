@@ -206,7 +206,7 @@ export function willMoveCheckGuardedPiece(
     guardedPieces
   );
 
-  move.reverse(boardState, game);
+  move.reverse(boardState);
 
   return checksGuardedPiece;
 }

@@ -146,11 +146,11 @@ export function removeCapturedPiece(
 ) {
   piece.color === "white"
     ? blackCapturedPieces.value.splice(
-        blackCapturedPieces.value.indexOf(piece.pieceId)
-      )
+      blackCapturedPieces.value.indexOf(piece.pieceId)
+    )
     : whiteCapturedPieces.value.splice(
-        blackCapturedPieces.value.indexOf(piece.pieceId)
-      );
+      blackCapturedPieces.value.indexOf(piece.pieceId)
+    );
 }
 
 export function transformPiece(
