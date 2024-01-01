@@ -357,12 +357,12 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
           <!-- Assistance -->
           <SectionTitle title="Assistance" />
           <UserOption
-            name="show pieces checking selected cell"
+            name="mark pieces checking selected cell"
             icon-id="rhombus-outline"
-            option-id="check-show-capturing-pieces"
+            option-id="check-mark-capturing-pieces"
           >
             <Checkbox
-              id="check-show-capturing-pieces"
+              id="check-mark-capturing-pieces"
               v-model="props.modelValue.markCellCapturingPieces.value"
             />
             <template #description>
@@ -375,12 +375,12 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="show availible piece moves of not playing player"
+            name="mark opponent availible piece moves"
             icon-id="arrow-top-right-bold-box-outline"
-            option-id="show-other-availible-moves"
+            option-id="check-mark-opponent-availible-moves"
           >
             <Checkbox
-              id="show-other-availible-moves"
+              id="check-mark-opponent-availible-moves"
               v-model="props.modelValue.markUnactivePlayerAvailibleMoves.value"
             />
             <template #description>

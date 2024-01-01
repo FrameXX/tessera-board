@@ -454,7 +454,7 @@ export default class Game {
         this.playerTimers.secondaryPlayerMatch.seconds
       ),
       new BooleanUserData(
-        "show_other_availible_moves",
+        "mark_opponent_availible_moves",
         this.settings.markUnactivePlayerAvailibleMoves.value,
         this.settings.markUnactivePlayerAvailibleMoves
       ),

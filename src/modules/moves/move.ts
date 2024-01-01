@@ -1,6 +1,4 @@
-import type { Ref } from "vue";
 import type Piece from "../pieces/piece";
-import type { PieceId } from "../pieces/piece";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
@@ -127,30 +125,6 @@ abstract class Move {
     cellMarks: MarkBoardState,
     boardStateValue: BoardStateValue
   ): void;
-}
-
-export function addCapturedPiece(
-  piece: Piece,
-  blackCapturedPieces: Ref<PieceId[]>,
-  whiteCapturedPieces: Ref<PieceId[]>
-) {
-  piece.color === "white"
-    ? blackCapturedPieces.value.push(piece.pieceId)
-    : whiteCapturedPieces.value.push(piece.pieceId);
-}
-
-export function removeCapturedPiece(
-  piece: Piece,
-  blackCapturedPieces: Ref<PieceId[]>,
-  whiteCapturedPieces: Ref<PieceId[]>
-) {
-  piece.color === "white"
-    ? blackCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    )
-    : whiteCapturedPieces.value.splice(
-      blackCapturedPieces.value.indexOf(piece.pieceId)
-    );
 }
 
 export function transformPiece(
