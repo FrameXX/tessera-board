@@ -6,10 +6,10 @@ import type {
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import {
-  getDiffPosition,
   getBoardPositionValue,
   isFriendlyPiece,
   isPositionOnBoard,
+  addPositions,
   type PlayerColor,
 } from "../utils/game";
 import Piece from "./piece";
@@ -25,16 +25,19 @@ export class Bishop extends Piece {
     boardStateValue: BoardStateValue
   ): BoardPosition[] {
     const capturingPositions: BoardPosition[] = [];
-    for (const colDiff of [-1, 1]) {
-      for (const rowDiff of [-1, 1]) {
-        let totalColDiff = 0;
-        let totalRowDiff = 0;
+    for (const colDelta of [-1, 1]) {
+      for (const rowDelta of [-1, 1]) {
+        let colDiff = 0;
+        let rowDiff = 0;
 
         let piece = null;
         do {
-          totalColDiff += colDiff;
-          totalRowDiff += rowDiff;
-          const target = getDiffPosition(position, totalColDiff, totalRowDiff);
+          colDiff += colDelta;
+          rowDiff += rowDelta;
+          const target = addPositions(position, {
+            row: rowDiff,
+            col: colDiff,
+          });
           if (!isPositionOnBoard(target)) {
             break;
           }

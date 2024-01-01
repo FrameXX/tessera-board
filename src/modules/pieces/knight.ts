@@ -2,9 +2,9 @@ import type { PieceContext, BoardPosition } from "../board_manager";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import {
-  getDiffPosition,
   isFriendlyPiece,
   isPositionOnBoard,
+  addPositions,
   type PlayerColor,
 } from "../utils/game";
 import Piece from "./piece";
@@ -22,7 +22,7 @@ export class Knight extends Piece {
         if (Math.abs(colDiff) === Math.abs(rowDiff)) {
           continue;
         }
-        const target = getDiffPosition(position, colDiff, rowDiff);
+        const target = addPositions(position, { row: rowDiff, col: colDiff });
         if (!isPositionOnBoard(target)) {
           continue;
         }

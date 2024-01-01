@@ -4,12 +4,12 @@ import Promotion from "../moves/promotion";
 import type { RawPiece } from "./raw_piece";
 import type { PieceContext, BoardPosition } from "../board_manager";
 import {
-  getDiffPosition,
   getBoardPositionValue,
   getRawPiece,
   isFriendlyPiece,
   type PlayerColor,
   getBoardPositionPiece,
+  addPositions,
 } from "../utils/game";
 import Piece from "./piece";
 import type Game from "../game";
@@ -51,13 +51,13 @@ export class Pawn extends Piece {
   }
 
   public getNewCapturingPositions(position: BoardPosition): BoardPosition[] {
+    const rowDiff = this.color === "white" ? 1 : -1;
     const capturingPositions: BoardPosition[] = [];
     for (const colDiff of [1, -1]) {
-      const target = getDiffPosition(
-        position,
-        colDiff,
-        this.color === "white" ? 1 : -1
-      );
+      const target = addPositions(position, {
+        row: rowDiff,
+        col: colDiff,
+      });
       capturingPositions.push(target);
     }
     return capturingPositions;
@@ -72,7 +72,7 @@ export class Pawn extends Piece {
         break;
       }
       if (this.color === "black") rowDiff = rowDiff * -1;
-      const target = getDiffPosition(position, 0, rowDiff);
+      const target = addPositions(position, { row: rowDiff, col: 0 });
       if (getBoardPositionValue(target, game.boardState)) {
         break;
       }

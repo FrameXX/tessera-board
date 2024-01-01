@@ -4,11 +4,11 @@ import Castling from "../moves/castling";
 import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import {
-  getDiffPosition,
   getBoardPositionValue,
   getRawPiece,
   isFriendlyPiece,
   isPositionOnBoard,
+  addPositions,
   type PlayerColor,
 } from "../utils/game";
 import Piece from "./piece";
@@ -63,7 +63,7 @@ export class King extends Piece {
         if (colDiff === 0 && rowDiff === 0) {
           continue;
         }
-        const target = getDiffPosition(position, colDiff, rowDiff);
+        const target = addPositions(position, { row: rowDiff, col: colDiff });
         if (!isPositionOnBoard(target)) {
           continue;
         }
@@ -89,24 +89,23 @@ export class King extends Piece {
 
     // https://en.wikipedia.org/wiki/Castling
     if (!this.moved && !this.castled) {
-      for (const colDiff of [-1, 1]) {
+      for (const colDelta of [-1, 1]) {
         let kingTarget: BoardPosition | null = null;
         let rookTarget: BoardPosition | null = null;
-        let totalColDiff = 0;
+        let colDiff = 0;
         while (true) {
-          totalColDiff += colDiff;
-          const searchRookPosition = getDiffPosition(
-            position,
-            totalColDiff,
-            position.row
-          );
+          colDiff += colDelta;
+          const searchRookPosition = addPositions(position, {
+            row: 0,
+            col: colDiff,
+          });
           if (!isPositionOnBoard(searchRookPosition)) break;
           // Rook moves on the other side of the moved king
-          if (Math.abs(totalColDiff) === 1) {
+          if (Math.abs(colDiff) === 1) {
             rookTarget = searchRookPosition;
           }
           // King moves 2 cells in rook direction
-          if (Math.abs(totalColDiff) === 2) {
+          if (Math.abs(colDiff) === 2) {
             kingTarget = searchRookPosition;
           }
           const piece = getBoardPositionValue(
@@ -126,7 +125,7 @@ export class King extends Piece {
           moves.push(
             new Castling(
               true,
-              colDiff === 1,
+              colDelta === 1,
               position,
               kingTarget,
               searchRookPosition,

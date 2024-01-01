@@ -211,14 +211,6 @@ export function willMoveCheckGuardedPiece(
   return checksGuardedPiece;
 }
 
-export function getDiffPosition(
-  position: BoardPosition,
-  colDiff: number,
-  rowDiff: number
-): BoardPosition {
-  return sumPositions(position, { row: rowDiff, col: colDiff });
-}
-
 export function isFriendlyPiece(
   piece: Piece | null,
   friendlyColor: PlayerColor
@@ -277,7 +269,7 @@ export function chooseBestPiece(
   return bestPiece;
 }
 
-export function sumPositions(
+export function addPositions(
   pos1: BoardPosition,
   pos2: BoardPosition
 ): BoardPosition {

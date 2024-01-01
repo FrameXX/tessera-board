@@ -2,7 +2,7 @@ import type { ComputedRef } from "vue";
 import { computed, ref, watch } from "vue";
 import type { BoardPosition, PieceContext } from "./board_manager";
 import type BoardManager from "./board_manager";
-import { getDiffPosition, positionsEqual } from "./utils/game";
+import { positionsEqual, addPositions } from "./utils/game";
 import type Game from "./game";
 
 export default class BoardPieceDragHandler {
@@ -42,13 +42,15 @@ export default class BoardPieceDragHandler {
     if (!this.draggingPiece.value) {
       return { row: 0, col: 0 };
     }
-    const position = getDiffPosition(
+    const position = addPositions(
       {
         row: this.draggingPiece.value?.row,
         col: this.draggingPiece.value?.col,
       },
-      this.dragColDiff.value,
-      this.dragRowDiff.value
+      {
+        row: this.dragRowDiff.value,
+        col: this.dragColDiff.value,
+      }
     );
     return position;
   });
