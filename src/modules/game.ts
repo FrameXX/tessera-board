@@ -5,7 +5,7 @@ import { type Ref, watch, ref, computed, capitalize, reactive } from "vue";
 import BoardStateData from "./user_data/board_state";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
-import type { Piece } from "./pieces/piece";
+import type { Piece, PieceId } from "./pieces/piece";
 import { PIECE_IDS, type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { PieceContext, BoardPosition } from "./board_manager";
@@ -525,6 +525,13 @@ export default class Game {
       this.settings.defaultBoardState,
       this.updateDefaultBoardAllPiecesContext
     );
+
+    for (const pieceId in this.settings.piecesImportance.values) {
+      watch(
+        this.settings.piecesImportance.values[pieceId as PieceId],
+        this.updateUnitExtents
+      );
+    }
   }
 
   private tryToRecoverData() {
@@ -808,6 +815,15 @@ export default class Game {
     this.undoMove();
   }
 
+  private updateUnitExtents = () => {
+    this.primaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
+      this.primaryPlayerColor.value
+    );
+    this.secondaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
+      this.secondaryPlayerColor.value
+    );
+  };
+
   private updateStateRefs() {
     this.lastMove.value = this.getLastMove();
     this.playingColor.value = this.getPlayingColor();
@@ -818,12 +834,7 @@ export default class Game {
     );
     this.playingPlayer.value = this.getPlayingPlayer();
     this.notPlayingPlayer.value = this.getNotPlayingPlayer();
-    this.primaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
-      this.primaryPlayerColor.value
-    );
-    this.secondaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
-      this.secondaryPlayerColor.value
-    );
+    this.updateUnitExtents();
   }
 
   public updateDefaultBoardAllPiecesContext = () => {
