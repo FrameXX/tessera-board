@@ -23,6 +23,7 @@ import About from "./components/About.vue";
 import FragmentTitle from "./components/FragmentTitle.vue";
 import Help from "./components/Help.vue";
 import Statistics from "./components/Statistics.vue";
+import { getElementInstanceById } from "./modules/utils/elements";
 
 const game = new Game();
 
@@ -46,8 +47,17 @@ const configPieceSelectOptions = computed(() => {
   }
   return pieces;
 });
+const statusHeight = ref(0);
+provide("statusHeight", statusHeight);
 
-onMounted(game.mount);
+onMounted(() => {
+  game.onMount();
+
+  const status = getElementInstanceById("status", HTMLElement);
+  new ResizeObserver(() => {
+    statusHeight.value = status.clientHeight;
+  }).observe(status);
+});
 </script>
 
 <template>

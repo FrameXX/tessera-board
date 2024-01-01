@@ -161,7 +161,6 @@ const secondaryPlayerMatchSecondsPulsing = computed(() => {
   @include shadow;
   @include flex-center;
   width: 100%;
-  height: 68px;
   z-index: var(--z-index-status);
 
   .info-text {

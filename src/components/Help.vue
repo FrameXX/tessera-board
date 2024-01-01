@@ -48,6 +48,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
             Next move
           </div>
         </div>
+        <div class="nav-placeholder"></div>
       </div>
     </div>
   </Transition>

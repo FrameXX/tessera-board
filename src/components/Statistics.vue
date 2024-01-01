@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { PropType, computed } from "vue";
+import { PropType, Ref, computed, inject } from "vue";
 import Backdrop from "./Backdrop.vue";
 import FragmentTitle from "./FragmentTitle.vue";
 import Tile from "./Tile.vue";
@@ -10,6 +10,8 @@ const props = defineProps({
   open: { type: Boolean, default: false },
   game: { type: Object as PropType<Game>, required: true },
 });
+
+const statusHeight = inject("statusHeight") as Ref<number>;
 
 const primaryPlayerUnitExtentFactor = computed(() => {
   return (
@@ -39,7 +41,10 @@ const playersUnitExtentFactor = computed(() => {
   <Transition name="slide-up">
     <div class="fragment" id="statistics" v-show="props.open">
       <div class="content">
-        <div id="status-placeholder"></div>
+        <div
+          id="status-placeholder"
+          :style="`height: ${statusHeight}px;`"
+        ></div>
         <FragmentTitle icon-id="chart-box-outline">Statistics</FragmentTitle>
         <InfoCard>
           Unit extent is a sum of importances of all pieces player has on board.
@@ -106,6 +111,7 @@ const playersUnitExtentFactor = computed(() => {
             />
           </div>
         </div>
+        <div class="nav-placeholder"></div>
       </div>
     </div>
   </Transition>
@@ -128,10 +134,6 @@ const playersUnitExtentFactor = computed(() => {
   .statistics-player:not(#statistics .statistics-player:first-child) {
     padding-top: 0.1px;
   }
-}
-
-#status-placeholder {
-  height: 68px;
 }
 
 @media only screen and (min-width: 600px) {

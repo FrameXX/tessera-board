@@ -539,22 +539,18 @@ export default class Game {
     this.userDataManager.recoverData();
   }
 
-  public mount = () => {
+  public onMount = () => {
+    this.visited === null ? this.restart() : this.restore();
     setSaturationMultiplier(1);
-    this.ui.updatePrimaryHue(
-      this.primaryPlayerPlaying.value,
-      this.winner.value
-    );
 
-    // Let the app wait another 600ms to make sure its fully loaded.
+    // Let the app wait another 400ms to make sure its fully loaded.
     setTimeout(() => {
-      this.visited === null ? this.restart() : this.restore();
       hideSplashscreen(
         this.transitionsManager.getApplyedTransitions(
           this.settings.transitions.value
         )
       );
-    }, 600);
+    }, 400);
   };
 
   public async performMove(move: Move) {
