@@ -111,8 +111,8 @@ class Shift extends Move {
   public getNotation(): string {
     return this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 
@@ -134,12 +134,7 @@ class Shift extends Move {
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
-    await game.movePiece(
-      piece,
-      this.origin,
-      this.target,
-      game.settings.transitionDuration.value
-    );
+    await game.movePiece(piece, this.origin, this.target);
     this.forwardMovedProperty(piece);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -163,12 +158,7 @@ class Shift extends Move {
 
   protected async _undo(game: Game) {
     const piece = getBoardPositionPiece(this.target, game.boardState);
-    await game.movePiece(
-      piece,
-      this.target,
-      this.origin,
-      game.settings.transitionDuration.value
-    );
+    await game.movePiece(piece, this.target, this.origin);
     this.reverseMovedProperty(piece);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -203,12 +193,7 @@ class Shift extends Move {
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
-    await game.movePiece(
-      piece,
-      this.origin,
-      this.target,
-      game.settings.transitionDuration.value
-    );
+    await game.movePiece(piece, this.origin, this.target);
     this.forwardMovedProperty(piece);
 
     if (game.settings.audioEffectsEnabled.value)

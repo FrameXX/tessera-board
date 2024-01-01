@@ -8,11 +8,7 @@ import RawBoardStateData from "./user_data/raw_board_state";
 import type { Piece } from "./pieces/piece";
 import { PIECE_IDS, type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
-import type {
-  PieceContext,
-  BoardPosition,
-  BoardStateValue,
-} from "./board_manager";
+import type { PieceContext, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
 import NumberUserData from "./user_data/number_user_data";
 import MoveListData from "./user_data/move_list";
@@ -39,10 +35,12 @@ import CellIndexOpacityData from "./user_data/cell_index_opacity";
 import TransitionDurationData from "./user_data/transition_duration";
 import CapturedPiecesData from "./user_data/captured_pieces";
 import {
+  getElementInstanceById,
   hideSplashscreen,
   setPrimaryHue,
   setSaturationMultiplier,
   updatePieceColors,
+  waitForTransitionEnd,
 } from "./utils/elements";
 import type {
   Player,
@@ -213,18 +211,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingColor.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayerColor.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayerColor.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingColor.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayerColor.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayerColor.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -1005,17 +1003,27 @@ export default class Game {
     return score;
   }
 
-  public movePiece(
+  public async movePiece(
     piece: Piece,
     origin: BoardPosition,
     target: BoardPosition,
-    transitionMultiplier: number,
-    boardState?: BoardStateValue
+    defaultBoard = false
   ) {
-    if (!boardState) boardState = this.boardState;
+    const boardState = defaultBoard
+      ? this.settings.defaultBoardState
+      : this.boardState;
     movePositionValue(piece, origin, target, boardState);
-    return new Promise((resolve) => {
-      setTimeout(resolve, 200 * (transitionMultiplier / 100));
-    });
+    defaultBoard
+      ? this.updateDefaultBoardAllPiecesContext()
+      : this.updateGameBoardAllPiecesContext();
+
+    const boardId = defaultBoard ? "default-board" : "primary-board";
+    const board = getElementInstanceById(boardId);
+    const pieceElement = board.querySelector(`[data-id="piece-${piece.id}"]`);
+    if (!(pieceElement instanceof SVGElement)) {
+      console.error("Could not find SVG element of piece", piece);
+      return;
+    }
+    await waitForTransitionEnd(pieceElement, "transform");
   }
 }

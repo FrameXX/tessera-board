@@ -58,8 +58,7 @@ class DefaultBoardManager extends BoardManager {
       pieceContext.piece,
       pieceContext,
       targetPosition,
-      this.game.settings.transitionDuration.value,
-      this.game.settings.defaultBoardState
+      true
     );
     if (this.game.settings.audioEffectsEnabled.value)
       this.game.audioEffects.pieceMove.play();

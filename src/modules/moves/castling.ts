@@ -120,20 +120,10 @@ class Castling extends Move {
     const rook = getBoardPositionPiece(this.rookOrigin, game.boardState);
     this.forwardMovedProperty(rook);
 
-    game.movePiece(
-      king,
-      this.kingOrigin,
-      this.kingTarget,
-      game.settings.transitionDuration.value
-    );
+    game.movePiece(king, this.kingOrigin, this.kingTarget);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    await game.movePiece(
-      rook,
-      this.rookOrigin,
-      this.rookTarget,
-      game.settings.transitionDuration.value
-    );
+    await game.movePiece(rook, this.rookOrigin, this.rookTarget);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
   }
@@ -157,21 +147,11 @@ class Castling extends Move {
     const king = getBoardPositionPiece(this.kingTarget, game.boardState);
     const rook = getBoardPositionPiece(this.rookTarget, game.boardState);
 
-    game.movePiece(
-      king,
-      this.kingTarget,
-      this.kingOrigin,
-      game.settings.transitionDuration.value
-    );
+    game.movePiece(king, this.kingTarget, this.kingOrigin);
     this.reverseMovedProperty(king);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    await game.movePiece(
-      rook,
-      this.rookTarget,
-      this.rookOrigin,
-      game.settings.transitionDuration.value
-    );
+    await game.movePiece(rook, this.rookTarget, this.rookOrigin);
     this.reverseMovedProperty(rook);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
@@ -191,21 +171,11 @@ class Castling extends Move {
     const king = getBoardPositionPiece(this.kingOrigin, game.boardState);
     const rook = getBoardPositionPiece(this.rookOrigin, game.boardState);
 
-    game.movePiece(
-      king,
-      this.kingOrigin,
-      this.kingTarget,
-      game.settings.transitionDuration.value
-    );
+    game.movePiece(king, this.kingOrigin, this.kingTarget);
     this.forwardMovedProperty(king);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    await game.movePiece(
-      rook,
-      this.rookOrigin,
-      this.rookTarget,
-      game.settings.transitionDuration.value
-    );
+    await game.movePiece(rook, this.rookOrigin, this.rookTarget);
     this.forwardMovedProperty(rook);
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
