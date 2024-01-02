@@ -106,7 +106,7 @@ export default class Game {
     secondaryPlayerHue: ref(200),
     pieceIconPack: ref<PieceIconPack>("font_awesome"),
     piecePadding: ref(20),
-    pieceBorder: ref(1.1),
+    pieceBorder: ref(1),
     transitionDuration: ref(100),
     cellIndexOpacity: ref(90),
     pieceLongPressTimeout: ref(0),

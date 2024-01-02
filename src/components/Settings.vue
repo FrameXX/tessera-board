@@ -633,6 +633,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
               <option value="material_design">Material Design</option>
               <option value="font_awesome">Font Awesome</option>
               <option value="tabler">Tabler</option>
+              <option value="game">Game</option>
             </select>
             <template #description
               >Chooses what vector icons are used for pieces. Different icon
