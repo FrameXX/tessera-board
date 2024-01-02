@@ -778,12 +778,14 @@ export default class Game {
   }
 
   private async undoMove() {
+    this.unselectBoardsContent();
     const reversedMove = this.moveList.value[this.lastMoveIndex.value];
     await reversedMove.undo(this);
     this.onMoveUndo();
   }
 
   private async redoMove() {
+    this.unselectBoardsContent();
     const forwardedMove = this.moveList.value[this.lastMoveIndex.value + 1];
     await forwardedMove.redo(this);
     this.onMoveRedo();

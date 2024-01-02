@@ -226,10 +226,8 @@ class GameBoardManager extends BoardManager {
       return;
     }
 
-    const matchingMove =
-      this.getAvailibleMoveWithClickablePosition(targetPosition);
-
-    this.draggingOverCell.value = matchingMove ? targetPosition : null;
+    const validMove = this.getValidMove(targetPosition);
+    this.draggingOverCell.value = validMove ? targetPosition : null;
   }
 
   private temporarilyActivateDragEndTimeout() {
@@ -248,12 +246,9 @@ class GameBoardManager extends BoardManager {
   public onPieceDragEnd(targetPosition: BoardPosition): void {
     this.temporarilyActivateDragEndTimeout();
     this.draggingOverCell.value = null;
-    const matchingMove =
-      this.getAvailibleMoveWithClickablePosition(targetPosition);
-    if (!matchingMove) {
-      return;
-    }
-    this.registerMove(matchingMove);
+
+    const validMove = this.getValidMove(targetPosition);
+    if (validMove) this.registerMove(validMove);
   }
 
   private isMovePerformationPermitted(piece: Piece) {
@@ -280,15 +275,13 @@ class GameBoardManager extends BoardManager {
     return true;
   }
 
-  private tryToMove(position: BoardPosition): boolean {
-    if (!this.selectedPiece.value) return false;
-    if (!this.availibleMoves) return false;
+  private getValidMove(position: BoardPosition): Move | null {
+    if (!this.selectedPiece.value) return null;
+    if (!this.availibleMoves) return null;
     if (!this.isMovePerformationPermitted(this.selectedPiece.value.piece))
-      return false;
-    const matchingMove = this.getAvailibleMoveWithClickablePosition(position);
-    if (!matchingMove) return false;
-    this.registerMove(matchingMove);
-    return true;
+      return null;
+    const validMove = this.getAvailibleMoveWithClickablePosition(position);
+    return validMove;
   }
 
   /**
@@ -312,9 +305,12 @@ class GameBoardManager extends BoardManager {
       return;
     }
 
-    const moved = this.tryToMove(pieceContext);
+    const validMove = this.getValidMove(pieceContext);
 
-    if (moved) return;
+    if (validMove) {
+      this.registerMove(validMove);
+      return;
+    }
 
     // Select the piece if there was no move to perform on it.
     this.unselectPiece();
@@ -339,15 +335,16 @@ class GameBoardManager extends BoardManager {
       // Unselect cell if the same cell was clicked and select another one if different was clicked.
       const clickedSameCell = positionsEqual(this.selectedCell.value, position);
       this.unselectCell();
-      if (!clickedSameCell) {
-        this.selectCell(position);
-      }
+      if (!clickedSameCell) this.selectCell(position);
       return;
     }
 
-    const moved = this.tryToMove(position);
+    const validMove = this.getValidMove(position);
 
-    if (moved) return;
+    if (validMove) {
+      this.registerMove(validMove);
+      return;
+    }
 
     // Take the cell click as a piece click if no move was performed on that cell and there is a piece in that cell. This is useful if the cells with pieces are selected using tabindex.
     if (!this.selectedPiece.value) {
