@@ -78,7 +78,6 @@ const props = defineProps({ open: { type: Boolean, default: false } });
   @include round-border;
 
   background-color: var(--color-primary-accent);
-  color: var(--color-primary-surface);
   padding: var(--spacing-small);
 }
 

@@ -1,8 +1,3 @@
-@mixin inverted-accent {
-  background-color: var(--color-primary-accent);
-  color: var(--color-primary-surface);
-}
-
 @mixin centered {
   margin: auto;
   top: 0;

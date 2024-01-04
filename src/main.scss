@@ -167,8 +167,8 @@ h3 {
 }
 
 .version {
-  @include inverted-accent;
   @include round-border;
+  background-color: var(--color-primary-accent);
   padding: var(--spacing-tiny);
   font-size: var(--font-size-tiny);
 }

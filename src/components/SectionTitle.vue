@@ -17,7 +17,7 @@ const props = defineProps({ title: { type: String, required: true } });
 .section-title {
   @include shadow;
   @include round-border;
-  @include inverted-accent;
+  background-color: var(--color-primary-accent);
   width: fit-content;
   font-size: var(--font-size-small);
   font-weight: bold;
