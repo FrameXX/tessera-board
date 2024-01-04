@@ -42,6 +42,6 @@ defineEmits({
   right: 0;
   margin: auto;
   padding: var(--spacing-small);
-  width: fit-content;
+  pointer-events: none;
 }
 </style>

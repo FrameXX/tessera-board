@@ -39,6 +39,7 @@ const props = defineProps({
   @include no-overrender;
   @include no-overflow;
   @include no-select;
+  pointer-events: all;
   margin: var(--spacing-small);
   position: relative;
   padding: var(--spacing-medium);

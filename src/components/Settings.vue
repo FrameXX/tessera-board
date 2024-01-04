@@ -105,7 +105,24 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="computer-aggressivity"
+            name="computer look adhead turns count"
+            icon-id="step-forward-2"
+            option-id="input-computer-look-adhead-turns-count-primary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="5"
+              id="input-computer-look-adhead-turns-count-primary-player"
+            />
+            <template #description>
+              Determines how many turns adhead should the computer analyze the
+              outcome of the oncoming move. When set to less then 2 the computer
+              will play pretty dump :).
+            </template>
+          </UserOption>
+          <UserOption
+            name="computer aggressivity"
             icon-id="lightning-bolt-outline"
             option-id="input-computer-aggressivity-primary-player"
           >
@@ -180,7 +197,24 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="computer-aggressivity"
+            name="computer look adhead turns count"
+            icon-id="step-forward-2"
+            option-id="input-computer-look-adhead-turns-count-secondary-player"
+          >
+            <input
+              type="number"
+              min="0"
+              max="5"
+              id="input-computer-look-adhead-turns-count-secondary-player"
+            />
+            <template #description>
+              Determines how many turns adhead should the computer analyze the
+              outcome of the oncoming move. When set to less then 2 the computer
+              will play pretty dump :).
+            </template>
+          </UserOption>
+          <UserOption
+            name="computer aggressivity"
             icon-id="lightning-bolt-outline"
             option-id="input-computer-aggressivity-secondary-player"
           >

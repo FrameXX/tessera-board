@@ -4,7 +4,7 @@ import UserData from "./user_data";
 import type ToastManager from "../toast_manager";
 import type { PlayerColor } from "../utils/game";
 
-class CapturedPiecesData extends UserData<PieceId[]> {
+class PieceIdListData extends UserData<PieceId[]> {
   constructor(
     value: PieceId[],
     valueRef: Ref<PieceId[]>,
@@ -43,4 +43,4 @@ class CapturedPiecesData extends UserData<PieceId[]> {
   public apply(): void {}
 }
 
-export default CapturedPiecesData;
+export default PieceIdListData;

@@ -33,7 +33,7 @@ import type { PreferredPlayerColor } from "./user_data/preferred_player_color";
 import PlayerColorOptionData from "./user_data/preferred_player_color";
 import CellIndexOpacityData from "./user_data/cell_index_opacity";
 import TransitionDurationData from "./user_data/transition_duration";
-import CapturedPiecesData from "./user_data/captured_pieces";
+import PieceIdListData from "./user_data/piece_id_list";
 import {
   getElementInstanceById,
   hideSplashscreen,
@@ -54,7 +54,7 @@ import {
   getAllpieceContext as getAllPiecesContext,
   getGuardedPieces,
   getOpossitePlayerColor,
-  invalidatePiecesCache,
+  invalidatePiecesCache as invalidatePieceContextCache,
   isGuardedPieceChecked,
   isPlayerColor,
   isSecondsPerMovePenalty,
@@ -211,18 +211,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingColor.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayerColor.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayerColor.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingColor.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayerColor.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayerColor.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -261,12 +261,12 @@ export default class Game {
     undefined,
     false
   );
-  public readonly whiteCapturedPiecesData = new CapturedPiecesData(
+  public readonly whiteCapturedPiecesData = new PieceIdListData(
     this.capturedPieces.white.value,
     this.capturedPieces.white,
     "white"
   );
-  public readonly blackCapturedPiecesData = new CapturedPiecesData(
+  public readonly blackCapturedPiecesData = new PieceIdListData(
     this.capturedPieces.black.value,
     this.capturedPieces.black,
     "black"
@@ -858,7 +858,7 @@ export default class Game {
 
   public onMove() {
     this.updateGameBoardAllPiecesContext();
-    invalidatePiecesCache(this.gameBoardAllPiecesContext.value);
+    invalidatePieceContextCache(this.gameBoardAllPiecesContext.value);
     this.updateStateRefs();
     this.updateCapturingPaths();
     this.updateBackendBoardStateData();
@@ -911,7 +911,7 @@ export default class Game {
 
     if (activePlayerChecked) this.ui.toastManager.showToast("Check!", "cross");
 
-    const canActivePlayerMove = this.canActivePlayerMove(
+    const canActivePlayerMove = this.canPlayerMove(
       this.playingColor.value,
       this.gameBoardAllPiecesContext.value
     );
@@ -935,16 +935,11 @@ export default class Game {
     this.draw("stalemate");
   }
 
-  private canActivePlayerMove(
-    color: PlayerColor,
-    allPiecesContext: PieceContext[]
-  ) {
+  private canPlayerMove(color: PlayerColor, allPiecesContext: PieceContext[]) {
     for (const pieceContext of allPiecesContext) {
       if (pieceContext.piece.color !== color) continue;
       const moves = pieceContext.piece.getPossibleMoves(this, pieceContext);
-      if (moves.length !== 0) {
-        return true;
-      }
+      if (moves.length !== 0) return true;
     }
     return false;
   }
