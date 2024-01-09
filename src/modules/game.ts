@@ -85,6 +85,18 @@ export default class Game {
    * Holds vue references to all user configurable values.
    */
   public readonly settings = {
+    primaryPlayerComputer: ref(false),
+    primaryPlayerComputerPrecision: ref(100),
+    primaryPlayerDynamicComputerPrecision: ref(true),
+    primaryPlayerDynamicComputerPrecisionStrenght: ref(80),
+    primaryPlayerComputerLookAdheadTurns: ref(3),
+    primaryPlayerComputerAggressivity: ref(50),
+    secondaryPlayerComputer: ref(true),
+    secondaryPlayerComputerPrecision: ref(100),
+    secondaryPlayerDynamicComputerPrecision: ref(true),
+    secondaryPlayerDynamicComputerPrecisionStrenght: ref(80),
+    secondaryPlayerComputerLookAdheadTurns: ref(3),
+    secondaryPlayerComputerAggressivity: ref(50),
     piecesImportances: new PiecesImportance(),
     preferredFirstMoveColor: ref<PreferredPlayerColor>("white"),
     preferredPlayerColor: ref<PreferredPlayerColor>("random"),
@@ -495,6 +507,78 @@ export default class Game {
         "secondary_player_initial_pieces",
         this.secondaryPlayerInitialPieces.value,
         this.secondaryPlayerInitialPieces
+      ),
+      new BooleanUserData(
+        "primary_player_computer",
+        this.settings.primaryPlayerComputer.value,
+        this.settings.primaryPlayerComputer
+      ),
+      new NumberUserData(
+        "primary_player_computer_precision",
+        this.settings.primaryPlayerComputerPrecision.value,
+        this.settings.primaryPlayerComputerPrecision,
+        0,
+        100
+      ),
+      new BooleanUserData(
+        "primary_player_dynamic_computer_precision",
+        this.settings.primaryPlayerDynamicComputerPrecision.value,
+        this.settings.primaryPlayerDynamicComputerPrecision
+      ),
+      new NumberUserData(
+        "primary_player_dynamic_computer_precision_strenght",
+        this.settings.primaryPlayerDynamicComputerPrecisionStrenght.value,
+        this.settings.primaryPlayerDynamicComputerPrecisionStrenght
+      ),
+      new NumberUserData(
+        "primary_player_computer_look_adhead_turns",
+        this.settings.primaryPlayerComputerLookAdheadTurns.value,
+        this.settings.primaryPlayerComputerLookAdheadTurns,
+        1,
+        5
+      ),
+      new NumberUserData(
+        "primary_player_computer_agressivity",
+        this.settings.primaryPlayerComputerAggressivity.value,
+        this.settings.primaryPlayerComputerAggressivity,
+        0,
+        100
+      ),
+      new BooleanUserData(
+        "secondary_player_computer",
+        this.settings.secondaryPlayerComputer.value,
+        this.settings.secondaryPlayerComputer
+      ),
+      new NumberUserData(
+        "secondary_player_computer_precision",
+        this.settings.secondaryPlayerComputerPrecision.value,
+        this.settings.secondaryPlayerComputerPrecision,
+        0,
+        100
+      ),
+      new BooleanUserData(
+        "secondary_player_dynamic_computer_precision",
+        this.settings.secondaryPlayerDynamicComputerPrecision.value,
+        this.settings.secondaryPlayerDynamicComputerPrecision
+      ),
+      new NumberUserData(
+        "secondary_player_dynamic_computer_precision_strenght",
+        this.settings.secondaryPlayerDynamicComputerPrecisionStrenght.value,
+        this.settings.secondaryPlayerDynamicComputerPrecisionStrenght
+      ),
+      new NumberUserData(
+        "secondary_player_computer_look_adhead_turns",
+        this.settings.secondaryPlayerComputerLookAdheadTurns.value,
+        this.settings.secondaryPlayerComputerLookAdheadTurns,
+        1,
+        5
+      ),
+      new NumberUserData(
+        "secondary_player_computer_agressivity",
+        this.settings.secondaryPlayerComputerAggressivity.value,
+        this.settings.secondaryPlayerComputerAggressivity,
+        0,
+        100
       ),
       this.defaultBoardStateData,
       this.gameBoardStateData,
