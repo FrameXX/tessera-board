@@ -283,7 +283,3 @@ export function isRawPiece(object: any): object is RawPiece {
   if (!isPlayerColor(object.color)) return false;
   return true;
 }
-
-export function getRawPiece(piece: Piece): RawPiece {
-  return { color: piece.color, pieceId: piece.pieceId, id: piece.id };
-}

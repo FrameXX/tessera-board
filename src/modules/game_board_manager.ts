@@ -141,8 +141,8 @@ class GameBoardManager extends BoardManager {
 
   private markCellCapturingPieces(position: BoardPosition) {
     const paths = getTargetMatchingPaths(position, [
-      ...this.game.whiteCapturingPaths.value,
-      ...this.game.blackCapturingPaths.value,
+      ...this.game.primaryPlayerCapturingPaths.value,
+      ...this.game.secondaryPlayerCapturingPaths.value,
     ]);
     for (const path of paths) {
       const origin = path.origin;

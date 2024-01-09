@@ -183,8 +183,8 @@ export default class Game {
 
   public readonly paused = ref<GamePausedState>("not");
   public readonly ui = new UI(this);
-  public readonly whiteCapturingPaths = ref<Path[]>([]);
-  public readonly blackCapturingPaths = ref<Path[]>([]);
+  public readonly primaryPlayerCapturingPaths = ref<Path[]>([]);
+  public readonly secondaryPlayerCapturingPaths = ref<Path[]>([]);
   public readonly primaryPlayerColor = ref<PlayerColor>("white");
   public readonly secondaryPlayerColor = ref<PlayerColor>("black");
   public readonly winReason = ref<WinReason>("none");
@@ -945,25 +945,25 @@ export default class Game {
   }
 
   public updateCapturingPaths() {
-    let whiteCapturingPaths: Path[] = [];
-    let blackCapturingPaths: Path[] = [];
+    let primaryPlayerCapturingPaths: Path[] = [];
+    let secondaryPlayerCapturingPaths: Path[] = [];
     for (const pieceContext of this.gameBoardAllPiecesContext.value) {
       const piece = pieceContext.piece;
       const origin: BoardPosition = {
         row: +pieceContext.row,
         col: +pieceContext.col,
       };
-      if (piece.color === "white") {
-        whiteCapturingPaths = [
-          ...whiteCapturingPaths,
+      if (piece.color === this.primaryPlayerColor.value) {
+        primaryPlayerCapturingPaths = [
+          ...primaryPlayerCapturingPaths,
           ...positionsToPath(
             piece.getCapturingPositions(origin, this.boardState),
             origin
           ),
         ];
       } else {
-        blackCapturingPaths = [
-          ...blackCapturingPaths,
+        secondaryPlayerCapturingPaths = [
+          ...secondaryPlayerCapturingPaths,
           ...positionsToPath(
             piece.getCapturingPositions(origin, this.boardState),
             origin
@@ -971,8 +971,8 @@ export default class Game {
         ];
       }
     }
-    this.whiteCapturingPaths.value = whiteCapturingPaths;
-    this.blackCapturingPaths.value = blackCapturingPaths;
+    this.primaryPlayerCapturingPaths.value = primaryPlayerCapturingPaths;
+    this.secondaryPlayerCapturingPaths.value = secondaryPlayerCapturingPaths;
   }
 
   public capturePosition(position: BoardPosition) {

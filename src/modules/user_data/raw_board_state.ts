@@ -1,7 +1,7 @@
 import ComplexUserData from "./complex_user_data";
 import type { BoardStateValue } from "../board_manager";
 import { getPieceFromRaw } from "../pieces/raw_piece";
-import { getRawPiece, isRawPiece } from "../utils/game";
+import { isRawPiece } from "../utils/game";
 import type ToastManager from "../toast_manager";
 
 class RawBoardStateData extends ComplexUserData<BoardStateValue> {
@@ -11,7 +11,7 @@ class RawBoardStateData extends ComplexUserData<BoardStateValue> {
 
   get rawVersion() {
     return this.value.map((row) =>
-      row.map((piece) => (piece ? getRawPiece(piece) : null))
+      row.map((piece) => (piece ? piece.getRawPiece() : null))
     );
   }
 
