@@ -52,8 +52,10 @@ import type {
 import {
   GameLogicError,
   getAllpieceContext as getAllPiecesContext,
+  getUnitExtent,
   getGuardedPieces,
   getOpossitePlayerColor,
+  getPieceIdsWithColor,
   invalidatePiecesCache as invalidatePieceContextCache,
   isGuardedPieceChecked,
   isPlayerColor,
@@ -83,7 +85,7 @@ export default class Game {
    * Holds vue references to all user configurable values.
    */
   public readonly settings = {
-    piecesImportance: new PiecesImportance(),
+    piecesImportances: new PiecesImportance(),
     preferredFirstMoveColor: ref<PreferredPlayerColor>("white"),
     preferredPlayerColor: ref<PreferredPlayerColor>("random"),
     primaryPlayerSecondsPerMove: ref<number>(0),
@@ -206,8 +208,10 @@ export default class Game {
   public readonly notPlayingPlayer = ref<Player>("secondary");
   public readonly primaryPlayerUnitExtent = ref(0);
   public readonly primaryPlayerMaxUnitExtent = ref(0);
+  public readonly primaryPlayerInitialPieces = ref<PieceId[]>([]);
   public readonly secondaryPlayerUnitExtent = ref(0);
   public readonly secondaryPlayerMaxUnitExtent = ref(0);
+  public readonly secondaryPlayerInitialPieces = ref<PieceId[]>([]);
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
@@ -262,14 +266,16 @@ export default class Game {
     false
   );
   public readonly whiteCapturedPiecesData = new PieceIdListData(
+    "white_captured_pieces",
     this.capturedPieces.white.value,
     this.capturedPieces.white,
-    "white"
+    false
   );
   public readonly blackCapturedPiecesData = new PieceIdListData(
+    "black_captured_pieces",
     this.capturedPieces.black.value,
     this.capturedPieces.black,
-    "black"
+    false
   );
 
   public readonly defaultBoardConfigInventory = new ConfigInventory(
@@ -291,8 +297,8 @@ export default class Game {
       ...PIECE_IDS.map((pieceId) => {
         return new NumberUserData(
           `${pieceId}-importance`,
-          this.settings.piecesImportance.values[pieceId].value,
-          this.settings.piecesImportance.values[pieceId]
+          this.settings.piecesImportances.values[pieceId].value,
+          this.settings.piecesImportances.values[pieceId]
         );
       }),
       new BooleanUserData(
@@ -480,15 +486,15 @@ export default class Game {
         this.secondaryPlayerUnitExtent.value,
         this.secondaryPlayerUnitExtent
       ),
-      new NumberUserData(
-        "primary_player_max_unit_extent",
-        this.primaryPlayerMaxUnitExtent.value,
-        this.primaryPlayerMaxUnitExtent
+      new PieceIdListData(
+        "primary_player_initial_pieces",
+        this.primaryPlayerInitialPieces.value,
+        this.primaryPlayerInitialPieces
       ),
-      new NumberUserData(
-        "secondary_player_max_unit_extent",
-        this.secondaryPlayerMaxUnitExtent.value,
-        this.secondaryPlayerMaxUnitExtent
+      new PieceIdListData(
+        "secondary_player_initial_pieces",
+        this.secondaryPlayerInitialPieces.value,
+        this.secondaryPlayerInitialPieces
       ),
       this.defaultBoardStateData,
       this.gameBoardStateData,
@@ -526,9 +532,9 @@ export default class Game {
       this.updateDefaultBoardAllPiecesContext
     );
 
-    for (const pieceId in this.settings.piecesImportance.values) {
+    for (const pieceId in this.settings.piecesImportances.values) {
       watch(
-        this.settings.piecesImportance.values[pieceId as PieceId],
+        this.settings.piecesImportances.values[pieceId as PieceId],
         this.updateUnitExtents
       );
     }
@@ -736,12 +742,6 @@ export default class Game {
     this.secondaryBoardManager.unselectAll();
   }
 
-  private initMaxUnitExtent() {
-    this.primaryPlayerMaxUnitExtent.value = this.primaryPlayerUnitExtent.value;
-    this.secondaryPlayerMaxUnitExtent.value =
-      this.secondaryPlayerUnitExtent.value;
-  }
-
   public restart() {
     this.clearWinner();
     this.capturedPieces.clearAll();
@@ -751,8 +751,8 @@ export default class Game {
     this.updateGameBoardAllPiecesContext();
     this.initFirstMoveColor();
     this.initPlayerColors();
+    this.updateInitialUnits();
     this.updateStateRefs();
-    this.initMaxUnitExtent();
     this.playerTimers.resetAll();
     this.updateCapturingPaths();
     this.updateBackendBoardStateData();
@@ -817,12 +817,40 @@ export default class Game {
     this.undoMove();
   }
 
-  private updateUnitExtents = () => {
-    this.primaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
-      this.primaryPlayerColor.value
+  private updateInitialUnits() {
+    this.primaryPlayerInitialPieces.value = getPieceIdsWithColor(
+      this.primaryPlayerColor.value,
+      this.gameBoardAllPiecesContext.value
     );
-    this.secondaryPlayerUnitExtent.value = this.getPlayerUnitExtent(
-      this.secondaryPlayerColor.value
+    this.secondaryPlayerInitialPieces.value = getPieceIdsWithColor(
+      this.secondaryPlayerColor.value,
+      this.gameBoardAllPiecesContext.value
+    );
+  }
+
+  private updateUnitExtents = () => {
+    this.primaryPlayerUnitExtent.value = getUnitExtent(
+      getPieceIdsWithColor(
+        this.primaryPlayerColor.value,
+        this.gameBoardAllPiecesContext.value
+      ),
+      this.settings.piecesImportances
+    );
+    this.secondaryPlayerUnitExtent.value = getUnitExtent(
+      getPieceIdsWithColor(
+        this.secondaryPlayerColor.value,
+        this.gameBoardAllPiecesContext.value
+      ),
+      this.settings.piecesImportances
+    );
+
+    this.primaryPlayerMaxUnitExtent.value = getUnitExtent(
+      this.primaryPlayerInitialPieces.value,
+      this.settings.piecesImportances
+    );
+    this.secondaryPlayerMaxUnitExtent.value = getUnitExtent(
+      this.secondaryPlayerInitialPieces.value,
+      this.settings.piecesImportances
     );
   };
 
@@ -995,16 +1023,6 @@ export default class Game {
     }
     this.boardState[position.row][position.col] = piece;
     this.capturedPieces.remove(piece);
-  }
-
-  public getPlayerUnitExtent(color: PlayerColor) {
-    let score = 0;
-    for (const pieceContext of this.gameBoardAllPiecesContext.value) {
-      if (pieceContext.piece.color !== color) continue;
-      score +=
-        this.settings.piecesImportance.values[pieceContext.piece.pieceId].value;
-    }
-    return score;
   }
 
   public async movePiece(

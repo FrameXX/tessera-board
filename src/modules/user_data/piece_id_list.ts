@@ -2,15 +2,15 @@ import type { Ref } from "vue";
 import { isPieceId, type PieceId } from "../pieces/piece";
 import UserData from "./user_data";
 import type ToastManager from "../toast_manager";
-import type { PlayerColor } from "../utils/game";
 
 class PieceIdListData extends UserData<PieceId[]> {
   constructor(
+    id: string,
     value: PieceId[],
     valueRef: Ref<PieceId[]>,
-    playerColor: PlayerColor
+    autoSave = true
   ) {
-    super(`${playerColor}_captured_pieces`, value, valueRef, false);
+    super(id, value, valueRef, autoSave);
   }
 
   public dump(): string {

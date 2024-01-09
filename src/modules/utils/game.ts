@@ -5,6 +5,7 @@ import type {
 } from "../board_manager";
 import {
   isPieceId,
+  PieceId,
   type Path,
   type PiecesImportanceValues,
 } from "../pieces/piece";
@@ -12,6 +13,7 @@ import type Piece from "../pieces/piece";
 import type Move from "../moves/move";
 import { type RawPiece } from "../pieces/raw_piece";
 import type Game from "../game";
+import PiecesImportance from "../pieces_importance";
 
 export type Mark = "availible" | "capture" | "capturing";
 
@@ -282,4 +284,27 @@ export function isRawPiece(object: any): object is RawPiece {
   if (!isPieceId(object.pieceId)) return false;
   if (!isPlayerColor(object.color)) return false;
   return true;
+}
+
+export function getPieceIdsWithColor(
+  color: PlayerColor,
+  allPiecesContext: PieceContext[]
+) {
+  const filteredPiecesContext = allPiecesContext.filter(
+    (pieceContext) => pieceContext.piece.color === color
+  );
+  return filteredPiecesContext.map(
+    (pieceContext) => pieceContext.piece.pieceId
+  );
+}
+
+export function getUnitExtent(
+  pieceIds: PieceId[],
+  piecesImportance: PiecesImportance
+) {
+  let score = 0;
+  for (const pieceId of pieceIds) {
+    score += piecesImportance.values[pieceId].value;
+  }
+  return score;
 }

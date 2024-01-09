@@ -528,7 +528,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             <input
               type="number"
               :id="`input-${pieceId}-importance`"
-              v-model="props.modelValue.piecesImportance.values[pieceId].value"
+              v-model="props.modelValue.piecesImportances.values[pieceId].value"
             />
           </UserOption>
         </Category>
