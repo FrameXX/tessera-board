@@ -43,7 +43,7 @@ import {
   waitForTransitionEnd,
 } from "./utils/elements";
 import type {
-  Player,
+  PlayerId,
   PlayerColor,
   SecondsPerMovePenalty,
   WinReason,
@@ -51,13 +51,13 @@ import type {
 } from "./utils/game";
 import {
   GameLogicError,
-  getAllpieceContext as getAllPiecesContext,
+  getAllpiecesContext as getAllPiecesContext,
   getUnitExtent,
   getGuardedPieces,
   getOpossitePlayerColor,
   getPieceIdsWithColor,
   invalidatePiecesCache as invalidatePieceContextCache,
-  isGuardedPieceChecked,
+  getCheckedGuardedPieces,
   isPlayerColor,
   isSecondsPerMovePenalty,
   isWinReason,
@@ -79,6 +79,14 @@ import { movePositionValue } from "./moves/move";
 
 export type GameAudioEffects = Game["audioEffects"];
 export type GameSettings = Game["settings"];
+
+export interface Player {
+  id: PlayerId;
+  color: Ref<PlayerColor>;
+  unitExtent: Ref<number>;
+  maxUnitExtent: Ref<number>;
+  initialPieces: Ref<PieceId[]>;
+}
 
 export default class Game {
   /**
@@ -184,6 +192,8 @@ export default class Game {
     }),
   };
 
+  private performing = false;
+
   public readonly boardState: (Piece | null)[][] = [
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
@@ -199,8 +209,6 @@ export default class Game {
   public readonly ui = new UI(this);
   public readonly primaryPlayerCapturingPaths = ref<Path[]>([]);
   public readonly secondaryPlayerCapturingPaths = ref<Path[]>([]);
-  public readonly primaryPlayerColor = ref<PlayerColor>("white");
-  public readonly secondaryPlayerColor = ref<PlayerColor>("black");
   public readonly winReason = ref<WinReason>("none");
   public readonly capturedPieces = new CapturedPieces();
   public readonly lastMoveIndex = ref(-1);
@@ -211,30 +219,39 @@ export default class Game {
     this.moveList
   );
 
+  public readonly primaryPlayer: Player = {
+    id: "primary",
+    color: ref<PlayerColor>("white"),
+    unitExtent: ref(0),
+    maxUnitExtent: ref(0),
+    initialPieces: ref<PieceId[]>([]),
+  };
+
+  public readonly secondaryPlayer: Player = {
+    id: "secondary",
+    color: ref<PlayerColor>("white"),
+    unitExtent: ref(0),
+    maxUnitExtent: ref(0),
+    initialPieces: ref<PieceId[]>([]),
+  };
+
   public readonly firstMoveColor = ref<PlayerColor>("white");
   public readonly lastMove: Ref<Move | null> = ref(null);
   public readonly winner = ref<Winner>("none");
-  public readonly playingColor = ref<PlayerColor>("white");
+  public playingPlayer = this.primaryPlayer;
+  public notPlayingPlayer = this.secondaryPlayer;
   public readonly primaryPlayerPlaying = ref<boolean>(true);
-  public readonly playingPlayer = ref<Player>("primary");
-  public readonly notPlayingPlayer = ref<Player>("secondary");
-  public readonly primaryPlayerUnitExtent = ref(0);
-  public readonly primaryPlayerMaxUnitExtent = ref(0);
-  public readonly primaryPlayerInitialPieces = ref<PieceId[]>([]);
-  public readonly secondaryPlayerUnitExtent = ref(0);
-  public readonly secondaryPlayerMaxUnitExtent = ref(0);
-  public readonly secondaryPlayerInitialPieces = ref<PieceId[]>([]);
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
       case "none":
-        return `${capitalize(this.playingColor.value)} plays`;
+        return `${capitalize(this.playingPlayer.color.value)} plays`;
       case "draw":
         return "Draw";
       case "secondary":
-        return `${capitalize(this.secondaryPlayerColor.value)} won`;
+        return `${capitalize(this.secondaryPlayer.color.value)} won`;
       case "primary":
-        return `${capitalize(this.primaryPlayerColor.value)} won`;
+        return `${capitalize(this.primaryPlayer.color.value)} won`;
       default:
         throw new UserDataError(
           `Winner value is of an invalid type. value: ${this.winner.value}`
@@ -392,9 +409,9 @@ export default class Game {
       ),
       new SelectUserData(
         "primary_player_color",
-        this.primaryPlayerColor.value,
+        this.primaryPlayer.color.value,
         isPlayerColor,
-        this.primaryPlayerColor
+        this.primaryPlayer.color
       ),
       new SelectUserData(
         "theme",
@@ -482,31 +499,25 @@ export default class Game {
         isPlayerColor,
         this.firstMoveColor
       ),
-      new SelectUserData(
-        "primary_player_color",
-        this.primaryPlayerColor.value,
-        isPlayerColor,
-        this.primaryPlayerColor
-      ),
       new NumberUserData(
         "primary_player_unit_extent",
-        this.primaryPlayerUnitExtent.value,
-        this.primaryPlayerUnitExtent
+        this.primaryPlayer.unitExtent.value,
+        this.primaryPlayer.unitExtent
       ),
       new NumberUserData(
         "secondary_player_unit_extent",
-        this.secondaryPlayerUnitExtent.value,
-        this.secondaryPlayerUnitExtent
+        this.secondaryPlayer.unitExtent.value,
+        this.secondaryPlayer.unitExtent
       ),
       new PieceIdListData(
         "primary_player_initial_pieces",
-        this.primaryPlayerInitialPieces.value,
-        this.primaryPlayerInitialPieces
+        this.primaryPlayer.initialPieces.value,
+        this.primaryPlayer.initialPieces
       ),
       new PieceIdListData(
         "secondary_player_initial_pieces",
-        this.secondaryPlayerInitialPieces.value,
-        this.secondaryPlayerInitialPieces
+        this.secondaryPlayer.initialPieces.value,
+        this.secondaryPlayer.initialPieces
       ),
       new BooleanUserData(
         "primary_player_computer",
@@ -651,15 +662,17 @@ export default class Game {
   };
 
   public async performMove(move: Move) {
+    this.performing = true;
     await move.perform(this);
     this.onMovePerform(move);
+    this.performing = false;
   }
 
-  public playerWin(player: Player, reason: WinReason) {
+  public playerWin(player: PlayerId, reason: WinReason) {
     const winnerColor =
       player === "primary"
-        ? this.primaryPlayerColor.value
-        : this.secondaryPlayerColor.value;
+        ? this.primaryPlayer.color.value
+        : this.secondaryPlayer.color.value;
     this.ui.toastManager.showToast(
       `${capitalize(winnerColor)} won.`,
       "crown-outline"
@@ -706,8 +719,8 @@ export default class Game {
 
     const loserColor =
       wasWinner === "primary"
-        ? this.secondaryPlayerColor.value
-        : this.primaryPlayerColor.value;
+        ? this.secondaryPlayer.color.value
+        : this.primaryPlayer.color.value;
     this.ui.toastManager.showToast(
       `${capitalize(loserColor)} is back in the game.`,
       "keyboard-return"
@@ -731,24 +744,28 @@ export default class Game {
   }
 
   private getPrimaryPlayerPlaying() {
-    return this.playingColor.value === this.primaryPlayerColor.value;
+    return this.playingPlayer.color.value === this.primaryPlayer.color.value;
   }
 
-  private getPlayingColor(): PlayerColor {
+  private getPlayingPlayer(): Player {
     return (isEven(this.lastMoveIndex.value) &&
       this.firstMoveColor.value === "black") ||
       (!isEven(this.lastMoveIndex.value) &&
         this.firstMoveColor.value === "white")
-      ? "white"
-      : "black";
+      ? this.getPlayerWithColor("white")
+      : this.getPlayerWithColor("black");
   }
 
-  private getPlayingPlayer(): Player {
-    return this.primaryPlayerPlaying.value ? "primary" : "secondary";
+  private getPlayerWithColor(color: PlayerColor) {
+    return this.primaryPlayer.color.value === color
+      ? this.primaryPlayer
+      : this.secondaryPlayer;
   }
 
   private getNotPlayingPlayer(): Player {
-    return this.primaryPlayerPlaying.value ? "secondary" : "primary";
+    return this.playingPlayer.id === "primary"
+      ? this.secondaryPlayer
+      : this.primaryPlayer;
   }
 
   private chooseFirstMoveColor(): PlayerColor {
@@ -769,8 +786,8 @@ export default class Game {
 
   private get notPlayingPlayerColor(): PlayerColor {
     return this.primaryPlayerPlaying.value
-      ? this.primaryPlayerColor.value
-      : this.secondaryPlayerColor.value;
+      ? this.primaryPlayer.color.value
+      : this.secondaryPlayer.color.value;
   }
 
   public async requestResign() {
@@ -797,19 +814,19 @@ export default class Game {
 
       "flag"
     );
-    this.playerWin(this.notPlayingPlayer.value, "resign");
+    this.playerWin(this.notPlayingPlayer.id, "resign");
   }
 
   private initPlayerColors() {
-    this.primaryPlayerColor.value = this.choosePrimaryPlayerColor();
+    this.primaryPlayer.color.value = this.choosePrimaryPlayerColor();
     this.initSecondaryPlayerColor();
   }
 
   private initSecondaryPlayerColor() {
-    this.secondaryPlayerColor.value = getOpossitePlayerColor(
-      this.primaryPlayerColor.value
+    this.secondaryPlayer.color.value = getOpossitePlayerColor(
+      this.primaryPlayer.color.value
     );
-    updatePieceColors(this.primaryPlayerColor.value);
+    updatePieceColors(this.primaryPlayer.color.value);
   }
 
   private initFirstMoveColor() {
@@ -850,7 +867,7 @@ export default class Game {
     this.initSecondaryPlayerColor();
     this.updateGameBoardAllPiecesContext();
     this.updateStateRefs();
-    updatePieceColors(this.primaryPlayerColor.value);
+    updatePieceColors(this.primaryPlayer.color.value);
     this.updateCapturingPaths();
     this.updateBackendBoardStateData();
     this.updateWinner();
@@ -862,20 +879,25 @@ export default class Game {
   }
 
   private async undoMove() {
+    this.performing = true;
     this.unselectBoardsContent();
     const reversedMove = this.moveList.value[this.lastMoveIndex.value];
     await reversedMove.undo(this);
     this.onMoveUndo();
+    this.performing = false;
   }
 
   private async redoMove() {
+    this.performing = true;
     this.unselectBoardsContent();
     const forwardedMove = this.moveList.value[this.lastMoveIndex.value + 1];
     await forwardedMove.redo(this);
     this.onMoveRedo();
+    this.performing = false;
   }
 
   public requestRedoMove() {
+    if (this.performing) return;
     if (this.moveList.value.length - this.lastMoveIndex.value < 2) {
       this.ui.toastManager.showToast(
         "You reached the last move. You cannot go further.",
@@ -889,6 +911,7 @@ export default class Game {
   }
 
   public requestUndoMove() {
+    if (this.performing) return;
     if (this.lastMoveIndex.value === -1) {
       this.ui.toastManager.showToast(
         "You reached the first move. You cannot go further.",
@@ -902,52 +925,51 @@ export default class Game {
   }
 
   private updateInitialUnits() {
-    this.primaryPlayerInitialPieces.value = getPieceIdsWithColor(
-      this.primaryPlayerColor.value,
+    this.primaryPlayer.initialPieces.value = getPieceIdsWithColor(
+      this.primaryPlayer.color.value,
       this.gameBoardAllPiecesContext.value
     );
-    this.secondaryPlayerInitialPieces.value = getPieceIdsWithColor(
-      this.secondaryPlayerColor.value,
+    this.secondaryPlayer.initialPieces.value = getPieceIdsWithColor(
+      this.primaryPlayer.color.value,
       this.gameBoardAllPiecesContext.value
     );
   }
 
   private updateUnitExtents = () => {
-    this.primaryPlayerUnitExtent.value = getUnitExtent(
+    this.primaryPlayer.unitExtent.value = getUnitExtent(
       getPieceIdsWithColor(
-        this.primaryPlayerColor.value,
+        this.primaryPlayer.color.value,
         this.gameBoardAllPiecesContext.value
       ),
       this.settings.piecesImportances
     );
-    this.secondaryPlayerUnitExtent.value = getUnitExtent(
+    this.secondaryPlayer.unitExtent.value = getUnitExtent(
       getPieceIdsWithColor(
-        this.secondaryPlayerColor.value,
+        this.secondaryPlayer.color.value,
         this.gameBoardAllPiecesContext.value
       ),
       this.settings.piecesImportances
     );
 
-    this.primaryPlayerMaxUnitExtent.value = getUnitExtent(
-      this.primaryPlayerInitialPieces.value,
+    this.primaryPlayer.maxUnitExtent.value = getUnitExtent(
+      this.primaryPlayer.initialPieces.value,
       this.settings.piecesImportances
     );
-    this.secondaryPlayerMaxUnitExtent.value = getUnitExtent(
-      this.secondaryPlayerInitialPieces.value,
+    this.secondaryPlayer.maxUnitExtent.value = getUnitExtent(
+      this.secondaryPlayer.initialPieces.value,
       this.settings.piecesImportances
     );
   };
 
   private updateStateRefs() {
     this.lastMove.value = this.getLastMove();
-    this.playingColor.value = this.getPlayingColor();
+    this.playingPlayer = this.getPlayingPlayer();
     this.primaryPlayerPlaying.value = this.getPrimaryPlayerPlaying();
     this.ui.updatePrimaryHue(
       this.primaryPlayerPlaying.value,
       this.winner.value
     );
-    this.playingPlayer.value = this.getPlayingPlayer();
-    this.notPlayingPlayer.value = this.getNotPlayingPlayer();
+    this.notPlayingPlayer = this.getNotPlayingPlayer();
     this.updateUnitExtents();
   }
 
@@ -1012,19 +1034,20 @@ export default class Game {
   private updateWinner() {
     const activePlayerGuardedPieces = getGuardedPieces(
       this.gameBoardAllPiecesContext.value,
-      this.playingColor.value
+      this.playingPlayer.color.value
     );
-    const activePlayerChecked = isGuardedPieceChecked(
-      this.boardState,
-      this.playingColor.value,
-      this.gameBoardAllPiecesContext.value,
-      activePlayerGuardedPieces
-    );
+    const activePlayerChecked =
+      getCheckedGuardedPieces(
+        this.boardState,
+        this.playingPlayer.color.value,
+        this.gameBoardAllPiecesContext.value,
+        activePlayerGuardedPieces
+      ).length !== 0;
 
     if (activePlayerChecked) this.ui.toastManager.showToast("Check!", "cross");
 
     const canActivePlayerMove = this.canPlayerMove(
-      this.playingColor.value,
+      this.playingPlayer.color.value,
       this.gameBoardAllPiecesContext.value
     );
 
@@ -1041,7 +1064,7 @@ export default class Game {
     if (activePlayerChecked || activePlayerGuardedPieces.length === 0) {
       const winReason: WinReason =
         activePlayerGuardedPieces.length === 0 ? "block" : "checkmate";
-      this.playerWin(this.notPlayingPlayer.value, winReason);
+      this.playerWin(this.notPlayingPlayer.id, winReason);
       return;
     }
     this.draw("stalemate");
@@ -1065,7 +1088,7 @@ export default class Game {
         row: +pieceContext.row,
         col: +pieceContext.col,
       };
-      if (piece.color === this.primaryPlayerColor.value) {
+      if (piece.color === this.primaryPlayer.color.value) {
         primaryPlayerCapturingPaths = [
           ...primaryPlayerCapturingPaths,
           ...positionsToPath(

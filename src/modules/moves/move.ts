@@ -2,8 +2,19 @@ import type Piece from "../pieces/piece";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
-import { GameLogicError, getAllpieceContext } from "../utils/game";
+import {
+  GameLogicError,
+  PlayerColor,
+  getAllMovesScore,
+  getAllpiecesContext as getAllPiecesContext,
+  getAllpiecesContext,
+  getGuardedPieces,
+  invalidatePiecesCache,
+  getCheckedGuardedPieces,
+} from "../utils/game";
 import type Game from "../game";
+import PiecesImportance from "../pieces_importance";
+import { Player } from "../game";
 
 export const MOVE_IDS = ["shift", "castling", "promotion"] as const;
 
@@ -27,6 +38,78 @@ abstract class Move {
   public loadCustomProps(rawMove: RawMove) {
     this.performed = rawMove.performed;
   }
+
+  public willCheckGuardedPieces(
+    game: Game,
+    color: PlayerColor,
+    boardState: BoardStateValue
+  ) {
+    this.forward(boardState, game);
+
+    const allPiecesContext = getAllpiecesContext(boardState);
+    invalidatePiecesCache(allPiecesContext);
+    const guardedPieces = getGuardedPieces(allPiecesContext, color);
+
+    const checkedGuardedPieces = getCheckedGuardedPieces(
+      boardState,
+      color,
+      allPiecesContext,
+      guardedPieces
+    );
+
+    this.reverse(boardState);
+
+    return checkedGuardedPieces;
+  }
+
+  public getScore(
+    game: Game,
+    depth: number,
+    boardState: BoardStateValue,
+    piecesImportance: PiecesImportance,
+    forPlayer: Player,
+    positive = true
+  ): number {
+    let thisScore = this._getScore(boardState, piecesImportance, forPlayer);
+    if (!positive) thisScore *= -1;
+    if (depth < 1) return thisScore;
+
+    this.forward(boardState, game);
+
+    const childrenScore = getAllMovesScore(
+      game,
+      depth - 1,
+      boardState,
+      piecesImportance,
+      forPlayer,
+      !positive
+    );
+
+    this.reverse(boardState);
+
+    const childrenScoreSum = childrenScore.reduce(
+      (accumulator, currentValue) => accumulator + currentValue,
+      0
+    );
+    const childrenAverageScore = childrenScoreSum / childrenScore.length;
+    const aggressivity =
+      (forPlayer.id === "primary"
+        ? game.settings.primaryPlayerComputerAggressivity.value
+        : game.settings.secondaryPlayerComputerAggressivity.value) /
+        100 +
+      0.5;
+    const childrenInfluenceScore = positive
+      ? thisScore + (thisScore - childrenAverageScore) * aggressivity
+      : childrenAverageScore;
+
+    return (thisScore + childrenInfluenceScore) / 2;
+  }
+
+  protected abstract _getScore(
+    boardState: BoardStateValue,
+    piecesImportance: PiecesImportance,
+    forPlayer: Player
+  ): number;
 
   /**
    * Returns an array of board positions that should be highlighted after the move is performed to indicate what has happened in the last move
@@ -159,7 +242,7 @@ export function movePositionValue(
 }
 
 export function getPieceById(id: string, boardState: BoardStateValue) {
-  const pieceContext = getAllpieceContext(boardState);
+  const pieceContext = getAllPiecesContext(boardState);
   for (const props of pieceContext) {
     if (props.piece.id !== id) {
       continue;

@@ -1,6 +1,5 @@
 import { getRandomId } from "../utils/misc";
 import type { PlayerColor } from "../utils/game";
-import { willMoveCheckGuardedPiece } from "../utils/game";
 import type { Ref } from "vue";
 import type Move from "../moves/move";
 import type { RawPiece } from "./raw_piece";
@@ -102,11 +101,12 @@ export abstract class Piece {
 
       if (!game.settings.ignorePiecesGuardedProperty.value) {
         possibleMoves = possibleMoves.filter((move) => {
-          return !willMoveCheckGuardedPiece(
-            game,
-            move,
-            this.color,
-            game.backendBoardStateData.value
+          return (
+            move.willCheckGuardedPieces(
+              game,
+              this.color,
+              game.backendBoardStateData.value
+            ).length === 0
           );
         });
       }
