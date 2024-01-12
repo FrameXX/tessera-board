@@ -52,7 +52,7 @@ import type {
 import {
   GameLogicError,
   getAllpiecesContext as getAllPiecesContext,
-  getUnitExtent,
+  sumPiecesImportances,
   getGuardedPieces,
   getOpossitePlayerColor,
   getPieceIdsWithColor,
@@ -666,6 +666,19 @@ export default class Game {
     await move.perform(this);
     this.onMovePerform(move);
     this.performing = false;
+
+    // const randomMove = this.getRandomMove(this.playingPlayer.color.value);
+    // console.log(randomMove);
+    // console.log(
+    //   "score",
+    //   randomMove.getScore(
+    //     this,
+    //     1,
+    //     this.backendBoardStateData.value,
+    //     this.settings.piecesImportances,
+    //     this.playingPlayer
+    //   )
+    // );
   }
 
   public playerWin(player: PlayerId, reason: WinReason) {
@@ -688,7 +701,7 @@ export default class Game {
     this.winReason.value = reason;
   }
 
-  public getRandomMove(pieceColor?: PlayerColor) {
+  public getRandomMove(pieceColor: PlayerColor) {
     let randomPieceContext: PieceContext;
     let moves: Move[];
     do {
@@ -696,10 +709,7 @@ export default class Game {
         randomPieceContext = getRandomArrayValue(
           this.gameBoardAllPiecesContext.value
         );
-      } while (
-        typeof pieceColor === "undefined" ||
-        randomPieceContext.piece.color !== pieceColor
-      );
+      } while (randomPieceContext.piece.color !== pieceColor);
       moves = randomPieceContext.piece.getPossibleMoves(
         this,
         randomPieceContext
@@ -727,7 +737,7 @@ export default class Game {
     );
   }
 
-  private setupDefaultBoardState() {
+  private setupInitialBoardState() {
     this.gameBoardStateData.load(
       this.defaultBoardStateData.dump(),
       this.ui.toastManager,
@@ -848,7 +858,7 @@ export default class Game {
     this.capturedPieces.clearAll();
     this.lastMoveIndex.value = -1;
     this.moveList.value = [];
-    this.setupDefaultBoardState();
+    this.setupInitialBoardState();
     this.updateGameBoardAllPiecesContext();
     this.initFirstMoveColor();
     this.initPlayerColors();
@@ -866,6 +876,7 @@ export default class Game {
   public restore() {
     this.initSecondaryPlayerColor();
     this.updateGameBoardAllPiecesContext();
+    this.updateDefaultBoardAllPiecesContext();
     this.updateStateRefs();
     updatePieceColors(this.primaryPlayer.color.value);
     this.updateCapturingPaths();
@@ -936,14 +947,14 @@ export default class Game {
   }
 
   private updateUnitExtents = () => {
-    this.primaryPlayer.unitExtent.value = getUnitExtent(
+    this.primaryPlayer.unitExtent.value = sumPiecesImportances(
       getPieceIdsWithColor(
         this.primaryPlayer.color.value,
         this.gameBoardAllPiecesContext.value
       ),
       this.settings.piecesImportances
     );
-    this.secondaryPlayer.unitExtent.value = getUnitExtent(
+    this.secondaryPlayer.unitExtent.value = sumPiecesImportances(
       getPieceIdsWithColor(
         this.secondaryPlayer.color.value,
         this.gameBoardAllPiecesContext.value
@@ -951,11 +962,11 @@ export default class Game {
       this.settings.piecesImportances
     );
 
-    this.primaryPlayer.maxUnitExtent.value = getUnitExtent(
+    this.primaryPlayer.maxUnitExtent.value = sumPiecesImportances(
       this.primaryPlayer.initialPieces.value,
       this.settings.piecesImportances
     );
-    this.secondaryPlayer.maxUnitExtent.value = getUnitExtent(
+    this.secondaryPlayer.maxUnitExtent.value = sumPiecesImportances(
       this.secondaryPlayer.initialPieces.value,
       this.settings.piecesImportances
     );

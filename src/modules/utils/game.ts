@@ -70,7 +70,7 @@ export function getAllMovesScore(
   boardState: BoardStateValue,
   piecesImportance: PiecesImportance,
   forPlayer: Player,
-  positive = true
+  playerMove = true
 ): number[] {
   const allPiecesContext = getAllpiecesContext(boardState);
   let score = [];
@@ -84,7 +84,7 @@ export function getAllMovesScore(
           boardState,
           piecesImportance,
           forPlayer,
-          positive
+          playerMove
         )
       );
     }
@@ -304,7 +304,7 @@ export function getPieceIdsWithColor(
   );
 }
 
-export function getUnitExtent(
+export function sumPiecesImportances(
   pieceIds: PieceId[],
   piecesImportance: PiecesImportance
 ) {

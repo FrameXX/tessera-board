@@ -11,6 +11,7 @@ import {
   getGuardedPieces,
   invalidatePiecesCache,
   getCheckedGuardedPieces,
+  sumPiecesImportances,
 } from "../utils/game";
 import type Game from "../game";
 import PiecesImportance from "../pieces_importance";
@@ -37,6 +38,20 @@ abstract class Move {
 
   public loadCustomProps(rawMove: RawMove) {
     this.performed = rawMove.performed;
+  }
+
+  protected getCheckingScore(
+    game: Game,
+    color: PlayerColor,
+    boardState: BoardStateValue,
+    piecesImportance: PiecesImportance
+  ) {
+    const checkedPieces = this.willCheckGuardedPieces(game, color, boardState);
+    const score = sumPiecesImportances(
+      checkedPieces.map((piece) => piece.pieceId),
+      piecesImportance
+    );
+    return score;
   }
 
   public willCheckGuardedPieces(
@@ -68,10 +83,17 @@ abstract class Move {
     boardState: BoardStateValue,
     piecesImportance: PiecesImportance,
     forPlayer: Player,
-    positive = true
+    playerMove = true
   ): number {
-    let thisScore = this._getScore(boardState, piecesImportance, forPlayer);
-    if (!positive) thisScore *= -1;
+    console.log(boardState);
+    console.log(depth);
+    let thisScore = this._getScore(
+      game,
+      boardState,
+      piecesImportance,
+      forPlayer,
+      playerMove
+    );
     if (depth < 1) return thisScore;
 
     this.forward(boardState, game);
@@ -82,7 +104,7 @@ abstract class Move {
       boardState,
       piecesImportance,
       forPlayer,
-      !positive
+      !playerMove
     );
 
     this.reverse(boardState);
@@ -91,14 +113,15 @@ abstract class Move {
       (accumulator, currentValue) => accumulator + currentValue,
       0
     );
-    const childrenAverageScore = childrenScoreSum / childrenScore.length;
+    const childrenAverageScore =
+      childrenScore.length === 0 ? 0 : childrenScoreSum / childrenScore.length;
     const aggressivity =
       (forPlayer.id === "primary"
         ? game.settings.primaryPlayerComputerAggressivity.value
         : game.settings.secondaryPlayerComputerAggressivity.value) /
         100 +
       0.5;
-    const childrenInfluenceScore = positive
+    const childrenInfluenceScore = playerMove
       ? thisScore + (thisScore - childrenAverageScore) * aggressivity
       : childrenAverageScore;
 
@@ -106,9 +129,11 @@ abstract class Move {
   }
 
   protected abstract _getScore(
+    game: Game,
     boardState: BoardStateValue,
     piecesImportance: PiecesImportance,
-    forPlayer: Player
+    forPlayer: Player,
+    playerMove: boolean
   ): number;
 
   /**

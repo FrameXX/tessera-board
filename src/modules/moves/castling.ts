@@ -5,8 +5,10 @@ import type {
 } from "../board_manager";
 import { isBoardPosition } from "../board_manager";
 import type Game from "../game";
+import { Player } from "../game";
 import type Piece from "../pieces/piece";
-import { getBoardPositionPiece } from "../utils/game";
+import PiecesImportance from "../pieces_importance";
+import { getBoardPositionPiece, getOpossitePlayerColor } from "../utils/game";
 import Move, {
   getCleanBoardPosition,
   handleInvalidRawMove,
@@ -61,6 +63,25 @@ class Castling extends Move {
     private readonly id?: string
   ) {
     super("castling");
+  }
+
+  protected _getScore(
+    game: Game,
+    boardState: BoardStateValue,
+    piecesImportance: PiecesImportance,
+    forPlayer: Player,
+    playerMove: boolean
+  ): number {
+    const moveOpponentColor = playerMove
+      ? getOpossitePlayerColor(forPlayer.color.value)
+      : forPlayer.color.value;
+    const checkScore = this.getCheckingScore(
+      game,
+      moveOpponentColor,
+      boardState,
+      piecesImportance
+    );
+    return checkScore;
   }
 
   public getRaw(): RawCastling {
