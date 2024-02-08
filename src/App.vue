@@ -395,7 +395,7 @@ onMounted(() => {
 
   <!-- Toast stack -->
   <Toaster
-    :toasts="game.ui.toaster.toasts.value"
+    :toaster="game.ui.toaster"
     @toast-dismiss="game.ui.toaster.remove($event.id)"
   />
 </template>

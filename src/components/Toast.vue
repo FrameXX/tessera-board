@@ -1,4 +1,3 @@
-<!-- Toast message/alert -->
 <script lang="ts" setup>
 import { ToastType } from "../modules/toaster/toast";
 import Icon from "./Icon.vue";

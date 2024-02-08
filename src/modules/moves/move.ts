@@ -2,8 +2,7 @@ import type Piece from "../pieces/piece";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
-import type {
-  PlayerColor} from "../utils/game";
+import type { PlayerColor } from "../utils/game";
 import {
   GameLogicError,
   getAllMovesScore,
@@ -35,102 +34,6 @@ abstract class Move {
   public loadCustomProps(rawMove: RawMove) {
     this.performed = rawMove.performed;
   }
-
-  protected getCheckingScore(
-    game: Game,
-    color: PlayerColor,
-    boardState: BoardStateValue,
-    piecesImportance: PiecesImportance
-  ) {
-    const checkedPieces = this.willCheckGuardedPieces(game, color, boardState);
-    const score = sumPiecesImportances(
-      checkedPieces.map((piece) => piece.pieceId),
-      piecesImportance
-    );
-    return score;
-  }
-
-  public willCheckGuardedPieces(
-    game: Game,
-    color: PlayerColor,
-    boardState: BoardStateValue
-  ) {
-    this.forward(boardState, game);
-
-    const allPiecesContext = getAllpiecesContext(boardState);
-    invalidatePiecesCache(allPiecesContext);
-    const guardedPieces = getGuardedPieces(allPiecesContext, color);
-
-    const checkedGuardedPieces = getCheckedGuardedPieces(
-      boardState,
-      color,
-      allPiecesContext,
-      guardedPieces
-    );
-
-    this.reverse(boardState);
-
-    return checkedGuardedPieces;
-  }
-
-  public getScore(
-    game: Game,
-    depth: number,
-    boardState: BoardStateValue,
-    piecesImportance: PiecesImportance,
-    forPlayer: Player,
-    playerMove = true
-  ): number {
-    console.log(boardState);
-    console.log(depth);
-    const thisScore = this._getScore(
-      game,
-      boardState,
-      piecesImportance,
-      forPlayer,
-      playerMove
-    );
-    if (depth < 1) return thisScore;
-
-    this.forward(boardState, game);
-
-    const childrenScore = getAllMovesScore(
-      game,
-      depth - 1,
-      boardState,
-      piecesImportance,
-      forPlayer,
-      !playerMove
-    );
-
-    this.reverse(boardState);
-
-    const childrenScoreSum = childrenScore.reduce(
-      (accumulator, currentValue) => accumulator + currentValue,
-      0
-    );
-    const childrenAverageScore =
-      childrenScore.length === 0 ? 0 : childrenScoreSum / childrenScore.length;
-    const aggressivity =
-      (forPlayer.id === "primary"
-        ? game.settings.primaryPlayerComputerAggressivity.value
-        : game.settings.secondaryPlayerComputerAggressivity.value) /
-        100 +
-      0.5;
-    const childrenInfluenceScore = playerMove
-      ? thisScore + (thisScore - childrenAverageScore) * aggressivity
-      : childrenAverageScore;
-
-    return (thisScore + childrenInfluenceScore) / 2;
-  }
-
-  protected abstract _getScore(
-    game: Game,
-    boardState: BoardStateValue,
-    piecesImportance: PiecesImportance,
-    forPlayer: Player,
-    playerMove: boolean
-  ): number;
 
   protected getCheckingScore(
     game: Game,

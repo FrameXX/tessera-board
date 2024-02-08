@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { PropType } from "vue";
 import Toast from "./Toast.vue";
-import { ToastProps } from "../modules/toaster/toaster";
+import Toaster from "../modules/toaster/toaster";
 
 const props = defineProps({
-  toasts: { type: Object as PropType<ToastProps[]>, required: true },
+  toaster: { type: Object as PropType<Toaster>, required: true },
 });
 defineEmits({
   toastDismiss: (event: { id: string }) => {
@@ -17,9 +17,9 @@ defineEmits({
   <div id="toast-stack" aria-label="Toast notifications">
     <TransitionGroup name="slide-down">
       <Toast
-        v-for="toast in props.toasts"
+        v-for="toast in props.toaster.toasts.value"
         :message="toast.message"
-        :case="toast.case"
+        :case="toast.type"
         :icon-id="toast.iconId"
         :key="toast.id"
         @click="() => $emit('toastDismiss', { id: toast.id })"
