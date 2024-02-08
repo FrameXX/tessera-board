@@ -23,11 +23,18 @@ import {
   isBoardPosition,
 } from "../board_manager";
 import type { RawMove } from "./raw_move";
-import { chooseBestPiece, GameLogicError, isRawPiece } from "../utils/game";
+import {
+  chooseBestPiece,
+  GameLogicError,
+  getOpossitePlayerColor,
+  isRawPiece,
+} from "../utils/game";
 import type { PieceId } from "../pieces/piece";
 import type Game from "../game";
 import { getBoardPositionPiece } from "../utils/game";
 import type CapturedPieces from "../capturedPieces";
+import { Player } from "../game";
+import PiecesImportance from "../pieces_importance";
 
 export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";
@@ -69,6 +76,28 @@ class Promotion extends Move {
     private readonly captures?: PieceContext
   ) {
     super("promotion");
+  }
+
+  protected _getScore(
+    game: Game,
+    boardState: BoardStateValue,
+    piecesImportance: PiecesImportance,
+    forPlayer: Player,
+    playerMove: boolean
+  ): number {
+    const captureScore = this.captures
+      ? piecesImportance.values[this.captures.piece.pieceId].value
+      : 0;
+    const moveOpponentColor = playerMove
+      ? getOpossitePlayerColor(forPlayer.color.value)
+      : forPlayer.color.value;
+    const checkScore = this.getCheckingScore(
+      game,
+      moveOpponentColor,
+      boardState,
+      piecesImportance
+    );
+    return captureScore + checkScore;
   }
 
   public getRaw(): RawPromotion {
@@ -191,9 +220,9 @@ class Promotion extends Move {
         transformOptions.length === 1
           ? transformOptions[0]
           : chooseBestPiece(
-            transformOptions,
-            game.settings.piecesImportance.values
-          );
+              transformOptions,
+              game.settings.piecesImportances.values
+            );
     }
 
     const newPiece = getPieceFromRaw(this.newRawPiece);
@@ -232,9 +261,9 @@ class Promotion extends Move {
         transformOptions.length === 1
           ? transformOptions[0]
           : chooseBestPiece(
-            transformOptions,
-            game.settings.piecesImportance.values
-          );
+              transformOptions,
+              game.settings.piecesImportances.values
+            );
     }
 
     const newPiece = getPieceFromRaw(this.newRawPiece);
@@ -342,11 +371,11 @@ class Promotion extends Move {
 
     return this.captures
       ? `${getPieceNotation(this.originalPiece.pieceId)}x${getPositionNotation(
-        this.captures
-      )}=${getPieceNotation(this.newRawPiece.pieceId)}`
+          this.captures
+        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-        this.newRawPiece.pieceId
-      )}`;
+          this.newRawPiece.pieceId
+        )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

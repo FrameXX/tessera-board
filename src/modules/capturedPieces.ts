@@ -12,11 +12,9 @@ export default class CapturedPieces {
   }
 
   public add(piece: Piece) {
-    console.log(piece);
     piece.color === "white"
       ? this.white.value.push(piece.pieceId)
       : this.black.value.push(piece.pieceId);
-    console.log(this.white.value);
   }
 
   public remove(piece: Piece) {

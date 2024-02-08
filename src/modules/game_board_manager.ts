@@ -22,7 +22,7 @@ class GameBoardManager extends BoardManager {
     if (this.game.settings.tableModeEnabled.value)
       return (
         !this.game.primaryPlayerPlaying.value ===
-        (this.game.primaryPlayerColor.value === "white")
+        (this.game.primaryPlayer.color.value === "white")
       );
     return false;
   });
@@ -34,7 +34,7 @@ class GameBoardManager extends BoardManager {
     }
     return (
       this.game.settings.tableModeEnabled.value &&
-      this.game.primaryPlayerColor.value !== "white"
+      this.game.primaryPlayer.color.value !== "white"
     );
   });
 
@@ -47,8 +47,8 @@ class GameBoardManager extends BoardManager {
 
   private get playerColor() {
     return this.isPrimaryBoard
-      ? this.game.primaryPlayerColor.value
-      : this.game.secondaryPlayerColor.value;
+      ? this.game.primaryPlayer.color.value
+      : this.game.secondaryPlayer.color.value;
   }
 
   private invalidateAvailibleMoves() {
@@ -64,7 +64,7 @@ class GameBoardManager extends BoardManager {
 
     if (
       !this.game.settings.secondCheckboardEnabled.value &&
-      pieceColor !== this.game.playingColor.value
+      pieceColor !== this.game.playingPlayer.color.value
     )
       return false;
 
@@ -72,9 +72,9 @@ class GameBoardManager extends BoardManager {
 
     if (
       (this.isPrimaryBoard &&
-        pieceColor !== this.game.primaryPlayerColor.value) ||
+        pieceColor !== this.game.primaryPlayer.color.value) ||
       (!this.isPrimaryBoard &&
-        pieceColor === this.game.primaryPlayerColor.value)
+        pieceColor === this.game.primaryPlayer.color.value)
     )
       return false;
 
@@ -141,8 +141,8 @@ class GameBoardManager extends BoardManager {
 
   private markCellCapturingPieces(position: BoardPosition) {
     const paths = getTargetMatchingPaths(position, [
-      ...this.game.whiteCapturingPaths.value,
-      ...this.game.blackCapturingPaths.value,
+      ...this.game.primaryPlayerCapturingPaths.value,
+      ...this.game.secondaryPlayerCapturingPaths.value,
     ]);
     for (const path of paths) {
       const origin = path.origin;
@@ -255,19 +255,19 @@ class GameBoardManager extends BoardManager {
     // Do not allow opponent on his checkboard to play moves for the player and vice versa.
     if (this.game.settings.secondCheckboardEnabled.value) {
       if (
-        piece.color !== this.game.primaryPlayerColor.value &&
+        piece.color !== this.game.primaryPlayer.color.value &&
         this.isPrimaryBoard
       )
         return false;
       if (
-        piece.color === this.game.primaryPlayerColor.value &&
+        piece.color === this.game.primaryPlayer.color.value &&
         !this.isPrimaryBoard
       )
         return false;
     }
 
     // Do not allow player that is not playing to perform a move.
-    if (piece.color !== this.game.playingColor.value) return false;
+    if (piece.color !== this.game.playingPlayer.color.value) return false;
 
     // Do not allow move to be performed if game is decided.
     if (this.game.winner.value !== "none") return false;

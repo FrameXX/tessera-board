@@ -10,7 +10,6 @@ import { isPieceKing } from "./king";
 import { type RawPiece } from "./raw_piece";
 import {
   getBoardPositionValue,
-  getRawPiece,
   isFriendlyPiece,
   isPositionOnBoard,
   addPositions,
@@ -44,7 +43,7 @@ export class Rook extends Piece {
 
   public getRawPiece(): RawRook {
     return {
-      ...getRawPiece(this),
+      ...super.getRawPiece(),
       moved: this.moved,
       castled: this.castled,
     };

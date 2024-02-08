@@ -5,7 +5,6 @@ import type Move from "../moves/move";
 import Shift from "../moves/shift";
 import {
   getBoardPositionValue,
-  getRawPiece,
   isFriendlyPiece,
   isPositionOnBoard,
   addPositions,
@@ -41,7 +40,7 @@ export class King extends Piece {
 
   public getRawPiece(): RawKing {
     return {
-      ...getRawPiece(this),
+      ...super.getRawPiece(),
       moved: this.moved,
       castled: this.castled,
     };

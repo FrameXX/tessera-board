@@ -11,7 +11,7 @@ class RawBoardStateData extends ComplexUserData<BoardStateValue> {
 
   get rawVersion() {
     return this.value.map((row) =>
-      row.map((piece) => (piece ? getRawPiece(piece) : null))
+      row.map((piece) => (piece ? piece.getRawPiece() : null))
     );
   }
 

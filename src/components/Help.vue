@@ -14,36 +14,72 @@ const props = defineProps({ open: { type: Boolean, default: false } });
         <h3>Keyboard shortcuts</h3>
         <div id="keyboard-shortcuts">
           <div class="shortcut">
-            <div class="keys"><span class="key">Esc</span></div>
+            <div class="keys"><div class="key">Esc</div></div>
             Close dialogs, windows and toggle action panel
           </div>
           <div class="shortcut">
             <div class="keys">
-              <span class="key">Shift</span> + <span class="key">C</span>
+              <div class="stroke">
+                <div class="key">Shift</div>
+                +
+                <div class="key">C</div>
+              </div>
             </div>
             Open game configuration
           </div>
           <div class="shortcut">
             <div class="keys">
-              <span class="key">Shift</span> + <span class="key">R</span>
+              <div class="stroke">
+                <div class="key">Shift</div>
+                +
+                <div class="key">R</div>
+              </div>
             </div>
             Restart the game (confirmation dialog will be skipped)
           </div>
           <div class="shortcut">
             <div class="keys">
-              <span class="key">Shift</span> + <span class="key">P</span>
+              <div class="stroke">
+                <div class="key">Shift</div>
+                +
+                <div class="key">P</div>
+              </div>
             </div>
             Pause/resume the game
           </div>
           <div class="shortcut">
             <div class="keys">
-              <span class="key">Shift</span> + <span class="key">Z</span>
+              <div class="stroke">
+                <div class="key">Shift</div>
+                +
+                <div class="key">Z</div>
+              </div>
+              <div class="stroke">
+                <div class="key">Ctrl</div>
+                +
+                <div class="key">Z</div>
+              </div>
+              <div class="stroke">
+                <div class="key">←</div>
+              </div>
             </div>
             Previous move
           </div>
           <div class="shortcut">
             <div class="keys">
-              <span class="key">Shift</span> + <span class="key">Y</span>
+              <div class="stroke">
+                <div class="key">Shift</div>
+                +
+                <div class="key">Y</div>
+              </div>
+              <div class="stroke">
+                <div class="key">Ctrl</div>
+                +
+                <div class="key">Y</div>
+              </div>
+              <div class="stroke">
+                <div class="key">→</div>
+              </div>
             </div>
             Next move
           </div>
@@ -68,8 +104,15 @@ const props = defineProps({ open: { type: Boolean, default: false } });
   font-size: var(--font-size-small);
 }
 
+.stroke {
+  margin-top: var(--spacing-medium);
+}
+
+.stroke::first-child {
+  margin-top: 0;
+}
+
 .keys {
-  padding-top: var(--spacing-small);
   padding-bottom: var(--spacing-medium);
 }
 
@@ -77,6 +120,7 @@ const props = defineProps({ open: { type: Boolean, default: false } });
   @include shadow;
   @include round-border;
 
+  display: inline-block;
   background-color: var(--color-primary-accent);
   padding: var(--spacing-small);
 }

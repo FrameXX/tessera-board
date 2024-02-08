@@ -1,6 +1,6 @@
 import { type Ref, ref, computed, watch, capitalize } from "vue";
 import type Game from "./game";
-import type { Player, PlayerColor, WinReason } from "./utils/game";
+import type { PlayerId, PlayerColor, WinReason } from "./utils/game";
 import { getOpossitePlayerColor } from "./utils/game";
 import Duration from "./utils/duration";
 
@@ -92,11 +92,11 @@ class PlayerTimer {
     this.game.playerWin(this.opponentPlayer, this.winReason);
   }
 
-  private get opponentPlayer(): Player {
+  private get opponentPlayer(): PlayerId {
     return this.isPrimaryPlayer ? "secondary" : "primary";
   }
 
-  private get player(): Player {
+  private get player(): PlayerId {
     return this.isPrimaryPlayer ? "primary" : "secondary";
   }
 

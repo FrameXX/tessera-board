@@ -46,6 +46,9 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </select>
             <template #description>
               Specifies the colour of your pieces, whether black or white.
+              Changing this option during the game will have no effect and will
+              apply on the next game start. Color of the secondary player is
+              chosen automatically based on color of the primary player.
             </template>
           </UserOption>
           <SectionTitle title="Computer" />
@@ -54,17 +57,21 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             icon-id="memory"
             option-id="check-computer-primary-player"
           >
-            <Checkbox id="check-computer-primary-player" />
+            <Checkbox
+              v-model="props.modelValue.primaryPlayerComputer.value"
+              id="check-computer-primary-player"
+            />
             <template #description>
               An algorythm will decide the move instead of a human.
             </template>
           </UserOption>
           <UserOption
-            name="computer precision"
+            name="computer precision (%)"
             icon-id="octagram-outline"
             option-id="input-computer-precision-primary-player"
           >
             <input
+              v-model="$props.modelValue.primaryPlayerComputerPrecision.value"
               type="number"
               min="0"
               max="100"
@@ -81,7 +88,12 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             icon-id="octagram-edit-outline"
             option-id="check-dynamic-computer-precision-primary-player"
           >
-            <Checkbox id="check-dynamic-computer-precision-primary-playe" />
+            <Checkbox
+              v-model="
+                props.modelValue.primaryPlayerDynamicComputerPrecision.value
+              "
+              id="check-dynamic-computer-precision-primary-playe"
+            />
             <template #description>
               Computer precision will be balanced during the game based on unit
               extent comparison. The more unit extent the computer opponent has
@@ -89,11 +101,15 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="dynamic computer precision strength"
+            name="dynamic computer precision strength (%)"
             icon-id="octagram-edit-outline"
             option-id="input-dynamic-computer-precision-strength-primary-player"
           >
             <input
+              v-model="
+                props.modelValue.primaryPlayerDynamicComputerPrecisionStrenght
+                  .value
+              "
               type="number"
               min="0"
               max="100"
@@ -105,15 +121,18 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="computer look adhead turns count"
+            name="computer look adhead turns"
             icon-id="step-forward-2"
-            option-id="input-computer-look-adhead-turns-count-primary-player"
+            option-id="input-computer-look-adhead-turns-primary-player"
           >
             <input
+              v-model="
+                props.modelValue.primaryPlayerComputerLookAdheadTurns.value
+              "
               type="number"
               min="0"
               max="5"
-              id="input-computer-look-adhead-turns-count-primary-player"
+              id="input-computer-look-adhead-turns-primary-player"
             />
             <template #description>
               Determines how many turns adhead should the computer analyze the
@@ -122,11 +141,12 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="computer aggressivity"
+            name="computer aggressivity (%)"
             icon-id="lightning-bolt-outline"
             option-id="input-computer-aggressivity-primary-player"
           >
             <input
+              v-model="props.modelValue.primaryPlayerComputerAggressivity.value"
               type="number"
               min="0"
               max="100"
@@ -146,17 +166,21 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             icon-id="memory"
             option-id="check-computer-secondary-player"
           >
-            <Checkbox id="check-computer-secondary-player" />
+            <Checkbox
+              v-model="props.modelValue.secondaryPlayerComputer.value"
+              id="check-computer-secondary-player"
+            />
             <template #description>
               An algorythm will decide the move instead of a human.
             </template>
           </UserOption>
           <UserOption
-            name="computer precision"
+            name="computer precision (%)"
             icon-id="octagram-outline"
             option-id="input-computer-precision-secondary-player"
           >
             <input
+              v-model="props.modelValue.secondaryPlayerComputerPrecision.value"
               type="number"
               min="0"
               max="100"
@@ -173,7 +197,12 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             icon-id="octagram-edit-outline"
             option-id="check-dynamic-computer-precision-secondary-player"
           >
-            <Checkbox id="check-dynamic-computer-precision-secondary-player" />
+            <Checkbox
+              v-model="
+                props.modelValue.secondaryPlayerDynamicComputerPrecision.value
+              "
+              id="check-dynamic-computer-precision-secondary-player"
+            />
             <template #description>
               Computer precision will be balanced during the game based on unit
               extent comparison. The more unit extent the computer opponent has
@@ -181,11 +210,15 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="dynamic computer precision strength"
+            name="dynamic computer precision strength (%)"
             icon-id="octagram-edit-outline"
             option-id="input-dynamic-computer-precision-strength-secondary-player"
           >
             <input
+              v-model="
+                props.modelValue.secondaryPlayerDynamicComputerPrecisionStrenght
+                  .value
+              "
               type="number"
               min="0"
               max="100"
@@ -197,15 +230,18 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="computer look adhead turns count"
+            name="computer look adhead turns"
             icon-id="step-forward-2"
-            option-id="input-computer-look-adhead-turns-count-secondary-player"
+            option-id="input-computer-look-adhead-turns-secondary-player"
           >
             <input
+              v-model="
+                props.modelValue.secondaryPlayerComputerLookAdheadTurns.value
+              "
               type="number"
               min="0"
               max="5"
-              id="input-computer-look-adhead-turns-count-secondary-player"
+              id="input-computer-look-adhead-turns-secondary-player"
             />
             <template #description>
               Determines how many turns adhead should the computer analyze the
@@ -214,11 +250,14 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="computer aggressivity"
+            name="computer aggressivity (%)"
             icon-id="lightning-bolt-outline"
             option-id="input-computer-aggressivity-secondary-player"
           >
             <input
+              v-model="
+                props.modelValue.secondaryPlayerComputerAggressivity.value
+              "
               type="number"
               min="0"
               max="100"
@@ -528,7 +567,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             <input
               type="number"
               :id="`input-${pieceId}-importance`"
-              v-model="props.modelValue.piecesImportance.values[pieceId].value"
+              v-model="props.modelValue.piecesImportances.values[pieceId].value"
             />
           </UserOption>
         </Category>

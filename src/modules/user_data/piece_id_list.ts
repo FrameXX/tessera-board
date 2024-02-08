@@ -6,11 +6,12 @@ import type { PlayerColor } from "../utils/game";
 
 class PieceIdListData extends UserData<PieceId[]> {
   constructor(
+    id: string,
     value: PieceId[],
     valueRef: Ref<PieceId[]>,
-    playerColor: PlayerColor
+    autoSave = true
   ) {
-    super(`${playerColor}_captured_pieces`, value, valueRef, false);
+    super(id, value, valueRef, autoSave);
   }
 
   public dump(): string {

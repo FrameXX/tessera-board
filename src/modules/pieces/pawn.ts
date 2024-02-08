@@ -5,7 +5,6 @@ import type { RawPiece } from "./raw_piece";
 import type { PieceContext, BoardPosition } from "../board_manager";
 import {
   getBoardPositionValue,
-  getRawPiece,
   isFriendlyPiece,
   type PlayerColor,
   getBoardPositionPiece,
@@ -39,7 +38,7 @@ export class Pawn extends Piece {
   }
 
   public getRawPiece(): RawPawn {
-    return { ...getRawPiece(this), moved: this.moved };
+    return { ...super.getRawPiece(), moved: this.moved };
   }
 
   public loadCustomProps(rawPiece: RawPiece): void {

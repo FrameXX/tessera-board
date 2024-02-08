@@ -15,23 +15,23 @@ const statusHeight = inject("statusHeight") as Ref<number>;
 
 const primaryPlayerUnitExtentFactor = computed(() => {
   return (
-    props.game.primaryPlayerUnitExtent.value /
-    props.game.primaryPlayerMaxUnitExtent.value
+    props.game.primaryPlayer.unitExtent.value /
+    props.game.primaryPlayer.maxUnitExtent.value
   );
 });
 
 const secondaryPlayerUnitExtentFactor = computed(() => {
   return (
-    props.game.secondaryPlayerUnitExtent.value /
-    props.game.secondaryPlayerMaxUnitExtent.value
+    props.game.secondaryPlayer.unitExtent.value /
+    props.game.secondaryPlayer.maxUnitExtent.value
   );
 });
 
 const playersUnitExtentFactor = computed(() => {
   return (
-    props.game.primaryPlayerUnitExtent.value /
-    (props.game.secondaryPlayerUnitExtent.value +
-      props.game.primaryPlayerUnitExtent.value)
+    props.game.primaryPlayer.unitExtent.value /
+    (props.game.secondaryPlayer.unitExtent.value +
+      props.game.primaryPlayer.unitExtent.value)
   );
 });
 </script>
@@ -53,7 +53,7 @@ const playersUnitExtentFactor = computed(() => {
           comparison
           icon-id="shield-crown-outline"
           title="Unit extent comparison"
-          :subtitle="`${props.game.primaryPlayerUnitExtent.value}|${props.game.secondaryPlayerUnitExtent.value}`"
+          :subtitle="`${props.game.primaryPlayer.unitExtent.value}|${props.game.secondaryPlayer.unitExtent.value}`"
           :factor="playersUnitExtentFactor"
         />
         <div id="statistics-players">
@@ -62,7 +62,7 @@ const playersUnitExtentFactor = computed(() => {
             <Tile
               icon-id="shield-crown-outline"
               title="Unit extent"
-              :subtitle="`${props.game.primaryPlayerUnitExtent.value}/${props.game.primaryPlayerMaxUnitExtent.value}`"
+              :subtitle="`${props.game.primaryPlayer.unitExtent.value}/${props.game.primaryPlayer.maxUnitExtent.value}`"
               :factor="primaryPlayerUnitExtentFactor"
             />
             <Tile
@@ -88,7 +88,7 @@ const playersUnitExtentFactor = computed(() => {
               secondary
               icon-id="shield-crown-outline"
               title="Unit extent"
-              :subtitle="`${props.game.secondaryPlayerUnitExtent.value}/${props.game.secondaryPlayerMaxUnitExtent.value}`"
+              :subtitle="`${props.game.secondaryPlayer.unitExtent.value}/${props.game.secondaryPlayer.maxUnitExtent.value}`"
               :factor="secondaryPlayerUnitExtentFactor"
             />
             <Tile

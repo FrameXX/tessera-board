@@ -3,23 +3,25 @@ import type {
   BoardPosition,
   BoardStateValue,
 } from "../board_manager";
+import type { PieceId } from "../pieces/piece";
 import {
   isPieceId,
   type Path,
   type PiecesImportanceValues,
 } from "../pieces/piece";
 import type Piece from "../pieces/piece";
-import type Move from "../moves/move";
 import { type RawPiece } from "../pieces/raw_piece";
 import type Game from "../game";
+import type PiecesImportance from "../pieces_importance";
+import { Player } from "../game";
 
 export type Mark = "availible" | "capture" | "capturing";
 
 export type MoveDirection = "forward" | "reverse";
 export type MoveExecution = "perform" | MoveDirection;
 
-export type Player = "primary" | "secondary";
-export function isPlayer(string: string): string is Player {
+export type PlayerId = "primary" | "secondary";
+export function isPlayer(string: string): string is PlayerId {
   return string === "primary" || string === "secondary";
 }
 
@@ -37,7 +39,7 @@ export function isUndecidedWinner(string: string): string is UndecidedWinner {
   return string === "draw" || string === "none";
 }
 
-export type Winner = UndecidedWinner | Player;
+export type Winner = UndecidedWinner | PlayerId;
 export function isWinner(string: string): string is Winner {
   return isPlayer(string) || isUndecidedWinner(string);
 }
@@ -62,6 +64,34 @@ export function isWinReason(string: string | null): string is WinReason {
   );
 }
 
+export function getAllMovesScore(
+  game: Game,
+  depth: number,
+  boardState: BoardStateValue,
+  piecesImportance: PiecesImportance,
+  forPlayer: Player,
+  playerMove = true
+): number[] {
+  const allPiecesContext = getAllpiecesContext(boardState);
+  let score = [];
+  for (const pieceContext of allPiecesContext) {
+    const moves = pieceContext.piece.getPossibleMoves(game, pieceContext);
+    for (const move of moves) {
+      score.push(
+        move.getScore(
+          game,
+          depth,
+          boardState,
+          piecesImportance,
+          forPlayer,
+          playerMove
+        )
+      );
+    }
+  }
+  return score;
+}
+
 export type SecondsPerMovePenalty = "game_loss" | "random_move";
 export function isSecondsPerMovePenalty(
   string: string
@@ -77,7 +107,7 @@ export class GameLogicError extends Error {
   }
 }
 
-export function getAllpieceContext(boardStateValue: BoardStateValue) {
+export function getAllpiecesContext(boardStateValue: BoardStateValue) {
   const allPiecesContext: PieceContext[] = [];
   for (const [rowIndex, row] of boardStateValue.entries()) {
     for (const [colIndex, piece] of row.entries()) {
@@ -107,15 +137,15 @@ export function getGuardedPieces(
   });
 }
 
-export function isGuardedPieceChecked(
+export function getCheckedGuardedPieces(
   boardState: BoardStateValue,
   color: PlayerColor,
-  allpiecesContext: PieceContext[],
+  allPiecesContext: PieceContext[],
   guardedPieces: PieceContext[]
 ) {
   let capturingPaths: Path[] = [];
 
-  for (const pieceContext of allpiecesContext) {
+  for (const pieceContext of allPiecesContext) {
     const piece = pieceContext.piece;
     if (piece.color === color) {
       continue;
@@ -130,16 +160,17 @@ export function isGuardedPieceChecked(
     ];
   }
 
-  for (const piece of guardedPieces) {
+  const checkedGuardedPieces = [];
+
+  for (const pieceContext of guardedPieces) {
     const paths = getTargetMatchingPaths(
-      { row: piece.row, col: piece.col },
+      { row: pieceContext.row, col: pieceContext.col },
       capturingPaths
     );
-    if (paths.length !== 0) {
-      return true;
-    }
+    if (paths.length !== 0) checkedGuardedPieces.push(pieceContext.piece);
   }
-  return false;
+
+  return checkedGuardedPieces;
 }
 
 export function invalidatePiecesCache(allPiecesContext: PieceContext[]) {
@@ -186,29 +217,6 @@ export function getBoardPositionValue(
 ): Piece | null {
   const piece = boardStateValue[position.row][position.col];
   return piece;
-}
-
-export function willMoveCheckGuardedPiece(
-  game: Game,
-  move: Move,
-  color: PlayerColor,
-  boardState: BoardStateValue
-) {
-  move.forward(boardState, game);
-
-  const allPiecesContext = getAllpieceContext(boardState);
-  invalidatePiecesCache(allPiecesContext);
-  const guardedPieces = getGuardedPieces(allPiecesContext, color);
-  const checksGuardedPiece = isGuardedPieceChecked(
-    boardState,
-    color,
-    allPiecesContext,
-    guardedPieces
-  );
-
-  move.reverse(boardState);
-
-  return checksGuardedPiece;
 }
 
 export function isFriendlyPiece(
@@ -284,6 +292,25 @@ export function isRawPiece(object: any): object is RawPiece {
   return true;
 }
 
-export function getRawPiece(piece: Piece): RawPiece {
-  return { color: piece.color, pieceId: piece.pieceId, id: piece.id };
+export function getPieceIdsWithColor(
+  color: PlayerColor,
+  allPiecesContext: PieceContext[]
+) {
+  const filteredPiecesContext = allPiecesContext.filter(
+    (pieceContext) => pieceContext.piece.color === color
+  );
+  return filteredPiecesContext.map(
+    (pieceContext) => pieceContext.piece.pieceId
+  );
+}
+
+export function sumPiecesImportances(
+  pieceIds: PieceId[],
+  piecesImportance: PiecesImportance
+) {
+  let score = 0;
+  for (const pieceId of pieceIds) {
+    score += piecesImportance.values[pieceId].value;
+  }
+  return score;
 }

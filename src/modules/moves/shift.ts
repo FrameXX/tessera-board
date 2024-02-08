@@ -23,8 +23,14 @@ import {
 } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import { getPieceFromRaw } from "../pieces/raw_piece";
-import { getBoardPositionPiece, positionsEqual } from "../utils/game";
+import {
+  getBoardPositionPiece,
+  getOpossitePlayerColor,
+  positionsEqual,
+} from "../utils/game";
 import type Game from "../game";
+import { Player } from "../game";
+import PiecesImportance from "../pieces_importance";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -65,6 +71,28 @@ class Shift extends Move {
     public readonly captures?: PieceContext
   ) {
     super("shift");
+  }
+
+  protected _getScore(
+    game: Game,
+    boardState: BoardStateValue,
+    piecesImportance: PiecesImportance,
+    forPlayer: Player,
+    playerMove = true
+  ): number {
+    const captureScore = this.captures
+      ? piecesImportance.values[this.captures.piece.pieceId].value
+      : 0;
+    const moveOpponentColor = playerMove
+      ? getOpossitePlayerColor(forPlayer.color.value)
+      : forPlayer.color.value;
+    const checkScore = this.getCheckingScore(
+      game,
+      moveOpponentColor,
+      boardState,
+      piecesImportance
+    );
+    return captureScore + checkScore;
   }
 
   public getRaw(): RawShift {
@@ -111,8 +139,8 @@ class Shift extends Move {
   public getNotation(): string {
     return this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 

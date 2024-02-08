@@ -62,14 +62,21 @@ class UI {
     });
 
     addEventListener("keydown", (event: KeyboardEvent) => {
-      if (event.key === "Escape") this.escapeManager.escape();
-      if (event.key === "R" && event.shiftKey) this.game.restart();
-      if (event.key === "P" && event.shiftKey) this.manuallyTogglePause();
-      if (event.key === "Z" && (event.shiftKey || event.ctrlKey))
+      const key = event.key.toLocaleLowerCase();
+      if (key === "escape") this.escapeManager.escape();
+      if (key === "r" && event.shiftKey) this.game.restart();
+      if (key === "p" && event.shiftKey) this.manuallyTogglePause();
+      if (
+        (key === "z" && (event.shiftKey || event.ctrlKey)) ||
+        key === "arrowleft"
+      )
         this.game.requestUndoMove();
-      if (event.key === "Y" && (event.shiftKey || event.ctrlKey))
+      if (
+        (key === "y" && (event.shiftKey || event.ctrlKey)) ||
+        key === "arrowright"
+      )
         this.game.requestRedoMove();
-      if (event.key === "C" && event.shiftKey) this.switchFragment("settings");
+      if (key === "c" && event.shiftKey) this.switchFragment("settings");
     });
 
     addEventListener("visibilitychange", () => {
@@ -79,20 +86,20 @@ class UI {
 
   public updatePrimaryHue(primaryPlayerPlaying: boolean, winner: Winner) {
     switch (winner) {
-    case "none":
-      setPrimaryHue(primaryPlayerPlaying);
-      break;
-    case "draw":
-      setSaturationMultiplier(0);
-      break;
-    case "primary":
-      setPrimaryHue(true);
-      break;
-    case "secondary":
-      setPrimaryHue(false);
-      break;
-    default:
-      break;
+      case "none":
+        setPrimaryHue(primaryPlayerPlaying);
+        break;
+      case "draw":
+        setSaturationMultiplier(0);
+        break;
+      case "primary":
+        setPrimaryHue(true);
+        break;
+      case "secondary":
+        setPrimaryHue(false);
+        break;
+      default:
+        break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
