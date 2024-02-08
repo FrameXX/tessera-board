@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import UserData from "./user_data";
-import type Toaster from "../toast_manager";
+import type Toaster from "../toaster/toaster";
 
 class SelectUserData<ValueType extends string> extends UserData<ValueType> {
   constructor(

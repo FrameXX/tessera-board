@@ -1,7 +1,7 @@
 import type { Ref } from "vue";
 import type Move from "../moves/move";
 import { isRawMove } from "../moves/raw_move";
-import type Toaster from "../toast_manager";
+import type Toaster from "../toaster/toaster";
 import UserData from "./user_data";
 import Shift from "../moves/shift";
 import Promotion from "../moves/promotion";
@@ -41,17 +41,17 @@ class MoveListData extends UserData<Move[]> {
       }
       let move: Move;
       switch (rawMove.moveId) {
-      case "shift":
-        move = Shift.restore(rawMove);
-        break;
-      case "promotion":
-        move = Promotion.restore(rawMove);
-        break;
-      case "castling":
-        move = Castling.restore(rawMove);
-        break;
-      default:
-        return;
+        case "shift":
+          move = Shift.restore(rawMove);
+          break;
+        case "promotion":
+          move = Promotion.restore(rawMove);
+          break;
+        case "castling":
+          move = Castling.restore(rawMove);
+          break;
+        default:
+          return;
       }
       move.loadCustomProps(rawMove);
       moves.push(move);

@@ -1,13 +1,12 @@
 <!-- Toast message/alert -->
-
 <script lang="ts" setup>
+import { ToastType } from "../modules/toaster/toast";
 import Icon from "./Icon.vue";
 import { PropType } from "vue";
-import { ToastCase } from "../modules/toast_manager";
 
 const props = defineProps({
   message: { type: String, required: true },
-  case: { type: String as PropType<ToastCase>, default: "info" },
+  case: { type: String as PropType<ToastType>, default: "info" },
   iconId: { type: String, required: false },
 });
 </script>

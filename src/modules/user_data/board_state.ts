@@ -1,6 +1,6 @@
 import ComplexUserData from "./complex_user_data";
 import { getPieceFromRaw } from "../pieces/raw_piece";
-import type Toaster from "../toast_manager";
+import type Toaster from "../toaster/toaster";
 import type { BoardStateValue } from "../board_manager";
 import { isRawPiece } from "../utils/game";
 

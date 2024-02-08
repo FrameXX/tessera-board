@@ -89,9 +89,6 @@ export interface Player {
 }
 
 export default class Game {
-  /**
-   * Holds vue references to all user configurable values.
-   */
   public readonly settings = {
     primaryPlayerComputer: ref(false),
     primaryPlayerComputerPrecision: ref(100),
@@ -180,9 +177,6 @@ export default class Game {
     ]),
   };
 
-  /**
-   * Audio effects in the game are working thanks to Howl library. Audio won't play until user touches the interface at least once. This a browser restriction.
-   */
   public readonly audioEffects = {
     pieceMove: new Howl({
       src: [moveAudioEffectUrl],
@@ -244,18 +238,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingPlayer.color.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayer.color.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayer.color.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingPlayer.color.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayer.color.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayer.color.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -666,19 +660,6 @@ export default class Game {
     await move.perform(this);
     this.onMovePerform(move);
     this.performing = false;
-
-    // const randomMove = this.getRandomMove(this.playingPlayer.color.value);
-    // console.log(randomMove);
-    // console.log(
-    //   "score",
-    //   randomMove.getScore(
-    //     this,
-    //     1,
-    //     this.backendBoardStateData.value,
-    //     this.settings.piecesImportances,
-    //     this.playingPlayer
-    //   )
-    // );
   }
 
   public playerWin(player: PlayerId, reason: WinReason) {

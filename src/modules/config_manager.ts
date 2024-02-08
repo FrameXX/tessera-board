@@ -1,6 +1,6 @@
 import type UserData from "./user_data/user_data";
 import type ConfigInventory from "./config_inventory";
-import type Toaster from "./toast_manager";
+import type Toaster from "./toaster/toaster";
 import { getRandomId } from "./utils/misc";
 
 class ConfigManager {

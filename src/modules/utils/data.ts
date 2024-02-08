@@ -1,4 +1,4 @@
-import type Toaster from "../toast_manager";
+import type Toaster from "../toaster/toaster";
 
 type Entries = [string, string][];
 function isEntries(object: any): object is Entries {

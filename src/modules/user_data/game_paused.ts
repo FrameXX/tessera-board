@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import SelectUserData from "./select_user_data";
-import type Toaster from "../toast_manager";
+import type Toaster from "../toaster/toaster";
 
 export type GamePausedState = "not" | "auto" | "manual";
 export function isGamePausedState(string: string): string is GamePausedState {

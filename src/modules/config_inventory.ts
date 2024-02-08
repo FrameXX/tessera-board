@@ -1,5 +1,5 @@
 import UserData from "./user_data/user_data";
-import type Toaster from "./toast_manager";
+import type Toaster from "./toaster/toaster";
 
 export interface UserConfigPrint {
   id: string;

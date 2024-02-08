@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import { watch } from "vue";
-import type Toaster from "../toast_manager";
+import type Toaster from "../toaster/toaster";
 
 export type SaveCallBack = () => void;
 

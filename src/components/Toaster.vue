@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { PropType } from "vue";
 import Toast from "./Toast.vue";
-import { ToastProps } from "../modules/toast_manager";
+import { ToastProps } from "../modules/toaster/toaster";
 
 const props = defineProps({
   toasts: { type: Object as PropType<ToastProps[]>, required: true },

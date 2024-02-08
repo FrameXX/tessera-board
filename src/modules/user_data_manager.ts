@@ -1,6 +1,6 @@
 import type UserData from "./user_data/user_data";
 import type ConfirmDialog from "./dialogs/confirm";
-import type Toaster from "./toast_manager";
+import type Toaster from "./toaster/toaster";
 import { exportData, importData } from "./utils/data";
 
 class UserDataManager {
