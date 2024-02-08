@@ -211,18 +211,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-      case "none":
-        return `${capitalize(this.playingColor.value)} plays`;
-      case "draw":
-        return "Draw";
-      case "secondary":
-        return `${capitalize(this.secondaryPlayerColor.value)} won`;
-      case "primary":
-        return `${capitalize(this.primaryPlayerColor.value)} won`;
-      default:
-        throw new UserDataError(
-          `Winner value is of an invalid type. value: ${this.winner.value}`
-        );
+    case "none":
+      return `${capitalize(this.playingColor.value)} plays`;
+    case "draw":
+      return "Draw";
+    case "secondary":
+      return `${capitalize(this.secondaryPlayerColor.value)} won`;
+    case "primary":
+      return `${capitalize(this.primaryPlayerColor.value)} won`;
+    default:
+      throw new UserDataError(
+        `Winner value is of an invalid type. value: ${this.winner.value}`
+      );
     }
   });
 
@@ -275,12 +275,12 @@ export default class Game {
   public readonly defaultBoardConfigInventory = new ConfigInventory(
     "default-board",
     predefinedDefaultBoardConfigs,
-    this.ui.toastManager
+    this.ui.toaster
   );
   public readonly defaultBoardConfigManager = new ConfigManager(
     this.defaultBoardConfigInventory,
     [this.defaultBoardStateData],
-    this.ui.toastManager
+    this.ui.toaster
   );
 
   /**
@@ -498,7 +498,7 @@ export default class Game {
       this.blackCapturedPiecesData,
     ],
     this.ui.confirmDialog,
-    this.ui.toastManager
+    this.ui.toaster
   );
   private visited: string | null;
 
@@ -536,7 +536,7 @@ export default class Game {
 
   private tryToRecoverData() {
     if (!navigator.cookieEnabled) {
-      this.ui.toastManager.showToast(
+      this.ui.toaster.bake(
         "Cookies are disabled. -> No changes will be restored in next session.",
 
         "cookie-alert"
@@ -570,17 +570,14 @@ export default class Game {
       player === "primary"
         ? this.primaryPlayerColor.value
         : this.secondaryPlayerColor.value;
-    this.ui.toastManager.showToast(
-      `${capitalize(winnerColor)} won.`,
-      "crown-outline"
-    );
+    this.ui.toaster.bake(`${capitalize(winnerColor)} won.`, "crown-outline");
     this.winner.value = player;
     this.winReason.value = reason;
     setPrimaryHue(player === "primary");
   }
 
   private draw(reason: WinReason) {
-    this.ui.toastManager.showToast("Draw.", "sword-cross");
+    this.ui.toaster.bake("Draw.", "sword-cross");
     this.winner.value = "draw";
     this.winReason.value = reason;
   }
@@ -618,7 +615,7 @@ export default class Game {
       wasWinner === "primary"
         ? this.secondaryPlayerColor.value
         : this.primaryPlayerColor.value;
-    this.ui.toastManager.showToast(
+    this.ui.toaster.bake(
       `${capitalize(loserColor)} is back in the game.`,
       "keyboard-return"
     );
@@ -627,7 +624,7 @@ export default class Game {
   private setupDefaultBoardState() {
     this.gameBoardStateData.load(
       this.defaultBoardStateData.dump(),
-      this.ui.toastManager,
+      this.ui.toaster,
       true
     );
     this.gameBoardStateData.updateReference();
@@ -685,7 +682,7 @@ export default class Game {
 
   public async requestResign() {
     if (this.winner.value !== "none") {
-      this.ui.toastManager.showToast(
+      this.ui.toaster.bake(
         "You cannot resign. The game ending was already decided.",
         "flag-off",
         "error"
@@ -702,7 +699,7 @@ export default class Game {
   }
 
   private resign() {
-    this.ui.toastManager.showToast(
+    this.ui.toaster.bake(
       `${capitalize(this.notPlayingPlayerColor)} resigned`,
 
       "flag"
@@ -759,7 +756,7 @@ export default class Game {
     this.updateWinner();
     this.saveMove();
     this.unselectBoardsContent();
-    this.ui.toastManager.showToast("New match started.", "flag-checkered");
+    this.ui.toaster.bake("New match started.", "flag-checkered");
   }
 
   public restore() {
@@ -793,7 +790,7 @@ export default class Game {
 
   public requestRedoMove() {
     if (this.moveList.value.length - this.lastMoveIndex.value < 2) {
-      this.ui.toastManager.showToast(
+      this.ui.toaster.bake(
         "You reached the last move. You cannot go further.",
         "cancel",
         "error"
@@ -806,7 +803,7 @@ export default class Game {
 
   public requestUndoMove() {
     if (this.lastMoveIndex.value === -1) {
-      this.ui.toastManager.showToast(
+      this.ui.toaster.bake(
         "You reached the first move. You cannot go further.",
         "cancel",
         "error"
@@ -852,7 +849,7 @@ export default class Game {
   private updateBackendBoardStateData() {
     this.backendBoardStateData.load(
       this.gameBoardStateData.dump(),
-      this.ui.toastManager
+      this.ui.toaster
     );
   }
 
@@ -909,7 +906,7 @@ export default class Game {
       activePlayerGuardedPieces
     );
 
-    if (activePlayerChecked) this.ui.toastManager.showToast("Check!", "cross");
+    if (activePlayerChecked) this.ui.toaster.bake("Check!", "cross");
 
     const canActivePlayerMove = this.canPlayerMove(
       this.playingColor.value,

@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import SelectUserData from "./select_user_data";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 
 export type GamePausedState = "not" | "auto" | "manual";
 export function isGamePausedState(string: string): string is GamePausedState {
@@ -12,12 +12,12 @@ class GamePausedData extends SelectUserData<GamePausedState> {
     super("game_paused", value, isGamePausedState, valueRef);
   }
 
-  public load(dumped: string, toastManager: ToastManager): void {
+  public load(dumped: string, toaster: Toaster): void {
     if (!this.validate(dumped)) {
       console.error(
         `An error occured while trying to parse game_paused user data ${this.id}.`
       );
-      this.handleInvalidLoadValue(dumped, toastManager);
+      this.handleInvalidLoadValue(dumped, toaster);
       return;
     }
 

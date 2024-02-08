@@ -1,4 +1,4 @@
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 import { reactive } from "vue";
 
 interface ConfigPrintDialogProps {
@@ -11,7 +11,7 @@ class ConfigPrintDialog {
   private resolve?: (value?: { name: string; description: string }) => void;
   public props: ConfigPrintDialogProps;
 
-  constructor(private readonly toastManager: ToastManager) {
+  constructor(private readonly toaster: Toaster) {
     this.props = reactive({
       open: false,
       name: "",
@@ -36,7 +36,7 @@ class ConfigPrintDialog {
   public confirm = () => {
     if (this.resolve) {
       if (this.props.name === "") {
-        this.toastManager.showToast(
+        this.toaster.bake(
           "Configuration name cannot be an empty string.",
 
           "alert-circle-outline"

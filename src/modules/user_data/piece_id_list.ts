@@ -1,7 +1,7 @@
 import type { Ref } from "vue";
 import { isPieceId, type PieceId } from "../pieces/piece";
 import UserData from "./user_data";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 import type { PlayerColor } from "../utils/game";
 
 class PieceIdListData extends UserData<PieceId[]> {
@@ -17,15 +17,15 @@ class PieceIdListData extends UserData<PieceId[]> {
     return JSON.stringify(this.value);
   }
 
-  public load(dumped: string, toastManager: ToastManager): void {
+  public load(dumped: string, toaster: Toaster): void {
     const value: PieceId[] = [];
     if (!value) {
       return;
     }
-    const pieceIds = this.safelyParse(dumped, toastManager);
+    const pieceIds = this.safelyParse(dumped, toaster);
     if (!Array.isArray(pieceIds)) {
       console.error("Captured pieces didn't parse into an array.");
-      this.handleInvalidLoadValue(dumped, toastManager);
+      this.handleInvalidLoadValue(dumped, toaster);
     }
     for (const i in pieceIds) {
       const pieceId = pieceIds[i];

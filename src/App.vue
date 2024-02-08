@@ -14,7 +14,7 @@ import Icon from "./components/Icon.vue";
 import Settings from "./components/Settings.vue";
 import UserOption from "./components/UserOption.vue";
 import Modal from "./components/Modal.vue";
-import ToastStack from "./components/ToastStack.vue";
+import Toaster from "./components/Toaster.vue";
 import ConfigItem from "./components/ConfigItem.vue";
 import ActionPanel from "./components/ActionPanel.vue";
 import Status from "./components/Status.vue";
@@ -394,9 +394,9 @@ onMounted(() => {
   </Modal>
 
   <!-- Toast stack -->
-  <ToastStack
-    :toasts="game.ui.toastManager.toasts.value"
-    @toast-dismiss="game.ui.toastManager.hideToastId($event.id)"
+  <Toaster
+    :toasts="game.ui.toaster.toasts.value"
+    @toast-dismiss="game.ui.toaster.remove($event.id)"
   />
 </template>
 

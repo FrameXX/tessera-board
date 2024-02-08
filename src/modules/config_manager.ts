@@ -1,17 +1,17 @@
 import type UserData from "./user_data/user_data";
 import type ConfigInventory from "./config_inventory";
-import type ToastManager from "./toast_manager";
+import type Toaster from "./toast_manager";
 import { getRandomId } from "./utils/misc";
 
 class ConfigManager {
   constructor(
     public readonly inventory: ConfigInventory,
     private readonly entries: UserData<any>[],
-    private readonly toastManager: ToastManager
+    private readonly toaster: Toaster
   ) {}
 
   private handleErrorOnRestore() {
-    this.toastManager.showToast(
+    this.toaster.bake(
       "An error occured while trying to load and apply configuration. Your data are probably corrupted or invalid and it's recommended that you clear all data.",
 
       "database-alert"
@@ -26,7 +26,7 @@ class ConfigManager {
     try {
       for (const index in configValues) {
         const entry = this.entries[index];
-        entry.load(configValues[index], this.toastManager);
+        entry.load(configValues[index], this.toaster);
       }
     } catch (error) {
       console.error(
@@ -57,7 +57,7 @@ class ConfigManager {
     try {
       for (const index in configValues) {
         const entry = this.entries[index];
-        entry.load(configValues[index], this.toastManager);
+        entry.load(configValues[index], this.toaster);
       }
     } catch (error) {
       console.error(

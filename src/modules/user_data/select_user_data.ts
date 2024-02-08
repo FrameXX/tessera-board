@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import UserData from "./user_data";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 
 class SelectUserData<ValueType extends string> extends UserData<ValueType> {
   constructor(
@@ -16,12 +16,12 @@ class SelectUserData<ValueType extends string> extends UserData<ValueType> {
     return this.value;
   }
 
-  public load(dumped: string, toastManager: ToastManager): void {
+  public load(dumped: string, toaster: Toaster): void {
     if (!this.validate(dumped)) {
       console.error(
         `An error occured while trying to parse select user data ${this.id}.`
       );
-      this.handleInvalidLoadValue(dumped, toastManager);
+      this.handleInvalidLoadValue(dumped, toaster);
       return;
     }
     this.value = dumped;

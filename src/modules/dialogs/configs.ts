@@ -3,7 +3,7 @@ import type { CommonConfigPrint } from "../config_inventory";
 import type ConfigManager from "../config_manager";
 import type ConfigPrintDialog from "./config_print";
 import type ConfirmDialog from "./confirm";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toaster/toaster";
 
 interface ConfigsDialogProps {
   open: boolean;
@@ -17,7 +17,7 @@ class ConfigsDialog {
   constructor(
     private readonly confirmDialog: ConfirmDialog,
     private readonly configPrintDialog: ConfigPrintDialog,
-    private readonly toastManager: ToastManager
+    private readonly toaster: Toaster
   ) {
     this.props = reactive({
       open: false,
@@ -55,7 +55,7 @@ class ConfigsDialog {
       userConfigPrint.description
     );
     this.updateConfigList();
-    this.toastManager.showToast(
+    this.toaster.bake(
       "Config saved.",
 
       "check-circle-outline"
@@ -86,7 +86,7 @@ class ConfigsDialog {
     }
     this.configManager?.renameConfig(id, userPrint.name, userPrint.description);
     this.updateConfigList();
-    this.toastManager.showToast(
+    this.toaster.bake(
       "Config renamed.",
 
       "check-circle-outline"
@@ -98,7 +98,7 @@ class ConfigsDialog {
       ? this.configManager?.restorePredefinedConfig(id)
       : this.configManager?.restoreUserConfig(id);
     this.configManager?.applyEntries();
-    this.toastManager.showToast(
+    this.toaster.bake(
       "Config loaded.",
 
       "check-circle-outline"

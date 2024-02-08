@@ -12,11 +12,6 @@ export function isMoveId(string: string): string is MoveId {
   return MOVE_IDS.includes(string as MoveId);
 }
 
-/**
- * Represents a generic move.
- * @class
- * @abstract
- */
 abstract class Move {
   public notation?: string;
   protected performed = false;
@@ -28,9 +23,6 @@ abstract class Move {
     this.performed = rawMove.performed;
   }
 
-  /**
-   * Returns an array of board positions that should be highlighted after the move is performed to indicate what has happened in the last move
-   */
   public abstract get highlightedBoardPositions(): BoardPosition[];
 
   public forward(boardState: BoardStateValue, game: Game) {
@@ -43,10 +35,6 @@ abstract class Move {
     this._forward(boardState, game);
   }
 
-  /**
-   * Alters the gameBoardState according to the move without any further effects or requiring any user input.
-   * @abstract
-   */
   protected abstract _forward(boardState: BoardStateValue, game: Game): void;
 
   public abstract getNotation(): string;
@@ -87,10 +75,6 @@ abstract class Move {
     this._reverse(boardState);
   }
 
-  /**
-   * Alters the gameBoardState according to the move, but reverse and without any further effects or requiring any user input.
-   * @abstract
-   */
   protected abstract _reverse(boardState: BoardStateValue): void;
 
   public async perform(game: Game) {
@@ -103,24 +87,10 @@ abstract class Move {
     await this._perform(game);
   }
 
-  /**
-   * Alters the gameBoardState according to the move. May include audio effects, vibrations or user dialogs.
-   * @param args The arguments and their count vary from class to class
-   * @abstract
-   */
   protected abstract _perform(game: Game): Promise<void>;
 
-  /**
-   * Returns an array of board positions that after click should perform this move.
-   */
   public abstract get clickablePositions(): BoardPosition[];
 
-  /**
-   * Sets specific cell marks related to the move to show on the checkboard.
-   * @param cellMarks reactive
-   * @param boardStateValue
-   * @abstract
-   */
   public abstract showCellMarks(
     cellMarks: MarkBoardState,
     boardStateValue: BoardStateValue

@@ -1,6 +1,6 @@
 import type { Ref } from "vue";
 import { watch } from "vue";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 
 export type SaveCallBack = () => void;
 
@@ -48,7 +48,7 @@ abstract class UserData<ValueType> {
     return isSavedOnce;
   }
 
-  protected safelyParse(dumped: string, toastManager: ToastManager) {
+  protected safelyParse(dumped: string, toaster: Toaster) {
     let value;
     try {
       value = JSON.parse(dumped);
@@ -57,7 +57,7 @@ abstract class UserData<ValueType> {
         `An error occured while trying to parse ${this.id}.`,
         error
       );
-      this.handleInvalidLoadValue(dumped, toastManager);
+      this.handleInvalidLoadValue(dumped, toaster);
       return;
     }
     return value;
@@ -82,9 +82,9 @@ abstract class UserData<ValueType> {
     if (this.autoSave) this.save();
   }
 
-  protected handleInvalidLoadValue(value: string, toastManager: ToastManager) {
+  protected handleInvalidLoadValue(value: string, toaster: Toaster) {
     console.error(`Invalid load value for ${this.id}.`, value);
-    toastManager.showToast(
+    toaster.bake(
       "An error occured while trying to load data from local storage. Your data are probably corrupted or invalid. If the problem persists clear all data.",
       "database-alert",
       "error"
@@ -97,10 +97,10 @@ abstract class UserData<ValueType> {
     }
   }
 
-  public recover(toastManager: ToastManager) {
+  public recover(toaster: Toaster) {
     const dumped = localStorage.getItem(this.storageKey);
     if (dumped) {
-      this.load(dumped, toastManager);
+      this.load(dumped, toaster);
     }
   }
 
@@ -110,7 +110,7 @@ abstract class UserData<ValueType> {
   public abstract dump(): string;
 
   // Load value from a string
-  public abstract load(dumped: string, toastManager: ToastManager): void;
+  public abstract load(dumped: string, toaster: Toaster): void;
 }
 
 export default UserData;

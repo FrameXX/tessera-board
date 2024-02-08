@@ -1,4 +1,4 @@
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 
 type Entries = [string, string][];
 function isEntries(object: any): object is Entries {
@@ -79,15 +79,15 @@ function readFile(file: File): Promise<any | null> {
   });
 }
 
-export async function importData(toastManager: ToastManager) {
+export async function importData(toaster: Toaster) {
   const file = await requestFile();
   if (!file) {
-    toastManager.showToast("File import was canceled", "file-cancel-outline");
+    toaster.bake("File import was canceled", "file-cancel-outline");
     return;
   }
   const entries = await readFile(file);
   if (entries === null) {
-    toastManager.showToast(
+    toaster.bake(
       "Reading data from file failed. File may be corrupted or in wrong format.",
       "file-alert-outline",
       "error"
@@ -95,7 +95,7 @@ export async function importData(toastManager: ToastManager) {
     return;
   }
   if (!isEntries(entries)) {
-    toastManager.showToast(
+    toaster.bake(
       "Provided file has incorrectly formated data. The file may be corrupted or in wrong format.",
       "file-alert-outline",
       "error"

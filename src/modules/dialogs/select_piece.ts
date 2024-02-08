@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import type { RawPiece } from "../pieces/raw_piece";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 
 interface SelectPieceDialogProps {
   open: boolean;
@@ -20,7 +20,7 @@ class SelectPieceDialog {
   private resolve?: (piece: RawPiece) => void;
   public props: SelectPieceDialogProps;
 
-  constructor(private readonly toastManager: ToastManager) {
+  constructor(private readonly toaster: Toaster) {
     this.props = reactive({
       open: false,
       selectedPiece: null,
@@ -46,7 +46,7 @@ class SelectPieceDialog {
       );
     }
     if (!this.props.selectedPiece) {
-      this.toastManager.showToast(
+      this.toaster.bake(
         "Please select one of the pieces by clicking on them.",
         "alert-circle-outline",
         "error"
@@ -59,7 +59,7 @@ class SelectPieceDialog {
   };
 
   public cancel = () => {
-    this.toastManager.showToast(
+    this.toaster.bake(
       "Promotion cannot be canceled. You can undo the move after it's complete.",
       "cancel",
       "error"

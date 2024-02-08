@@ -1,7 +1,7 @@
 import type { Ref } from "vue";
 import type Move from "../moves/move";
 import { isRawMove } from "../moves/raw_move";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 import UserData from "./user_data";
 import Shift from "../moves/shift";
 import Promotion from "../moves/promotion";
@@ -22,21 +22,21 @@ class MoveListData extends UserData<Move[]> {
     return JSON.stringify(this.rawVersion);
   }
 
-  public load(dumped: string, toastManager: ToastManager): void {
-    const rawMoves = this.safelyParse(dumped, toastManager);
+  public load(dumped: string, toaster: Toaster): void {
+    const rawMoves = this.safelyParse(dumped, toaster);
     if (!rawMoves) {
       return;
     }
     if (!Array.isArray(rawMoves)) {
       console.error("The parsed value of move list is not an array");
-      this.handleInvalidLoadValue(dumped, toastManager);
+      this.handleInvalidLoadValue(dumped, toaster);
       return;
     }
     const moves: Move[] = [];
     for (const rawMove of rawMoves) {
       if (!isRawMove(rawMove)) {
         console.error("The parsed value of move list is not an array");
-        this.handleInvalidLoadValue(dumped, toastManager);
+        this.handleInvalidLoadValue(dumped, toaster);
         return;
       }
       let move: Move;

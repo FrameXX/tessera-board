@@ -76,7 +76,7 @@ class PlayerTimer {
   }
 
   private onReachLimit() {
-    this.game.ui.toastManager.showToast(
+    this.game.ui.toaster.bake(
       `${capitalize(this.playerColor)} run out of ${this.name} time!`,
       "timer-alert-outline"
     );
@@ -126,7 +126,7 @@ class PlayerTimer {
 
   public requestReset() {
     this.reset();
-    this.game.ui.toastManager.showToast(
+    this.game.ui.toaster.bake(
       `${capitalize(this.player)} player ${this.name} timer reset.`,
       "numeric-0-box-outline"
     );

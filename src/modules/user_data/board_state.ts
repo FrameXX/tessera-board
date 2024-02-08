@@ -1,6 +1,6 @@
 import ComplexUserData from "./complex_user_data";
 import { getPieceFromRaw } from "../pieces/raw_piece";
-import type ToastManager from "../toast_manager";
+import type Toaster from "../toast_manager";
 import type { BoardStateValue } from "../board_manager";
 import { isRawPiece } from "../utils/game";
 
@@ -25,16 +25,16 @@ class BoardStateData extends ComplexUserData<BoardStateValue> {
 
   public load(
     dumped: string,
-    toastManager: ToastManager,
+    toaster: Toaster,
     fromRaw: boolean = false
   ): void {
-    const value = this.safelyParse(dumped, toastManager);
+    const value = this.safelyParse(dumped, toaster);
     if (!value) {
       return;
     }
     if (!Array.isArray(value)) {
       console.error("The parsed value of board state is not an array");
-      this.handleInvalidLoadValue(dumped, toastManager);
+      this.handleInvalidLoadValue(dumped, toaster);
       return;
     }
     for (const rowIndex in value) {

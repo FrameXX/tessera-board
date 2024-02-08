@@ -1,5 +1,5 @@
 import UserData from "./user_data/user_data";
-import type ToastManager from "./toast_manager";
+import type Toaster from "./toast_manager";
 
 export interface UserConfigPrint {
   id: string;
@@ -49,7 +49,7 @@ class ConfigInventory {
   constructor(
     public readonly id: string,
     public readonly predefinedConfigs: PredefinedConfig[],
-    private readonly toastManager: ToastManager
+    private readonly toaster: Toaster
   ) {
     this.configPrints = this.predefinedConfigs.map((config) => {
       return {
@@ -65,7 +65,7 @@ class ConfigInventory {
   }
 
   private handleErrorOnLoad() {
-    this.toastManager.showToast(
+    this.toaster.bake(
       "An error occured while trying to load data configurations from local storage. Your data are probably corrupted or invalid and it's recommended that you clear all data.",
       "database-alert",
       "error"
@@ -85,7 +85,7 @@ class ConfigInventory {
       console.error(
         `Provided id ${id} of predefined config of inventory ${this.id} is not valid, or the value got lost.`
       );
-      this.toastManager.showToast(
+      this.toaster.bake(
         "An unknown error occured while trying to apply preloaded config.",
         "database-alert",
         "error"

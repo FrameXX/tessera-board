@@ -5,7 +5,6 @@ import {
   setPrimaryHue,
   setSaturationMultiplier,
 } from "./utils/elements";
-import ToastManager from "./toast_manager";
 import type Game from "./game";
 import DurationDialog from "./dialogs/duration";
 import ConfirmDialog from "./dialogs/confirm";
@@ -14,6 +13,7 @@ import SelectPieceDialog from "./dialogs/select_piece";
 import ConfigPrintDialog from "./dialogs/config_print";
 import ConfigsDialog from "./dialogs/configs";
 import type { Winner } from "./utils/game";
+import Toaster from "./toaster/toaster";
 
 const UI_FRAGMENTS = ["settings", "about", "help", "statistics"] as const;
 type UIFragment = (typeof UI_FRAGMENTS)[number];
@@ -26,16 +26,16 @@ class UI {
   public readonly escapeManager: EscapeManager;
   public readonly actionPanelOpen: Ref<boolean> = ref(false);
   public readonly openedFragment: Ref<UIFragment | null> = ref(null);
-  public readonly toastManager = new ToastManager();
+  public readonly toaster = new Toaster();
   public readonly durationDialog = new DurationDialog();
   public readonly confirmDialog = new ConfirmDialog();
   public readonly configPieceDialog = new ConfigPieceDialog();
-  public readonly selectPieceDialog = new SelectPieceDialog(this.toastManager);
-  public readonly configPrintDialog = new ConfigPrintDialog(this.toastManager);
+  public readonly selectPieceDialog = new SelectPieceDialog(this.toaster);
+  public readonly configPrintDialog = new ConfigPrintDialog(this.toaster);
   public readonly configsDialog = new ConfigsDialog(
     this.confirmDialog,
     this.configPrintDialog,
-    this.toastManager
+    this.toaster
   );
   public readonly rotated = computed(() => {
     return (
@@ -49,9 +49,9 @@ class UI {
     this.escapeManager = new EscapeManager(this.toggleActionsPanel);
     watch(this.game.paused, (newValue) => {
       if (newValue !== "not") {
-        this.toastManager.showToast("Game paused", "pause");
+        this.toaster.bake("Game paused", "pause");
       } else {
-        this.toastManager.showToast("Game resumed", "play-outline");
+        this.toaster.bake("Game resumed", "play-outline");
       }
     });
     watch(this.openedFragment, () => {
