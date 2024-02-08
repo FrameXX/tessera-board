@@ -110,8 +110,8 @@ class PlayerTimer {
 
   private get playerColor(): PlayerColor {
     return this.isPrimaryPlayer
-      ? this.game.primaryPlayerColor.value
-      : getOpossitePlayerColor(this.game.primaryPlayerColor.value);
+      ? this.game.primaryPlayer.color.value
+      : getOpossitePlayerColor(this.game.primaryPlayer.color.value);
   }
 
   private startInterval() {
