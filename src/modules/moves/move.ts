@@ -2,9 +2,10 @@ import type Piece from "../pieces/piece";
 import type { BoardPosition, MarkBoardState } from "../board_manager";
 import type { RawMove } from "./raw_move";
 import type { BoardStateValue } from "../board_manager";
+import type {
+  PlayerColor} from "../utils/game";
 import {
   GameLogicError,
-  PlayerColor,
   getAllMovesScore,
   getAllpiecesContext as getAllPiecesContext,
   getAllpiecesContext,
@@ -14,8 +15,8 @@ import {
   sumPiecesImportances,
 } from "../utils/game";
 import type Game from "../game";
-import PiecesImportance from "../pieces_importance";
-import { Player } from "../game";
+import type PiecesImportance from "../pieces_importance";
+import type { Player } from "../game";
 
 export const MOVE_IDS = ["shift", "castling", "promotion"] as const;
 
@@ -82,7 +83,7 @@ abstract class Move {
   ): number {
     console.log(boardState);
     console.log(depth);
-    let thisScore = this._getScore(
+    const thisScore = this._getScore(
       game,
       boardState,
       piecesImportance,
@@ -178,7 +179,7 @@ abstract class Move {
   ): number {
     console.log(boardState);
     console.log(depth);
-    let thisScore = this._getScore(
+    const thisScore = this._getScore(
       game,
       boardState,
       piecesImportance,

@@ -244,18 +244,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-      case "none":
-        return `${capitalize(this.playingPlayer.color.value)} plays`;
-      case "draw":
-        return "Draw";
-      case "secondary":
-        return `${capitalize(this.secondaryPlayer.color.value)} won`;
-      case "primary":
-        return `${capitalize(this.primaryPlayer.color.value)} won`;
-      default:
-        throw new UserDataError(
-          `Winner value is of an invalid type. value: ${this.winner.value}`
-        );
+    case "none":
+      return `${capitalize(this.playingPlayer.color.value)} plays`;
+    case "draw":
+      return "Draw";
+    case "secondary":
+      return `${capitalize(this.secondaryPlayer.color.value)} won`;
+    case "primary":
+      return `${capitalize(this.primaryPlayer.color.value)} won`;
+    default:
+      throw new UserDataError(
+        `Winner value is of an invalid type. value: ${this.winner.value}`
+      );
     }
   });
 

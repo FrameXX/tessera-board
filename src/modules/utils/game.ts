@@ -13,7 +13,7 @@ import type Piece from "../pieces/piece";
 import { type RawPiece } from "../pieces/raw_piece";
 import type Game from "../game";
 import type PiecesImportance from "../pieces_importance";
-import { Player } from "../game";
+import type { Player } from "../game";
 
 export type Mark = "availible" | "capture" | "capturing";
 
@@ -73,7 +73,7 @@ export function getAllMovesScore(
   playerMove = true
 ): number[] {
   const allPiecesContext = getAllpiecesContext(boardState);
-  let score = [];
+  const score = [];
   for (const pieceContext of allPiecesContext) {
     const moves = pieceContext.piece.getPossibleMoves(game, pieceContext);
     for (const move of moves) {

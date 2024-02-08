@@ -33,8 +33,8 @@ import type { PieceId } from "../pieces/piece";
 import type Game from "../game";
 import { getBoardPositionPiece } from "../utils/game";
 import type CapturedPieces from "../capturedPieces";
-import { Player } from "../game";
-import PiecesImportance from "../pieces_importance";
+import type { Player } from "../game";
+import type PiecesImportance from "../pieces_importance";
 
 export function isMovePromotion(move: Move): move is Promotion {
   return move.moveId === "promotion";
@@ -220,9 +220,9 @@ class Promotion extends Move {
         transformOptions.length === 1
           ? transformOptions[0]
           : chooseBestPiece(
-              transformOptions,
-              game.settings.piecesImportances.values
-            );
+            transformOptions,
+            game.settings.piecesImportances.values
+          );
     }
 
     const newPiece = getPieceFromRaw(this.newRawPiece);
@@ -261,9 +261,9 @@ class Promotion extends Move {
         transformOptions.length === 1
           ? transformOptions[0]
           : chooseBestPiece(
-              transformOptions,
-              game.settings.piecesImportances.values
-            );
+            transformOptions,
+            game.settings.piecesImportances.values
+          );
     }
 
     const newPiece = getPieceFromRaw(this.newRawPiece);
@@ -371,11 +371,11 @@ class Promotion extends Move {
 
     return this.captures
       ? `${getPieceNotation(this.originalPiece.pieceId)}x${getPositionNotation(
-          this.captures
-        )}=${getPieceNotation(this.newRawPiece.pieceId)}`
+        this.captures
+      )}=${getPieceNotation(this.newRawPiece.pieceId)}`
       : `${getPositionNotation(this.target)}=${getPieceNotation(
-          this.newRawPiece.pieceId
-        )}`;
+        this.newRawPiece.pieceId
+      )}`;
   }
 
   public get clickablePositions(): BoardPosition[] {

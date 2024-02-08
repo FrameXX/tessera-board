@@ -5,9 +5,9 @@ import type {
 } from "../board_manager";
 import { isBoardPosition } from "../board_manager";
 import type Game from "../game";
-import { Player } from "../game";
+import type { Player } from "../game";
 import type Piece from "../pieces/piece";
-import PiecesImportance from "../pieces_importance";
+import type PiecesImportance from "../pieces_importance";
 import { getBoardPositionPiece, getOpossitePlayerColor } from "../utils/game";
 import Move, {
   getCleanBoardPosition,

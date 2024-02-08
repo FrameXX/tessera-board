@@ -86,20 +86,20 @@ class UI {
 
   public updatePrimaryHue(primaryPlayerPlaying: boolean, winner: Winner) {
     switch (winner) {
-      case "none":
-        setPrimaryHue(primaryPlayerPlaying);
-        break;
-      case "draw":
-        setSaturationMultiplier(0);
-        break;
-      case "primary":
-        setPrimaryHue(true);
-        break;
-      case "secondary":
-        setPrimaryHue(false);
-        break;
-      default:
-        break;
+    case "none":
+      setPrimaryHue(primaryPlayerPlaying);
+      break;
+    case "draw":
+      setSaturationMultiplier(0);
+      break;
+    case "primary":
+      setPrimaryHue(true);
+      break;
+    case "secondary":
+      setPrimaryHue(false);
+      break;
+    default:
+      break;
     }
     if (winner !== "draw") {
       setSaturationMultiplier(1);
