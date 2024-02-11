@@ -7,7 +7,6 @@
 **Single page app/game for playing Chess with the aim of being functional, customisable, visually appealing and usable on both mobile and desktop devices and screens.**
 
 <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg"></a>
-<a href="https://github.com/FrameXX/tessera-board/releases" alt="Version: 0.0.0"><img src="https://img.shields.io/badge/Version-0.0.0-brown.svg"></a>
 
 </div>
 
