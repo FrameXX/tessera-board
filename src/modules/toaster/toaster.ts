@@ -1,4 +1,4 @@
-import type { Ref} from "vue";
+import type { Ref } from "vue";
 import { ref } from "vue";
 import type { ToastType } from "./toast";
 import Toast from "./toast";
@@ -42,6 +42,6 @@ export default class Toaster {
   };
 
   private removeMostBaked() {
-    this.remove(this.toasts.value[this.toasts.value.length - 1].id);
+    this.remove(this.toasts.value[0].id);
   }
 }
