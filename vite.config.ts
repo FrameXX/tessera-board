@@ -6,4 +6,7 @@ export default defineConfig({
   publicDir: "src/assets",
   root: "src",
   plugins: [vue()],
+  build: {
+    assetsInlineLimit: 0,
+  },
 });
