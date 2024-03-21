@@ -82,8 +82,7 @@ class PlayerTimer {
     );
     if (
       this.isMoveTimer &&
-      this.game.settings.secondsMoveLimitRunOutPunishment.value ===
-        "random_move"
+      this.game.settings.secondsMoveLimitRunOutPenalty.value === "random_move"
     ) {
       const randomMove = this.game.getRandomMove(this.playerColor);
       this.game.performMove(randomMove);

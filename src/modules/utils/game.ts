@@ -7,13 +7,14 @@ import type { PieceId } from "../pieces/piece";
 import {
   isPieceId,
   type Path,
-  type PiecesImportanceValues,
+  type PieceImportanceValues,
 } from "../pieces/piece";
 import type Piece from "../pieces/piece";
 import { type RawPiece } from "../pieces/raw_piece";
 import type Game from "../game";
-import type PiecesImportance from "../pieces_importance";
+import type PiecesImportance from "../piece_importances";
 import type { Player } from "../game";
+import { PlayerColor, isPlayerColor } from "../options/player_color_option";
 
 export type Mark = "availible" | "capture" | "capturing";
 
@@ -23,11 +24,6 @@ export type MoveExecution = "perform" | MoveDirection;
 export type PlayerId = "primary" | "secondary";
 export function isPlayer(string: string): string is PlayerId {
   return string === "primary" || string === "secondary";
-}
-
-export type PlayerColor = "white" | "black";
-export function isPlayerColor(string: string): string is PlayerColor {
-  return string === "white" || string === "black";
 }
 
 export function getOpossitePlayerColor(playerColor: PlayerColor) {
@@ -90,13 +86,6 @@ export function getAllMovesScore(
     }
   }
   return score;
-}
-
-export type SecondsPerMovePenalty = "game_loss" | "random_move";
-export function isSecondsPerMovePenalty(
-  string: string
-): string is SecondsPerMovePenalty {
-  return string === "game_loss" || string === "random_move";
 }
 
 export class GameLogicError extends Error {
@@ -263,7 +252,7 @@ export function positionsToPath(
 
 export function chooseBestPiece(
   pieces: RawPiece[],
-  piecesImportance: PiecesImportanceValues
+  piecesImportance: PieceImportanceValues
 ) {
   let bestPiece = pieces[0];
   for (const piece of pieces) {
@@ -304,7 +293,7 @@ export function getPieceIdsWithColor(
   );
 }
 
-export function sumPiecesImportances(
+export function sumpieceImportances(
   pieceIds: PieceId[],
   piecesImportance: PiecesImportance
 ) {

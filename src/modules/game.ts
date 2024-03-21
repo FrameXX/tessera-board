@@ -24,12 +24,11 @@ import PieceIconPackData from "./user_data/piece_set";
 import UI from "./ui";
 import UserDataManager from "./user_data_manager";
 import BooleanUserData from "./user_data/boolean_user_data";
-import HueData from "./user_data/hue";
+import HueOption from "./options/hue_option";
 import SelectUserData from "./user_data/select_user_data";
 import GamePausedData from "./user_data/game_paused";
 import PieceBorderData from "./user_data/piece_border";
 import PiecePaddingData from "./user_data/piece_padding";
-import type { PreferredPlayerColor } from "./user_data/preferred_player_color";
 import PlayerColorOptionData from "./user_data/preferred_player_color";
 import CellIndexOpacityData from "./user_data/cell_index_opacity";
 import TransitionDurationData from "./user_data/transition_duration";
@@ -42,24 +41,16 @@ import {
   updatePieceColors,
   waitForTransitionEnd,
 } from "./utils/elements";
-import type {
-  PlayerId,
-  PlayerColor,
-  SecondsPerMovePenalty,
-  WinReason,
-  Winner,
-} from "./utils/game";
+import type { PlayerId, WinReason, Winner } from "./utils/game";
 import {
   GameLogicError,
   getAllpiecesContext as getAllPiecesContext,
-  sumPiecesImportances,
+  sumpieceImportances,
   getGuardedPieces,
   getOpossitePlayerColor,
   getPieceIdsWithColor,
   invalidatePiecesCache as invalidatePieceContextCache,
   getCheckedGuardedPieces,
-  isPlayerColor,
-  isSecondsPerMovePenalty,
   isWinReason,
   positionsToPath,
 } from "./utils/game";
@@ -74,8 +65,13 @@ import King from "./pieces/king";
 import Pawn from "./pieces/pawn";
 import PlayerTimers from "./player_timers";
 import CapturedPieces from "./capturedPieces";
-import PiecesImportance from "./pieces_importance";
+import PiecesImportance from "./piece_importances";
 import { movePositionValue } from "./moves/move";
+import BooleanOption from "./options/boolean_option";
+import NumberOption from "./options/number_option";
+import PlayerColorOption, { PlayerColor } from "./options/player_color_option";
+import PreferredPlayerColorOption from "./options/preferred_player_color_option";
+import SecondsPerMovePenaltyOption from "./options/seconds_per_move_penalty_option";
 
 export type GameAudioEffects = Game["audioEffects"];
 export type GameSettings = Game["settings"];
@@ -90,26 +86,66 @@ export interface Player {
 
 export default class Game {
   public readonly settings = {
-    primaryPlayerComputer: ref(false),
-    primaryPlayerComputerPrecision: ref(100),
-    primaryPlayerDynamicComputerPrecision: ref(true),
-    primaryPlayerDynamicComputerPrecisionStrenght: ref(80),
-    primaryPlayerComputerLookAdheadTurns: ref(3),
-    primaryPlayerComputerAggressivity: ref(50),
-    secondaryPlayerComputer: ref(true),
-    secondaryPlayerComputerPrecision: ref(100),
-    secondaryPlayerDynamicComputerPrecision: ref(true),
-    secondaryPlayerDynamicComputerPrecisionStrenght: ref(80),
-    secondaryPlayerComputerLookAdheadTurns: ref(3),
-    secondaryPlayerComputerAggressivity: ref(50),
-    piecesImportances: new PiecesImportance(),
-    preferredFirstMoveColor: ref<PreferredPlayerColor>("white"),
-    preferredPlayerColor: ref<PreferredPlayerColor>("random"),
-    primaryPlayerSecondsPerMove: ref<number>(0),
-    secondaryPlayerSecondsPerMove: ref<number>(0),
-    primaryPlayerSecondsPerMatch: ref<number>(0),
-    secondaryPlayerSecondsPerMatch: ref<number>(0),
-    secondsMoveLimitRunOutPunishment: ref<SecondsPerMovePenalty>("random_move"),
+    primaryPlayerHue: reactive(new HueOption(37, true)),
+    secondaryPlayerHue: reactive(new HueOption(200, false)),
+    primaryPlayerComputer: reactive(
+      new BooleanOption(false, "computer-primary")
+    ),
+    primaryPlayerComputerPrecision: reactive(
+      new NumberOption(100, "computer-precision-primary")
+    ),
+    primaryPlayerDynamicComputerPrecision: reactive(
+      new BooleanOption(true, "computer-precision-dynamic-primary")
+    ),
+    primaryPlayerDynamicComputerPrecisionStrenght: reactive(
+      new NumberOption(80, "computer-precision-dynamic-strenght-primary")
+    ),
+    primaryPlayerComputerLookAdheadTurns: reactive(
+      new NumberOption(3, "computer-look-adhead-turns-primary")
+    ),
+    primaryPlayerComputerAggressivity: reactive(
+      new NumberOption(80, "computer-aggressity-primary")
+    ),
+    secondaryPlayerComputer: reactive(
+      new BooleanOption(false, "computer-secondary")
+    ),
+    secondaryPlayerComputerPrecision: reactive(
+      new NumberOption(100, "computer-precision-secondary")
+    ),
+    secondaryPlayerDynamicComputerPrecision: reactive(
+      new BooleanOption(true, "computer-precision-dynamic-secondary")
+    ),
+    secondaryPlayerDynamicComputerPrecisionStrenght: reactive(
+      new NumberOption(80, "computer-precision-dynamic-strenght-secondary")
+    ),
+    secondaryPlayerComputerLookAdheadTurns: reactive(
+      new NumberOption(3, "computer-look-adhead-turns-secondary")
+    ),
+    secondaryPlayerComputerAggressivity: reactive(
+      new NumberOption(80, "computer-aggressity-secondary")
+    ),
+    pieceImportances: new PiecesImportance(),
+    preferredFirstMoveColor: reactive(
+      new PreferredPlayerColorOption("white", "color-preferred-first-move")
+    ),
+    preferredPlayerColor: reactive(
+      new PreferredPlayerColorOption("random", "color-preferred-primary")
+    ),
+    primaryPlayerSecondsPerMove: reactive(
+      new NumberOption(0, "seconds-per-move-primary")
+    ),
+    secondaryPlayerSecondsPerMove: reactive(
+      new NumberOption(0, "seconds-per-move-secondary")
+    ),
+    primaryPlayerSecondsPerMatch: reactive(
+      new NumberOption(0, "seconds-per-match-primary")
+    ),
+    secondaryPlayerSecondsPerMatch: reactive(
+      new NumberOption(0, "seconds-per-match-secondary")
+    ),
+    secondsMoveLimitRunOutPenalty: reactive(
+      new SecondsPerMovePenaltyOption("random_move")
+    ),
     reviveFromCapturedPieces: ref(false),
     audioEffectsEnabled: ref(true),
     vibrationsEnabled: ref(true),
@@ -121,8 +157,6 @@ export default class Game {
     tableModeEnabled: ref(false),
     theme: ref<Theme>("auto"),
     transitions: ref<Transitions>("auto"),
-    primaryPlayerHue: ref(37),
-    secondaryPlayerHue: ref(200),
     pieceIconPack: ref<PieceIconPack>("font_awesome"),
     piecePadding: ref(20),
     pieceBorder: ref(1),
@@ -238,18 +272,18 @@ export default class Game {
 
   public readonly status = computed(() => {
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingPlayer.color.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayer.color.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayer.color.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingPlayer.color.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayer.color.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayer.color.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -320,8 +354,8 @@ export default class Game {
       ...PIECE_IDS.map((pieceId) => {
         return new NumberUserData(
           `${pieceId}-importance`,
-          this.settings.piecesImportances.values[pieceId].value,
-          this.settings.piecesImportances.values[pieceId]
+          this.settings.pieceImportances.values[pieceId].value,
+          this.settings.pieceImportances.values[pieceId]
         );
       }),
       new BooleanUserData(
@@ -333,16 +367,6 @@ export default class Game {
         "auto_pause",
         this.settings.autoPauseGame.value,
         this.settings.autoPauseGame
-      ),
-      new HueData(
-        this.settings.primaryPlayerHue.value,
-        this.settings.primaryPlayerHue,
-        false
-      ),
-      new HueData(
-        this.settings.secondaryPlayerHue.value,
-        this.settings.secondaryPlayerHue,
-        true
       ),
       new PieceIconPackData(
         this.settings.pieceIconPack.value,
@@ -363,16 +387,6 @@ export default class Game {
       new CellIndexOpacityData(
         this.settings.cellIndexOpacity.value,
         this.settings.cellIndexOpacity
-      ),
-      new PlayerColorOptionData(
-        "preferred_player_color",
-        this.settings.preferredPlayerColor.value,
-        this.settings.preferredPlayerColor
-      ),
-      new PlayerColorOptionData(
-        "preferred_first_move_color",
-        this.settings.preferredFirstMoveColor.value,
-        this.settings.preferredFirstMoveColor
       ),
       new BooleanUserData(
         "show_capturing_pieces",
@@ -402,12 +416,6 @@ export default class Game {
         this.settings.ignorePiecesGuardedProperty
       ),
       new SelectUserData(
-        "primary_player_color",
-        this.primaryPlayer.color.value,
-        isPlayerColor,
-        this.primaryPlayer.color
-      ),
-      new SelectUserData(
         "theme",
         this.settings.theme.value,
         isTheme,
@@ -425,12 +433,6 @@ export default class Game {
         isWinReason,
         this.winReason
       ),
-      new SelectUserData(
-        "seconds_per_move_runout_punishment",
-        "random_move",
-        isSecondsPerMovePenalty,
-        this.settings.secondsMoveLimitRunOutPunishment
-      ),
       new GamePausedData(this.paused.value, this.paused),
       new BooleanUserData(
         "revive_from_captured_pieces",
@@ -441,26 +443,6 @@ export default class Game {
         "audio_effects_enabled",
         this.settings.audioEffectsEnabled.value,
         this.settings.audioEffectsEnabled
-      ),
-      new NumberUserData(
-        "primary_player_seconds_per_move",
-        this.settings.primaryPlayerSecondsPerMove.value,
-        this.settings.primaryPlayerSecondsPerMove
-      ),
-      new NumberUserData(
-        "secondary_player_seconds_per_move",
-        this.settings.secondaryPlayerSecondsPerMove.value,
-        this.settings.secondaryPlayerSecondsPerMove
-      ),
-      new NumberUserData(
-        "primary_player_seconds_per_match",
-        this.settings.primaryPlayerSecondsPerMatch.value,
-        this.settings.primaryPlayerSecondsPerMatch
-      ),
-      new NumberUserData(
-        "secondary_player_seconds_per_match",
-        this.settings.secondaryPlayerSecondsPerMatch.value,
-        this.settings.secondaryPlayerSecondsPerMatch
       ),
       new NumberUserData(
         "primary_player_move_seconds",
@@ -487,12 +469,6 @@ export default class Game {
         this.settings.markUnactivePlayerAvailibleMoves.value,
         this.settings.markUnactivePlayerAvailibleMoves
       ),
-      new SelectUserData(
-        "first_move_color",
-        this.firstMoveColor.value,
-        isPlayerColor,
-        this.firstMoveColor
-      ),
       new NumberUserData(
         "primary_player_unit_extent",
         this.primaryPlayer.unitExtent.value,
@@ -512,78 +488,6 @@ export default class Game {
         "secondary_player_initial_pieces",
         this.secondaryPlayer.initialPieces.value,
         this.secondaryPlayer.initialPieces
-      ),
-      new BooleanUserData(
-        "primary_player_computer",
-        this.settings.primaryPlayerComputer.value,
-        this.settings.primaryPlayerComputer
-      ),
-      new NumberUserData(
-        "primary_player_computer_precision",
-        this.settings.primaryPlayerComputerPrecision.value,
-        this.settings.primaryPlayerComputerPrecision,
-        0,
-        100
-      ),
-      new BooleanUserData(
-        "primary_player_dynamic_computer_precision",
-        this.settings.primaryPlayerDynamicComputerPrecision.value,
-        this.settings.primaryPlayerDynamicComputerPrecision
-      ),
-      new NumberUserData(
-        "primary_player_dynamic_computer_precision_strenght",
-        this.settings.primaryPlayerDynamicComputerPrecisionStrenght.value,
-        this.settings.primaryPlayerDynamicComputerPrecisionStrenght
-      ),
-      new NumberUserData(
-        "primary_player_computer_look_adhead_turns",
-        this.settings.primaryPlayerComputerLookAdheadTurns.value,
-        this.settings.primaryPlayerComputerLookAdheadTurns,
-        1,
-        5
-      ),
-      new NumberUserData(
-        "primary_player_computer_agressivity",
-        this.settings.primaryPlayerComputerAggressivity.value,
-        this.settings.primaryPlayerComputerAggressivity,
-        0,
-        100
-      ),
-      new BooleanUserData(
-        "secondary_player_computer",
-        this.settings.secondaryPlayerComputer.value,
-        this.settings.secondaryPlayerComputer
-      ),
-      new NumberUserData(
-        "secondary_player_computer_precision",
-        this.settings.secondaryPlayerComputerPrecision.value,
-        this.settings.secondaryPlayerComputerPrecision,
-        0,
-        100
-      ),
-      new BooleanUserData(
-        "secondary_player_dynamic_computer_precision",
-        this.settings.secondaryPlayerDynamicComputerPrecision.value,
-        this.settings.secondaryPlayerDynamicComputerPrecision
-      ),
-      new NumberUserData(
-        "secondary_player_dynamic_computer_precision_strenght",
-        this.settings.secondaryPlayerDynamicComputerPrecisionStrenght.value,
-        this.settings.secondaryPlayerDynamicComputerPrecisionStrenght
-      ),
-      new NumberUserData(
-        "secondary_player_computer_look_adhead_turns",
-        this.settings.secondaryPlayerComputerLookAdheadTurns.value,
-        this.settings.secondaryPlayerComputerLookAdheadTurns,
-        1,
-        5
-      ),
-      new NumberUserData(
-        "secondary_player_computer_agressivity",
-        this.settings.secondaryPlayerComputerAggressivity.value,
-        this.settings.secondaryPlayerComputerAggressivity,
-        0,
-        100
       ),
       this.defaultBoardStateData,
       this.gameBoardStateData,
@@ -621,9 +525,9 @@ export default class Game {
       this.updateDefaultBoardAllPiecesContext
     );
 
-    for (const pieceId in this.settings.piecesImportances.values) {
+    for (const pieceId in this.settings.pieceImportances.values) {
       watch(
-        this.settings.piecesImportances.values[pieceId as PieceId],
+        this.settings.pieceImportances.values[pieceId as PieceId],
         this.updateUnitExtents
       );
     }
@@ -925,28 +829,28 @@ export default class Game {
   }
 
   private updateUnitExtents = () => {
-    this.primaryPlayer.unitExtent.value = sumPiecesImportances(
+    this.primaryPlayer.unitExtent.value = sumpieceImportances(
       getPieceIdsWithColor(
         this.primaryPlayer.color.value,
         this.gameBoardAllPiecesContext.value
       ),
-      this.settings.piecesImportances
+      this.settings.pieceImportances
     );
-    this.secondaryPlayer.unitExtent.value = sumPiecesImportances(
+    this.secondaryPlayer.unitExtent.value = sumpieceImportances(
       getPieceIdsWithColor(
         this.secondaryPlayer.color.value,
         this.gameBoardAllPiecesContext.value
       ),
-      this.settings.piecesImportances
+      this.settings.pieceImportances
     );
 
-    this.primaryPlayer.maxUnitExtent.value = sumPiecesImportances(
+    this.primaryPlayer.maxUnitExtent.value = sumpieceImportances(
       this.primaryPlayer.initialPieces.value,
-      this.settings.piecesImportances
+      this.settings.pieceImportances
     );
-    this.secondaryPlayer.maxUnitExtent.value = sumPiecesImportances(
+    this.secondaryPlayer.maxUnitExtent.value = sumpieceImportances(
       this.secondaryPlayer.initialPieces.value,
-      this.settings.piecesImportances
+      this.settings.pieceImportances
     );
   };
 

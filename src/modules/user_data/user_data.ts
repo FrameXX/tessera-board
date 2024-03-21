@@ -2,8 +2,6 @@ import type { Ref } from "vue";
 import { watch } from "vue";
 import type Toaster from "../toaster/toaster";
 
-export type SaveCallBack = () => void;
-
 export class UserDataError extends Error {
   constructor(message: string) {
     super(message);

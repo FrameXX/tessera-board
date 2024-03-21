@@ -30,7 +30,7 @@ import {
 } from "../utils/game";
 import type Game from "../game";
 import type { Player } from "../game";
-import type PiecesImportance from "../pieces_importance";
+import type PiecesImportance from "../piece_importances";
 
 export function isMoveShift(move: Move): move is Shift {
   return move.moveId == "shift";
@@ -139,8 +139,8 @@ class Shift extends Move {
   public getNotation(): string {
     return this.captures
       ? `${getPieceNotation(this.pieceId)}x${getPositionNotation(
-        this.captures
-      )}`
+          this.captures
+        )}`
       : `${getPieceNotation(this.pieceId)}${getPositionNotation(this.target)}`;
   }
 

@@ -411,13 +411,13 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
-            name="Time per move expiration punishment"
+            name="Time per move expiration penalty"
             icon-id="timer-sand-complete"
-            option-id="seconds-move-limit-run-out-punishment"
+            option-id="seconds-move-limit-run-out-penalty"
           >
             <select
-              id="seconds-move-limit-run-out-punishment"
-              v-model="props.modelValue.secondsMoveLimitRunOutPunishment.value"
+              id="seconds-move-limit-run-out-penalty"
+              v-model="props.modelValue.secondsMoveLimitRunOutPenalty.value"
             >
               <option value="random_move">Random move</option>
               <option value="game_loss">Game loss</option>
@@ -567,7 +567,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             <input
               type="number"
               :id="`input-${pieceId}-importance`"
-              v-model="props.modelValue.piecesImportances.values[pieceId].value"
+              v-model="props.modelValue.pieceImportances.values[pieceId].value"
             />
           </UserOption>
         </Category>

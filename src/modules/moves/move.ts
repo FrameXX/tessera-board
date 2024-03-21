@@ -11,10 +11,10 @@ import {
   getGuardedPieces,
   invalidatePiecesCache,
   getCheckedGuardedPieces,
-  sumPiecesImportances,
+  sumpieceImportances,
 } from "../utils/game";
 import type Game from "../game";
-import type PiecesImportance from "../pieces_importance";
+import type PiecesImportance from "../piece_importances";
 import type { Player } from "../game";
 
 export const MOVE_IDS = ["shift", "castling", "promotion"] as const;
@@ -42,7 +42,7 @@ abstract class Move {
     piecesImportance: PiecesImportance
   ) {
     const checkedPieces = this.willCheckGuardedPieces(game, color, boardState);
-    const score = sumPiecesImportances(
+    const score = sumpieceImportances(
       checkedPieces.map((piece) => piece.pieceId),
       piecesImportance
     );

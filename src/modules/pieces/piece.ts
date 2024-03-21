@@ -15,7 +15,7 @@ export const PIECES = {
   pawn: "Pawn",
 } as const;
 
-export const PIECES_DEFAULT_IMPORTANCE = {
+export const PIECE_DEFAULT_IMPORTANCES = {
   rook: 5,
   knight: 3,
   bishop: 3.25,
@@ -31,7 +31,7 @@ export function isPieceId(string: string): string is PieceId {
   return Object.keys(PIECES).includes(string);
 }
 
-export type PiecesImportanceValues = {
+export type PieceImportanceValues = {
   [key in PieceId]: Ref<number>;
 };
 
