@@ -9,18 +9,17 @@ class HueOption extends NumberOption {
       0,
       360
     );
-    this.addEventListener("change", (event) => {
-      const newValue = (event as CustomEvent).detail;
-      this.apply(newValue);
+    this.addEventListener("change", () => {
+      this.apply();
     });
-    this.apply(this.value);
+    this.apply();
   }
 
-  private apply(value: number): void {
+  private apply(): void {
     if (this.primaryPlayer) {
-      setCSSVariable("H-primary-player", value.toString());
+      setCSSVariable("H-primary-player", this.value.toString());
     } else {
-      setCSSVariable("H-secondary-player", value.toString());
+      setCSSVariable("H-secondary-player", this.value.toString());
     }
   }
 }

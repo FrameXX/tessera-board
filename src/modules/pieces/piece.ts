@@ -1,10 +1,10 @@
 import { getRandomId } from "../utils/misc";
-import type { PlayerColor } from "../utils/game";
-import type { Ref } from "vue";
 import type Move from "../moves/move";
 import type { RawPiece } from "./raw_piece";
 import type { BoardPosition, BoardStateValue } from "../board_manager";
 import type Game from "../game";
+import NumberOption from "../options/number_option";
+import { PlayerColor } from "../options/player_color_option";
 
 export const PIECES = {
   rook: "Rook",
@@ -32,7 +32,7 @@ export function isPieceId(string: string): string is PieceId {
 }
 
 export type PieceImportanceValues = {
-  [key in PieceId]: Ref<number>;
+  [key in PieceId]: NumberOption;
 };
 
 export interface Path {

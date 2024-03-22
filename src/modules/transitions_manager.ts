@@ -1,26 +1,21 @@
 import { setCSSVariable } from "./utils/elements";
-import type { Ref} from "vue";
-import { watch } from "vue";
-
-export type Transitions = "auto" | "enabled" | "disabled";
-export function isTransitions(string: string): string is Transitions {
-  return string === "auto" || string === "enabled" || string === "disabled";
-}
+import TransitionsOption, { Transitions } from "./options/transitions_option";
 
 class TransitionsManager {
-  constructor(private readonly transitions: Ref<Transitions>) {
-    this.updateTransitions(this.transitions.value);
+  constructor(private readonly transitionsOption: TransitionsOption) {
+    this.updateTransitions(this.transitionsOption.value);
 
     matchMedia("(prefers-reduced-motion: reduce)").addEventListener(
       "change",
       () => {
-        if (this.transitions.value === "auto") {
-          this.updateTransitions(this.transitions.value);
+        if (this.transitionsOption.value === "auto") {
+          this.updateTransitions(this.transitionsOption.value);
         }
       }
     );
 
-    watch(this.transitions, (newValue) => {
+    this.transitionsOption.addEventListener("change", (event) => {
+      const newValue = (event as CustomEvent).detail as Transitions;
       this.updateTransitions(newValue);
     });
   }

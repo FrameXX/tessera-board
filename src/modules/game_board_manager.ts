@@ -57,7 +57,7 @@ class GameBoardManager extends BoardManager {
 
   private isMarkingAvailibleMovesPermitted(pieceColor: PlayerColor) {
     if (
-      this.game.settings.markUnactivePlayerAvailibleMoves.value ||
+      this.game.settings.markUnactivePlayerAvailableMoves.value ||
       this.game.winner.value !== "none"
     )
       return true;

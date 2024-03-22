@@ -1,6 +1,6 @@
 import Storable from "../storable";
 
-export default class SelectOption<
+export default abstract class SelectOption<
   ValueType extends string
 > extends Storable<ValueType> {
   constructor(

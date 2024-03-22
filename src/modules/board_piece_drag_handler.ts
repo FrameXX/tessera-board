@@ -77,7 +77,7 @@ export default class BoardPieceDragHandler {
         this.targetingDragPosition.value,
         this.draggingPiece.value
       );
-      if (this.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+      if (this.game.settings.hapticFeedbackEnabled.value) navigator.vibrate(30);
     });
     watch(this.dragXDiff, this.dragDiffChange);
     watch(this.dragYDiff, this.dragDiffChange);

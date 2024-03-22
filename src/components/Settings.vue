@@ -454,7 +454,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
           >
             <Checkbox
               id="check-mark-opponent-availible-moves"
-              v-model="props.modelValue.markUnactivePlayerAvailibleMoves.value"
+              v-model="props.modelValue.markUnactivePlayerAvailableMoves.value"
             />
             <template #description>
               The player will be able to display the possible moves and board
@@ -786,7 +786,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
           >
             <Checkbox
               id="check-use-vibrations"
-              v-model="props.modelValue.vibrationsEnabled.value"
+              v-model="props.modelValue.hapticFeedbackEnabled.value"
             />
             <template #description>
               Vibrations will be performed on devices that have a vibration
@@ -824,7 +824,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
               min="0"
               max="300"
               id="input-transition-duration"
-              v-model="props.modelValue.transitionDuration.value"
+              v-model="props.modelValue.transitionsDuration.value"
             />
             <template #description
               >Changes duration of all the transitions and animations (except

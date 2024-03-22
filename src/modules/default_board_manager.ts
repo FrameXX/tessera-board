@@ -72,7 +72,7 @@ class DefaultBoardManager extends BoardManager {
       null;
     if (this.game.settings.audioEffectsEnabled.value)
       this.game.audioEffects.pieceRemove.play();
-    if (this.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+    if (this.game.settings.hapticFeedbackEnabled.value) navigator.vibrate(30);
   }
 
   public async onCellClick(position: BoardPosition) {
@@ -83,7 +83,7 @@ class DefaultBoardManager extends BoardManager {
     this.game.settings.defaultBoardState[position.row][position.col] = piece;
     if (this.game.settings.audioEffectsEnabled.value)
       this.game.audioEffects.pieceMove.play();
-    if (this.game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+    if (this.game.settings.hapticFeedbackEnabled.value) navigator.vibrate(30);
   }
 }
 

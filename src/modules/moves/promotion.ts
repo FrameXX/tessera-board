@@ -200,7 +200,7 @@ class Promotion extends Move {
 
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceRemove.play();
-      if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+      if (game.settings.hapticFeedbackEnabled.value) navigator.vibrate(30);
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
@@ -239,7 +239,7 @@ class Promotion extends Move {
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
+    if (game.settings.hapticFeedbackEnabled) navigator.vibrate([40, 60, 20]);
   }
 
   protected _forward(boardState: BoardStateValue, game: Game): void {
@@ -292,7 +292,7 @@ class Promotion extends Move {
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
+    if (game.settings.hapticFeedbackEnabled) navigator.vibrate([40, 60, 20]);
 
     const piece = getBoardPositionPiece(this.target, game.boardState);
     await game.movePiece(piece, this.target, this.origin);
@@ -322,7 +322,7 @@ class Promotion extends Move {
       game.capturePosition(this.captures);
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceRemove.play();
-      if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+      if (game.settings.hapticFeedbackEnabled.value) navigator.vibrate(30);
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
@@ -358,7 +358,7 @@ class Promotion extends Move {
 
     if (game.settings.audioEffectsEnabled.value)
       game.audioEffects.pieceMove.play();
-    if (game.settings.vibrationsEnabled) navigator.vibrate([40, 60, 20]);
+    if (game.settings.hapticFeedbackEnabled) navigator.vibrate([40, 60, 20]);
     game.updateGameBoardAllPiecesContext();
   }
 

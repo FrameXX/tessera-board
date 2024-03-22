@@ -1,27 +1,23 @@
 import { setCSSVariable } from "./utils/elements";
-import type { Ref} from "vue";
-import { watch } from "vue";
+import ThemeOption, { Theme } from "./options/theme_option";
 
 export type ApplyedTheme = "light" | "dark";
-export type Theme = "auto" | "light" | "dark";
-export function isTheme(string: string): string is Theme {
-  return string === "auto" || string === "light" || string === "dark";
-}
 
 class ThemeManager {
-  constructor(private readonly theme: Ref<Theme>) {
-    this.updateTheme(this.theme.value);
+  constructor(private readonly themeOption: ThemeOption) {
+    this.updateTheme(this.themeOption.value);
 
     matchMedia("(prefers-color-scheme: dark)").addEventListener(
       "change",
       () => {
-        if (this.theme.value === "auto") {
-          this.updateTheme(this.theme.value);
+        if (this.themeOption.value === "auto") {
+          this.updateTheme(this.themeOption.value);
         }
       }
     );
 
-    watch(this.theme, (newValue) => {
+    this.themeOption.addEventListener("change", (event) => {
+      const newValue = (event as CustomEvent).detail as Theme;
       this.updateTheme(newValue);
     });
   }

@@ -6,7 +6,7 @@ import BoardStateData from "./user_data/board_state";
 import { getRandomArrayValue, getRandomNumber, isEven } from "./utils/misc";
 import RawBoardStateData from "./user_data/raw_board_state";
 import type { Piece, PieceId } from "./pieces/piece";
-import { PIECE_IDS, type Path } from "./pieces/piece";
+import { type Path } from "./pieces/piece";
 import type { GamePausedState } from "./user_data/game_paused";
 import type { PieceContext, BoardPosition } from "./board_manager";
 import type Move from "./moves/move";
@@ -15,23 +15,13 @@ import MoveListData from "./user_data/move_list";
 import GameBoardManager from "./game_board_manager";
 import { UserDataError } from "./user_data/user_data";
 import DefaultBoardManager from "./default_board_manager";
-import type { Theme } from "./theme_manager";
-import ThemeManager, { isTheme } from "./theme_manager";
-import type { Transitions } from "./transitions_manager";
-import TransitionsManager, { isTransitions } from "./transitions_manager";
-import type { PieceIconPack } from "./user_data/piece_set";
-import PieceIconPackData from "./user_data/piece_set";
+import ThemeManager from "./theme_manager";
+import TransitionsManager from "./transitions_manager";
 import UI from "./ui";
 import UserDataManager from "./user_data_manager";
-import BooleanUserData from "./user_data/boolean_user_data";
 import HueOption from "./options/hue_option";
 import SelectUserData from "./user_data/select_user_data";
 import GamePausedData from "./user_data/game_paused";
-import PieceBorderData from "./user_data/piece_border";
-import PiecePaddingData from "./user_data/piece_padding";
-import PlayerColorOptionData from "./user_data/preferred_player_color";
-import CellIndexOpacityData from "./user_data/cell_index_opacity";
-import TransitionDurationData from "./user_data/transition_duration";
 import PieceIdListData from "./user_data/piece_id_list";
 import {
   getElementInstanceById,
@@ -65,13 +55,18 @@ import King from "./pieces/king";
 import Pawn from "./pieces/pawn";
 import PlayerTimers from "./player_timers";
 import CapturedPieces from "./capturedPieces";
-import PiecesImportance from "./piece_importances";
+import PieceImportances from "./piece_importances";
 import { movePositionValue } from "./moves/move";
 import BooleanOption from "./options/boolean_option";
 import NumberOption from "./options/number_option";
-import PlayerColorOption, { PlayerColor } from "./options/player_color_option";
+import { PlayerColor } from "./options/player_color_option";
 import PreferredPlayerColorOption from "./options/preferred_player_color_option";
 import SecondsPerMovePenaltyOption from "./options/seconds_per_move_penalty_option";
+import PiecePaddingOption from "./options/piece_padding_option";
+import ThemeOption from "./options/theme_option";
+import TransitionsOption from "./options/transitions_option";
+import PieceIconPackOption from "./options/piece_icon_pack_option";
+import TransitionsDurationOption from "./options/transitions_duration_option";
 
 export type GameAudioEffects = Game["audioEffects"];
 export type GameSettings = Game["settings"];
@@ -124,7 +119,7 @@ export default class Game {
     secondaryPlayerComputerAggressivity: reactive(
       new NumberOption(80, "computer-aggressity-secondary")
     ),
-    pieceImportances: new PiecesImportance(),
+    pieceImportances: new PieceImportances(),
     preferredFirstMoveColor: reactive(
       new PreferredPlayerColorOption("white", "color-preferred-first-move")
     ),
@@ -146,23 +141,39 @@ export default class Game {
     secondsMoveLimitRunOutPenalty: reactive(
       new SecondsPerMovePenaltyOption("random_move")
     ),
-    reviveFromCapturedPieces: ref(false),
-    audioEffectsEnabled: ref(true),
-    vibrationsEnabled: ref(true),
-    secondCheckboardEnabled: ref(false),
-    ignorePiecesGuardedProperty: ref(false),
-    markCellCapturingPieces: ref(true),
-    autoPauseGame: ref(true),
-    markUnactivePlayerAvailibleMoves: ref(false),
-    tableModeEnabled: ref(false),
-    theme: ref<Theme>("auto"),
-    transitions: ref<Transitions>("auto"),
-    pieceIconPack: ref<PieceIconPack>("font_awesome"),
-    piecePadding: ref(20),
-    pieceBorder: ref(1),
-    transitionDuration: ref(100),
-    cellIndexOpacity: ref(90),
-    pieceLongPressTimeout: ref(0),
+    reviveFromCapturedPieces: reactive(
+      new BooleanOption(false, "revive-from-captured-pieces")
+    ),
+    audioEffectsEnabled: reactive(
+      new BooleanOption(true, "audio-effects-enabled")
+    ),
+    hapticFeedbackEnabled: reactive(
+      new BooleanOption(true, "haptick-feedback-enabled")
+    ),
+    secondCheckboardEnabled: reactive(
+      new BooleanOption(false, "second-checkboard-enabled")
+    ),
+    ignorePiecesGuardedProperty: reactive(
+      new BooleanOption(false, "ignore-pieces-guarded-property-enabled")
+    ),
+    markCellCapturingPieces: reactive(
+      new BooleanOption(true, "mark-cell-capturing-pieces-enabled")
+    ),
+    autoPauseGame: reactive(new BooleanOption(true, "auto-pause-game-enabled")),
+    markUnactivePlayerAvailableMoves: reactive(
+      new BooleanOption(false, "mark-unactive-player-available-moves-enabled")
+    ),
+    tableModeEnabled: reactive(new BooleanOption(false, "table-mode-enabled")),
+    theme: reactive(new ThemeOption("auto")) as ThemeOption,
+    transitions: reactive(new TransitionsOption("auto")) as TransitionsOption,
+    pieceIconPack: reactive(new PieceIconPackOption("font_awesome")),
+    piecePadding: reactive(new PiecePaddingOption(20)),
+    pieceBorder: reactive(new NumberOption(1, "piece-border")),
+    transitionsDuration: reactive(new TransitionsDurationOption(100)),
+    cellIndexOpacity: reactive(new NumberOption(90, "cell-index-opacity")),
+    pieceLongPressTimeout: reactive(
+      new NumberOption(0, "piece-long-press-timeout")
+    ),
     defaultBoardState: reactive<(Piece | null)[][]>([
       [
         new Rook("white"),
@@ -351,82 +362,6 @@ export default class Game {
    */
   public userDataManager = new UserDataManager(
     [
-      ...PIECE_IDS.map((pieceId) => {
-        return new NumberUserData(
-          `${pieceId}-importance`,
-          this.settings.pieceImportances.values[pieceId].value,
-          this.settings.pieceImportances.values[pieceId]
-        );
-      }),
-      new BooleanUserData(
-        "vibrations_enabled",
-        this.settings.vibrationsEnabled.value,
-        this.settings.vibrationsEnabled
-      ),
-      new BooleanUserData(
-        "auto_pause",
-        this.settings.autoPauseGame.value,
-        this.settings.autoPauseGame
-      ),
-      new PieceIconPackData(
-        this.settings.pieceIconPack.value,
-        this.settings.pieceIconPack
-      ),
-      new PiecePaddingData(
-        this.settings.piecePadding.value,
-        this.settings.piecePadding
-      ),
-      new PieceBorderData(
-        this.settings.pieceBorder.value,
-        this.settings.pieceBorder
-      ),
-      new TransitionDurationData(
-        this.settings.transitionDuration.value,
-        this.settings.transitionDuration
-      ),
-      new CellIndexOpacityData(
-        this.settings.cellIndexOpacity.value,
-        this.settings.cellIndexOpacity
-      ),
-      new BooleanUserData(
-        "show_capturing_pieces",
-        this.settings.markCellCapturingPieces.value,
-        this.settings.markCellCapturingPieces
-      ),
-      new BooleanUserData(
-        "second_checkboard",
-        this.settings.secondCheckboardEnabled.value,
-        this.settings.secondCheckboardEnabled
-      ),
-      new NumberUserData(
-        "piece_long_press_timeout",
-        this.settings.pieceLongPressTimeout.value,
-        this.settings.pieceLongPressTimeout,
-        0,
-        600
-      ),
-      new BooleanUserData(
-        "table_mode",
-        this.settings.tableModeEnabled.value,
-        this.settings.tableModeEnabled
-      ),
-      new BooleanUserData(
-        "ignore_pieces_guarded_property",
-        this.settings.ignorePiecesGuardedProperty.value,
-        this.settings.ignorePiecesGuardedProperty
-      ),
-      new SelectUserData(
-        "theme",
-        this.settings.theme.value,
-        isTheme,
-        this.settings.theme
-      ),
-      new SelectUserData(
-        "transitions_enabled",
-        this.settings.transitions.value,
-        isTransitions,
-        this.settings.transitions
-      ),
       new SelectUserData(
         "game_over_reason",
         this.winReason.value,
@@ -434,16 +369,6 @@ export default class Game {
         this.winReason
       ),
       new GamePausedData(this.paused.value, this.paused),
-      new BooleanUserData(
-        "revive_from_captured_pieces",
-        this.settings.reviveFromCapturedPieces.value,
-        this.settings.reviveFromCapturedPieces
-      ),
-      new BooleanUserData(
-        "audio_effects_enabled",
-        this.settings.audioEffectsEnabled.value,
-        this.settings.audioEffectsEnabled
-      ),
       new NumberUserData(
         "primary_player_move_seconds",
         0,
@@ -463,11 +388,6 @@ export default class Game {
         "secondary_player_match_seconds",
         0,
         this.playerTimers.secondaryPlayerMatch.seconds
-      ),
-      new BooleanUserData(
-        "mark_opponent_availible_moves",
-        this.settings.markUnactivePlayerAvailibleMoves.value,
-        this.settings.markUnactivePlayerAvailibleMoves
       ),
       new NumberUserData(
         "primary_player_unit_extent",
@@ -526,10 +446,8 @@ export default class Game {
     );
 
     for (const pieceId in this.settings.pieceImportances.values) {
-      watch(
-        this.settings.pieceImportances.values[pieceId as PieceId],
-        this.updateUnitExtents
-      );
+      const option = this.settings.pieceImportances.values[pieceId as PieceId];
+      option.addEventListener("change", this.updateUnitExtents);
     }
   }
 
@@ -797,7 +715,7 @@ export default class Game {
         "cancel",
         "error"
       );
-      if (this.settings.vibrationsEnabled) navigator.vibrate(30);
+      if (this.settings.hapticFeedbackEnabled) navigator.vibrate(30);
       return;
     }
     this.redoMove();
@@ -811,7 +729,7 @@ export default class Game {
         "cancel",
         "error"
       );
-      if (this.settings.vibrationsEnabled) navigator.vibrate(30);
+      if (this.settings.hapticFeedbackEnabled) navigator.vibrate(30);
       return;
     }
     this.undoMove();

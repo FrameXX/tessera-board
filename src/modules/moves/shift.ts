@@ -158,7 +158,7 @@ class Shift extends Move {
       game.capturePosition(this.captures);
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceRemove.play();
-      if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+      if (game.settings.hapticFeedbackEnabled.value) navigator.vibrate(30);
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
@@ -217,7 +217,7 @@ class Shift extends Move {
       game.capturePosition(this.captures);
       if (game.settings.audioEffectsEnabled.value)
         game.audioEffects.pieceRemove.play();
-      if (game.settings.vibrationsEnabled.value) navigator.vibrate(30);
+      if (game.settings.hapticFeedbackEnabled.value) navigator.vibrate(30);
     }
 
     const piece = getBoardPositionPiece(this.origin, game.boardState);
