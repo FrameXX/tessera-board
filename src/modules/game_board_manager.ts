@@ -123,12 +123,6 @@ class GameBoardManager extends BoardManager {
     this.markMoves(this.availibleMoves);
   }
 
-  /**
-   * This method returns a move that has provided position in its clickable positions if there's one.
-   * @method
-   * @param position
-   * @returns Move or null in case no move targets the positon.
-   */
   private getAvailibleMoveWithClickablePosition(
     position: BoardPosition
   ): Move | null {
@@ -179,18 +173,10 @@ class GameBoardManager extends BoardManager {
     this.clearCellMarks();
   }
 
-  /**
-   * This method is called by Board component when a user initializes a dragging sequence on a piece.
-   * @method
-   * @param targetPosition
-   * @param pieceContext
-   * @returns
-   */
   public onPieceDragStart(
     targetPosition: BoardPosition,
     pieceContext: PieceContext
   ): void {
-    // Select piece if not selected already
     if (this.selectedPiece.value) {
       if (!positionsEqual(this.selectedPiece.value, pieceContext)) {
         this.unselectPiece();
@@ -209,18 +195,10 @@ class GameBoardManager extends BoardManager {
       this.onPieceClick(pieceContext);
   }
 
-  /**
-   * This function is called by BoardComponent when the user dragging a piece moves from one position (cell) to another.
-   * @method
-   * @param targetPosition
-   * @param pieceContext
-   * @returns
-   */
   public onPieceDragOverCell(
     targetPosition: BoardPosition,
     pieceContext: PieceContext
   ): void {
-    // A dragged piece can be returned to its original position.
     if (positionsEqual(targetPosition, pieceContext)) {
       this.draggingOverCell.value = targetPosition;
       return;
@@ -237,12 +215,6 @@ class GameBoardManager extends BoardManager {
     }, 100);
   }
 
-  /**
-   * This method is called by Board component when the user dragging a Piece ends the dragging sequence.
-   * @method
-   * @param targetPosition
-   * @returns
-   */
   public onPieceDragEnd(targetPosition: BoardPosition): void {
     this.temporarilyActivateDragEndTimeout();
     this.draggingOverCell.value = null;
@@ -252,7 +224,6 @@ class GameBoardManager extends BoardManager {
   }
 
   private isMovePerformationPermitted(piece: Piece) {
-    // Do not allow opponent on his checkboard to play moves for the player and vice versa.
     if (this.game.settings.secondCheckboardEnabled.value) {
       if (
         piece.color !== this.game.primaryPlayer.color.value &&
@@ -266,10 +237,8 @@ class GameBoardManager extends BoardManager {
         return false;
     }
 
-    // Do not allow player that is not playing to perform a move.
     if (piece.color !== this.game.playingPlayer.color.value) return false;
 
-    // Do not allow move to be performed if game is decided.
     if (this.game.winner.value !== "none") return false;
 
     return true;
@@ -284,22 +253,14 @@ class GameBoardManager extends BoardManager {
     return validMove;
   }
 
-  /**
-   * This method is called by Board component to let know its manager that user has clicked a piece with provided piece context.
-   * @method
-   * @param pieceContext
-   * @returns
-   */
   public onPieceClick = (pieceContext: PieceContext): void => {
     if (this.dragEndTimeoutActive) return;
 
-    // Select piece if none is selected.
     if (!this.selectedPiece.value) {
       this.selectPiece(pieceContext);
       return;
     }
 
-    // Unselect piece if the same piece was clicked.
     if (positionsEqual(this.selectedPiece.value, pieceContext)) {
       this.unselectPiece();
       return;
@@ -312,7 +273,6 @@ class GameBoardManager extends BoardManager {
       return;
     }
 
-    // Select the piece if there was no move to perform on it.
     this.unselectPiece();
     this.selectPiece(pieceContext);
   };
@@ -322,17 +282,10 @@ class GameBoardManager extends BoardManager {
     this.game.performMove(move);
   }
 
-  /**
-   * This method is called by Board component to let know its manager that user has clicked a cell with provided piece position.
-   * @method
-   * @param position
-   * @returns
-   */
   public onCellClick(position: BoardPosition): void {
     if (this.dragEndTimeoutActive) return;
 
     if (this.selectedCell.value) {
-      // Unselect cell if the same cell was clicked and select another one if different was clicked.
       const clickedSameCell = positionsEqual(this.selectedCell.value, position);
       this.unselectCell();
       if (!clickedSameCell) this.selectCell(position);
@@ -346,7 +299,6 @@ class GameBoardManager extends BoardManager {
       return;
     }
 
-    // Take the cell click as a piece click if no move was performed on that cell and there is a piece in that cell. This is useful if the cells with pieces are selected using tabindex.
     if (!this.selectedPiece.value) {
       const piece = this.game.boardState[position.row][position.col];
       if (piece) {
