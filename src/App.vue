@@ -285,6 +285,7 @@ onMounted(() => {
 
   <!-- New Configuration -->
   <Modal
+    z-index-category="modal-top"
     id="config-print"
     title="Set configuration name and description"
     :open="game.ui.configPrintDialog.props.open"

@@ -10,6 +10,7 @@ const props = defineProps({
   titleIconId: { type: String, required: true },
   open: { type: Boolean, default: false },
   focusOnOpen: { type: Object as PropType<HTMLElement | null>, default: null },
+  zIndexCategory: { type: String, default: "top-fragment" },
 });
 const emit = defineEmits(["open", "close", "backdropClick"]);
 
@@ -65,7 +66,11 @@ watch(
 </script>
 
 <template>
-  <Backdrop v-show="props.open" @click="$emit('backdropClick')" />
+  <Backdrop
+    :z-index-category="props.zIndexCategory"
+    v-show="props.open"
+    @click="$emit('backdropClick')"
+  />
   <Transition name="throw">
     <dialog
       v-show="props.open"

@@ -29,28 +29,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
       <div class="content">
         <FragmentTitle icon-id="cog-outline">Configuration</FragmentTitle>
         <!-- Player -->
-        <Category name="Primary player" icon-id="account">
-          <SectionTitle title="Player color" />
-          <UserOption
-            name="color"
-            icon-id="invert-colors"
-            option-id="select-player-color"
-          >
-            <select
-              id="select-player-color"
-              v-model="props.modelValue.preferredPlayerColor.value"
-            >
-              <option value="random">Random</option>
-              <option value="white">White</option>
-              <option value="black">Black</option>
-            </select>
-            <template #description>
-              Specifies the colour of your pieces, whether black or white.
-              Changing this option during the game will have no effect and will
-              apply on the next game start. Color of the secondary player is
-              chosen automatically based on color of the primary player.
-            </template>
-          </UserOption>
+        <Category name="Primary player" icon-id="account" v-if="false">
           <SectionTitle title="Computer" />
           <UserOption
             name="computer"
@@ -159,7 +138,7 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
           </UserOption>
         </Category>
         <!-- Secondary player -->
-        <Category name="Secondary player" icon-id="target-account">
+        <Category name="Secondary player" icon-id="target-account" v-if="false">
           <SectionTitle title="Computer" />
           <UserOption
             name="computer"
@@ -464,6 +443,26 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
           </UserOption>
           <!-- Other -->
           <SectionTitle title="Other" />
+          <UserOption
+            name="Primary player color"
+            icon-id="invert-colors"
+            option-id="select-player-color"
+          >
+            <select
+              id="select-player-color"
+              v-model="props.modelValue.preferredPlayerColor.value"
+            >
+              <option value="random">Random</option>
+              <option value="white">White</option>
+              <option value="black">Black</option>
+            </select>
+            <template #description>
+              Specifies the colour of your pieces, whether black or white.
+              Changing this option during the game will have no effect and will
+              apply on the next game start. Color of the secondary player is
+              chosen automatically based on color of the primary player.
+            </template>
+          </UserOption>
           <UserOption
             name="First move color"
             icon-id="numeric-1-box-outline"
