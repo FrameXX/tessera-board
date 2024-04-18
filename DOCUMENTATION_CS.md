@@ -30,4 +30,4 @@ Všechna uložená data hry lze v nastavení exportovat do souboru json a poté 
 
 V nastavení si můžete upravit výchozí rozestavení figurek na začátku hry v podstatě bez omezení, jak chcete. Pokaždé když začnete novou hru se tato deska s výchozím rozestavením zkopíruje do herní desky.
 
-Je to samozřejmě více, ale nebudu popisovat každý detail... Většina lze upravit v nastavení.
+Je toho samozřejmě více, ale nebudu popisovat každý detail... Většina lze upravit v nastavení.
