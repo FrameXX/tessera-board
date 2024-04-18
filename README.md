@@ -45,7 +45,7 @@ Open whatever projects folder you want the project to be in. In console execute:
 
 #### Note on `landev` script
 
-The `landev` script in package.json is configured to start a server on the local network. It can be executed by executing `npm run landev` in project root. Starting a "lan server" is useful for debugging on a mobile phone or other devices connected to the same network, but the IP address in the command is hardcoded. Therefore, you must modify the command to utilise the IP address of your device on your network, which varies on each network or you will come across an error.
+The `landev` script in package.json is configured to start a server on the local network. It can be executed by executing `npm run landev` in project root. Starting a "lan server" is useful for debugging on a mobile phone or other devices connected to the same network, but the IP address in the command is hardcoded. Therefore, you must modify the command to utilise the IP address of your device on your network, which varies on each network. If you don't do so you will probably come across an error.
 
 ### Build
 

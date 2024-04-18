@@ -134,7 +134,8 @@ label {
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   text-transform: none;
   text-align: left;
   flex-grow: 1;
@@ -151,6 +152,10 @@ h2 {
 
 h3 {
   font-size: var(--font-size-big);
+}
+
+h4 {
+  font-size: var(--font-size-medium);
 }
 
 #app {
