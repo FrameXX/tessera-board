@@ -193,7 +193,7 @@ onMounted(() => {
           "
           :drag-x-diff="pieceDragHandler.dragXDiff.value"
           :drag-y-diff="pieceDragHandler.shiftedDragYDiff.value"
-          :inch-offset="pieceDragHandler.inchCmOffset.value"
+          :inch-offset="pieceDragHandler.dragOffsetCm.value"
           :row="pieceContext.row"
           :col="pieceContext.col"
           :piece="pieceContext.piece"

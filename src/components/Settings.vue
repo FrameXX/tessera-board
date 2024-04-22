@@ -592,6 +592,25 @@ const pieceIds = ref(Object.keys(PIECES)) as Ref<PieceId[]>;
             </template>
           </UserOption>
           <UserOption
+            name="Piece drag position upshift (cm)"
+            icon-id="gesture-swipe-up"
+            option-id="input-piece-drag-position-upshift"
+          >
+            <input
+              type="number"
+              min="0"
+              max="6"
+              id="input-piece-drag-position-upshift"
+              v-model="props.modelValue.pieceDragPositionUpshift.value"
+            />
+            <template #description
+              >On touchscreens the piece is automatically shifted a bit up when
+              dragged, so that it won't get covered by thumb or whatever thing
+              you are using to drag it. If you set the value to 0 you basically
+              disable the behavior.
+            </template>
+          </UserOption>
+          <UserOption
             name="table mode"
             icon-id="table-furniture"
             option-id="check-table-mode"

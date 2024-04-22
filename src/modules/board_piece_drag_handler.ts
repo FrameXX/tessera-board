@@ -13,10 +13,10 @@ export default class BoardPieceDragHandler {
   public dragXDiff = ref(0);
   public dragYDiff = ref(0);
   public draggingPiece = ref<PieceContext | null>(null);
-  public readonly inchCmOffset = ref(1.8);
+  public readonly dragOffsetCm = ref(0);
 
   private inchPxOffset = computed(() => {
-    let offset = this.inchCmOffset.value * this.pixelsPerCm;
+    let offset = this.dragOffsetCm.value * this.pixelsPerCm;
     if (
       this.boardManager.contentRotated.value &&
       this.boardManager.boardRotated.value
@@ -104,7 +104,8 @@ export default class BoardPieceDragHandler {
     if (event.pointerType === "touch") {
       if (this.pressTimeout !== null || this.draggingPiece.value !== null)
         return;
-      this.inchCmOffset.value = 1.8;
+      this.dragOffsetCm.value =
+        this.game.settings.pieceDragPositionUpshift.value;
     } else {
       if (
         event.button !== 0 ||
@@ -112,7 +113,7 @@ export default class BoardPieceDragHandler {
         this.draggingPiece.value !== null
       )
         return;
-      this.inchCmOffset.value = 0;
+      this.dragOffsetCm.value = 0;
     }
 
     this.pressTimeout = window.setTimeout(() => {

@@ -129,6 +129,7 @@ export default class Game {
     transitionDuration: ref(100),
     cellIndexOpacity: ref(90),
     pieceLongPressTimeout: ref(0),
+    pieceDragPositionUpshift: ref(1.8),
     defaultBoardState: reactive<(Piece | null)[][]>([
       [
         new Rook("white"),
@@ -237,19 +238,20 @@ export default class Game {
   public readonly primaryPlayerPlaying = ref<boolean>(true);
 
   public readonly status = computed(() => {
+    this.lastMoveIndex.value;
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingPlayer.color.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayer.color.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayer.color.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingPlayer.color.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayer.color.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayer.color.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -388,6 +390,13 @@ export default class Game {
         "piece_long_press_timeout",
         this.settings.pieceLongPressTimeout.value,
         this.settings.pieceLongPressTimeout,
+        0,
+        600
+      ),
+      new NumberUserData(
+        "piece_drag_position_upshift",
+        this.settings.pieceDragPositionUpshift.value,
+        this.settings.pieceDragPositionUpshift,
         0,
         600
       ),
@@ -886,7 +895,7 @@ export default class Game {
   }
 
   public requestRedoMove() {
-    if (this.performing) return;
+    if (this.performing || this.ui.openedFragment.value) return;
     if (this.moveList.value.length - this.lastMoveIndex.value < 2) {
       this.ui.toaster.bake(
         "You reached the last move. You cannot go further.",
@@ -900,7 +909,7 @@ export default class Game {
   }
 
   public requestUndoMove() {
-    if (this.performing) return;
+    if (this.performing || this.ui.openedFragment.value) return;
     if (this.lastMoveIndex.value === -1) {
       this.ui.toaster.bake(
         "You reached the first move. You cannot go further.",
