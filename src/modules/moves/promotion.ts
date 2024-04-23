@@ -32,7 +32,7 @@ import {
 import type { PieceId } from "../pieces/piece";
 import type Game from "../game";
 import { getBoardPositionPiece } from "../utils/game";
-import type CapturedPieces from "../capturedPieces";
+import type CapturedPieces from "../captured_pieces";
 import type { Player } from "../game";
 import type PiecesImportance from "../pieces_importance";
 
