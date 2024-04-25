@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx vite",
-    "landev": "npx vite --host 192.168.1.39 --port 3000",
+    "landev": "npx vite --host 192.168.0.8 --port 3000",
     "build": "eslint . --fix && vue-tsc && vite build",
     "preview": "vite preview",
     "eslint": "eslint . --fix"
