@@ -240,18 +240,18 @@ export default class Game {
   public readonly status = computed(() => {
     this.lastMoveIndex.value;
     switch (this.winner.value) {
-    case "none":
-      return `${capitalize(this.playingPlayer.color.value)} plays`;
-    case "draw":
-      return "Draw";
-    case "secondary":
-      return `${capitalize(this.secondaryPlayer.color.value)} won`;
-    case "primary":
-      return `${capitalize(this.primaryPlayer.color.value)} won`;
-    default:
-      throw new UserDataError(
-        `Winner value is of an invalid type. value: ${this.winner.value}`
-      );
+      case "none":
+        return `${capitalize(this.playingPlayer.color.value)} plays`;
+      case "draw":
+        return "Draw";
+      case "secondary":
+        return `${capitalize(this.secondaryPlayer.color.value)} won`;
+      case "primary":
+        return `${capitalize(this.primaryPlayer.color.value)} won`;
+      default:
+        throw new UserDataError(
+          `Winner value is of an invalid type. value: ${this.winner.value}`
+        );
     }
   });
 
@@ -604,7 +604,7 @@ export default class Game {
     this.ui.confirmDialog,
     this.ui.toaster
   );
-  private visited: string | null;
+  private visited: string | null = null;
 
   constructor() {
     new ThemeManager(this.settings.theme);
@@ -615,11 +615,18 @@ export default class Game {
     this.primaryBoardManager = new GameBoardManager(this, true);
     this.secondaryBoardManager = new GameBoardManager(this, false);
 
-    this.visited = localStorage.getItem("tessera_board-visited");
-    if (this.visited === null) {
-      localStorage.setItem("tessera_board-visited", "1");
+    if (navigator.cookieEnabled) {
+      this.visited = localStorage.getItem("tessera_board-visited");
+      if (this.visited === null) {
+        localStorage.setItem("tessera_board-visited", "1");
+      } else {
+        this.userDataManager.recoverData();
+      }
     } else {
-      this.tryToRecoverData();
+      this.ui.toaster.bake(
+        "Cookies are disabled. -> No changes will be restored in next session.",
+        "cookie-alert"
+      );
     }
     this.userDataManager.onRecoverCheck();
     this.userDataManager.applyData();
@@ -636,18 +643,6 @@ export default class Game {
         this.updateUnitExtents
       );
     }
-  }
-
-  private tryToRecoverData() {
-    if (!navigator.cookieEnabled) {
-      this.ui.toaster.bake(
-        "Cookies are disabled. -> No changes will be restored in next session.",
-
-        "cookie-alert"
-      );
-      return;
-    }
-    this.userDataManager.recoverData();
   }
 
   public onMount = () => {
