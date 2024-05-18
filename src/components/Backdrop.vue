@@ -21,7 +21,6 @@ const props = defineProps({
 
 .backdrop {
   @include screen;
-  z-index: var(--z-index-modal);
   background-color: var(--color-backdrop);
   opacity: 0.9;
 }

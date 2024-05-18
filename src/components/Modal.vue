@@ -10,7 +10,7 @@ const props = defineProps({
   titleIconId: { type: String, required: true },
   open: { type: Boolean, default: false },
   focusOnOpen: { type: Object as PropType<HTMLElement | null>, default: null },
-  zIndexCategory: { type: String, default: "top-fragment" },
+  zIndexCategory: { type: String },
 });
 const emit = defineEmits(["open", "close", "backdropClick"]);
 

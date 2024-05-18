@@ -376,6 +376,7 @@ onMounted(() => {
     title="Confirm"
     :open="game.ui.confirmDialog.props.open"
     title-icon-id="check-all"
+    z-index-category="modal"
     @open="game.ui.escapeManager.addLayer(game.ui.confirmDialog.cancel)"
     @close="game.ui.escapeManager.removeLayer()"
   >
